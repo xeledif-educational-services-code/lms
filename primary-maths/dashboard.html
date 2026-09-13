@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Xeledif Maths LMS — Teacher Dashboard</title>
+<style>
+  :root {
+    --text:#1a1a1a; --text-sec:#555; --text-ter:#888;
+    --border:#e5e5e5; --bg:#fff; --bg-sec:#f8f8f8;
+    --good-bg:#EAF3DE; --good-fg:#27500A; --good-border:#C0DD97;
+    --mid-bg:#FAEEDA;  --mid-fg:#633806;  --mid-border:#FAC775;
+    --bad-bg:#FAECE7;  --bad-fg:#712B13;  --bad-border:#F0997B;
+    --accent:#5B21B6; --accent-dark:#4C1D95;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+         background:#f5f5f5; color:var(--text); padding:2rem 1rem 4rem; }
+  .wrap { max-width:1040px; margin:0 auto; }
+
+  h1 { font-size:22px; margin-bottom:4px; }
+  .sub { font-size:13px; color:var(--text-sec); margin-bottom:20px; }
+  .sub a { color:var(--accent); text-decoration:none; font-weight:600; }
+  .sub a:hover { text-decoration:underline; }
+
+  .tools { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  button { padding:8px 14px; border-radius:8px; border:1px solid var(--border);
+           background:#fff; cursor:pointer; font-size:13px; font-family:inherit;
+           transition:background .15s, border-color .15s; }
+  button:hover { background:#f0f0f0; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button.primary:hover { background:var(--accent-dark); }
+  button.danger { background:var(--bad-bg); color:var(--bad-fg); border-color:var(--bad-border); }
+  button.danger:hover { background:#F5D5C8; }
+
+  .pupil { background:#fff; border:1px solid var(--border); border-radius:12px;
+           padding:1.25rem 1.5rem; margin-bottom:1.25rem; }
+  .pupil h2 { font-size:17px; margin-bottom:8px; display:flex; align-items:center;
+              gap:10px; flex-wrap:wrap; }
+  .pill { display:inline-block; font-size:11px; font-weight:700;
+          padding:3px 10px; border-radius:10px; letter-spacing:.2px; }
+  .pill.good { background:var(--good-bg); color:var(--good-fg); border:0.5px solid var(--good-border); }
+  .pill.mid  { background:var(--mid-bg);  color:var(--mid-fg);  border:0.5px solid var(--mid-border); }
+  .pill.bad  { background:var(--bad-bg);  color:var(--bad-fg);  border:0.5px solid var(--bad-border); }
+
+  .kpis { display:flex; gap:20px; flex-wrap:wrap; font-size:12px;
+          color:var(--text-sec); margin:6px 0 14px; }
+  .kpis strong { color:var(--text); font-size:14px; }
+
+  .step { border-top:1px solid #eee; padding:14px 0; font-size:13px; }
+  .step:first-of-type { border-top:1px solid #eee; }
+  .step-title { font-weight:600; margin-bottom:6px; font-size:14px;
+                display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .step-meta { display:flex; gap:16px; flex-wrap:wrap; font-size:12px;
+               color:var(--text-sec); margin-bottom:8px; }
+  .step-meta strong { color:var(--text); }
+
+  .q-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(110px, 1fr));
+            gap:6px; margin-top:6px; }
+  .q-cell { font-size:11px; padding:6px 8px; border-radius:8px;
+            border:0.5px solid var(--border); background:var(--bg-sec);
+            line-height:1.4; }
+  .q-cell.first  { background:var(--good-bg); border-color:var(--good-border); color:var(--good-fg); }
+  .q-cell.retry  { background:var(--mid-bg);  border-color:var(--mid-border);  color:var(--mid-fg); }
+  .q-cell.fail   { background:var(--bad-bg);  border-color:var(--bad-border);  color:var(--bad-fg); }
+  .q-cell .qlab  { font-weight:700; display:block; margin-bottom:2px; }
+  .q-cell .qdet  { opacity:.75; }
+
+  .empty { color:#888; font-size:13px; padding:2rem 0; text-align:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Teacher Dashboard</h1>
+  <div class="sub">
+    Reads progress from this browser's local storage — nothing leaves the device.
+    <a href="#" id="pupilLink" style="margin-left:8px;">Set / change pupil name</a>
+    &nbsp;·&nbsp;
+    <a href="index.html">← Back to lessons</a>
+  </div>
+
+  <div class="tools">
+    <button class="primary" onclick="exportCSV()">⬇ Export CSV</button>
+    <button onclick="exportJSON()">⬇ Export JSON</button>
+    <button onclick="location.reload()">🔄 Refresh</button>
+    <button class="danger" onclick="clearAll()">🗑 Clear ALL progress</button>
+  </div>
+
+  <div id="root"></div>
+</div>
+
+<script>
+const KEY = 'xeledif.progress.v1';
+const PUPIL_KEY = 'xeledif.pupil';
+
+function readAll() {
+  try { return JSON.parse(localStorage.getItem(KEY)) || {}; }
+  catch { return {}; }
+}
+
+function bucket(firstTry, total) {
+  if (!total) return { cls:'', label:'—' };
+  const pct = firstTry / total;
+  if (pct >= 0.8) return { cls:'good', label: Math.round(pct*100) + '%' };
+  if (pct >= 0.5) return { cls:'mid',  label: Math.round(pct*100) + '%' };
+  return { cls:'bad', label: Math.round(pct*100) + '%' };
+}
+
+function render() {
+  const all = readAll();
+  const root = document.getElementById('root');
+
+  const byPupil = {};
+  Object.values(all).forEach(rec => {
+    (byPupil[rec.pupil] = byPupil[rec.pupil] || []).push(rec);
+  });
+
+  if (!Object.keys(byPupil).length) {
+    root.innerHTML = '<div class="empty">No progress recorded yet. Once a pupil answers a question, it will appear here.</div>';
+    return;
+  }
+
+  root.innerHTML = Object.entries(byPupil).map(([pupil, steps]) => {
+    let totalQs = 0, totalFirstTry = 0, totalSolved = 0, totalWrong = 0;
+    steps.forEach(step => {
+      const ex = Object.values(step.exercises);
+      totalQs += ex.length;
+      totalFirstTry += ex.filter(e => e.firstTry === true).length;
+      totalSolved += ex.filter(e => e.correct > 0).length;
+      totalWrong += step.wrong;
+    });
+    const pBucket = bucket(totalFirstTry, totalQs);
+
+    const stepRows = steps
+      .sort((a,b) => (b.updatedAt||'').localeCompare(a.updatedAt||''))
+      .map(step => {
+        const ex = Object.entries(step.exercises)
+          .sort((a,c) => parseInt(a[0]) - parseInt(c[0]));
+        const firstTry = ex.filter(([,e]) => e.firstTry === true).length;
+        const solved   = ex.filter(([,e]) => e.correct > 0).length;
+        const b = bucket(firstTry, ex.length);
+
+        const perQ = ex.map(([num, e]) => {
+          const isFirst  = e.firstTry === true;
+          const isRetry  = e.firstTry === false && e.correct > 0;
+          const isFail   = e.correct === 0;
+          const cls = isFirst ? 'first' : isRetry ? 'retry' : isFail ? 'fail' : '';
+          const icon = isFirst ? '✅' : isRetry ? '⚠️' : '❌';
+          const time = e.timeOnTaskMs
+            ? Math.round(e.timeOnTaskMs / 1000) + 's' : '—';
+          const wrong = e.wrong ? `${e.wrong}✗` : '0✗';
+          return `<div class="q-cell ${cls}">
+            <span class="qlab">${icon} Q${num}</span>
+            <span class="qdet">${wrong} · ${time}</span>
+          </div>`;
+        }).join('');
+
+        return `
+          <div class="step">
+            <div class="step-title">
+              ${step.stepLabel || step.stepId}
+              <span class="pill ${b.cls}">${b.label} first-try</span>
+            </div>
+            <div class="step-meta">
+              <span>First-try: <strong>${firstTry}/${ex.length}</strong></span>
+              <span>Solved: <strong>${solved}/${ex.length}</strong></span>
+              <span>Wrong attempts: <strong>${step.wrong}</strong></span>
+              <span style="opacity:.6;">updated ${step.updatedAt ? new Date(step.updatedAt).toLocaleString() : '—'}</span>
+            </div>
+            <div class="q-grid">${perQ}</div>
+          </div>`;
+      }).join('');
+
+    return `
+      <div class="pupil">
+        <h2>${pupil}
+          <span class="pill ${pBucket.cls}">${pBucket.label} first-try</span>
+        </h2>
+        <div class="kpis">
+          <span>Steps attempted: <strong>${steps.length}</strong></span>
+          <span>Questions: <strong>${totalQs}</strong></span>
+          <span>First-try correct: <strong>${totalFirstTry}</strong></span>
+          <span>Eventually solved: <strong>${totalSolved}</strong></span>
+          <span>Total wrong clicks: <strong>${totalWrong}</strong></span>
+        </div>
+        ${stepRows}
+      </div>`;
+  }).join('');
+}
+
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(readAll(), null, 2)], { type:'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `xeledif-progress-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+}
+
+function exportCSV() {
+  const all = readAll();
+  const rows = [[
+    'Pupil','Step','Exercise','First Try','Correct','Wrong',
+    'Time on Task (s)','Updated At'
+  ]];
+
+  Object.values(all).forEach(rec => {
+    Object.entries(rec.exercises).forEach(([num, e]) => {
+      rows.push([
+        rec.pupil,
+        rec.stepLabel || rec.stepId,
+        'Q' + num,
+        e.firstTry === true ? 'yes' : e.firstTry === false ? 'no' : '',
+        e.correct,
+        e.wrong,
+        e.timeOnTaskMs ? Math.round(e.timeOnTaskMs / 1000) : '',
+        rec.updatedAt || ''
+      ]);
+    });
+  });
+
+  const csv = rows.map(r =>
+    r.map(cell => {
+      const s = String(cell ?? '');
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    }).join(',')
+  ).join('\n');
+
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `xeledif-progress-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+}
+
+function clearAll() {
+  if (!confirm('This deletes ALL pupil progress on this device. Continue?')) return;
+  localStorage.removeItem(KEY);
+  render();
+}
+
+document.getElementById('pupilLink').addEventListener('click', e => {
+  e.preventDefault();
+  const current = localStorage.getItem(PUPIL_KEY) || '';
+  const name = prompt('Set the pupil name for this device:', current);
+  if (name !== null) {
+    localStorage.setItem(PUPIL_KEY, name.trim() || 'Unknown');
+    alert('Pupil set to: ' + (name.trim() || 'Unknown') + '\nReload the lessons page to start a fresh session for this pupil.');
+  }
+});
+
+render();
+</script>
+</body>
+</html>
