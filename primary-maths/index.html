@@ -113,6 +113,103 @@
   .empty-icon { width:46px; height:46px; border-radius:50%; background:var(--bg-sec); border:0.5px dashed var(--border); display:flex; align-items:center; justify-content:center; }
   .empty-title { font-size:15px; font-weight:600; color:var(--text); }
   .empty-sub { font-size:13px; color:var(--text-sec); max-width:340px; line-height:1.6; }
+
+
+
+
+/* modal summary */
+
+/* ─── MCQ completion modal ─── */
+#mcq-modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+#mcq-modal-overlay.show { display: flex; }
+#mcq-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 22px;
+  max-width: 460px;
+  width: 100%;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  font-family: inherit;
+}
+#mcq-modal h2 {
+  font-size: 20px; margin: 0 0 14px; font-weight: 700; color: #1a1a1a;
+}
+#mcq-modal .modal-summary {
+  padding: 12px 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+#mcq-modal .modal-summary .big {
+  font-size: 15px; font-weight: 700; margin-bottom: 4px;
+}
+#mcq-modal .modal-summary .small {
+  font-size: 12px; opacity: .8;
+}
+#mcq-modal .modal-lines {
+  margin-bottom: 16px;
+  max-height: 40vh;
+  overflow-y: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#mcq-modal .modal-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: #f8f8f8;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  color: #1a1a1a;
+}
+#mcq-modal .modal-btn:hover { background: #f0f0f0; }
+
+/* ─── Finish button (floating, above tracker) ─── */
+#mcq-finish-btn {
+  position: fixed;
+  bottom: 16px;
+  right: 16px;
+  z-index: 9998;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  background: #5B21B6;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 12px rgba(91,33,182,0.35);
+  transition: background .15s, transform .15s;
+  display: none;
+}
+#mcq-finish-btn:hover { background: #4C1D95; transform: translateY(-1px); }
+#mcq-finish-btn.show { display: block; }
+
+/* Push the tracker up so it sits above the finish button */
+#mcq-tracker { bottom: 68px !important; }
+
+/* On small screens, shrink everything */
+@media (max-width: 480px) {
+  #mcq-modal { padding: 16px; border-radius: 12px; }
+  #mcq-modal h2 { font-size: 17px; }
+  #mcq-finish-btn { padding: 9px 14px; font-size: 12px; bottom: 12px; right: 12px; }
+  #mcq-tracker { bottom: 62px !important; right: 12px !important; }
+}
+
 </style>
 </head>
 <body>
@@ -164,25 +261,32 @@
 
 </div>
 
+
+
+
+
 <script>
 /* ============================================================
    SHARED ENGINE — used by Primary 4, 5 and 6
    ============================================================ */
 
 
-/* ──────── Persistent progress store (Tier 3) ──────── */
+/* ──────── Persistent progress store (multi-attempt, lazy) ──────── */
 const ProgressStore = {
-  KEY: 'xeledif.progress.v1',
+  KEY: 'xeledif.progress.v2',
   PUPIL_KEY: 'xeledif.pupil',
+  ACTIVE_KEY: 'xeledif.activeAttempt',
+
+  _currentMeta: null,      // set by buildTopic on step click
+  _provisional: {},        // in-memory attempts not yet persisted
 
   readAll() {
     try { return JSON.parse(localStorage.getItem(this.KEY)) || {}; }
     catch { return {}; }
   },
   writeAll(data) {
-    try { localStorage.setItem(this.KEY, JSON.stringify(data)); } catch (e) {
-      console.warn('ProgressStore: write failed', e);
-    }
+    try { localStorage.setItem(this.KEY, JSON.stringify(data)); }
+    catch (e) { console.warn('ProgressStore: write failed', e); }
   },
 
   identifyPupil() {
@@ -193,40 +297,172 @@ const ProgressStore = {
     }
     return name;
   },
-
   setPupil(name) {
     localStorage.setItem(this.PUPIL_KEY, String(name || 'Unknown').trim() || 'Unknown');
   },
-
   clearPupil() {
     localStorage.removeItem(this.PUPIL_KEY);
+    localStorage.removeItem(this.ACTIVE_KEY);
   },
 
-  // stepId is composed in buildTopic(); stepLabel from the step object
+  /* ── Attempt lifecycle ─────────────────────────────────── */
+
+  // Called when a step tab is opened. Does NOT write to storage.
+  // The attempt only becomes persistent on the first recordAttempt().
+  startAttempt(stepId, stepLabel, meta) {
+    const pupil = this.identifyPupil();
+    const activeMap = this._readActive();
+    const activeKey = pupil + '::' + stepId;
+    const existingId = activeMap[activeKey];
+
+    if (existingId) {
+      // If a persisted attempt exists for this id, resume it
+      const all = this.readAll();
+      const persisted = all[pupil + '::' + stepId + '::' + existingId];
+      if (persisted && !persisted.completed) {
+        return existingId;
+      }
+      // Otherwise it may be a provisional attempt — resume it too
+      if (this._provisional[activeKey] &&
+          this._provisional[activeKey].attemptId === existingId &&
+          !this._provisional[activeKey].completed) {
+        return existingId;
+      }
+    }
+
+    // No resumable attempt — create a provisional one (in memory)
+    const attemptId = this._uuid();
+    activeMap[activeKey] = attemptId;
+    this._writeActive(activeMap);
+
+    const attemptNumber = this._nextAttemptNumber(pupil, stepId);
+    const now = new Date().toISOString();
+
+    this._provisional[activeKey] = {
+      pupil, stepId,
+      stepLabel: stepLabel || '',
+      term: meta?.term || '',
+      topic: meta?.topic || '',
+      stepNumber: meta?.stepNumber || 0,
+      attemptId,
+      attemptNumber,
+      startedAt: now,
+      updatedAt: now,
+      completed: false,
+      exercises: {},
+      correct: 0, wrong: 0, firstTryCorrect: 0, answered: 0
+    };
+    return attemptId;
+  },
+
+  // Returns the current attempt (provisional OR persisted).
+  getActiveAttempt(stepId) {
+    const pupil = this.identifyPupil();
+    const activeMap = this._readActive();
+    const attemptId = activeMap[pupil + '::' + stepId];
+    if (!attemptId) return null;
+
+    const activeKey = pupil + '::' + stepId;
+    const prov = this._provisional[activeKey];
+    if (prov && prov.attemptId === attemptId) return prov;
+
+    const all = this.readAll();
+    return all[pupil + '::' + stepId + '::' + attemptId] || null;
+  },
+
+  // Force-start a fresh attempt, abandoning the current one.
+  // If the current attempt has any answers, it is preserved in history.
+  forceNewAttempt(stepId, stepLabel, meta) {
+    const pupil = this.identifyPupil();
+    const activeKey = pupil + '::' + stepId;
+    const activeMap = this._readActive();
+    const currentId = activeMap[activeKey];
+
+    if (currentId) {
+      // Persist the current attempt if it has any answers (as incomplete)
+      const prov = this._provisional[activeKey];
+      if (prov && prov.attemptId === currentId && prov.answered > 0) {
+        const all = this.readAll();
+        all[pupil + '::' + stepId + '::' + currentId] = { ...prov, completed: false };
+        this.writeAll(all);
+      }
+      // Drop the provisional cache
+      delete this._provisional[activeKey];
+      delete activeMap[activeKey];
+      this._writeActive(activeMap);
+    }
+
+    // Create a brand-new attempt
+    return this.startAttempt(stepId, stepLabel, meta);
+  },
+
+  // Called when the pupil clicks Finish. Persists the attempt as completed.
+  completeAttempt(stepId) {
+    const pupil = this.identifyPupil();
+    const activeKey = pupil + '::' + stepId;
+    const activeMap = this._readActive();
+    const attemptId = activeMap[activeKey];
+    if (!attemptId) return;
+
+    const prov = this._provisional[activeKey];
+    if (prov && prov.attemptId === attemptId) {
+      // Persist if there's anything worth keeping
+      if (prov.answered > 0) {
+        const all = this.readAll();
+        prov.completed = true;
+        prov.updatedAt = new Date().toISOString();
+        all[pupil + '::' + stepId + '::' + attemptId] = prov;
+        this.writeAll(all);
+      }
+      delete this._provisional[activeKey];
+    } else {
+      // Persisted but not yet frozen — freeze it
+      const all = this.readAll();
+      const key = pupil + '::' + stepId + '::' + attemptId;
+      if (all[key]) {
+        all[key].completed = true;
+        all[key].updatedAt = new Date().toISOString();
+        this.writeAll(all);
+      }
+    }
+
+    delete activeMap[activeKey];
+    this._writeActive(activeMap);
+  },
+
+  // Record a single click. This is where an attempt becomes persistent.
   recordAttempt({ stepId, stepLabel, exerciseNum, isCorrect, timeOnTaskMs }) {
     const pupil = this.identifyPupil();
-    const all = this.readAll();
-    const key = pupil + '::' + stepId;
+    const activeKey = pupil + '::' + stepId;
+    const activeMap = this._readActive();
+    let attemptId = activeMap[activeKey];
 
-    const rec = all[key] || {
-      pupil, stepId, stepLabel,
-      exercises: {},
-      correct: 0, wrong: 0,
-      updatedAt: null
-    };
+    if (!attemptId) {
+      attemptId = this.startAttempt(stepId, stepLabel, this._currentMeta);
+    }
+
+    // Get or create the attempt record
+    const prov = this._provisional[activeKey];
+    let rec;
+    if (prov && prov.attemptId === attemptId) {
+      rec = prov;
+    } else {
+      const all = this.readAll();
+      rec = all[pupil + '::' + stepId + '::' + attemptId];
+      if (!rec) return;
+    }
+
+    if (rec.completed) return;
 
     const q = rec.exercises[exerciseNum] || {
       correct: 0, wrong: 0, firstTry: null, timeOnTaskMs: 0
     };
 
-    // ── Idempotency: once solved in storage, no further state changes.
-    // We still allow time-on-task to be filled in if it was missing.
     if (q.correct > 0) {
       if (timeOnTaskMs && !q.timeOnTaskMs) q.timeOnTaskMs = timeOnTaskMs;
       rec.exercises[exerciseNum] = q;
       rec.updatedAt = new Date().toISOString();
-      all[key] = rec;
-      this.writeAll(all);
+      this._save(activeKey, rec, pupil, stepId, attemptId);
       return;
     }
 
@@ -240,27 +476,80 @@ const ProgressStore = {
     if (timeOnTaskMs && !q.timeOnTaskMs) q.timeOnTaskMs = timeOnTaskMs;
     rec.exercises[exerciseNum] = q;
 
-    rec.correct = Object.values(rec.exercises).reduce((s, e) => s + e.correct, 0);
-    rec.wrong   = Object.values(rec.exercises).reduce((s, e) => s + e.wrong, 0);
-    rec.updatedAt = new Date().toISOString();
-    all[key] = rec;
-    this.writeAll(all);
+    const ex = Object.values(rec.exercises);
+    rec.correct         = ex.reduce((s, e) => s + e.correct, 0);
+    rec.wrong           = ex.reduce((s, e) => s + e.wrong, 0);
+    rec.firstTryCorrect = ex.filter(e => e.firstTry === true).length;
+    rec.answered        = ex.filter(e => e.correct > 0 || e.wrong > 0).length;
+    rec.updatedAt       = new Date().toISOString();
+
+    this._save(activeKey, rec, pupil, stepId, attemptId);
+  },
+
+  // Write the current attempt: to provisional cache AND to storage.
+  // Once a pupil has answered at least one question, the attempt is
+  // persisted immediately so a page crash doesn't lose data.
+  _save(activeKey, rec, pupil, stepId, attemptId) {
+    this._provisional[activeKey] = rec;
+    if (rec.answered > 0) {
+      const all = this.readAll();
+      all[pupil + '::' + stepId + '::' + attemptId] = rec;
+      this.writeAll(all);
+    }
+  },
+
+  /* ── Internal helpers ─────────────────────────────────── */
+
+  _readActive() {
+    try { return JSON.parse(localStorage.getItem(this.ACTIVE_KEY)) || {}; }
+    catch { return {}; }
+  },
+  _writeActive(map) {
+    localStorage.setItem(this.ACTIVE_KEY, JSON.stringify(map));
+  },
+  _nextAttemptNumber(pupil, stepId) {
+    const all = this.readAll();
+    let max = 0;
+    Object.values(all).forEach(rec => {
+      if (rec.pupil === pupil && rec.stepId === stepId) {
+        if (rec.attemptNumber > max) max = rec.attemptNumber;
+      }
+    });
+    // Also count the provisional one (if any)
+    Object.values(this._provisional).forEach(rec => {
+      if (rec.pupil === pupil && rec.stepId === stepId) {
+        if (rec.attemptNumber > max) max = rec.attemptNumber;
+      }
+    });
+    return max + 1;
+  },
+  _uuid() {
+    return 'a-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8);
   }
 };
 
-/* ──────── In-session MCQ tracker (Tier 1 + polish) ──────── */
+
+
+
+/* ──────── In-session MCQ tracker (Tier 1 + finish button) ──────── */
 const MCQTracker = {
   state: {},
+  completionShown: false,
 
   reset() {
     this.state = {};
+    this.completionShown = false;
+
     // Rehydrate from persistent storage so tracker matches reality
     // even after a tab switch, page reload, or session restart.
     const stepId = window.__currentStepId;
     if (stepId) {
-      const pupil = localStorage.getItem(ProgressStore.PUPIL_KEY) || 'Unknown';
-      const all = ProgressStore.readAll();
-      const rec = all[pupil + '::' + stepId];
+      ProgressStore.startAttempt(
+        stepId,
+        window.__currentStepLabel || '',
+        window.__currentStepMeta || {}
+      );
+      const rec = ProgressStore.getActiveAttempt(stepId);
       if (rec) {
         Object.entries(rec.exercises).forEach(([num, e]) => {
           this.state['Q' + num] = {
@@ -274,6 +563,7 @@ const MCQTracker = {
         });
       }
     }
+
     this.render();
   },
 
@@ -297,7 +587,6 @@ const MCQTracker = {
     // Once solved, no further counting
     if (s.solved) return;
 
-    // POLISH #2 — record time-on-task
     if (!s.firstSeenAt) s.firstSeenAt = Date.now();
 
     if (isCorrect) {
@@ -306,7 +595,7 @@ const MCQTracker = {
       s.solvedAt = Date.now();
       if (s.firstTry === null) s.firstTry = true;
 
-      // POLISH #1 — green pulse for first-try successes
+      // Green pulse for first-try successes
       if (s.firstTry === true) {
         const el = document.getElementById('mcq-tracker');
         if (el && el.animate) {
@@ -322,6 +611,7 @@ const MCQTracker = {
       if (s.firstTry === null) s.firstTry = false;
     }
     this.render();
+    this.updateFinishButton();
 
     ProgressStore.recordAttempt({
       stepId: window.__currentStepId || 'unknown',
@@ -334,14 +624,164 @@ const MCQTracker = {
   },
 
   totals() {
-    let correct = 0, wrong = 0, solved = 0, firstTryCorrect = 0;
+    let correct = 0, wrong = 0, solved = 0, firstTryCorrect = 0, answered = 0;
     Object.values(this.state).forEach(s => {
       correct += s.correct;
       wrong   += s.wrong;
       if (s.solved) solved++;
       if (s.firstTry === true) firstTryCorrect++;
+      if (s.solved || s.wrong > 0) answered++;
     });
-    return { correct, wrong, solved, firstTryCorrect, total: Object.keys(this.state).length };
+    return {
+      correct, wrong, solved, firstTryCorrect, answered,
+      total: Object.keys(this.state).length,
+      actualTotal: window.__currentExerciseCount || 0
+    };
+  },
+
+  updateFinishButton() {
+    let btn = document.getElementById('mcq-finish-btn');
+    if (!btn) {
+      btn = document.createElement('button');
+      btn.id = 'mcq-finish-btn';
+      btn.textContent = '🎯 Finish & See Score';
+      btn.onclick = () => this.requestFinish();
+      document.body.appendChild(btn);
+    }
+    const { answered } = this.totals();
+    // Show once the pupil has attempted at least one question
+    btn.classList.toggle('show', answered > 0);
+  },
+
+  requestFinish() {
+    const t = this.totals();
+    const unanswered = Math.max(0, t.actualTotal - t.answered);
+
+    if (unanswered > 0) {
+      const noun = unanswered === 1 ? 'question' : 'questions';
+      const msg = `You still have ${unanswered} unanswered ${noun}.\n\nSubmit anyway and see your score for what you've done so far?`;
+      if (!window.confirm(msg)) return;
+    }
+
+    // Freeze the current attempt and clear the active pointer
+    if (window.__currentStepId) {
+      ProgressStore.completeAttempt(window.__currentStepId);
+    }
+
+    this.showCompleteModal();
+  },
+
+  showCompleteModal() {
+    const t = this.totals();
+    const denom = t.actualTotal || t.total || 1;
+    const firstTryPct = Math.round((t.firstTryCorrect / denom) * 100);
+    const cls = firstTryPct >= 80 ? '#27500A' : firstTryPct >= 50 ? '#633806' : '#712B13';
+    const bg  = firstTryPct >= 80 ? '#EAF3DE' : firstTryPct >= 50 ? '#FAEEDA' : '#FAECE7';
+
+    let overlay = document.getElementById('mcq-modal-overlay');
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = 'mcq-modal-overlay';
+      overlay.innerHTML = '<div id="mcq-modal"></div>';
+      overlay.onclick = (e) => {
+        if (e.target === overlay) overlay.classList.remove('show');
+      };
+      document.body.appendChild(overlay);
+    }
+
+    // Build the per-question list from Q1..actualTotal, so unanswered ones show up too
+    const total = t.actualTotal || t.total;
+    const lines = [];
+    for (let i = 1; i <= total; i++) {
+      const k = 'Q' + i;
+      const s = this.state[k];
+      if (!s) {
+        lines.push(`<div>⏳ ${k} — not attempted</div>`);
+      } else if (s.solved && s.firstTry === true) {
+        const time = s.firstSeenAt && s.solvedAt
+          ? ` · ${Math.round((s.solvedAt - s.firstSeenAt) / 1000)}s` : '';
+        lines.push(`<div>✅ ${k}${time}</div>`);
+      } else if (s.solved) {
+        const time = s.firstSeenAt && s.solvedAt
+          ? ` · ${Math.round((s.solvedAt - s.firstSeenAt) / 1000)}s` : '';
+        lines.push(`<div>⚠️ ${k} (after ${s.wrong} wrong${time})</div>`);
+      } else if (s.wrong > 0) {
+        lines.push(`<div>❌ ${k} (${s.wrong} wrong)</div>`);
+      } else {
+        lines.push(`<div>⏳ ${k} — not attempted</div>`);
+      }
+    }
+
+    const modal = overlay.querySelector('#mcq-modal');
+    modal.innerHTML = `
+      <h2>🎯 Exercise Scorecard</h2>
+      <div class="modal-summary" style="background:${bg};color:${cls};">
+        <div class="big">First-try: ${t.firstTryCorrect} / ${denom} (${firstTryPct}%)</div>
+        <div class="small">Solved: ${t.solved}/${denom} · Answered: ${t.answered}/${denom} · Wrong attempts: ${t.wrong}</div>
+      </div>
+      <div class="modal-lines">${lines.join('')}</div>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="modal-btn" style="flex:1;"
+                onclick="document.getElementById('mcq-modal-overlay').classList.remove('show')">
+          Close — back to lesson
+        </button>
+        <button class="modal-btn" style="flex:1;background:#FAECE7;border-color:#F0997B;color:#712B13;"
+                onclick="MCQTracker.startFreshAttempt()">
+          🔄 Start a fresh attempt
+        </button>
+      </div>
+    `;
+    overlay.classList.add('show');
+  },
+
+  startFreshAttempt() {
+    const stepId = window.__currentStepId;
+    if (!stepId) return;
+
+    const confirmed = window.confirm(
+      'Start a fresh attempt?\n\n' +
+      'Your current attempt will be kept in your teacher\'s records, ' +
+      'and you will begin with a clean scorecard.'
+    );
+    if (!confirmed) return;
+
+    // Close the modal
+    const overlay = document.getElementById('mcq-modal-overlay');
+    if (overlay) overlay.classList.remove('show');
+
+    // Persist current attempt (if it has any answers), then start fresh
+    ProgressStore.forceNewAttempt(
+      stepId,
+      window.__currentStepLabel || '',
+      window.__currentStepMeta || {}
+    );
+
+    // Rebuild the step content so all MCQ buttons reset to default
+    // (removes ✓/✗ styling, re-enables clicking)
+    if (window.__currentStepObject) {
+      const host = document.querySelector('.step-content-area:not(.hidden)');
+      if (host) {
+        host.innerHTML = renderStepContent(window.__currentStepObject);
+      }
+    } else {
+      // Fallback: just reload the tracker state and reset the DOM manually
+      MCQTracker.reset();
+      document.querySelectorAll('.mcq-options').forEach(c => {
+        delete c.dataset.solved;
+        c.querySelectorAll('.mcq-btn').forEach(b => {
+          b.style.background = '';
+          b.style.color = '';
+          b.style.borderColor = '';
+          b.style.opacity = '';
+          b.style.pointerEvents = '';
+          if (b.innerText.startsWith('✓ ') || b.innerText.startsWith('✗ '))
+            b.innerText = b.innerText.substring(2);
+        });
+        c.parentElement.querySelectorAll('.mcq-feedback').forEach(f => f.remove());
+      });
+    }
+
+    MCQTracker.render();
   },
 
   render() {
@@ -350,7 +790,7 @@ const MCQTracker = {
       el = document.createElement('div');
       el.id = 'mcq-tracker';
       el.style.cssText = `
-        position: fixed; bottom: 16px; right: 16px; z-index: 9999;
+        position: fixed; bottom: 68px; right: 16px; z-index: 9999;
         background: rgba(30,30,30,0.92); color: #fff;
         padding: 10px 14px; border-radius: 12px;
         font-size: 12px; font-family: inherit;
@@ -360,21 +800,19 @@ const MCQTracker = {
         cursor: pointer;
         transition: box-shadow 0.2s ease;
       `;
-      el.title = 'Click to collapse / expand';
-      el.onclick = () => {
-        el.dataset.collapsed = el.dataset.collapsed === '1' ? '0' : '1';
-        this.render();
-      };
+      el.title = 'Click to view scorecard';
+      el.onclick = () => this.showCompleteModal();
       document.body.appendChild(el);
     }
 
+    const { correct, wrong, solved, firstTryCorrect, answered, actualTotal } = this.totals();
+    const denom = actualTotal || Object.keys(this.state).length || '—';
+
     if (el.dataset.collapsed === '1') {
-      const { solved, total } = this.totals();
-      el.textContent = `📊 ${solved}/${total || '—'}`;
+      el.textContent = `📊 ${solved}/${denom}`;
       return;
     }
 
-    const { correct, wrong, solved, firstTryCorrect, total } = this.totals();
     const lines = Object.keys(this.state)
       .sort((a, b) => parseInt(a.slice(1)) - parseInt(b.slice(1)))
       .map(k => {
@@ -390,28 +828,20 @@ const MCQTracker = {
         return `${icon} ${k}${detail}`;
       });
 
-    let html = `
+    el.innerHTML = `
       <div style="font-weight:700;margin-bottom:4px;">📊 Progress</div>
       <div style="opacity:.85;">✓ ${correct} correct · ✗ ${wrong} wrong</div>
-      <div style="opacity:.85;">Solved: ${solved} / ${total || '—'} · First-try: ${firstTryCorrect}</div>
+      <div style="opacity:.85;">Solved: ${solved} / ${denom} · First-try: ${firstTryCorrect}</div>
       <div style="margin-top:6px;font-size:11px;opacity:.7;">${lines.join('<br>') || 'Answer a question to start.'}</div>
+      <div style="margin-top:6px;font-size:10px;opacity:.5;">Click to reopen scorecard</div>
     `;
 
-    // POLISH #3 — session-complete summary
-    if (total > 0 && solved === total && total >= 5) {
-      const firstTryPct = Math.round((firstTryCorrect / total) * 100);
-      const cls = firstTryPct >= 80 ? '#639922'
-                : firstTryPct >= 50 ? '#BA7517'
-                : '#D85A30';
-      html += `
-        <div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,0.15);font-weight:700;color:${cls};">
-          🎯 Session complete — First-try: ${firstTryCorrect}/${total} (${firstTryPct}%)
-        </div>`;
-    }
-
-    el.innerHTML = html;
+    this.updateFinishButton();
   }
 };
+
+
+
 
 
 function handleMCQ(btn, isCorrect) {
@@ -477,6 +907,13 @@ function mcqBlock(options, correctIndex) {
     const buttons = list.map((it,i)=>`<button class="mcq-btn" onclick="handleMCQ(this, ${it.isCorrect})">(${letters[i]}) ${it.text}</button>`).join('');
     return `<div class="mcq-options">${buttons}</div>`;
 }
+
+
+
+
+
+
+
 
 const TERM_COLORS = {
   autumn: { bg:'#FFF8F0', border:'#FAC775', dot:'#BA7517', dotTxt:'white', title:'#633806', active:'#854F0B', light:'#FAEEDA' },
@@ -2507,7 +2944,7 @@ const SCHEME_P4 = [
     col: TERM_COLORS.summer,
     open: false,
     topics: [
-            { id:'decimalsB',  label:'Decimals B',           col:TOPIC_PALETTE[0], steps:['Make a whole with tenths','Make a whole with hundredths','Partition decimals','Flexibly partition decimals','Compare decimals','Order decimals','Round to the nearest whole number','Halves and quarters as decimals'].map(s=>({label:s,content:null})) },
+      { id:'decimalsB',  label:'Decimals B',           col:TOPIC_PALETTE[0], steps:['Make a whole with tenths','Make a whole with hundredths','Partition decimals','Flexibly partition decimals','Compare decimals','Order decimals','Round to the nearest whole number','Halves and quarters as decimals'].map(s=>({label:s,content:null})) },
       { id:'money',      label:'Money',                col:TOPIC_PALETTE[1], steps:['Write money using decimals','Convert between pounds and pence','Compare amounts of money','Estimate with money','Calculate with money','Solve problems with money'].map(s=>({label:s,content:null})) },
       { id:'time',       label:'Time',                 col:TOPIC_PALETTE[2], steps:['Years, months, weeks and days','Hours, minutes and seconds','Convert between analogue and digital times','Convert to the 24 hour clock','Convert from the 24 hour clock'].map(s=>({label:s,content:null})) },
       { id:'shape',      label:'Shape',                col:TOPIC_PALETTE[3], steps:['Understand angles as turns','Identify angles','Compare and order angles','Triangles','Quadrilaterals','Polygons','Lines of symmetry','Complete a symmetric figure'].map(s=>({label:s,content:null})) },
@@ -2521,7 +2958,12 @@ const SCHEME_P4 = [
    RENDER ENGINE
    ============================================================ */
 function renderStepContent(step) {
+  // Guard: null content steps must not throw
+  const raw = step.content || '';
+  window.__currentExerciseCount = (raw.match(/class="exercise-item"/g) || []).length;
+
   MCQTracker.reset();
+
   if (!step.content) {
     return `<div class="step-content-area"><div class="empty-state">
       <div class="empty-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8.5" stroke="#bbb" stroke-width="1.2"/><path d="M10 6v4l2.5 2.5" stroke="#bbb" stroke-width="1.2" stroke-linecap="round"/></svg></div>
@@ -2532,7 +2974,9 @@ function renderStepContent(step) {
   return `<div class="step-content-area">${step.content}</div>`;
 }
 
-function buildTopic(topic, termId) {
+
+
+function buildTopic(topic, termId, termLabel) {
   const col = topic.col;
   const topicDiv = document.createElement('div');
   topicDiv.className = 'topic-group';
@@ -2563,7 +3007,15 @@ function buildTopic(topic, termId) {
       contentArea.classList.remove('hidden');
       window.__currentStepId = `${termId}-${topic.id}-step${si + 1}`;
       window.__currentStepLabel = step.label || `Step ${si + 1}`;
-      contentArea.innerHTML = renderStepContent(step); // ← reset() runs here
+      window.__currentStepObject = step;
+      window.__currentStepMeta = {
+        term: termLabel || termId,
+        topic: topic.label,
+        topicId: topic.id,
+        stepNumber: si + 1,
+        stepLabel: step.label || `Step ${si + 1}`
+      };
+      contentArea.innerHTML = renderStepContent(step);
       contentArea.scrollIntoView({ behavior:'smooth', block:'nearest' });
     };
     tabsRow.appendChild(btn);
@@ -2598,7 +3050,9 @@ function build(containerId, scheme) {
     const body = document.createElement('div');
     body.id = `termbody-${containerId}-${term.id}`;
     body.className = 'term-body' + (term.open ? ' open' : '');
-    term.topics.forEach(topic => body.appendChild(buildTopic(topic, containerId + '-' + term.id)));
+    term.topics.forEach(topic => body.appendChild(
+      buildTopic(topic, containerId + '-' + term.id, term.label)
+    ));
     hdr.onclick = () => {
       const b = document.getElementById(`termbody-${containerId}-${term.id}`);
       const a = document.getElementById(`termarr-${containerId}-${term.id}`);
