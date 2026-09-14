@@ -24,6 +24,21 @@ let currentUser = null;
 let currentRole = null;
 let roleReady = null;  // promise that resolves once role is known
 
+// ── Email-link sign-in state ──────────────────────────────────
+// We deliberately do NOT call signInWithEmailLink() automatically
+// on page load. The oobCode in the link is single-use, and some
+// email providers (very common on school/university Office 365
+// tenants — "Safe Links"/ATP) pre-visit links to scan them for
+// phishing before the person ever taps them. If sign-in completes
+// the instant the page loads, the scanner's visit burns the code,
+// and the real person gets "auth/invalid-action-code: ...already
+// been used." Requiring an actual button tap avoids that, because
+// scanners fetch pages — they don't press buttons.
+let pendingEmailLinkSignIn = false;
+let pendingEmailLinkEmail = null;
+let signInBusy = false;
+let lastSignInError = null;
+
 function initFirebaseCompat() {
   if (typeof firebase === 'undefined') {
     console.warn('Firebase SDK not loaded — offline mode.');
@@ -34,23 +49,20 @@ function initFirebaseCompat() {
   fbAuth = firebase.auth();
   fbDb = firebase.firestore();
 
-  // Handle magic-link sign-in return
-  if (fbAuth.isSignInWithEmailLink(window.location.href)) {
-    let email = window.localStorage.getItem('xeledif.emailForSignIn');
-    if (!email) email = window.prompt('Confirm your email to finish sign-in:');
-    if (email) {
-      fbAuth.signInWithEmailLink(email, window.location.href).catch(err => {
-        alert('Sign-in failed: ' + err.message);
-      }).finally(() => {
-        window.localStorage.removeItem('xeledif.emailForSignIn');
-        window.history.replaceState({}, document.title, window.location.pathname);
-      });
-    }
-  }
+  const cameFromEmailLink = fbAuth.isSignInWithEmailLink(window.location.href);
 
   roleReady = new Promise((resolve) => {
     fbAuth.onAuthStateChanged(async (user) => {
       currentUser = user;
+
+      // Already signed in but a leftover magic link is still in the
+      // URL (stale email re-opened, link clicked twice, etc.) — just
+      // scrub the URL instead of trying to "use" a dead code.
+      if (user && cameFromEmailLink) {
+        pendingEmailLinkSignIn = false;
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+
       if (!user) {
         currentRole = null;
         resolve(null);
@@ -75,6 +87,14 @@ function initFirebaseCompat() {
       resolve(currentRole);
     });
   });
+
+  // We landed here via a magic link and nobody is signed in yet.
+  // Show a "tap to finish" button instead of calling the SDK now.
+  if (cameFromEmailLink && !currentUser) {
+    pendingEmailLinkSignIn = true;
+    pendingEmailLinkEmail = window.localStorage.getItem('xeledif.emailForSignIn') || null;
+    renderAuthUI();
+  }
 }
 
 function waitForRole() {
@@ -91,6 +111,37 @@ async function sendSignInLink(email) {
   };
   await fbAuth.sendSignInLinkToEmail(email, actionCodeSettings);
   window.localStorage.setItem('xeledif.emailForSignIn', email);
+}
+
+// Runs ONLY when the person taps "Tap to finish signing in" —
+// never automatically. This is the fix for auth/invalid-action-code
+// caused by link-scanning email security systems.
+async function completeEmailLinkSignIn() {
+  if (signInBusy) return;
+
+  let email = pendingEmailLinkEmail;
+  if (!email) {
+    email = (window.prompt('Confirm the email address this link was sent to:') || '').trim();
+  }
+  if (!email) return;
+
+  signInBusy = true;
+  lastSignInError = null;
+  renderAuthUI();
+
+  try {
+    await fbAuth.signInWithEmailLink(email, window.location.href);
+    // onAuthStateChanged fires next and re-renders the bar.
+  } catch (err) {
+    console.warn('signInWithEmailLink failed:', err);
+    pendingEmailLinkSignIn = false;
+    lastSignInError = err;
+    renderAuthUI();
+  } finally {
+    signInBusy = false;
+    window.localStorage.removeItem('xeledif.emailForSignIn');
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }
 }
 
 async function doSignOut() {
@@ -157,17 +208,41 @@ function renderAuthUI() {
         <span style="color:#555;">${roleLabel} · ${currentUser.email || ''}</span>
         <button onclick="doSignOut()" style="padding:4px 10px;font-size:12px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer;font-family:inherit;">Sign out</button>
       </div>`;
-  } else {
+    return;
+  }
+
+  // Arrived via a magic link but sign-in hasn't been completed yet —
+  // wait for a genuine tap before calling the Firebase SDK.
+  if (pendingEmailLinkSignIn) {
     bar.innerHTML = `
-      <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
-        <input id="auth-email" type="email" placeholder="your@email.com"
-               style="padding:6px 10px;font-size:13px;border-radius:6px;border:1px solid #ddd;font-family:inherit;">
-        <button onclick="handleSignInClick()"
+      <div style="display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;">
+        <span style="color:#555;">✉️ Sign-in link detected for this device.</span>
+        <button id="finish-signin-btn" onclick="completeEmailLinkSignIn()" ${signInBusy ? 'disabled' : ''}
                 style="padding:6px 12px;font-size:13px;border-radius:6px;border:none;background:#5B21B6;color:#fff;cursor:pointer;font-family:inherit;">
-          Sign in
+          ${signInBusy ? 'Signing in…' : 'Tap to finish signing in'}
         </button>
       </div>`;
+    return;
   }
+
+  const errorBanner = lastSignInError
+    ? `<div style="color:#712B13;background:#FAECE7;border:1px solid #F0997B;border-radius:6px;padding:6px 10px;font-size:12px;margin-bottom:6px;max-width:420px;">
+         ${lastSignInError.code === 'auth/invalid-action-code'
+            ? 'That sign-in link has already been used, or has expired. Please request a new one below.'
+            : 'Sign-in failed: ' + lastSignInError.message}
+       </div>`
+    : '';
+
+  bar.innerHTML = `
+    ${errorBanner}
+    <div style="display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap;">
+      <input id="auth-email" type="email" placeholder="your@email.com"
+             style="padding:6px 10px;font-size:13px;border-radius:6px;border:1px solid #ddd;font-family:inherit;">
+      <button onclick="handleSignInClick()"
+              style="padding:6px 12px;font-size:13px;border-radius:6px;border:none;background:#5B21B6;color:#fff;cursor:pointer;font-family:inherit;">
+        Sign in
+      </button>
+    </div>`;
 }
 
 async function handleSignInClick() {
@@ -175,36 +250,14 @@ async function handleSignInClick() {
   const email = (input?.value || '').trim();
   if (!email) { alert('Please enter your email.'); return; }
   try {
+    lastSignInError = null;
     await sendSignInLink(email);
     alert('Check your inbox — a sign-in link has been sent to ' + email +
-          '\n\nClick the link in that email to finish signing in.');
+          '\n\nOpen it on THIS device/browser if you can, then tap the ' +
+          '"Tap to finish signing in" button that appears.');
   } catch (err) {
     alert('Could not send sign-in link: ' + err.message);
   }
-}
-
-/* ─── One-time migration: upload existing localStorage progress ─── */
-async function migrateLocalToCloud() {
-  if (!currentUser || !fbDb) return;
-  const KEY = 'xeledif.progress.v2';
-  let localData = {};
-  try { localData = JSON.parse(localStorage.getItem(KEY)) || {}; } catch {}
-  const entries = Object.values(localData);
-  if (!entries.length) return;
-
-  const ok = confirm(
-    `Found ${entries.length} attempt(s) stored locally on this device.\n\n` +
-    `Upload them to the cloud so they appear on the teacher dashboard?`
-  );
-  if (!ok) return;
-
-  let uploaded = 0;
-  for (const rec of entries) {
-    if (!rec.attemptId) continue;
-    await cloudWriteAttempt(rec);
-    uploaded++;
-  }
-  alert(`Uploaded ${uploaded} attempt(s) to the cloud.`);
 }
 
 /* ─── Init ─── */
