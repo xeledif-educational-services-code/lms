@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Xeledif Maths LMS — Teacher Dashboard</title>
+
 <style>
   :root {
     --text:#1a1a1a; --text-sec:#555;
@@ -20,6 +21,7 @@
   h1 { font-size:22px; margin-bottom:4px; }
   .sub { font-size:13px; color:var(--text-sec); margin-bottom:20px; }
   .sub a { color:var(--accent); text-decoration:none; font-weight:600; }
+  .sub a:hover { text-decoration:underline; }
   .tools { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
   button { padding:8px 14px; border-radius:8px; border:1px solid var(--border);
            background:#fff; cursor:pointer; font-size:13px; font-family:inherit; }
@@ -54,7 +56,6 @@
                color:var(--text-sec); margin-bottom:6px; }
   .step-meta strong { color:var(--text); }
 
-  /* Trend mini-bars */
   .trend { display:flex; align-items:flex-end; gap:2px; height:32px;
            margin:8px 0 12px; padding:0 2px; }
   .trend-bar { flex:1; min-width:6px; background:var(--bad-bg);
@@ -89,14 +90,6 @@
   .q-cell.first  { background:var(--good-bg); border-color:var(--good-border); color:var(--good-fg); }
   .q-cell.retry  { background:var(--mid-bg);  border-color:var(--mid-border);  color:var(--mid-fg); }
   .q-cell.fail   { background:var(--bad-bg);  border-color:var(--bad-border);  color:var(--bad-fg); }
-
-  /* Unsolved questions: visually louder than ⚠️ retried cells */
-  .q-cell.fail {
-    background:var(--bad-bg);
-    border:1.5px solid var(--bad-fg);
-    color:var(--bad-fg);
-    font-weight:600;
-  }
   .q-cell .qlab  { font-weight:700; display:block; margin-bottom:1px; }
   .q-cell .qdet  { opacity:.8; }
 
@@ -108,13 +101,23 @@
     .kpis { gap:10px; }
   }
 </style>
-<base target="_blank">
+
+<!-- Firebase SDK (compat build) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Your Firebase integration -->
+<script src="firebase-integration.js"></script>
 </head>
 <body>
 <div class="wrap">
   <h1>Teacher Dashboard</h1>
+
+  <div id="auth-bar" style="margin-bottom:1rem;"></div>
+
   <div class="sub">
-    Reads progress from this browser's local storage — nothing leaves the device.
+    Shows pupil progress from this browser and the cloud (when signed in).
     <a href="#" id="pupilLink" style="margin-left:8px;">Set / change pupil name</a>
     &nbsp;·&nbsp;
     <a href="index.html">← Back to lessons</a>
@@ -125,7 +128,8 @@
     <button onclick="exportJSON()">⬇ Export ALL (JSON)</button>
     <button onclick="document.getElementById('importFile').click()">📤 Import pupil's score</button>
     <button onclick="location.reload()">🔄 Refresh</button>
-    <button class="danger" onclick="clearAll()">🗑 Clear ALL progress</button>
+    <button class="danger" onclick="clearAll()">🗑 Clear ALL local progress</button>
+    <button id="migrateBtn" style="display:none;" onclick="migrateLocalToCloud()">☁ Upload local to cloud</button>
     <input type="file" id="importFile" accept=".json" style="display:none">
   </div>
 
@@ -164,6 +168,9 @@ function render() {
   const byPupil = {};
   Object.values(all).forEach(rec => {
     if (!rec || !rec.pupil) return;
+    // Skip smoke-test documents created during Firebase debugging
+    if (rec.stepId === 'test-step' || (rec.attemptId || '').startsWith('smoke-test-')) return;
+
     byPupil[rec.pupil] = byPupil[rec.pupil] || {};
     byPupil[rec.pupil][rec.stepId] = byPupil[rec.pupil][rec.stepId] || {
       stepLabel: rec.stepLabel,
@@ -182,7 +189,6 @@ function render() {
       attempts.sort((a, b) => (a.attemptNumber || 0) - (b.attemptNumber || 0));
       return { stepId, stepLabel, attempts };
     }).sort((a, b) => {
-      // Sort by term, then topic, then step number
       const sa = a.attempts[0] || {};
       const sb = b.attempts[0] || {};
       const t = (sa.term || '').localeCompare(sb.term || '');
@@ -197,7 +203,7 @@ function render() {
     steps.forEach(({ attempts }) => {
       attempts.forEach(rec => {
         totalAttempts++;
-        const ex = Object.values(rec.exercises);
+        const ex = Object.values(rec.exercises || {});
         totalQuestions += ex.length;
         totalFirstTry += ex.filter(e => e.firstTry === true).length;
         totalSolved += ex.filter(e => e.correct > 0).length;
@@ -206,26 +212,50 @@ function render() {
     });
     const pBucket = bucket(totalFirstTry, totalQuestions);
 
+    // Priority focus: steps below 50% first-try with full path
+    const weakSteps = steps
+      .map(({ stepLabel, attempts }) => {
+        const sample = attempts.find(a => a.term || a.topic) || {};
+        let qs = 0, first = 0;
+        attempts.forEach(rec => {
+          const ex = Object.values(rec.exercises || {});
+          qs += ex.length;
+          first += ex.filter(e => e.firstTry === true).length;
+        });
+        const pct = qs ? first / qs : 0;
+        return {
+          term: sample.term || '',
+          topic: sample.topic || '',
+          stepNumber: sample.stepNumber || 0,
+          stepLabel,
+          pct, qs, first
+        };
+      })
+      .filter(s => s.pct < 0.5 && s.qs > 0)
+      .sort((a, b) => a.pct - b.pct);
+
+    const focusHtml = weakSteps.length
+      ? `<div style="background:#FAECE7;border:1px solid #F0997B;border-radius:10px;padding:10px 14px;margin:8px 0 12px;">
+           <div style="font-size:12px;font-weight:700;color:#712B13;margin-bottom:6px;">⚠️ Priority focus</div>
+           <div style="font-size:12px;color:#712B13;line-height:1.6;">
+             ${weakSteps.map(s => {
+               const path = [s.term, s.topic, s.stepNumber ? 'Step ' + s.stepNumber : '', s.stepLabel]
+                 .filter(Boolean).join(' · ');
+               return `${path}: ${Math.round(s.pct*100)}% first-try`;
+             }).join('<br>')}
+           </div>
+         </div>`
+      : '';
+
     const stepBlocks = steps.map(({ stepId, stepLabel, attempts }) => {
-      // Extract hierarchy from the first attempt that has it
       const sample = attempts.find(a => a.term || a.topic) || {};
       const termName  = sample.term  || '';
       const topicName = sample.topic || '';
       const stepNum   = sample.stepNumber || '';
 
-      // Build the full path label
-      const pathParts = [
-        termName,
-        topicName,
-        stepNum ? `Step ${stepNum}` : '',
-        stepLabel
-      ].filter(Boolean);
-      const fullPath = pathParts.join(' · ');
-
-      // Compute aggregate stats across all attempts for this step
       let allQ = 0, allFirst = 0, allSolved = 0, allWrong = 0;
       attempts.forEach(rec => {
-        const ex = Object.values(rec.exercises);
+        const ex = Object.values(rec.exercises || {});
         allQ += ex.length;
         allFirst += ex.filter(e => e.firstTry === true).length;
         allSolved += ex.filter(e => e.correct > 0).length;
@@ -233,9 +263,8 @@ function render() {
       });
       const stepBucket = bucket(allFirst, allQ);
 
-      // Trend bars: one per attempt, showing first-try % of that attempt
       const trendBars = attempts.map(rec => {
-        const ex = Object.values(rec.exercises);
+        const ex = Object.values(rec.exercises || {});
         const first = ex.filter(e => e.firstTry === true).length;
         const total = ex.length || 1;
         const pct = first / total;
@@ -248,10 +277,10 @@ function render() {
         `<span>${rec.attemptNumber}</span>`
       ).join('');
 
-      // Per-question wrong totals across all attempts — drill list
+      // Most-missed questions across all attempts
       const qWrongTotals = {};
       attempts.forEach(rec => {
-        Object.entries(rec.exercises).forEach(([num, e]) => {
+        Object.entries(rec.exercises || {}).forEach(([num, e]) => {
           qWrongTotals[num] = (qWrongTotals[num] || 0) + (e.wrong || 0);
         });
       });
@@ -259,15 +288,13 @@ function render() {
         .filter(([, n]) => n > 0)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 5);
-
       const hotHtml = hotQs.length
         ? `<div style="font-size:11px;color:var(--text-sec);margin-top:8px;">
-             <strong>Most-missed questions (all attempts):</strong>
+             <strong>Most-missed questions:</strong>
              ${hotQs.map(([num, n]) => `Q${num} (${n}✗)`).join(' · ')}
            </div>`
         : '';
 
-      // Attempt rows
       const attemptRows = attempts.slice().reverse().map(rec => {
         const ex = Object.entries(rec.exercises || {})
           .sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
@@ -338,56 +365,14 @@ function render() {
             <div style="font-size:11px;color:var(--text-sec);margin-top:6px;">Progress trend (first-try % per attempt):</div>
             <div class="trend">${trendBars}</div>
             <div class="trend-labels">${trendLabels}</div>
-            ${hotHtml}
           ` : ''}
+          ${hotHtml}
           <div class="attempt-list">${attemptRows}</div>
         </div>`;
     }).join('');
 
-    // Steps where the pupil is weakest — "what to reinforce today"
-    const weakSteps = steps
-      .map(({ stepLabel, attempts }) => {
-        const sample = attempts.find(a => a.term || a.topic) || {};
-        let qs = 0, first = 0;
-        attempts.forEach(rec => {
-          const ex = Object.values(rec.exercises);
-          qs += ex.length;
-          first += ex.filter(e => e.firstTry === true).length;
-        });
-        const pct = qs ? first / qs : 0;
-        return {
-          term: sample.term || '',
-          topic: sample.topic || '',
-          stepNumber: sample.stepNumber || 0,
-          stepLabel,
-          pct,
-          qs,
-          first
-        };
-      })
-      .filter(s => s.pct < 0.5 && s.qs > 0)
-      .sort((a, b) => a.pct - b.pct);
-
-    const focusHtml = weakSteps.length
-      ? `<div style="background:#FAECE7;border:1px solid #F0997B;border-radius:10px;padding:10px 14px;margin:8px 0 12px;">
-           <div style="font-size:12px;font-weight:700;color:#712B13;margin-bottom:6px;">⚠️ Priority focus</div>
-           <div style="font-size:12px;color:#712B13;line-height:1.6;">
-             ${weakSteps.map(s => {
-               const path = [
-                 s.term,
-                 s.topic,
-                 s.stepNumber ? 'Step ' + s.stepNumber : '',
-                 s.stepLabel
-               ].filter(Boolean).join(' · ');
-               return `${path}: ${Math.round(s.pct*100)}% first-try`;
-             }).join('<br>')}
-           </div>
-         </div>`
-      : '';
-
     return `
       <div class="pupil">
-
         <div class="pupil-head">
           <h2>${pupil}
             <span class="pill ${pBucket.cls}">${pBucket.label} aggregate</span>
@@ -527,7 +512,8 @@ document.getElementById('importFile').addEventListener('change', (e) => {
 });
 
 function clearAll() {
-  if (!confirm('This deletes ALL pupil progress on this device. Continue?')) return;
+  if (!confirm('This deletes ALL pupil progress on this DEVICE only.\n\n' +
+               'Data already in the cloud will not be deleted.\n\nContinue?')) return;
   localStorage.removeItem(KEY);
   localStorage.removeItem('xeledif.activeAttempt');
   render();
@@ -544,7 +530,146 @@ document.getElementById('pupilLink').addEventListener('click', e => {
   }
 });
 
-render();
+
+
+/* ─── Boot: cloud is source of truth, local is a read-through cache ─── */
+(async function boot() {
+  // ── 1. Show whatever's cached immediately (avoids blank flash)
+  render();
+
+  // ── 2. Wait for Firebase auth role
+  const role = await (typeof waitForRole === 'function' ? waitForRole() : Promise.resolve(null));
+
+  if (!role) {
+    console.log('[dashboard] Not signed in — showing cached data only.');
+    updateUploadButtonState();
+    return;
+  }
+
+  console.log('[dashboard] Signed in as', role, '— cloud is now the source of truth.');
+
+  // ── 3. Callback fired on every Firestore snapshot
+  const onCloudUpdate = (cloudData) => {
+    // First-run auto-migration: if local attempts exist that
+    // aren't yet in the cloud, upload them before overwriting cache.
+    if (localStorage.getItem('xeledif.migrationDone') !== '1') {
+      const localSnapshot = readAll();
+      const localAttempts = Object.values(localSnapshot).filter(
+        rec => rec && rec.attemptId &&
+               !rec.attemptId.startsWith('smoke-test-') &&
+               rec.stepId !== 'test-step'
+      );
+
+      const cloudIds = new Set(Object.keys(cloudData));
+      const toUpload = localAttempts.filter(rec => !cloudIds.has(rec.attemptId));
+
+      if (toUpload.length > 0) {
+        console.log('[dashboard] Auto-migrating', toUpload.length, 'attempt(s) to cloud...');
+        Promise.all(toUpload.map(rec => cloudWriteAttempt(rec)))
+          .then(() => {
+            console.log('[dashboard] Auto-migration complete.');
+            localStorage.setItem('xeledif.migrationDone', '1');
+          })
+          .catch(err => {
+            console.warn('[dashboard] Auto-migration upload failed:', err);
+            // Don't mark as done — retry next load
+          });
+        // Don't overwrite the cache yet. Wait for the next snapshot
+        // (which will include the uploaded attempts).
+        return;
+      }
+      // No local-only attempts; mark migration done and proceed.
+      localStorage.setItem('xeledif.migrationDone', '1');
+    }
+
+    // Cloud is now the truth — replace the cache wholesale.
+    localStorage.setItem(KEY, JSON.stringify(cloudData));
+    render();
+    updateUploadButtonState();
+  };
+
+  if (role === 'teacher') {
+    if (typeof cloudSubscribeAll === 'function') cloudSubscribeAll(onCloudUpdate);
+  } else {
+    if (typeof cloudSubscribeMy === 'function') cloudSubscribeMy(onCloudUpdate);
+  }
+})();
+
+
+
+/* ─── Upload-local-to-cloud button (manual fallback) ─── */
+function updateUploadButtonState() {
+  const btn = document.getElementById('migrateBtn');
+  if (!btn) return;
+
+  const done = localStorage.getItem('xeledif.migrationDone') === '1';
+  if (done) {
+    btn.style.display = 'none';
+    return;
+  }
+
+  const local = readAll();
+  const meaningful = Object.values(local).filter(
+    rec => rec && rec.attemptId &&
+           !rec.attemptId.startsWith('smoke-test-') &&
+           rec.stepId !== 'test-step'
+  ).length;
+
+  if (meaningful > 0) {
+    btn.style.display = 'inline-block';
+    btn.textContent = `☁ Upload ${meaningful} local attempt${meaningful === 1 ? '' : 's'} to cloud`;
+  } else {
+    btn.style.display = 'none';
+  }
+}
+
+async function migrateLocalToCloud() {
+  if (typeof getFirebaseUser !== 'function' || !getFirebaseUser()) {
+    alert('You must be signed in to upload.');
+    return;
+  }
+
+  const all = readAll();
+  const entries = Object.values(all).filter(
+    rec => rec && rec.attemptId &&
+           !rec.attemptId.startsWith('smoke-test-') &&
+           rec.stepId !== 'test-step'
+  );
+
+  if (!entries.length) {
+    alert('No local attempts to upload.');
+    return;
+  }
+
+  const ok = confirm(
+    `Upload ${entries.length} local attempt(s) to the cloud?\n\n` +
+    `This is a one-time operation. Afterwards, the dashboard will ` +
+    `always reflect whatever is in the cloud.`
+  );
+  if (!ok) return;
+
+  const btn = document.getElementById('migrateBtn');
+  if (btn) { btn.disabled = true; btn.textContent = '☁ Uploading...'; }
+
+  let uploaded = 0, failed = 0;
+  for (const rec of entries) {
+    try {
+      await cloudWriteAttempt(rec);
+      uploaded++;
+    } catch (err) {
+      console.warn('Upload failed for', rec.attemptId, err);
+      failed++;
+    }
+  }
+
+  localStorage.setItem('xeledif.migrationDone', '1');
+  alert(
+    `Upload complete.\n\nUploaded: ${uploaded}` +
+    (failed ? `\nFailed: ${failed}` : '') +
+    `\n\nThe dashboard now reflects cloud data only.`
+  );
+  updateUploadButtonState();
+}
 </script>
 </body>
 </html>

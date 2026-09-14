@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Xeledif Maths LMS | Years 4–6</title>
+
 <style>
 :root {
     --blue:#378ADD; --blue-light:#E6F1FB; --blue-dark:#0C447C; --blue-mid:#185FA5;
@@ -211,9 +212,20 @@
 }
 
 </style>
+
+<!-- Firebase SDK (compat build) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Your Firebase integration -->
+<script src="firebase-integration.js"></script>
+
 </head>
 <body>
 <div class="page">
+
+<div id="auth-bar" style="margin-bottom:1rem;"></div>
 
 <div class="hero">
   <div class="hero-row">
