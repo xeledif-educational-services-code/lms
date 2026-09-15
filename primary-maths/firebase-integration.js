@@ -85,6 +85,17 @@ function initFirebaseCompat() {
       }
       renderAuthUI();
       resolve(currentRole);
+      showSyncDebug('Signed in as ' + (user.email || user.uid) + ' (' + currentRole + ')');
+
+      // Catch-up sync: push any locally-recorded attempts on THIS
+      // device now that we know for certain we're signed in. This
+      // covers the case where a pupil started answering questions
+      // before tapping "Tap to finish signing in" (or before the
+      // sign-in confirmation had finished processing) — those
+      // per-answer syncs would have silently no-op'd at the time
+      // because getFirebaseUser() was still null. It also re-tries
+      // anything that failed to sync earlier due to a network blip.
+      syncAllLocalAttempts();
     });
   });
 
@@ -144,11 +155,34 @@ async function completeEmailLinkSignIn() {
   }
 }
 
+// ── Temporary on-screen debug readout ───────────────────────────
+// Shows sign-in and sync status directly on the page, since a
+// phone usually can't show a JS console. Safe to remove later by
+// deleting this function and its call sites (search "showSyncDebug").
+function showSyncDebug(msg) {
+  let el = document.getElementById('xeledif-sync-debug');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'xeledif-sync-debug';
+    el.style.cssText = `
+      position:fixed; bottom:4px; left:4px; z-index:100000;
+      background:rgba(0,0,0,0.8); color:#fff; font-size:10px;
+      padding:5px 9px; border-radius:6px; font-family:monospace;
+      max-width:92vw; word-break:break-word; line-height:1.4;
+    `;
+    (document.body || document.documentElement).appendChild(el);
+  }
+  const time = new Date().toLocaleTimeString();
+  el.textContent = `[${time}] ${msg}`;
+  console.log('[xeledif-sync]', msg);
+}
+
 async function doSignOut() {
   // Clear caches so the next user doesn't see stale data
   localStorage.removeItem('xeledif.progress.v2');
   localStorage.removeItem('xeledif.activeAttempt');
   localStorage.removeItem('xeledif.migrationDone');
+  localStorage.removeItem('xeledif.syncedAttempts');
   if (fbAuth) await fbAuth.signOut();
   location.reload();
 }
@@ -156,18 +190,23 @@ async function doSignOut() {
 /* ─── Firestore writes ─── */
 
 async function cloudWriteAttempt(rec) {
-  if (!currentUser || !fbDb) return;
+  if (!currentUser || !fbDb) {
+    showSyncDebug('⏭ write skipped for ' + (rec && rec.attemptId) + ' — not signed in yet');
+    return;
+  }
   try {
     await fbDb.collection('progress').doc(rec.attemptId).set({
       ...rec,
       pupilUid: currentUser.uid,
       pupilEmail: currentUser.email || ''
     }, { merge: true });
+    showSyncDebug('✅ synced ' + rec.attemptId + ' (' + (rec.answered || 0) + ' answered)');
   } catch (err) {
     console.warn('cloudWriteAttempt failed:', err.message);
-    // Re-throw so callers (real-time sync, dashboard reconciliation)
-    // can tell the write did NOT actually make it to Firestore,
-    // instead of silently assuming success.
+    showSyncDebug('❌ sync FAILED for ' + rec.attemptId + ': [' + err.code + '] ' + err.message);
+    // Re-throw so callers (real-time sync, dashboard reconciliation,
+    // catch-up sync) can tell the write did NOT actually make it to
+    // Firestore, instead of silently assuming success.
     throw err;
   }
 }
@@ -175,6 +214,48 @@ async function cloudWriteAttempt(rec) {
 async function cloudDeleteAttempt(attemptId) {
   if (!currentUser || !fbDb) return;
   await fbDb.collection('progress').doc(attemptId).delete();
+}
+
+// Push every eligible attempt sitting in this device's localStorage
+// to Firestore. Safe to call repeatedly — writes are idempotent
+// (merge:true), and we skip anything already confirmed synced AND
+// completed, so this doesn't grow into unbounded re-writes over time.
+async function syncAllLocalAttempts() {
+  if (!currentUser || !fbDb) return;
+
+  let all;
+  try { all = JSON.parse(localStorage.getItem('xeledif.progress.v2')) || {}; }
+  catch { all = {}; }
+
+  let syncedIds;
+  try { syncedIds = new Set(JSON.parse(localStorage.getItem('xeledif.syncedAttempts')) || []); }
+  catch { syncedIds = new Set(); }
+
+  const candidates = Object.values(all).filter(rec =>
+    rec && rec.attemptId &&
+    !rec.attemptId.startsWith('smoke-test-') &&
+    rec.stepId !== 'test-step' &&
+    rec.answered > 0 &&
+    !(syncedIds.has(rec.attemptId) && rec.completed)
+  );
+
+  for (const rec of candidates) {
+    try {
+      await cloudWriteAttempt(rec);
+      syncedIds.add(rec.attemptId);
+    } catch (err) {
+      console.warn('[sync] catch-up upload failed for', rec.attemptId, err);
+      // Leave it out of syncedIds — we'll retry next time this runs.
+    }
+  }
+
+  try {
+    localStorage.setItem('xeledif.syncedAttempts', JSON.stringify([...syncedIds]));
+  } catch (err) {
+    console.warn('[sync] could not persist synced-attempt bookkeeping:', err);
+  }
+
+  showSyncDebug('Catch-up sync: found ' + candidates.length + ' local attempt(s) to check.');
 }
 
 /* ─── Firestore reads ─── */
