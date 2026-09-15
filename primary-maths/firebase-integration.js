@@ -39,6 +39,99 @@ let pendingEmailLinkEmail = null;
 let signInBusy = false;
 let lastSignInError = null;
 
+// ── Full-page access gate ───────────────────────────────────────
+// Deters casual/unauthorized use of a shared link by blocking view
+// and interaction with the whole page until someone is signed in.
+// This is a UX/access-log deterrent, not a real security boundary:
+// the page's HTML/JS is still delivered to any browser that
+// requests it, so a technically able visitor could still disable
+// JavaScript or read page source to get at it. Genuine content
+// protection would require serving lesson content from Firestore
+// behind an auth-gated read rule instead of embedding it in the
+// page. What this DOES achieve: nobody can see or interact with a
+// lesson without first receiving and clicking a magic-link email
+// tied to a real address — a real, logged access record.
+const GATE_HTML_CLASS = 'xeledif-gate-active';
+
+function showGate() {
+  document.documentElement.classList.add(GATE_HTML_CLASS);
+  const gate = document.getElementById('xeledif-auth-gate');
+  if (gate) { gate.style.display = 'flex'; renderGate(gate); }
+}
+function hideGate() {
+  document.documentElement.classList.remove(GATE_HTML_CLASS);
+  const gate = document.getElementById('xeledif-auth-gate');
+  if (gate) gate.style.display = 'none';
+}
+function refreshGate() {
+  if (!document.documentElement.classList.contains(GATE_HTML_CLASS)) return;
+  const gate = document.getElementById('xeledif-auth-gate');
+  if (gate) renderGate(gate);
+}
+
+function renderGate(gate) {
+  if (pendingEmailLinkSignIn) {
+    gate.innerHTML = `
+      <div style="background:#fff;border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+        <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:8px;">Xeledif Maths — Private Access</div>
+        <div style="font-size:13px;color:#555;margin-bottom:16px;">✉️ Sign-in link detected for this device.</div>
+        <button id="gate-finish-signin-btn" onclick="completeEmailLinkSignIn()" ${signInBusy ? 'disabled' : ''}
+                style="width:100%;padding:10px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+          ${signInBusy ? 'Signing in…' : 'Tap to finish signing in'}
+        </button>
+      </div>`;
+    return;
+  }
+
+  const errorHtml = lastSignInError
+    ? `<div style="color:#712B13;background:#FAECE7;border:1px solid #F0997B;border-radius:6px;padding:8px 10px;font-size:12px;margin-bottom:12px;text-align:left;">
+         ${lastSignInError.code === 'auth/invalid-action-code'
+            ? 'That sign-in link has already been used or has expired. Request a new one below.'
+            : 'Sign-in failed: ' + lastSignInError.message}
+       </div>`
+    : '';
+
+  gate.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:360px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:left;">
+      <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:4px;">🔒 Private learning platform</div>
+      <div style="font-size:13px;color:#555;margin-bottom:16px;line-height:1.5;">
+        This site is for registered pupils only. Enter the email your teacher registered for you to receive a sign-in link.
+      </div>
+      ${errorHtml}
+      <input id="gate-email" type="email" placeholder="your@email.com"
+             style="width:100%;padding:10px;font-size:14px;border-radius:8px;border:1px solid #ddd;font-family:inherit;box-sizing:border-box;margin-bottom:10px;">
+      <button onclick="handleGateSignInClick()"
+              style="width:100%;padding:10px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+        Send sign-in link
+      </button>
+    </div>`;
+}
+
+async function handleGateSignInClick() {
+  const input = document.getElementById('gate-email');
+  const email = (input?.value || '').trim();
+  if (!email) { alert('Please enter your email.'); return; }
+  try {
+    lastSignInError = null;
+    await sendSignInLink(email);
+    alert('Check your inbox — a sign-in link has been sent to ' + email +
+          '\n\nOpen it on THIS device/browser, then tap the button that appears.');
+  } catch (err) {
+    alert('Could not send sign-in link: ' + err.message);
+  }
+}
+
+// ── Pupil-identity binding ──────────────────────────────────────
+// The dashboard groups scores by a "pupil name" string. Previously
+// that name was just typed into a per-device prompt, completely
+// disconnected from who was actually signed in — so a signed-in
+// pupil could type any name at all, and the same device re-prompted
+// separately for every different visitor. Now the display name is
+// resolved once per ACCOUNT (stored in that pupil's Firestore user
+// document, asked for only the first time), so it follows the pupil
+// to any device they sign into and can't be freely retyped.
+window.__xeledifPupilName = null;
+
 function initFirebaseCompat() {
   if (typeof firebase === 'undefined') {
     console.warn('Firebase SDK not loaded — offline mode.');
@@ -67,6 +160,7 @@ function initFirebaseCompat() {
         currentRole = null;
         resolve(null);
         renderAuthUI();
+        showGate();
         return;
       }
       // Ensure a user doc exists with a role
@@ -83,7 +177,30 @@ function initFirebaseCompat() {
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       }
+
+      // Resolve this pupil's stable display name (see the
+      // pupil-identity-binding note above). Teachers don't need one.
+      if (currentRole !== 'teacher') {
+        const existingData = snap.exists ? snap.data() : null;
+        if (existingData && existingData.pupilName) {
+          window.__xeledifPupilName = existingData.pupilName;
+        } else {
+          let name = (window.prompt("What name should appear on your teacher's dashboard?") || '').trim();
+          if (!name) name = user.email || 'Pupil';
+          window.__xeledifPupilName = name;
+          try {
+            await ref.set({ pupilName: name }, { merge: true });
+          } catch (err) {
+            console.warn('Could not save pupil display name:', err);
+          }
+        }
+        try {
+          localStorage.setItem('xeledif.pupilNameFor.' + user.uid, window.__xeledifPupilName);
+        } catch (err) { /* non-fatal */ }
+      }
+
       renderAuthUI();
+      hideGate();
       resolve(currentRole);
 
       // Catch-up sync: push any locally-recorded attempts on THIS
@@ -104,6 +221,7 @@ function initFirebaseCompat() {
     pendingEmailLinkSignIn = true;
     pendingEmailLinkEmail = window.localStorage.getItem('xeledif.emailForSignIn') || null;
     renderAuthUI();
+    showGate();
   }
 }
 
@@ -147,6 +265,7 @@ async function completeEmailLinkSignIn() {
     pendingEmailLinkSignIn = false;
     lastSignInError = err;
     renderAuthUI();
+    refreshGate();
   } finally {
     signInBusy = false;
     window.localStorage.removeItem('xeledif.emailForSignIn');
@@ -160,6 +279,7 @@ async function doSignOut() {
   localStorage.removeItem('xeledif.activeAttempt');
   localStorage.removeItem('xeledif.migrationDone');
   localStorage.removeItem('xeledif.syncedAttempts');
+  window.__xeledifPupilName = null;
   if (fbAuth) await fbAuth.signOut();
   location.reload();
 }
