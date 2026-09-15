@@ -165,6 +165,10 @@ async function cloudWriteAttempt(rec) {
     }, { merge: true });
   } catch (err) {
     console.warn('cloudWriteAttempt failed:', err.message);
+    // Re-throw so callers (real-time sync, dashboard reconciliation)
+    // can tell the write did NOT actually make it to Firestore,
+    // instead of silently assuming success.
+    throw err;
   }
 }
 

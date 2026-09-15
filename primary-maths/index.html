@@ -395,8 +395,10 @@ const ProgressStore = {
       const prov = this._provisional[activeKey];
       if (prov && prov.attemptId === currentId && prov.answered > 0) {
         const all = this.readAll();
-        all[pupil + '::' + stepId + '::' + currentId] = { ...prov, completed: false };
+        const frozen = { ...prov, completed: false };
+        all[pupil + '::' + stepId + '::' + currentId] = frozen;
         this.writeAll(all);
+        this._syncToCloud(frozen);
       }
       // Drop the provisional cache
       delete this._provisional[activeKey];
@@ -425,6 +427,7 @@ const ProgressStore = {
         prov.updatedAt = new Date().toISOString();
         all[pupil + '::' + stepId + '::' + attemptId] = prov;
         this.writeAll(all);
+        this._syncToCloud(prov);
       }
       delete this._provisional[activeKey];
     } else {
@@ -435,6 +438,7 @@ const ProgressStore = {
         all[key].completed = true;
         all[key].updatedAt = new Date().toISOString();
         this.writeAll(all);
+        this._syncToCloud(all[key]);
       }
     }
 
@@ -507,6 +511,18 @@ const ProgressStore = {
       const all = this.readAll();
       all[pupil + '::' + stepId + '::' + attemptId] = rec;
       this.writeAll(all);
+      this._syncToCloud(rec);
+    }
+  },
+
+    // Best-effort real-time push to Firestore. If nobody is signed in
+  // (or we're offline), this quietly no-ops and the record stays
+  // safe in localStorage — dashboard.html's reconciliation will pick
+  // it up as a fallback next time it loads.
+  _syncToCloud(rec) {
+    if (typeof getFirebaseUser === 'function' && getFirebaseUser() &&
+        typeof cloudWriteAttempt === 'function') {
+      cloudWriteAttempt(rec).catch(() => { /* already logged inside cloudWriteAttempt */ });
     }
   },
 

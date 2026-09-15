@@ -550,38 +550,40 @@ document.getElementById('pupilLink').addEventListener('click', e => {
 
   // ── 3. Callback fired on every Firestore snapshot
   const onCloudUpdate = (cloudData) => {
-    // First-run auto-migration: if local attempts exist that
-    // aren't yet in the cloud, upload them before overwriting cache.
-    if (localStorage.getItem('xeledif.migrationDone') !== '1') {
-      const localSnapshot = readAll();
-      const localAttempts = Object.values(localSnapshot).filter(
-        rec => rec && rec.attemptId &&
-               !rec.attemptId.startsWith('smoke-test-') &&
-               rec.stepId !== 'test-step'
-      );
+    // Reconcile on EVERY snapshot, not just once. Previously this
+    // whole block was skipped once xeledif.migrationDone was '1',
+    // which meant any NEW local-only attempt recorded after that
+    // point (like Prosper's) was invisible to this check — and the
+    // "cloud is the truth" overwrite below then erased it from
+    // localStorage. That was the cause of scores flickering and
+    // disappearing.
+    const localSnapshot = readAll();
+    const localAttempts = Object.values(localSnapshot).filter(
+      rec => rec && rec.attemptId &&
+             !rec.attemptId.startsWith('smoke-test-') &&
+             rec.stepId !== 'test-step'
+    );
 
-      const cloudIds = new Set(Object.keys(cloudData));
-      const toUpload = localAttempts.filter(rec => !cloudIds.has(rec.attemptId));
+    const cloudIds = new Set(Object.keys(cloudData));
+    const toUpload = localAttempts.filter(rec => !cloudIds.has(rec.attemptId));
 
-      if (toUpload.length > 0) {
-        console.log('[dashboard] Auto-migrating', toUpload.length, 'attempt(s) to cloud...');
-        Promise.all(toUpload.map(rec => cloudWriteAttempt(rec)))
-          .then(() => {
-            console.log('[dashboard] Auto-migration complete.');
-            localStorage.setItem('xeledif.migrationDone', '1');
-          })
-          .catch(err => {
-            console.warn('[dashboard] Auto-migration upload failed:', err);
-            // Don't mark as done — retry next load
-          });
-        // Don't overwrite the cache yet. Wait for the next snapshot
-        // (which will include the uploaded attempts).
-        return;
-      }
-      // No local-only attempts; mark migration done and proceed.
-      localStorage.setItem('xeledif.migrationDone', '1');
+    if (toUpload.length > 0) {
+      console.log('[dashboard] Reconciling', toUpload.length, 'local attempt(s) not yet in the cloud...');
+      Promise.all(toUpload.map(rec => cloudWriteAttempt(rec)))
+        .then(() => {
+          console.log('[dashboard] Reconciliation complete.');
+          localStorage.setItem('xeledif.migrationDone', '1');
+        })
+        .catch(err => {
+          console.warn('[dashboard] Reconciliation upload failed:', err);
+          // Leave things as-is — we'll retry on the next snapshot.
+        });
+      // Don't overwrite the cache yet. Wait for the next snapshot,
+      // which will include whatever we just uploaded.
+      return;
     }
 
+    localStorage.setItem('xeledif.migrationDone', '1');
     // Cloud is now the truth — replace the cache wholesale.
     localStorage.setItem(KEY, JSON.stringify(cloudData));
     render();
