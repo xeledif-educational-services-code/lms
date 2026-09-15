@@ -85,7 +85,6 @@ function initFirebaseCompat() {
       }
       renderAuthUI();
       resolve(currentRole);
-      showSyncDebug('Signed in as ' + (user.email || user.uid) + ' (' + currentRole + ')');
 
       // Catch-up sync: push any locally-recorded attempts on THIS
       // device now that we know for certain we're signed in. This
@@ -155,28 +154,6 @@ async function completeEmailLinkSignIn() {
   }
 }
 
-// ── Temporary on-screen debug readout ───────────────────────────
-// Shows sign-in and sync status directly on the page, since a
-// phone usually can't show a JS console. Safe to remove later by
-// deleting this function and its call sites (search "showSyncDebug").
-function showSyncDebug(msg) {
-  let el = document.getElementById('xeledif-sync-debug');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'xeledif-sync-debug';
-    el.style.cssText = `
-      position:fixed; bottom:4px; left:4px; z-index:100000;
-      background:rgba(0,0,0,0.8); color:#fff; font-size:10px;
-      padding:5px 9px; border-radius:6px; font-family:monospace;
-      max-width:92vw; word-break:break-word; line-height:1.4;
-    `;
-    (document.body || document.documentElement).appendChild(el);
-  }
-  const time = new Date().toLocaleTimeString();
-  el.textContent = `[${time}] ${msg}`;
-  console.log('[xeledif-sync]', msg);
-}
-
 async function doSignOut() {
   // Clear caches so the next user doesn't see stale data
   localStorage.removeItem('xeledif.progress.v2');
@@ -190,20 +167,15 @@ async function doSignOut() {
 /* ─── Firestore writes ─── */
 
 async function cloudWriteAttempt(rec) {
-  if (!currentUser || !fbDb) {
-    showSyncDebug('⏭ write skipped for ' + (rec && rec.attemptId) + ' — not signed in yet');
-    return;
-  }
+  if (!currentUser || !fbDb) return;
   try {
     await fbDb.collection('progress').doc(rec.attemptId).set({
       ...rec,
       pupilUid: currentUser.uid,
       pupilEmail: currentUser.email || ''
     }, { merge: true });
-    showSyncDebug('✅ synced ' + rec.attemptId + ' (' + (rec.answered || 0) + ' answered)');
   } catch (err) {
     console.warn('cloudWriteAttempt failed:', err.message);
-    showSyncDebug('❌ sync FAILED for ' + rec.attemptId + ': [' + err.code + '] ' + err.message);
     // Re-throw so callers (real-time sync, dashboard reconciliation,
     // catch-up sync) can tell the write did NOT actually make it to
     // Firestore, instead of silently assuming success.
@@ -254,8 +226,6 @@ async function syncAllLocalAttempts() {
   } catch (err) {
     console.warn('[sync] could not persist synced-attempt bookkeeping:', err);
   }
-
-  showSyncDebug('Catch-up sync: found ' + candidates.length + ' local attempt(s) to check.');
 }
 
 /* ─── Firestore reads ─── */
