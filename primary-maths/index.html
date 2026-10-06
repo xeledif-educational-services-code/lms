@@ -2982,6 +2982,12 @@ const SCHEME_P5 = [
           { label:'Problems involving addition and subtraction', content: P5_AS13 },
           { label:'Reasoning with addition and subtraction', content: P5_AS14 }
         ]},
+      { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],
+        steps: ['Multiples','Common multiples','Factors','Factor pairs','Common factors','Prime numbers','Prime factors','Composite numbers','Square numbers','Cube numbers','Squared notation (²)','Cubed notation (³)','Recognise divisibility patterns','Multiplication facts and related division facts','Mental multiplication strategies','Mental division strategies'].map(s=>({label:s, content:null}))},
+      { id:'fractionsA', label:'Fractions A', col: TOPIC_PALETTE[2],
+        steps: ['What is a fraction?','Equivalent fractions','Simplifying fractions','Improper fractions','Mixed numbers','Convert improper fractions to mixed numbers','Convert mixed numbers to improper fractions','Compare fractions','Order fractions','Fractions on a number line','Fractions greater than one','Add fractions with the same denominator','Add fractions with related denominators','Subtract fractions with the same denominator','Subtract fractions with related denominators','Add mixed numbers','Subtract mixed numbers','Fraction problem-solving'].map(s=>({label:s, content:null}))},
+    ]
+  },
   { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2026', col: TERM_COLORS.spring, open:false,
     topics: [
       { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
