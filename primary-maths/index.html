@@ -2661,6 +2661,279 @@ ${exCard(20,[
 
 
 
+
+
+
+/* ============================================================
+   PRIMARY 5 — ADDITION & SUBTRACTION (Autumn, topic 2)
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers) + SECTION B (lessons) into index.html
+      <script>, directly BELOW the P5_PV20 constant.
+   2. Replace the old `addsub` topic object inside SCHEME_P5 with
+      SECTION C.
+   3. Later, when lesson 3..14 are ready, replace the `null` of the
+      matching P5_AS# constant with a template-literal lesson.
+   Requires existing helpers: steps(), numLine(), exQ(), mcqBlock(),
+   PLACE_META.
+   ============================================================ */
+ 
+ 
+/* ================= SECTION A — TEAL-THEMED HELPERS ================= */
+ 
+function asHeader(icon, label, sub){
+  return `<div class="day-header"><div class="day-icon" style="background:#E1F5EE;color:#085041;border:0.5px solid #1D9E75;">${icon}</div><div><div class="day-label" style="color:#085041;">${label}</div><div class="day-sub">${sub}</div></div></div>`;
+}
+function asExCard(stepNo, items){
+  return `<div class="card" style="border-color:#1D9E75;"><div class="card-title" style="color:#085041;">Exercises — Step ${stepNo}</div><div class="exercise-list">${items.join('')}</div></div>`;
+}
+/* Warm-up box in teal */
+function asWarm(text){
+  return `<div class="warmup" style="background:#E1F5EE;color:#085041;">🧠 <strong>Warm-up:</strong> ${text}</div>`;
+}
+ 
+/* Bar model: whole on top, parts underneath (widths proportional to weight).
+   parts = [[label, weight, fill, stroke, textColour], ...]  */
+function asBar(title, total, parts){
+  const W=620, x0=10, tw=W-20, sum=parts.reduce((s,p)=>s+p[1],0);
+  let s=`<svg viewBox="0 0 ${W} 150" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<rect x="${x0}" y="28" width="${tw}" height="42" rx="8" fill="#E1F5EE" stroke="#1D9E75" stroke-width="2"/>`;
+  s+=`<text x="${W/2}" y="55" text-anchor="middle" font-size="18" font-weight="800" fill="#085041">${total}</text>`;
+  let x=x0;
+  parts.forEach(p=>{
+    const w=tw*p[1]/sum;
+    s+=`<rect x="${x}" y="84" width="${w}" height="42" rx="8" fill="${p[2]}" stroke="${p[3]}" stroke-width="2"/>`;
+    s+=`<text x="${x+w/2}" y="110" text-anchor="middle" font-size="16" font-weight="800" fill="${p[4]}">${p[0]}</text>`;
+    x+=w;
+  });
+  s+=`<text x="${W/2}" y="144" text-anchor="middle" font-size="11" fill="#666">whole on top · parts underneath</text>`;
+  return s+'</svg>';
+}
+ 
+/* Empty number line with curved jumps.
+   pts = ['67','70','92'], jumps = ['+3','+22']  */
+function asJump(pts, jumps, title){
+  const W=640, H=130, y=88, n=pts.length, gap=(W-90)/(n-1);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="14" y1="${y}" x2="${W-14}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  s+=`<polygon points="${W-14},${y} ${W-26},${y-6} ${W-26},${y+6}" fill="#444"/>`;
+  pts.forEach((p,i)=>{
+    const x=45+i*gap, last=i===n-1;
+    s+=`<circle cx="${x}" cy="${y}" r="6" fill="${last?'#D85A30':'#1D9E75'}"/>`;
+    s+=`<text x="${x}" y="${y+25}" text-anchor="middle" font-size="13" font-weight="800" fill="${last?'#D85A30':'#085041'}">${p}</text>`;
+  });
+  jumps.forEach((j,i)=>{
+    const x1=45+i*gap, x2=45+(i+1)*gap, mx=(x1+x2)/2;
+    s+=`<path d="M ${x1} ${y-6} Q ${mx} ${y-62} ${x2} ${y-6}" fill="none" stroke="#BA7517" stroke-width="2.5"/>`;
+    s+=`<rect x="${mx-24}" y="${y-52}" width="48" height="20" rx="10" fill="#FAEEDA" stroke="#BA7517"/>`;
+    s+=`<text x="${mx}" y="${y-38}" text-anchor="middle" font-size="12" font-weight="800" fill="#633806">${j}</text>`;
+  });
+  return s+'</svg>';
+}
+ 
+/* Place-value counters. cols = [['Te',4],['O',7]] using PLACE_META keys.
+   Each counter shows its value (10, 1, 100, 1000 …). */
+function asPV(title, cols){
+  const cw=120, W=cols.length*cw+20;
+  const rows=Math.max(...cols.map(c=>Math.ceil(c[1]/3)),1), H=78+rows*32+34;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="15" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  cols.forEach((c,i)=>{
+    const m=PLACE_META[c[0]], x=10+i*cw, cx=x+(cw-10)/2;
+    s+=`<rect x="${x}" y="24" width="${cw-10}" height="${H-30}" rx="10" fill="${m[2]}" stroke="${m[1]}" stroke-width="1.5"/>`;
+    s+=`<text x="${cx}" y="42" text-anchor="middle" font-size="9" font-weight="700" fill="${m[3]}">${m[0]}</text>`;
+    for(let k=0;k<c[1];k++){
+      const px=cx-30+(k%3)*30, py=68+Math.floor(k/3)*32;
+      s+=`<circle cx="${px}" cy="${py}" r="13" fill="${m[1]}"/>`;
+      s+=`<text x="${px}" y="${py+3}" text-anchor="middle" font-size="${m[4]>=1000?7:9}" font-weight="800" fill="#fff">${m[4].toLocaleString('en-GB')}</text>`;
+    }
+    s+=`<text x="${cx}" y="${H-12}" text-anchor="middle" font-size="11" font-weight="800" fill="${m[3]}">${c[1]} × ${m[4].toLocaleString('en-GB')} = ${(c[1]*m[4]).toLocaleString('en-GB')}</text>`;
+  });
+  return s+'</svg>';
+}
+ 
+ 
+/* ================= SECTION B — LESSONS ================= */
+ 
+/* ---------- STEP 1 : Mental addition and subtraction strategies ---------- */
+const P5_AS1 = `
+${asHeader('AS1','Step 1 — Mental Addition and Subtraction Strategies','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Your Number Toolbox</div>
+  ${asWarm('You do not always need a pencil and paper! A clever mathematician has a <strong>toolbox of strategies</strong> and picks the best tool for each calculation. Today you will add FOUR tools to your box.')}
+ 
+  <div class="card-body">First, remember the big idea behind every addition and subtraction — the <strong>part-whole model</strong>. Two parts join to make a whole. If you know the whole and one part, you can find the other part.</div>
+  ${asBar('Part-whole: 47 + 36 = ?', '? (the whole)', [['47',47,'#FAEEDA','#BA7517','#633806'],['36',36,'#E6F1FB','#378ADD','#0C447C']])}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔧 Tool 1 — PARTITION</div><div class="s-body" style="color:#085041;">Split the second number into tens and ones. Add the tens, add the ones, then join them together.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔧 Tool 2 — BRIDGE</div><div class="s-body" style="color:#633806;">Jump to the next ten (or hundred) first — it is a &ldquo;bridge&rdquo; — then add what is left over.</div></div>
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">🔧 Tool 3 — ROUND &amp; ADJUST</div><div class="s-body" style="color:#0C447C;">Change an awkward number (like 298) into a friendly one (300), calculate, then fix the difference.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔧 Tool 4 — COUNT ON</div><div class="s-body" style="color:#3C3489;">When two numbers are CLOSE together, find the <em>difference</em> by counting on from the smaller to the bigger.</div></div>
+  </div>
+ 
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert</div><div class="s-body" style="color:#712B13;">Subtraction does <strong>not</strong> always mean &ldquo;taking away&rdquo;. 502 − 498 is not about removing 498 things — the numbers are almost the same, so the <em>gap</em> between them is tiny!</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Remember</div><div class="s-body" style="color:#27500A;">There is no &ldquo;one right way&rdquo;. Look at the numbers FIRST, then choose the tool that makes the calculation easiest.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Tool 1: PARTITION · 47 + 36</div>
+  ${asWarm('Can you see 47 and 36 as bundles of tens and loose ones?')}
+  <div class="card-body"><strong>Concrete:</strong> Build each number with place-value counters. Each orange counter is a ten, each small counter is a one.</div>
+  ${asPV('Concrete: 47 and 36 together', [['Te',7],['O',13]])}
+  <div class="card-body" style="margin-top:6px;">&uarr; Count: 4 + 3 = <strong>7 tens</strong>. Ones: 7 + 6 = <strong>13 ones</strong> — that is more than 9, so 10 of them <em>exchange</em> into 1 more ten!</div>
+  ${steps([['Partition 36','30 + 6','tens and ones'],['Add the tens','47 + 30 = 77','jump 3 tens'],['Add the ones','77 + 6','77 + 3 = 80, then 3 more'],['ANSWER','= 83','47 + 36 = 83 ✓']])}
+  ${asJump(['47','77','83'],['+30','+6'],'Pictorial: partition on an empty number line')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Tool 2: BRIDGE through ten · 67 + 25</div>
+  ${asWarm('67 is only <strong>3</strong> away from 70. 70 is a friendly number!')}
+  <div class="card-body">Split 25 into <strong>3 + 22</strong>. The 3 builds the bridge to 70, then we add the rest.</div>
+  ${steps([['Start','67','our first number'],['Bridge to the next ten','67 + 3 = 70','how many to reach 70?'],['What is left of 25?','25 − 3 = 22','we used 3 already'],['Add the rest','70 + 22 = 92','easy from 70!'],['ANSWER','= 92','67 + 25 = 92 ✓']])}
+  ${asJump(['67','70','92'],['+3','+22'],'Pictorial: bridging through 70')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 67 + 25 → 60 + 20 = 80, 7 + 5 = 12, 80 + 12 = 92 ✓ (two different tools, same answer!)</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Tool 3: ROUND &amp; ADJUST (addition) · 298 + 345</div>
+  ${asWarm('298 is just <strong>2 short</strong> of 300. Would you rather add 298 or 300?')}
+  ${asBar('Round 298 up to 300 — then take the extra 2 back', '298 + 345', [['298 → 300',300,'#E6F1FB','#378ADD','#0C447C'],['345',345,'#FAEEDA','#BA7517','#633806']])}
+  ${steps([['Round up','298 → 300','add 2 to make it friendly'],['Add the friendly number','300 + 345 = 645','easy!'],['Adjust','645 − 2','we added 2 too many'],['ANSWER','= 643','298 + 345 = 643 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Golden rule of adjusting</div><div class="s-body" style="color:#712B13;">In ADDITION, if you made a number <strong>bigger</strong>, your answer is too big — so <strong>subtract</strong> the extra.</div></div></div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Tool 4: COUNT ON to find the difference · 504 − 478</div>
+  ${asWarm('504 and 478 are close together. Taking away 478 would be a lot of work — but how far is it from 478 up to 504?')}
+  <div class="card-body">Count on in two easy jumps: first up to the next hundred (500), then the last bit to 504.</div>
+  ${asJump(['478','500','504'],['+22','+4'],'Pictorial: counting on to find the difference')}
+  ${steps([['Jump 1','478 → 500','+ 22'],['Jump 2','500 → 504','+ 4'],['Add the jumps','22 + 4','= 26'],['ANSWER','504 − 478 = 26','the difference is 26 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with addition (inverse):</strong> 478 + 26 = 504 ✓</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — ROUND &amp; ADJUST (subtraction) in real life · 645 − 298</div>
+  ${asWarm('A school library has 645 books. 298 are lent out for the holidays. How many are left on the shelves?')}
+  ${asBar('645 books in total', '645', [['298 lent out',298,'#FAECE7','#D85A30','#712B13'],['? left on shelf',347,'#EAF3DE','#639922','#27500A']])}
+  ${steps([['Round 298','298 → 300','2 more than 298'],['Subtract the friendly number','645 − 300 = 345','easy!'],['Adjust','345 + 2','we took away 2 too many, so give 2 back'],['ANSWER','= 347 books','645 − 298 = 347 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Careful — subtraction flips!</div><div class="s-body" style="color:#712B13;">In SUBTRACTION, if you made the number you are taking away <strong>bigger</strong>, you took away too much — so <strong>ADD</strong> the extra back. (The opposite of addition!)</div></div></div>
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 347 + 298 should give 645. 347 + 300 = 647, minus 2 = 645 ✓</div>
+</div>
+ 
+${asExCard(1,[
+ exQ(1,'Use PARTITION to work out 34 + 25.',['59','49','69'],0),
+ exQ(2,'Use BRIDGING through 60 to work out 58 + 26. (58 + 2 = 60, then + 24)',['84','74','83'],0),
+ exQ(3,'Use ROUND &amp; ADJUST: 199 + 256 = ?  (Hint: 200 + 256, then fix)',['455','457','356'],0),
+ exQ(4,'Use COUNTING ON to find 603 − 588. (588 → 600 → 603)',['15','25','5'],0),
+ exQ(5,'Use ROUND &amp; ADJUST: 502 − 297 = ?  (Hint: 502 − 300, then fix)',['205','199','195'],0),
+ exQ(6,'Which is the MOST efficient way to work out 399 + 126?',['Round 399 to 400, add 126, then subtract 1','Count on 399 ones from 126','Partition both into ones and add one at a time'],0),
+ exQ(7,'Bridge to 100: 67 + ___ = 100',['33','43','37'],0),
+ exQ(8,'Ade has 285 stickers and gets 99 more. How many now? (Hint: add 100, subtract 1)',['384','386','375'],0),
+ exQ(9,'THINK DEEPER: Mia says &ldquo;802 − 799 needs a long written method.&rdquo; Sam says &ldquo;Just count on from 799!&rdquo; Who is right?',['Sam — the numbers are close, so count on: the answer is 3','Mia — you must always use a written method','Neither — the answer is 13'],0,'t'),
+ exQ(10,'BOSS LEVEL: A shop has 1,002 balloons. It sells 487 in the morning and 298 in the afternoon. How many are left?',['217','227','317'],0,'b')])}`;
+ 
+ 
+/* ---------- STEP 2 : Add and subtract multiples of 10, 100 and 1,000 ---------- */
+const P5_AS2 = `
+${asHeader('AS2','Step 2 — Add and Subtract Multiples of 10, 100 and 1,000','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Think in Units</div>
+  ${asWarm('3 apples + 4 apples = 7 apples. So 3 <strong>tens</strong> + 4 <strong>tens</strong> = 7 <strong>tens</strong>! The unit is just a different &ldquo;thing&rdquo; being counted.')}
+ 
+  <div class="card-body"><strong>Concrete:</strong> Use ten-counters. Each orange counter is worth 10.</div>
+  ${asPV('30 + 40 → 3 tens + 4 tens', [['Te',3],['Te',4]])}
+  <div class="card-body" style="text-align:center;margin-top:6px;font-size:15px;"><strong>3 tens + 4 tens = 7 tens = 70</strong></div>
+ 
+  <div class="card-body" style="margin-top:10px;">The secret: <strong>ignore the zeros, add the digits, then put the unit back.</strong></div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0;">
+    <div style="background:#DCFCE7;border:1.5px solid #15803D;border-radius:10px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#166534;">TENS UNIT</div><div style="font-size:16px;font-weight:800;color:#166534;margin:6px 0;">30 + 40</div><div style="font-size:12px;color:#166534;">3 tens + 4 tens<br><strong>= 7 tens = 70</strong></div></div>
+    <div style="background:#DBEAFE;border:1.5px solid #1D4ED8;border-radius:10px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#1E40AF;">HUNDREDS UNIT</div><div style="font-size:16px;font-weight:800;color:#1E40AF;margin:6px 0;">300 + 400</div><div style="font-size:12px;color:#1E40AF;">3 hundreds + 4 hundreds<br><strong>= 7 hundreds = 700</strong></div></div>
+    <div style="background:#EDE9FE;border:1.5px solid #6D28D9;border-radius:10px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:700;color:#5B21B6;">THOUSANDS UNIT</div><div style="font-size:16px;font-weight:800;color:#5B21B6;margin:6px 0;">3,000 + 4,000</div><div style="font-size:12px;color:#5B21B6;">3 thousands + 4 thousands<br><strong>= 7 thousands = 7,000</strong></div></div>
+  </div>
+ 
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert</div><div class="s-body" style="color:#712B13;">600 + 500 is <strong>NOT</strong> 1,000! 6 hundreds + 5 hundreds = <strong>11 hundreds</strong>, which is 1 thousand and 1 hundred = <strong>1,100</strong>. Never just &ldquo;add a zero&rdquo; — always count the units.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Three-step method</div><div class="s-body" style="color:#27500A;">1) Name the unit (tens? hundreds? thousands?). 2) Add or subtract the unit counts. 3) Say the answer with its unit.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Tens: 50 + 80 (crossing 100)</div>
+  ${asWarm('5 tens + 8 tens. How many tens is that? And what do you do when there are 10 tens?')}
+  ${asPV('Concrete: 5 tens and 8 tens', [['Te',5],['Te',8]])}
+  ${steps([['Name the unit','tens','5 tens + 8 tens'],['Add the counts','5 + 8 = 13','13 tens'],['Exchange','10 tens = 1 hundred','13 tens = 1 hundred and 3 tens'],['ANSWER','= 130','50 + 80 = 130 ✓']])}
+  ${asBar('Bar model: 50 + 80', '130', [['50',50,'#DCFCE7','#15803D','#166534'],['80',80,'#DBEAFE','#1D4ED8','#1E40AF']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Hundreds: 600 + 500</div>
+  ${asWarm('6 hundreds + 5 hundreds. Is the answer 1,000? Let us test it!')}
+  ${asPV('Concrete: 6 hundreds and 5 hundreds', [['H',6],['H',5]])}
+  ${steps([['Name the unit','hundreds','6 hundreds + 5 hundreds'],['Add the counts','6 + 5 = 11','11 hundreds'],['Exchange','10 hundreds = 1 thousand','11 hundreds = 1 thousand + 1 hundred'],['ANSWER','= 1,100','600 + 500 = 1,100 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Thousands subtraction: 5,000 − 2,000</div>
+  ${asWarm('You have 5 thousand-counters and give away 2. How many thousands are left?')}
+  ${asPV('Concrete: start with 5 thousands', [['T',5]])}
+  ${steps([['Name the unit','thousands','5 thousands − 2 thousands'],['Subtract the counts','5 − 2 = 3','3 thousands'],['ANSWER','= 3,000','5,000 − 2,000 = 3,000 ✓']])}
+  ${numLine(0,6000,1000,[[5000,'start 5,000'],[3000,'end 3,000']])}
+  <div class="card-body">Move <strong>2 steps back</strong>, each step is 1,000.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Adding hundreds to a bigger number: 4,700 + 600</div>
+  ${asWarm('4,700 is the same as <strong>47 hundreds</strong>. Now add 6 more hundreds!')}
+  ${asBar('Think of 4,700 as 47 hundreds', '4,700 + 600 = ?', [['4,700 = 47 hundreds',47,'#DBEAFE','#1D4ED8','#1E40AF'],['600 = 6 hundreds',6,'#FAEEDA','#BA7517','#633806']])}
+  ${steps([['Name the unit','hundreds','4,700 = 47 hundreds'],['Add the counts','47 + 6 = 53','53 hundreds'],['Say it','53 hundreds','= 5,300'],['ANSWER','= 5,300','4,700 + 600 = 5,300 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 4,700 + 300 = 5,000, then 300 more = 5,300 ✓ (bridging!)</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Crossing a boundary in real life: 15,000 − 8,000</div>
+  ${asWarm('A school fundraiser has a target of £15,000. £8,000 has already been raised. How much more is needed?')}
+  ${asBar('Part-whole: target £15,000', '£15,000', [['£8,000 raised',8,'#EAF3DE','#639922','#27500A'],['? still needed',7,'#FAECE7','#D85A30','#712B13']])}
+  ${steps([['Name the unit','thousands','15 thousands − 8 thousands'],['Subtract the counts','15 − 8 = 7','7 thousands'],['ANSWER','= £7,000 more','15,000 − 8,000 = 7,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check (inverse):</strong> 8,000 + 7,000 = 15,000 ✓</div>
+</div>
+ 
+${asExCard(2,[
+ exQ(1,'50 + 80 = ?',['130','1,300','13'],0),
+ exQ(2,'700 + 400 = ?',['1,100','1,000','11,000'],0),
+ exQ(3,'9,000 − 4,000 = ?',['5,000','500','13,000'],0),
+ exQ(4,'3,400 + 500 = ?  (34 hundreds + 5 hundreds)',['3,900','3,450','8,400'],0),
+ exQ(5,'12,000 − 7,000 = ?',['5,000','6,000','19,000'],0),
+ exQ(6,'8,600 − 900 = ?  (86 hundreds − 9 hundreds)',['7,700','8,500','7,600'],0),
+ exQ(7,'___ + 600 = 1,500. What is the missing number?',['900','1,100','2,100'],0),
+ exQ(8,'24,000 + 9,000 = ?',['33,000','33,900','15,000'],0),
+ exQ(9,'THINK DEEPER: 3,200 − 800. How do we say it in hundreds?',['32 hundreds − 8 hundreds = 24 hundreds = 2,400','32 hundreds − 8 hundreds = 25 hundreds = 2,500','3 hundreds − 8 hundreds = 400'],0,'t'),
+ exQ(10,'BOSS LEVEL: A charity raised £28,000 in week 1 and £6,000 more in week 2 than in week 1. It then spent £40,000 on a new roof. How much is left?',['£22,000','£12,000','£32,000'],0,'b')])}`;
+
+
+
+ /* ---------- STEPS 3–14 : PLACEHOLDERS ----------
+   Replace `null` with a template-literal lesson when ready, e.g.
+   const P5_AS3 = `${asHeader('AS3', ...)} ... ${asExCard(3,[...])}`;
+   Keep the order: the Step number = the number in the constant name. */
+const P5_AS3  = null; // Add numbers with more than four digits
+const P5_AS4  = null; // Subtract numbers with more than four digits
+const P5_AS5  = null; // Column addition with exchange
+const P5_AS6  = null; // Column subtraction with exchange
+const P5_AS7  = null; // Efficient written methods
+const P5_AS8  = null; // Estimating answers
+const P5_AS9  = null; // Checking using inverse operations
+const P5_AS10 = null; // Find missing numbers
+const P5_AS11 = null; // Multi-step addition problems
+const P5_AS12 = null; // Multi-step subtraction problems
+const P5_AS13 = null; // Problems involving addition and subtraction
+const P5_AS14 = null; // Reasoning with addition and subtraction
+
 /* ============================================================
    SCHEME DATA — Primary 5
    ============================================================ */
@@ -2693,13 +2966,22 @@ const SCHEME_P5 = [
           { label:'Number sequences involving large numbers', content: P5_PV20 }
         ]},
       { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],
-        steps: ['Mental addition and subtraction strategies','Add and subtract multiples of 10, 100 and 1,000','Add numbers with more than four digits','Subtract numbers with more than four digits','Column addition with exchange','Column subtraction with exchange','Efficient written methods','Estimating answers','Checking using inverse operations','Find missing numbers','Multi-step addition problems','Multi-step subtraction problems','Problems involving addition and subtraction','Reasoning with addition and subtraction'].map(s=>({label:s, content:null}))},
-      { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],
-        steps: ['Multiples','Common multiples','Factors','Factor pairs','Common factors','Prime numbers','Prime factors','Composite numbers','Square numbers','Cube numbers','Squared notation (²)','Cubed notation (³)','Recognise divisibility patterns','Multiplication facts and related division facts','Mental multiplication strategies','Mental division strategies'].map(s=>({label:s, content:null}))},
-      { id:'fractionsA', label:'Fractions A', col: TOPIC_PALETTE[2],
-        steps: ['What is a fraction?','Equivalent fractions','Simplifying fractions','Improper fractions','Mixed numbers','Convert improper fractions to mixed numbers','Convert mixed numbers to improper fractions','Compare fractions','Order fractions','Fractions on a number line','Fractions greater than one','Add fractions with the same denominator','Add fractions with related denominators','Subtract fractions with the same denominator','Subtract fractions with related denominators','Add mixed numbers','Subtract mixed numbers','Fraction problem-solving'].map(s=>({label:s, content:null}))},
-    ]
-  },
+        steps: [
+          { label:'Mental addition and subtraction strategies', content: P5_AS1 },
+          { label:'Add and subtract multiples of 10, 100 and 1,000', content: P5_AS2 },
+          { label:'Add numbers with more than four digits', content: P5_AS3 },
+          { label:'Subtract numbers with more than four digits', content: P5_AS4 },
+          { label:'Column addition with exchange', content: P5_AS5 },
+          { label:'Column subtraction with exchange', content: P5_AS6 },
+          { label:'Efficient written methods', content: P5_AS7 },
+          { label:'Estimating answers', content: P5_AS8 },
+          { label:'Checking using inverse operations', content: P5_AS9 },
+          { label:'Find missing numbers', content: P5_AS10 },
+          { label:'Multi-step addition problems', content: P5_AS11 },
+          { label:'Multi-step subtraction problems', content: P5_AS12 },
+          { label:'Problems involving addition and subtraction', content: P5_AS13 },
+          { label:'Reasoning with addition and subtraction', content: P5_AS14 }
+        ]},
   { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2026', col: TERM_COLORS.spring, open:false,
     topics: [
       { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
