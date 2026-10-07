@@ -3156,11 +3156,200 @@ ${asExCard(4,[
 
 
 
+/* ============================================================
+   PRIMARY 5 — ADDITION & SUBTRACTION — LESSONS 5 AND 6
+   HOW TO INSTALL
+   1. In index.html DELETE these two lines:
+        const P5_AS5  = null; // Column addition with exchange
+        const P5_AS6  = null; // Column subtraction with exchange
+      (a second `const P5_AS5` would break the whole script!)
+   2. Paste this ENTIRE file directly BELOW P5_AS4 and ABOVE
+      `const SCHEME_P5`.
+   Nothing else changes: SCHEME_P5 already points at P5_AS5/P5_AS6.
+   Requires the helpers from lessons 1–4 (asHeader, asWarm, asBar,
+   asJump, asPV, asExCard) + steps(), numLine(), exQ(), PLACE_META,
+   and asCol() (added with lessons 3–4).
+   ============================================================ */
+
+
+/* ============================================================
+   STEP 5 : Column addition with exchange
+   (Consolidation + extension of Step 3: fluency, three addends,
+    error-spotting and missing-digit puzzles)
+   ============================================================ */
+const P5_AS5 = `
+${asHeader('AS5','Step 5 — Column Addition with Exchange','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — The Exchange, Revisited</div>
+  ${asWarm('In Step 3 you met the most important idea in column addition: when a column reaches <strong>10 or more</strong>, you exchange 10 of that unit for 1 of the next unit up. Today we make that skill <strong>rock-solid</strong> — and stretch it further.')}
+
+  <div class="card-body"><strong>Concrete:</strong> Watch a column &ldquo;overflow&rdquo; and re-pack itself. 13 ones cannot stay in the ones column — so 10 of them exchange into 1 ten. The VALUE never changes.</div>
+  ${asPV('BEFORE: 13 ones is too many!', [['Te',2],['O',13]])}
+  ${asPV('AFTER: 10 ones exchanged for 1 ten (same value!)', [['Te',3],['O',3]])}
+  <div class="card-body" style="text-align:center;margin-top:6px;font-size:15px;"><strong>13 ones = 1 ten and 3 ones — always!</strong></div>
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The 5-Step Routine (same as Step 3 — now make it automatic)</div><div class="s-body" style="color:#085041;">1) <strong>Estimate</strong> by rounding. 2) <strong>Line up</strong> the ones. 3) Add from the <strong>ones</strong>, moving left. 4) <strong>Exchange</strong> every time a column reaches 10 or more — write the carried digit <em>small</em> under the next column. 5) <strong>Check</strong> against your estimate.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — The forgotten little 1</div><div class="s-body" style="color:#712B13;">The exchanged digit must be added into the NEXT column <strong>immediately</strong>, before you move on. Pupils who &ldquo;save it for later&rdquo; almost always forget it. Carry it straight away!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — A column totalling exactly 10</div><div class="s-body" style="color:#712B13;">If a column adds to <strong>exactly 10</strong>, you write <strong>0</strong> in the answer and still carry the 1. A column can never be left blank — the 0 is doing an important job of holding the place!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Warm-up: three exchanges · 46,378 + 35,269</div>
+  ${asWarm('Estimate first: 46,000 + 35,000 ≈ 81,000. Now watch the exchanges — there are THREE hiding in this one!')}
+  <div class="card-body"><strong>Concrete:</strong> joining the counters would give 13 ones (too many), 13 tens (too many) and 11 thousands (too many). Three columns all need exchanging.</div>
+  ${asCol({a:'46378',b:'35269',op:'+',res:'81647',under:['1','','','1',''],title:'Exchanges travel from right to left — one small red 1 per overflow'})}
+  ${steps([['Ones','8 + 9 = 17','write 7, exchange 1 ten'],['Tens','7 + 6 + 1 = 14','write 4, exchange 1 hundred'],['Hundreds','3 + 2 + 1 = 6','no exchange — under 10'],['Thousands','6 + 5 = 11','write 1, exchange 1 ten thousand'],['Ten thousands','4 + 3 + 1 = 8','done!'],['ANSWER','81,647','close to 81,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 81,647 − 35,269 = 46,378 ✓ (the inverse never lies!)</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — NEW SKILL: adding THREE numbers · 24,315 + 17,682 + 9,478</div>
+  ${asWarm('A charity walk raised £24,315 on day 1, £17,682 on day 2 and £9,478 on day 3. What is the total? The column method still works — there are just three numbers to line up!')}
+  <div class="card-body"><strong>Estimate:</strong> 24,000 + 18,000 + 9,000 ≈ 51,000.</div>
+  <div class="card-body"><strong>Safe method — go two at a time:</strong></div>
+  ${asCol({a:'24315',b:'17682',op:'+',res:'41997',under:['','1','','',''],title:'Step A: add the first two numbers'})}
+  ${asCol({a:'41997',b:'9478',op:'+',res:'51475',under:['1','1','1','1',''],title:'Step B: add the third number to the running total'})}
+  <div class="card-body" style="margin-top:8px;"><strong>Expert method — all three in one pass.</strong> Add down each column, include any exchanged digits, then exchange as usual. Watch the thousands column carry <strong>2</strong>!</div>
+  ${steps([['Ones','5 + 2 + 8 = 15','write 5, exchange 1'],['Tens','1 + 8 + 7 + 1 = 17','write 7, exchange 1'],['Hundreds','3 + 6 + 4 + 1 = 14','write 4, exchange 1'],['Thousands','4 + 7 + 9 + 1 = 21','write 1, exchange 2!'],['Ten thousands','2 + 1 + 0 + 2 = 5','two thousands became 2 ten thousands'],['ANSWER','51,475','close to 51,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Carrying a 2</div><div class="s-body" style="color:#27500A;">21 thousands = 2 ten thousands and 1 thousand. When a column reaches 20 or more, you can exchange <strong>2 or more</strong> into the next column. It is rare, but it is perfectly normal!</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — SPOT THE MISTAKE: Leo&rsquo;s column</div>
+  ${asWarm('Leo worked out 35,468 + 47,257 and wrote the answer below. Before you look at his working — what should the answer be roughly?')}
+  <div class="card-body"><strong>Estimate:</strong> 35,000 + 47,000 ≈ 82,000. Leo&rsquo;s answer of 82,615 looks &ldquo;about right&rdquo;… but it is WRONG. Find the mistake!</div>
+  ${asCol({a:'35468',b:'47257',op:'+',res:'82615',under:['1','','1','1',''],hi:[3],title:'LEO\u2019S WORKING — what went wrong in the tens column?'})}
+  ${steps([['Ones','8 + 7 = 15','Leo wrote 5 and exchanged 1 ✓ good so far…'],['Tens','Leo did 6 + 5 = 11','but he FORGOT the exchanged 1! It should be 6 + 5 + 1 = 12'],['Tens','so he wrote 1 instead of 2','which also means NO new exchange travelled to the hundreds…'],['Hundreds','Leo did 4 + 2 = 6','the correct version is 4 + 2 + 1 = 7'],['CORRECT ANSWER','82,725','one forgotten little 1 moved BOTH the tens and the hundreds digit!']])}
+  <div class="card-body"><strong>How the inverse check catches it:</strong> 82,615 − 47,257 = 35,358 — but Leo started with 35,468! ✗ The answer must be wrong.</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Lesson from Leo</div><div class="s-body" style="color:#712B13;">An estimate can say an answer is &ldquo;about right&rdquo; and it can STILL be wrong by hundreds. The <strong>inverse operation</strong> (subtracting one addend back off) catches mistakes that estimates miss.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — MISSING DIGIT DETECTIVE · 28,643 + ▢4,758 = 76,401</div>
+  ${asWarm('A digit has gone missing! Work through each column <em>backwards</em> and the missing digit has nowhere to hide.')}
+  <div class="card-body">Cover the top number with your hand and ask, column by column: <em>&ldquo;What must the missing digit be?&rdquo;</em></div>
+  ${steps([['Ones','3 + 8 = 11 → write 1 ✓','the answer ends in 1 — good, this column works'],['Tens','4 + 5 + 1 = 10 → write 0 ✓','also works — and it exchanges 1'],['Hundreds','6 + 7 + 1 = 14 → write 4 ✓','works — exchanges another 1'],['Thousands','8 + 5 + 1 = 14 → write 4','so far so good… but the answer shows… wait!'],['Ten thousands','2 + ▢ + 1 = 7','▢ = 4! The missing digit is FOUR']])}
+  ${asCol({a:'28643',b:'47758',op:'+',res:'76401',under:['1','1','1','1',''],hi:[0],title:'The missing digit was 4: 28,643 + 47,758 = 76,401'})}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 76,401 − 47,758 = 28,643 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: the summer fair · £12,475 + £15,380 + £8,945</div>
+  ${asWarm('Year 5&rsquo;s stall made <strong>£12,475</strong>, Year 6&rsquo;s stall made <strong>£15,380</strong>, and donations came to <strong>£8,945</strong>. How much did the fair raise altogether?')}
+  ${asBar('Part-whole: money raised at the fair', '£36,800', [['Stalls: £27,855',27.9,'#E1F5EE','#1D9E75','#085041'],['Donations: £8,945',8.9,'#FAEEDA','#BA7517','#633806']])}
+  <div class="card-body"><strong>Estimate:</strong> 12,000 + 15,000 + 9,000 ≈ 36,000.</div>
+  <div class="card-body"><strong>Step A:</strong> add the two stalls together:</div>
+  ${asCol({a:'12475',b:'15380',op:'+',res:'27855',under:['','','1','',''],title:'The stalls made £27,855 together'})}
+  <div class="card-body" style="margin-top:8px;"><strong>Step B:</strong> now add the donations:</div>
+  ${asCol({a:'27855',b:'8945',op:'+',res:'36800',under:['1','1','1','',''],title:'Every column exchanges here — look at the chain of red 1s!'})}
+  ${steps([['Step A ones','5 + 0 = 5, tens 7 + 8 = 15','write 5, exchange 1 → 27,855'],['Step B ones','5 + 5 = 10','write 0, exchange 1'],['Step B tens','5 + 4 + 1 = 10','write 0, exchange 1 again!'],['Step B hundreds','8 + 9 + 1 = 18','write 8, exchange 1'],['Step B thousands','7 + 8 + 1 = 16','write 6, exchange 1'],['Step B ten thousands','2 + 0 + 1 = 3','ANSWER: £36,800 ✓']])}
+</div>
+
+${asExCard(5,[
+ exQ(1,'Work out 23,458 + 19,367. (Ones and tens both exchange.)',['42,825','41,825','42,815'],0),
+ exQ(2,'Work out 56,083 + 27,649. (Watch the hundreds column!)',['83,732','82,732','83,822'],0),
+ exQ(3,'Which calculation will need the MOST exchanges?',['7,999 + 6,999','12,345 + 23,456','50,000 + 40,000'],0),
+ exQ(4,'MISSING DIGIT: 3▢,245 + 15,678 = 49,923. What is ▢?',['4','5','6'],0),
+ exQ(5,'45,678 + 24,322 = ?  (A sneaky one — nearly every column exchanges!)',['70,000','7,000','70,010'],0),
+ exQ(6,'Work out 6,915 + 38,476. (Careful: line up the ones!)',['45,391','44,391','45,481'],0),
+ exQ(7,'A theme park welcomed 28,465 visitors on Saturday and 36,958 on Sunday. How many visitors in total?',['65,423','64,423','65,413'],0),
+ exQ(8,'Which addition correctly CHECKS that 43,268 + 29,573 = 72,841?',['72,841 − 29,573 = 43,268','72,841 + 29,573 = 43,268','43,268 − 29,573 = 72,841'],0),
+ exQ(9,'THINK DEEPER: 19,999 + 19,999. Zara says &ldquo;the answer is 39,998 and there is one exchange in each of the four rightmost columns.&rdquo; Is she right?',['Yes — every column from the ones to the thousands reaches 10 or more','No — the answer is 38,998','No — only two columns exchange'],0,'t'),
+ exQ(10,'BOSS LEVEL: Three schools collected cans for recycling: 24,380, 18,975 and 16,640. Their joint target was 60,000 cans. Did they reach it?',['No — they collected 59,995, just 5 short of the target','Yes — they collected 60,005','No — they collected 59,895, which is 105 short'],0,'b')])}`;
+
+
+/* ============================================================
+   STEP 6 : Column subtraction with exchange
+   (Consolidation + extension of Step 4: fluency, the zero trap,
+    error-spotting, missing-digit puzzles and inverse checks)
+   ============================================================ */
+const P5_AS6 = `
+${asHeader('AS6','Step 6 — Column Subtraction with Exchange','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Exchanging to Subtract</div>
+  ${asWarm('In Step 4 you learned that subtracting column by column sometimes needs an <strong>exchange</strong>: when the top digit is too small, you &ldquo;borrow&rdquo; 1 from the next column and turn it into 10. Today we practise until it becomes automatic — including the tricky ZERO columns!')}
+
+  <div class="card-body"><strong>Concrete:</strong> you cannot take 7 from 4 ones. So exchange 1 ten for 10 ones. The total value has not changed — it has just been re-packaged so the subtraction is possible.</div>
+  ${asPV('BEFORE: not enough ones to subtract', [['Te',3],['O',4]])}
+  ${asPV('AFTER: 1 ten became 10 ones — 14 ones!', [['Te',2],['O',14]])}
+  <div class="card-body" style="text-align:center;margin-top:6px;font-size:15px;"><strong>34 = 2 tens and 14 ones — same value, new packaging!</strong></div>
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The 5-Step Routine (same as Step 4 — now automatic)</div><div class="s-body" style="color:#085041;">1) <strong>Estimate</strong> by rounding. 2) <strong>Line up</strong> the ones, bigger number on top. 3) Work from the <strong>ones</strong> leftwards: too small on top? <strong>Exchange</strong> 1 from the next column (top digit drops by 1, your digit gains 10). 4) Subtract every column. 5) <strong>Check</strong> by adding your answer to the number you subtracted.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — The swap trap</div><div class="s-body" style="color:#712B13;">Never swap digits to do &ldquo;big minus small&rdquo;! In 72 − 48 the ones column is 2 − 8. The top number stays on top — exchange instead. Swapping gives a digit that LOOKS sensible but is always wrong.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — The zero trap</div><div class="s-body" style="color:#712B13;">You cannot take 1 from a 0! Keep moving LEFT until you find a column that can give one away. Every zero it passes through becomes a <strong>9</strong>, and the column that needed help gets <strong>10 + its digit</strong>.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Warm-up: four exchanges · 85,324 − 47,856</div>
+  ${asWarm('Estimate first: 85,000 − 48,000 ≈ 37,000. Almost every top digit is smaller than the digit below it — follow the red numbers one column at a time.')}
+  <div class="card-body"><strong>Concrete idea:</strong> 8, 7, 4 and 2 are all too small to lose 6, 5, 8 and 7 — so EVERY column except the last must exchange from its neighbour.</div>
+  ${asCol({a:'85324',b:'47856',op:'−',res:'37468',over:['7','14','12','11','14'],strike:[true,true,true,true,true],title:'Every red number shows the digit AFTER its exchange'})}
+  ${steps([['Ones','4 &lt; 6 → exchange from tens','tens 2 → 1, ones 4 → 14; 14 − 6 = 8'],['Tens','1 &lt; 5 → exchange from hundreds','hundreds 3 → 2, tens 1 → 11; 11 − 5 = 6'],['Hundreds','2 &lt; 8 → exchange from thousands','thousands 5 → 4, hundreds 2 → 12; 12 − 8 = 4'],['Thousands','4 &lt; 7 → exchange from ten thousands','ten thousands 8 → 7, thousands 4 → 14; 14 − 7 = 7'],['Ten thousands','7 − 4','= 3'],['ANSWER','37,468','close to 37,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with the inverse:</strong> 37,468 + 47,856 = 85,324 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The ZERO TRAP ×2 · 60,402 − 27,538</div>
+  ${asWarm('The top number has TWO zeros in the middle. You cannot exchange from a zero — so the exchange must travel all the way from the ten thousands. Watch closely!')}
+  <div class="card-body"><strong>Estimate:</strong> 60,000 − 28,000 ≈ 32,000.</div>
+  <div class="card-body"><strong>Concrete idea:</strong> 60,402 is 6 ten-thousands and 4 hundreds and 2 ones. To subtract in the ones and tens columns, one ten-thousand must unpack step by step: 1 ten thousand → 10 thousands → 9 thousands + 1 hundred → 9 hundreds + 1 ten → 9 tens + 10 ones… the middle digits all become NINES.</div>
+  ${asCol({a:'60402',b:'27538',op:'−',res:'32864',over:['5','9','13','9','14'],strike:[true,true,true,true,true],title:'The nines trick: zeros in the middle all become 9'})}
+  ${steps([['Ones','2 &lt; 8 → exchange','tens is 0 — keep moving left… hundreds 4 → 3, tens 0 → 10, then tens gives 1 on: tens 10 → 9, ones 2 → 14; 14 − 8 = 6'],['Tens','9 − 3','= 6'],['Hundreds','3 &lt; 5 → exchange','thousands is 0 — keep moving left… ten thousands 6 → 5, thousands 0 → 10, gives 1 on: thousands 10 → 9, hundreds 3 → 13; 13 − 5 = 8'],['Thousands','9 − 7','= 2'],['Ten thousands','5 − 2','= 3'],['ANSWER','32,864','close to 32,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The nines trick</div><div class="s-body" style="color:#27500A;">When an exchange ripples through one or more zeros, every zero becomes a <strong>9</strong>, the digit that lends becomes <strong>1 smaller</strong>, and the column that asked for help gets <strong>10 + its own digit</strong>. Memorise this pattern and zero-trap questions become easy!</div></div></div>
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 32,864 + 27,538 = 60,402 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — SPOT THE MISTAKE: Mia&rsquo;s exchange</div>
+  ${asWarm('Mia worked out 53,624 − 28,357. Her answer is below. Can you see what she forgot?')}
+  <div class="card-body"><strong>Estimate:</strong> 54,000 − 28,000 ≈ 26,000. Mia&rsquo;s answer of 25,367 looks close… but the INVERSE check says otherwise: 25,367 + 28,357 = 53,724 — and Mia only started with 53,624! ✗</div>
+  ${asCol({a:'53624',b:'28357',op:'−',res:'25367',over:['4','13','5','12','14'],strike:[true,true,true,true,true],hi:[3],title:'MIA\u2019S WORKING — look carefully at the tens column'})}
+  ${steps([['Ones','4 &lt; 7 → exchange','tens 2 → 1, ones 4 → 14; 14 − 7 = 7 ✓'],['Tens','Mia used 2 again!','the tens digit was ALREADY reduced to 1 by the ones exchange…'],['Tens','she did 2 → 12, then 12 − 5 = 7','but it should be 1 → 11, then 11 − 5 = 6'],['Hundreds / thousands','5 − 3 = 2 · 3 &lt; 8 → 13 − 8 = 5','these columns were fine'],['CORRECT ANSWER','25,267','one forgotten &ldquo;knock one off&rdquo; changed the tens digit — the inverse check caught it!']])}
+  ${asCol({a:'53624',b:'28357',op:'−',res:'25267',over:['4','13','5','11','14'],strike:[true,true,true,true,true],hi:[3],title:'The correct version — tens becomes 11, not 12'})}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Golden rule:</strong> the moment you exchange from a column, its top digit is <strong>1 smaller forever</strong> for the rest of this question. Cross out the old digit so you cannot accidentally use it again!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — MISSING DIGIT DETECTIVE · 8▢,563 − 47,28▢ = 34,275</div>
+  ${asWarm('TWO digits have vanished this time! Work column by column and each missing digit must give itself away.')}
+  <div class="card-body">Start on the right, as always. If a column looks impossible, that is your clue that an exchange happened there.</div>
+  ${steps([['Ones','3 − ▢ = 5? Impossible!','so an exchange happened: tens 6 → 5, ones 3 → 13; 13 − ▢ = 5 → ▢ = 8'],['Tens','now 5 − 8? Impossible too!','another exchange: hundreds 5 → 4, tens 5 → 15; 15 − 8 = 7 ✓ matches the answer'],['Hundreds','4 − 2 = 2','✓ matches — no exchange needed here'],['Thousands','▢ − 7 = 4? Impossible!','exchange from the ten thousands: 8 → 7, ▢ → ▢ + 10; ▢ + 10 − 7 = 4 → ▢ = 1'],['Ten thousands','7 − 4 = 3','✓ everything checks out!']])}
+  ${asCol({a:'81563',b:'47288',op:'−',res:'34275',over:['7','11','4','15','13'],strike:[true,true,true,true,true],title:'Solved: 81,563 − 47,288 = 34,275'})}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 34,275 + 47,288 = 81,563 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: the petition · 75,000 − 48,360</div>
+  ${asWarm('A leisure centre needs <strong>75,000</strong> signatures to get a new swimming pool. So far <strong>48,360</strong> people have signed. How many more signatures are needed?')}
+  ${asBar('Part-whole: signatures needed', '75,000 signatures needed', [['48,360 signed',48.4,'#EAF3DE','#639922','#27500A'],['? still needed',26.6,'#FAECE7','#D85A30','#712B13']])}
+  <div class="card-body"><strong>Estimate:</strong> 75,000 − 48,000 ≈ 27,000.</div>
+  ${asCol({a:'75000',b:'48360',op:'−',res:'26640',over:['6','9','9','10',''],strike:[true,true,true,true,false],title:'The exchange ripples through two zeros — the nines trick in action'})}
+  ${steps([['Ones','0 − 0 = 0','no exchange needed here!'],['Tens','0 &lt; 6 → exchange','keep left past two zeros… ten thousands 7 → 6, thousands 0 → 9, hundreds 0 → 9, tens 0 → 10; 10 − 6 = 4'],['Hundreds','9 − 3','= 6'],['Thousands','9 − 8','= 1'],['Ten thousands','6 − 4','= 2'],['ANSWER','26,640 more signatures needed','close to 27,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 26,640 + 48,360 = 75,000 ✓ — and in real life: 48,360 + 26,640 really does fill the gap to 75,000.</div>
+</div>
+
+${asExCard(6,[
+ exQ(1,'Work out 74,352 − 28,167. (Four exchanges!)',['46,185','46,285','45,185'],0),
+ exQ(2,'Work out 50,304 − 26,718. (Watch the zero in the tens!)',['23,586','23,686','24,586'],0),
+ exQ(3,'Which subtraction will need a ZERO-RIPPLE exchange (the nines trick)?',['80,000 − 45,231','67,543 − 32,118','99,999 − 1'],0),
+ exQ(4,'MISSING DIGIT: 6▢,000 − 24,375 = 41,625. What is ▢?',['6','5','7'],0),
+ exQ(5,'Which addition correctly CHECKS that 61,000 − 27,450 = 33,550?',['33,550 + 27,450 = 61,000','61,000 + 27,450 = 33,550','33,550 − 27,450 = 61,000'],0),
+ exQ(6,'Work out 92,470 − 38,956.',['53,514','52,514','53,414'],0),
+ exQ(7,'A warehouse stored 72,500 boxes. 38,675 were shipped out. How many boxes remain?',['33,825','33,925','32,825'],0),
+ exQ(8,'Which estimate is sensible for 82,300 − 47,650?',['About 35,000','About 130,000','About 3,500'],0),
+ exQ(9,'THINK DEEPER: 10,000 − 8,976. Theo says &ldquo;just count on! 8,976 → 9,000 is 24, then 9,000 → 10,000 is 1,000, so the answer is 1,024.&rdquo; Is he right?',['Yes — both methods give 1,024; counting on was quicker here because the numbers are close','No — the column method gives 2,024','No — counting on and subtraction always give different answers'],0,'t'),
+ exQ(10,'BOSS LEVEL: A digital library had 90,000 books. 12,475 were removed, then 8,930 new books were added. How many books does the library have now?',['86,455','87,455','85,455'],0,'b')])}`;
 
 
 
-const P5_AS5  = null; // Column addition with exchange
-const P5_AS6  = null; // Column subtraction with exchange
+
+
 const P5_AS7  = null; // Efficient written methods
 const P5_AS8  = null; // Estimating answers
 const P5_AS9  = null; // Checking using inverse operations
