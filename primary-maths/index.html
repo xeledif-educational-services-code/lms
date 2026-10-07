@@ -3347,11 +3347,201 @@ ${asExCard(6,[
  exQ(10,'BOSS LEVEL: A digital library had 90,000 books. 12,475 were removed, then 8,930 new books were added. How many books does the library have now?',['86,455','87,455','85,455'],0,'b')])}`;
 
 
+/* ============================================================
+   PRIMARY 5 — ADDITION & SUBTRACTION — LESSONS 7 AND 8
+   INSTALL: delete `const P5_AS7 = null;` and `const P5_AS8 = null;`
+   then paste this whole file BELOW P5_AS6 (above SCHEME_P5).
+   Uses: asHeader, asWarm, asBar, asJump, asPV, asCol, asExCard,
+         steps(), numLine(), exQ().
+
+   asCol reminder:
+     under[i] = digit written BELOW the column that RECEIVES an exchange
+     over[i]  = the NEW value of the top digit AFTER exchanging
+   ============================================================ */
+
+
+/* ============================================================
+   STEP 7 : Efficient written methods
+   ============================================================ */
+const P5_AS7 = `
+${asHeader('AS7','Step 7 — Efficient Written Methods','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Choosing the Smartest Tool</div>
+  ${asWarm('You now know mental strategies (Steps 1–2) AND the column method (Steps 3–6). A real mathematician does not use the same tool every time. <strong>Efficient</strong> means <em>quick, accurate and easy to check</em>. Look at the numbers FIRST — then choose!')}
+
+  <div class="card-body"><strong>Pictorial idea:</strong> a bar model shows that the SAME total can be reached in different ways. 49,998 + 12,345 can be tackled with a tidy &ldquo;friendly&rdquo; number — the 49,998 is just 2 short of 50,000.</div>
+  ${asBar('49,998 + 12,345 — spot the friendly number!', '? (the whole)', [['49,998 ≈ 50,000',50,'#E6F1FB','#378ADD','#0C447C'],['12,345',12.3,'#FAEEDA','#BA7517','#633806']])}
+
+  <div class="card-body" style="margin-top:10px;"><strong>Ask yourself these four questions, in order. Stop at the first &ldquo;YES&rdquo;:</strong></div>
+  <div class="strategy-grid" style="margin-top:6px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Is one number just below or above a round number?</div><div class="s-body" style="color:#0C447C;">(like 29,999 or 50,002) → <strong>ROUND &amp; ADJUST</strong>. Round, calculate, then fix the difference.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">② Subtraction with two numbers that are CLOSE together?</div><div class="s-body" style="color:#3C3489;">(like 50,000 − 48,765) → <strong>COUNT ON</strong> to find the difference.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">③ Are the numbers made of whole thousands or hundreds?</div><div class="s-body" style="color:#085041;">(like 25,000 + 34,000) → <strong>THINK IN UNITS</strong> (25 thousands + 34 thousands).</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">④ None of the above — messy digits everywhere?</div><div class="s-body" style="color:#633806;">(like 74,386 + 18,675) → <strong>COLUMN METHOD</strong>, with an estimate to check.</div></div>
+  </div>
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Column is always best&rdquo;</div><div class="s-body" style="color:#712B13;">The column method works every time, but it is SLOW for 50,000 − 49,998 (lots of zeros and exchanges). A 2-second count-on gives the answer 2.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Mental is always faster&rdquo;</div><div class="s-body" style="color:#712B13;">With messy digits like 74,386 + 18,675, keeping everything in your head causes mistakes. Writing the column method is the <strong>efficient</strong> choice because it is accurate.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Method detective: choose first, calculate second</div>
+  ${asWarm('Do NOT calculate yet! Just look at each question and decide which tool fits best.')}
+  <div style="display:flex;flex-direction:column;gap:8px;margin:10px 0;">
+    ${[
+      ['49,998 + 12,345','① ROUND &amp; ADJUST','50,000 + 12,345 − 2 = 62,343','#E6F1FB','#0C447C'],
+      ['60,000 − 59,850','② COUNT ON','59,850 → 60,000 is just 150','#EEEDFE','#3C3489'],
+      ['25,000 + 34,000','③ THINK IN UNITS','25 thousands + 34 thousands = 59,000','#E1F5EE','#085041'],
+      ['80,300 − 29,999','① ROUND &amp; ADJUST','80,300 − 30,000 + 1 = 50,301','#E6F1FB','#0C447C'],
+      ['74,386 + 18,675','④ COLUMN METHOD','messy digits — no friendly numbers → 93,061','#FAEEDA','#633806'],
+      ['90,421 − 37,658','④ COLUMN METHOD','far apart, no friendly number → 52,763','#FAEEDA','#633806']
+    ].map(r=>`<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:${r[3]};border-radius:10px;padding:10px 12px;"><div style="font-size:15px;font-weight:800;color:${r[4]};min-width:150px;">${r[0]}</div><div style="font-size:12px;font-weight:800;color:${r[4]};background:#fff;border-radius:10px;padding:3px 10px;">${r[1]}</div><div style="font-size:12px;color:${r[4]};flex:1;min-width:170px;">${r[2]}</div></div>`).join('')}
+  </div>
+  <div class="card-body">🎯 Efficient mathematicians <strong>decide first</strong>. The next four examples show each tool in full.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Round &amp; adjust (addition): 24,999 + 13,456</div>
+  ${asWarm('24,999 is only 1 less than 25,000. Is it easier to add 24,999 or 25,000?')}
+  <div class="card-body"><strong>Estimate:</strong> 25,000 + 13,000 ≈ 38,000.</div>
+  ${asJump(['13,456','38,456','38,455'],['+25,000','−1'],'Pictorial: jump with the friendly number, then fix')}
+  ${steps([['Round up','24,999 → 25,000','we added 1 extra'],['Add','25,000 + 13,456 = 38,456','easy: 25 thousands + 13,456'],['Adjust','38,456 − 1','we added 1 too many, so take 1 off'],['ANSWER','38,455','close to 38,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with the inverse:</strong> 38,455 − 13,456 = 24,999 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Count on (subtraction): 50,000 − 48,765</div>
+  ${asWarm('The column method on this question needs an exchange through FOUR zeros. Is there an easier way? How far is it from 48,765 UP to 50,000?')}
+  <div class="card-body"><strong>Estimate:</strong> 50,000 − 49,000 ≈ 1,000.</div>
+  ${asJump(['48,765','49,000','50,000'],['+235','+1,000'],'Pictorial: count on from the smaller number to the bigger')}
+  ${steps([['Jump 1','48,765 → 49,000','+ 235 (reach the next thousand)'],['Jump 2','49,000 → 50,000','+ 1,000'],['Add the jumps','235 + 1,000','= 1,235'],['ANSWER','50,000 − 48,765 = 1,235','close to 1,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 48,765 + 1,235 = 50,000 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Round &amp; adjust (subtraction): 63,420 − 19,998</div>
+  ${asWarm('19,998 is just 2 short of 20,000. Subtract 20,000 — then think carefully: did you take away too much or too little?')}
+  <div class="card-body"><strong>Estimate:</strong> 63,000 − 20,000 ≈ 43,000.</div>
+  ${asBar('We take away 20,000 — but we only needed 19,998', '63,420', [['19,998 (really)',19.998,'#FAECE7','#D85A30','#712B13'],['? left',43.42,'#EAF3DE','#639922','#27500A']])}
+  ${steps([['Round up','19,998 → 20,000','2 more than we need to take away'],['Subtract','63,420 − 20,000 = 43,420','easy: 63 thousands − 20 thousands'],['Adjust','43,420 + 2','we took away 2 too many, so give 2 back'],['ANSWER','43,422','close to 43,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Careful — subtraction flips the adjustment!</div><div class="s-body" style="color:#712B13;">Rounding the number you SUBTRACT up means you took away too much, so you must <strong>ADD</strong> the extra back.</div></div></div>
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 43,422 + 19,998 = 63,420 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Column method wins: 47,386 + 28,659</div>
+  ${asWarm('There are no friendly numbers here. Let us compare TWO methods — which one is more efficient?')}
+  <div class="card-body"><strong>Estimate:</strong> 47,000 + 29,000 ≈ 76,000.</div>
+  <div class="card-body"><strong>Method A — partitioning on a number line</strong> (three jumps to track in your head):</div>
+  ${asJump(['47,386','75,386','75,986','76,045'],['+28,000','+600','+59'],'Method A: jumps')}
+  <div class="card-body" style="margin-top:8px;"><strong>Method B — column method</strong> (every step written down, easy to check):</div>
+  ${asCol({a:'47386',b:'28659',op:'+',res:'76045',under:['1','1','1','1',''],hi:[2],title:'6 + 9 = 15 · 8 + 5 + 1 = 14 · 3 + 6 + 1 = 10 (write 0!) · …'})}
+  ${steps([['Ones','6 + 9 = 15','write 5, exchange 1'],['Tens','8 + 5 + 1 = 14','write 4, exchange 1'],['Hundreds','3 + 6 + 1 = 10','write 0, exchange 1'],['Thousands','7 + 8 + 1 = 16','write 6, exchange 1'],['Ten thousands','4 + 2 + 1 = 7','done'],['ANSWER','76,045','both methods agree, close to 76,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Verdict</div><div class="s-body" style="color:#27500A;">Both are correct. The column method is more <strong>efficient</strong> here because every step is written down, so you can find and fix a mistake quickly. When you are unsure, choose the column method.</div></div></div>
+</div>
+
+${asExCard(7,[
+ exQ(1,'Which is the MOST efficient way to work out 29,999 + 14,205?',['Round 29,999 to 30,000, add, then subtract 1','Count on 29,999 ones','Use the column method with lots of exchanges'],0),
+ exQ(2,'29,999 + 14,205 = ?',['44,204','44,206','43,204'],0),
+ exQ(3,'Use COUNTING ON: 40,000 − 39,876 = ?',['124','1,124','24'],0),
+ exQ(4,'Use ROUND &amp; ADJUST: 75,300 − 29,998 = ?',['45,302','45,298','46,302'],0),
+ exQ(5,'Which method suits 83,641 − 57,268 best?',['Column subtraction','Counting on from 57,268 in one jump','Round &amp; adjust by 1 or 2'],0),
+ exQ(6,'83,641 − 57,268 = ?',['26,373','26,473','27,373'],0),
+ exQ(7,'15,002 − 14,997 = ?  (Look at the numbers before you choose a method!)',['5','50','4,995'],0),
+ exQ(8,'A printer has 50,000 leaflets. It uses 48,990. How many are left?',['1,010','2,010','1,100'],0),
+ exQ(9,'THINK DEEPER: For which calculation is ROUND &amp; ADJUST the LEAST helpful?',['47,386 + 28,659','19,998 + 25,347','30,001 + 14,200'],0,'t'),
+ exQ(10,'BOSS LEVEL: What is 99,999 + 99,999 + 99,999?  (Think: three lots of 100,000, then fix)',['299,997','300,003','299,979'],0,'b')])}`;
+
+
+/* ============================================================
+   STEP 8 : Estimating answers
+   ============================================================ */
+const P5_AS8 = `
+${asHeader('AS8','Step 8 — Estimating Answers','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — The &ldquo;About How Many?&rdquo; Skill</div>
+  ${asWarm('Before a builder orders bricks, she estimates. Before a pilot flies, he estimates the fuel. An <strong>estimate</strong> is a quick, sensible answer that is <em>close</em> to the exact one. We make it by <strong>rounding</strong> first and calculating second.')}
+
+  <div class="card-body"><strong>Pictorial:</strong> rounding moves a number to its nearest &ldquo;friendly&rdquo; neighbour on the number line. 48,672 is closer to 50,000 than to 40,000:</div>
+  ${numLine(40000,50000,10000,[[48672,'48,672 ≈ 50,000']])}
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Estimate in 4 steps</div><div class="s-body" style="color:#085041;">1) Choose a <strong>sensible place value</strong> (nearest 1,000? 10,000?). 2) <strong>Round</strong> every number the same way. 3) <strong>Calculate</strong> with the rounded numbers. 4) <strong>Compare</strong> with your exact answer: is it close?</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🎯 Which place value?</div><div class="s-body" style="color:#633806;">Round to the <strong>biggest place value that still keeps both numbers different</strong> from zero. 5-digit numbers → nearest 1,000 or 10,000. 6-digit numbers → nearest 10,000 or 100,000.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;An estimate equals the answer&rdquo;</div><div class="s-body" style="color:#712B13;">An estimate is NEVER exactly right (usually). It tells you whether the exact answer is <strong>reasonable</strong>. If they differ by thousands, hunt for an error!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Rounding differently</div><div class="s-body" style="color:#712B13;">Round ALL numbers in a calculation to the SAME place value. Rounding one to the nearest 100 and another to the nearest 10,000 makes the estimate unreliable.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Estimate an addition: 48,672 + 31,395</div>
+  ${asWarm('Both numbers have five digits. Which place value will you round to?')}
+  <div class="card-body"><strong>Round to the nearest 10,000:</strong></div>
+  ${numLine(40000,50000,10000,[[48672,'48,672 → 50,000']])}
+  ${numLine(30000,40000,10000,[[31395,'31,395 → 30,000']])}
+  ${steps([['Round','48,672 → 50,000','thousands digit 8 → round UP'],['Round','31,395 → 30,000','thousands digit 1 → round DOWN'],['Calculate','50,000 + 30,000','= 80,000'],['ESTIMATE','about 80,000','a quick, sensible answer']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Now compare with the exact answer</strong> from the column method:</div>
+  ${asCol({a:'48672',b:'31395',op:'+',res:'80067',under:['1','1','1','',''],title:'Exact answer: 80,067 — very close to 80,000 ✓'})}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Choosing a sensible place value: 76,845 − 38,214</div>
+  ${asWarm('Two estimates are possible. Which one is closer to the truth?')}
+  <div class="strategy-grid" style="margin-top:6px;">
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">Nearest 10,000</div><div class="s-body" style="color:#3C3489;">80,000 − 40,000 = <strong>40,000</strong><br>quick, but rough.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">Nearest 1,000</div><div class="s-body" style="color:#085041;">77,000 − 38,000 = <strong>39,000</strong><br>a little more work, closer.</div></div>
+  </div>
+  ${asBar('Exact answer for comparison', '76,845 − 38,214 = 38,631', [['estimate (10,000s): 40,000',40,'#EEEDFE','#7F77DD','#3C3489'],['estimate (1,000s): 39,000',39,'#E1F5EE','#1D9E75','#085041']])}
+  ${steps([['Exact answer','76,845 − 38,214 = 38,631','using the column method'],['Gap from 40,000','1,369','a rougher estimate'],['Gap from 39,000','369','a closer estimate'],['LESSON','smaller place value = closer','but both show the answer is reasonable!']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Over-estimates and under-estimates: 4,860 + 3,740</div>
+  ${asWarm('If you round BOTH numbers UP, will your estimate be bigger or smaller than the exact answer?')}
+  ${steps([['Round both UP','4,860 → 5,000 · 3,740 → 4,000','5,000 + 4,000 = 9,000 (an OVER-estimate)'],['Round both DOWN','4,860 → 4,000 · 3,740 → 3,000','4,000 + 3,000 = 7,000 (an UNDER-estimate)'],['Exact answer','4,860 + 3,740','= 8,600 — inside the corridor!']])}
+  ${numLine(7000,9000,500,[[7000,'under 7,000'],[8600,'exact 8,600'],[9000,'over 9,000']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The estimate corridor</div><div class="s-body" style="color:#27500A;">In an addition: <strong>round up both → estimate is too big. Round down both → estimate is too small.</strong> The exact answer is always trapped between the two.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Using an estimate to catch a mistake: 345,278 + 256,839</div>
+  ${asWarm('Ola works this out and writes 502,117. Before checking her column working, use an ESTIMATE. Does her answer look reasonable?')}
+  <div class="card-body"><strong>Round to the nearest 10,000:</strong></div>
+  ${steps([['Round','345,278 → 350,000','thousands digit 5 → round UP'],['Round','256,839 → 260,000','thousands digit 6 → round UP'],['Calculate','350,000 + 260,000','= 610,000'],['COMPARE','Ola&rsquo;s 502,117 vs 610,000','about 108,000 away — NOT reasonable!']])}
+  ${asCol({a:'345278',b:'256839',op:'+',res:'602117',under:['1','1','1','1','1',''],hi:[1],title:'Ola forgot the exchange in the ten thousands: the true answer is 602,117'})}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ What went wrong?</div><div class="s-body" style="color:#712B13;">Ola wrote 5 hundred-thousands instead of 6 — she missed the final exchange from the ten-thousands column. The estimate (610,000) flagged the error in seconds.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: is the money enough?</div>
+  ${asWarm('A school has <strong>£50,000</strong> for repairs. The roof costs <strong>£18,450</strong>, the floor <strong>£21,380</strong> and painting <strong>£9,870</strong>. Is £50,000 enough?')}
+  <div class="card-body"><strong>Round to the nearest £1,000 (round each one):</strong></div>
+  ${steps([['Round','£18,450 → £18,000','hundreds digit 4 → round DOWN'],['Round','£21,380 → £21,000','hundreds digit 3 → round DOWN'],['Round','£9,870 → £10,000','hundreds digit 8 → round UP'],['ESTIMATE','£18,000 + £21,000 + £10,000','= £49,000 — just under £50,000']])}
+  <div class="card-body" style="margin-top:6px;"><strong>Stop and think!</strong> The estimate (£49,000) is VERY close to the limit (£50,000). When an estimate sits close to a boundary, an estimate is <strong>not enough</strong> — calculate exactly!</div>
+  ${asCol({a:'39830',b:'9870',op:'+',res:'49700',under:['1','1','1','',''],title:'£18,450 + £21,380 = £39,830, then + £9,870 = £49,700'})}
+  ${steps([['Exact total','£49,700','£18,450 + £21,380 + £9,870'],['Compare','£49,700 &lt; £50,000','yes, it is enough'],['Money left','£50,000 − £49,700','= £300']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ When to estimate and when to be exact</div><div class="s-body" style="color:#27500A;">Estimate to <strong>check</strong> an answer or make a quick decision. Calculate <strong>exactly</strong> when the amount is very close to a limit — like money, measurements for building, or medicine doses.</div></div></div>
+</div>
+
+${asExCard(8,[
+ exQ(1,'Estimate 62,480 + 27,615 by rounding each number to the nearest 10,000.',['90,000','80,000','100,000'],0),
+ exQ(2,'Estimate 83,720 − 41,290 by rounding each number to the nearest 1,000.',['43,000','42,000','44,000'],0),
+ exQ(3,'Estimate 19,860 + 30,140 by rounding each number to the nearest 1,000.',['50,000','40,000','60,000'],0),
+ exQ(4,'A pupil says 56,432 + 38,975 = 85,407. Round each to the nearest 10,000 to check. Is the answer reasonable?',['No — the estimate is about 100,000, so 85,407 is too small','Yes — it is close to 100,000','Yes — estimates are always bigger than exact answers'],0),
+ exQ(5,'In an ADDITION, if you round BOTH numbers UP, your estimate will be…',['Bigger than the exact answer','Smaller than the exact answer','Exactly the same as the exact answer'],0),
+ exQ(6,'Estimate 745,300 − 298,700 by rounding each number to the nearest 100,000.',['400,000','500,000','300,000'],0),
+ exQ(7,'Which pair of rounded numbers gives the best estimate for 48,612 − 21,389 (rounding to the nearest 1,000)?',['49,000 − 21,000','50,000 − 20,000','48,000 − 22,000'],0),
+ exQ(8,'A school needs £40,000. The costs are £14,860, £13,275 and £11,940. Rounding each to the nearest £1,000 gives exactly £40,000. What should the school do?',['Calculate exactly, because the estimate is right at the limit','Decide it can definitely afford it','Decide it definitely cannot afford it'],0),
+ exQ(9,'THINK DEEPER: The exact answer to 38,600 + 21,700 is 60,300. Sam rounds to the nearest 10,000 and gets 60,000. Mia rounds to the nearest 1,000 and gets 61,000. Which statement is true?',['Sam&rsquo;s estimate is closer here — rounding to a bigger place value is not ALWAYS less accurate','Mia&rsquo;s estimate must be closer because a smaller place value is always more accurate','Both estimates are exactly the same distance away'],0,'t'),
+ exQ(10,'BOSS LEVEL: A stadium sold 38,462 tickets on Saturday, 41,150 on Sunday and 27,890 on Monday. The target was 100,000 tickets. Round each to the nearest 1,000 to estimate the total. What do you conclude?',['About 107,000 — the target is very likely reached','About 100,000 — the target is exactly met','About 97,000 — the target is missed'],0,'b')])}`;
 
 
 
-const P5_AS7  = null; // Efficient written methods
-const P5_AS8  = null; // Estimating answers
+
 const P5_AS9  = null; // Checking using inverse operations
 const P5_AS10 = null; // Find missing numbers
 const P5_AS11 = null; // Multi-step addition problems
