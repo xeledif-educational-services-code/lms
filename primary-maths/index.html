@@ -3719,8 +3719,214 @@ ${asExCard(10,[
 
 
 
-const P5_AS11 = null; // Multi-step addition problems
-const P5_AS12 = null; // Multi-step subtraction problems
+/* ============================================================
+   PRIMARY 5 — ADDITION & SUBTRACTION — LESSONS 11 AND 12
+   INSTALL: delete `const P5_AS11 = null;` and `const P5_AS12 = null;`
+   then paste this whole file BELOW P5_AS10 (above SCHEME_P5).
+   Uses: asHeader, asWarm, asBar, asJump, asCol, asExCard,
+         steps(), exQ().
+
+   asCol reminder:
+     under[i] = digit written BELOW the column that RECEIVES an exchange
+     over[i]  = the NEW value of the top digit AFTER exchanging
+   ============================================================ */
+
+
+/* small shared helper: the 5-badge problem-solving routine */
+function asRoutine(){
+  const b=[['READ','#E6F1FB','#378ADD','#0C447C','Underline the question. Circle the numbers.'],
+           ['DRAW','#E1F5EE','#1D9E75','#085041','Sketch a bar model of the story.'],
+           ['PLAN','#FAEEDA','#BA7517','#633806','How many steps? What comes first?'],
+           ['SOLVE','#EEEDFE','#7F77DD','#3C3489','Estimate, then calculate each step.'],
+           ['CHECK','#EAF3DE','#639922','#27500A','Inverse + does it answer the question?']];
+  return `<div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin:10px 0;">${b.map((x,i)=>`<div style="background:${x[1]};border:1.5px solid ${x[2]};border-radius:10px;padding:8px 4px;text-align:center;"><div style="width:26px;height:26px;border-radius:50%;background:${x[2]};color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 4px;">${i+1}</div><div style="font-size:12px;font-weight:800;color:${x[3]};">${x[0]}</div><div style="font-size:9px;color:${x[3]};line-height:1.3;margin-top:3px;">${x[4]}</div></div>`).join('')}</div>`;
+}
+
+
+/* ============================================================
+   STEP 11 : Multi-step addition problems
+   ============================================================ */
+const P5_AS11 = `
+${asHeader('AS11','Step 11 — Multi-Step Addition Problems','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — One Story, Several Steps</div>
+  ${asWarm('A <strong>multi-step</strong> problem is a story where ONE calculation is not enough. Sometimes you must find a hidden number first. Sometimes you add three or four amounts. The skills are ones you already own — the new skill is <strong>planning</strong>.')}
+
+  <div class="card-body"><strong>Use the same 5-badge routine every time:</strong></div>
+  ${asRoutine()}
+
+  <div class="card-body"><strong>Pictorial:</strong> a bar model with several parts shows how many amounts join the whole.</div>
+  ${asBar('Three parts join to make one total', '? total', [['part 1',30,'#E6F1FB','#378ADD','#0C447C'],['part 2',40,'#FAEEDA','#BA7517','#633806'],['part 3',25,'#E1F5EE','#1D9E75','#085041']])}
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Add every number you see&rdquo;</div><div class="s-body" style="color:#712B13;">In &ldquo;Sunday had 3,850 <em>MORE</em> than Saturday&rdquo;, the 3,850 is a <strong>difference</strong>, not Sunday&rsquo;s amount! You must find Sunday&rsquo;s number first, then add.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Answering the wrong question</div><div class="s-body" style="color:#712B13;">The answer to the <em>middle</em> step is not the final answer! Re-read the question at the end: &ldquo;How many <strong>altogether</strong>?&rdquo; or &ldquo;How many on Sunday?&rdquo;</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Running-total trick</div><div class="s-body" style="color:#27500A;">With many amounts, keep a <strong>running total</strong>: add the first two, then add the third to that total, and so on. Write each total down.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Adding three amounts: 12,450 + 15,380 + 9,675</div>
+  ${asWarm('A museum counted 12,450 visitors on Monday, 15,380 on Tuesday and 9,675 on Wednesday. How many visitors in the three days?')}
+  ${asBar('Three days join to make the total', '? visitors', [['Mon 12,450',12.45,'#E6F1FB','#378ADD','#0C447C'],['Tue 15,380',15.38,'#FAEEDA','#BA7517','#633806'],['Wed 9,675',9.68,'#E1F5EE','#1D9E75','#085041']])}
+  <div class="card-body"><strong>Estimate:</strong> 12,000 + 15,000 + 10,000 ≈ 37,000.</div>
+  <div class="card-body"><strong>Step A:</strong> Monday + Tuesday</div>
+  ${asCol({a:'12450',b:'15380',op:'+',res:'27830',under:['','','1','',''],title:'Step A: 12,450 + 15,380 = 27,830'})}
+  <div class="card-body" style="margin-top:8px;"><strong>Step B:</strong> add Wednesday to the running total</div>
+  ${asCol({a:'27830',b:'9675',op:'+',res:'37505',under:['1','1','1','',''],title:'Step B: 27,830 + 9,675 = 37,505'})}
+  ${steps([['Plan','2 steps','Mon + Tue, then + Wed'],['Running total 1','27,830','after two days'],['Running total 2','37,505','after three days'],['ANSWER','37,505 visitors','close to 37,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 37,505 − 9,675 = 27,830 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The hidden step (&ldquo;more than&rdquo;): Saturday and Sunday</div>
+  ${asWarm('A stadium had <strong>24,500</strong> fans on Saturday. On Sunday there were <strong>3,850 MORE</strong> fans than on Saturday. How many fans came over the whole weekend?')}
+  ${asBar('Sunday = Saturday + 3,850', 'Sunday: ?', [['Saturday 24,500',24.5,'#E6F1FB','#378ADD','#0C447C'],['+3,850',3.85,'#FAEEDA','#BA7517','#633806']])}
+  <div class="card-body"><strong>Plan:</strong> Step 1 → find Sunday. Step 2 → add Saturday + Sunday. <strong>Estimate:</strong> 25,000 + 28,000 ≈ 53,000.</div>
+  ${asCol({a:'24500',b:'3850',op:'+',res:'28350',under:['','1','','',''],hi:[2],title:'Step 1: Sunday = 24,500 + 3,850 = 28,350'})}
+  ${asCol({a:'24500',b:'28350',op:'+',res:'52850',under:['1','','','',''],title:'Step 2: weekend = 24,500 + 28,350 = 52,850'})}
+  ${steps([['Step 1','Sunday','24,500 + 3,850 = 28,350'],['Step 2','Weekend total','24,500 + 28,350 = 52,850'],['ANSWER','52,850 fans','close to 53,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ The trap</div><div class="s-body" style="color:#712B13;">24,500 + 3,850 = 28,350 is <strong>only Sunday</strong>. The question asked for the whole weekend — so there is one more step!</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A chain of &ldquo;more than&rdquo;: the three-day walk</div>
+  ${asWarm('Femi walks <strong>14,650 m</strong> on Day 1. On Day 2 she walks <strong>3,200 m more</strong> than Day 1. On Day 3 she walks <strong>2,750 m more</strong> than Day 2. How far does she walk in total?')}
+  <div class="card-body"><strong>Plan:</strong> find Day 2, then Day 3, then add all three. That is <strong>4 calculations</strong>.</div>
+  ${steps([['Day 1','14,650 m','given'],['Day 2','14,650 + 3,200','= 17,850 m'],['Day 3','17,850 + 2,750','= 20,600 m'],['Total','14,650 + 17,850 + 20,600','calculate next…']])}
+  ${asCol({a:'14650',b:'17850',op:'+',res:'32500',under:['1','1','1','',''],title:'Day 1 + Day 2 = 32,500 m'})}
+  ${asCol({a:'32500',b:'20600',op:'+',res:'53100',under:['','1','','',''],title:'+ Day 3 = 53,100 m'})}
+  ${steps([['ANSWER','53,100 m','estimate: 15,000 + 18,000 + 21,000 = 54,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with the inverse:</strong> 53,100 − 20,600 − 17,850 = 14,650 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A running total with four amounts</div>
+  ${asWarm('A library lent 35,420 books in January, 28,650 in February, 31,975 in March and 26,380 in April. How many in the four months?')}
+  <div class="card-body"><strong>Estimate:</strong> 35,000 + 29,000 + 32,000 + 26,000 ≈ 122,000.</div>
+  ${asJump(['35,420','64,070','96,045','122,425'],['+28,650','+31,975','+26,380'],'Running total: each jump adds the next month')}
+  ${steps([['Jan + Feb','35,420 + 28,650','= 64,070'],['+ Mar','64,070 + 31,975','= 96,045'],['+ Apr','96,045 + 26,380','= 122,425'],['ANSWER','122,425 books','close to 122,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Tip:</strong> write every running total, so a mistake can be found quickly.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: the town hall renovation</div>
+  ${asWarm('The roof costs <strong>£48,750</strong>. The windows cost <strong>£19,895</strong>. The electrics cost <strong>£7,350 more than the windows</strong>. The painting costs <strong>£12,400</strong>. What is the total cost?')}
+  <div class="card-body"><strong>Estimate:</strong> 49,000 + 20,000 + 27,000 + 12,000 ≈ 108,000.</div>
+  <div class="card-body"><strong>Hidden step first:</strong> find the electrics.</div>
+  ${asCol({a:'19895',b:'7350',op:'+',res:'27245',under:['1','1','1','',''],title:'Electrics = 19,895 + 7,350 = £27,245'})}
+  ${asJump(['48,750','68,645','95,890','108,290'],['+19,895','+27,245','+12,400'],'Running total: roof → windows → electrics → painting')}
+  ${steps([['Roof + windows','48,750 + 19,895','= 68,645'],['+ electrics','68,645 + 27,245','= 95,890'],['+ painting','95,890 + 12,400','= 108,290'],['ANSWER','£108,290','close to 108,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 108,290 − 12,400 − 27,245 − 19,895 = 48,750 ✓</div>
+</div>
+
+${asExCard(11,[
+ exQ(1,'A farm sold 14,250 eggs on Monday, 16,780 on Tuesday and 11,945 on Wednesday. How many eggs in total?',['42,975','41,975','43,975'],0),
+ exQ(2,'A shop sold 23,400 pens in week 1. In week 2 it sold 4,650 MORE than in week 1. How many pens in week 2?',['28,050','27,050','18,750'],0),
+ exQ(3,'Using question 2: how many pens did the shop sell in the two weeks altogether?',['51,450','50,450','51,350'],0),
+ exQ(4,'A cinema sold 18,500 tickets in June, 3,250 MORE in July than in June, and 21,000 in August. What is the FIRST step?',['Find how many tickets were sold in July','Add 18,500 + 3,250 + 21,000 straight away','Subtract 3,250 from 18,500'],0),
+ exQ(5,'Using question 4: how many tickets were sold in the three months?',['61,250','60,250','62,250'],0),
+ exQ(6,'Estimate 28,640 + 31,250 + 19,870 by rounding each to the nearest 1,000.',['80,000','79,000','90,000'],0),
+ exQ(7,'A cyclist rides 12,450 m, 13,875 m, 9,990 m and 14,320 m. How far in total?',['50,635','49,635','51,635'],0),
+ exQ(8,'A school raised £34,500 at the fair, £15,750 from a raffle and £9,800 in donations. Its target was £60,000. What is true?',['It raised £60,050 — £50 over the target','It raised £59,050 — £950 short','It raised £50,000 — £10,000 short'],0),
+ exQ(9,'THINK DEEPER: Ben solves &ldquo;A has 15,400. B has 2,600 MORE than A. C has 1,800 MORE than B. How many altogether?&rdquo; by adding 15,400 + 2,600 + 1,800 = 19,800. Is he right?',['No — 2,600 and 1,800 are differences; the correct total is 53,200','Yes — 19,800 is correct','No — the correct total is 36,400'],0,'t'),
+ exQ(10,'BOSS LEVEL: A charity raised £24,850 on Day 1, £6,375 MORE on Day 2 than on Day 1, and £10,000 MORE on Day 3 than on Day 2. How much in total?',['£97,300','£87,300','£98,300'],0,'b')])}`;
+
+
+/* ============================================================
+   STEP 12 : Multi-step subtraction problems
+   ============================================================ */
+const P5_AS12 = `
+${asHeader('AS12','Step 12 — Multi-Step Subtraction Problems','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Several Take-Aways, One Story</div>
+  ${asWarm('In a multi-step subtraction story, things leave a total <strong>more than once</strong> — items are sold, spent or used up in stages. We have to keep track of the whole and every part that leaves.')}
+
+  ${asRoutine()}
+
+  <div class="card-body"><strong>Pictorial:</strong> the whole is on top. The parts that LEAVE and the part that is LEFT sit underneath:</div>
+  ${asBar('Whole = two parts taken away + what is left', 'whole', [['taken 1',28,'#FAECE7','#D85A30','#712B13'],['taken 2',22,'#FAEEDA','#BA7517','#633806'],['left: ?',30,'#EAF3DE','#639922','#27500A']])}
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🛠 Two valid methods</div><div class="s-body" style="color:#085041;"><strong>Method A:</strong> take away one amount at a time (running total, going down).<br><strong>Method B:</strong> ADD the amounts taken away, then subtract that total from the whole <em>once</em>. Fewer exchanges, easier to check!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Stopping too soon</div><div class="s-body" style="color:#712B13;">After the first subtraction, the story is NOT over. Re-read the question: have ALL amounts been taken away?</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;fewer than&rdquo; and the total</div><div class="s-body" style="color:#712B13;">&ldquo;B has 12,800 <em>fewer</em> than A&rdquo; means subtract from <strong>A</strong> (the thing being compared), not from any total. Draw the bar model to see which number is the whole.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Two take-aways, two methods: 90,000 − 24,350 − 18,675</div>
+  ${asWarm('A warehouse holds 90,000 parcels. On Monday 24,350 leave. On Tuesday 18,675 leave. How many parcels remain?')}
+  <div class="card-body"><strong>Estimate:</strong> 90,000 − 24,000 − 19,000 ≈ 47,000.</div>
+  <div class="card-body"><strong>Method A — one at a time</strong></div>
+  ${asCol({a:'90000',b:'24350',op:'−',res:'65650',over:['8','9','9','10',''],strike:[true,true,true,true,false],title:'Monday: 90,000 − 24,350 = 65,650 (nines trick)'})}
+  ${asCol({a:'65650',b:'18675',op:'−',res:'46975',over:['5','14','15','14','10'],strike:[true,true,true,true,true],title:'Tuesday: 65,650 − 18,675 = 46,975'})}
+  <div class="card-body" style="margin-top:8px;"><strong>Method B — add what leaves, subtract once</strong></div>
+  ${steps([['Add the two amounts','24,350 + 18,675','= 43,025 parcels left the warehouse'],['Subtract once','90,000 − 43,025','= 46,975'],['ANSWER','46,975 parcels','both methods agree, close to 47,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 46,975 + 24,350 + 18,675 = 90,000 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — A chain of &ldquo;fewer than&rdquo;: three stadiums</div>
+  ${asWarm('Stadium A holds <strong>62,400</strong> fans. Stadium B holds <strong>15,750 fewer</strong> than A. Stadium C holds <strong>8,300 fewer</strong> than B. How many fans does Stadium C hold?')}
+  ${asBar('Bar models: each stadium is compared with the one before', '62,400 (A)', [['B = A − 15,750',46.65,'#E6F1FB','#378ADD','#0C447C'],['15,750 fewer',15.75,'#FAECE7','#D85A30','#712B13']])}
+  <div class="card-body"><strong>Plan:</strong> find B first, then use B to find C. <strong>Estimate:</strong> 62,000 − 16,000 − 8,000 ≈ 38,000.</div>
+  ${asCol({a:'62400',b:'15750',op:'−',res:'46650',over:['5','11','13','10',''],strike:[true,true,true,true,false],title:'Stadium B = 62,400 − 15,750 = 46,650'})}
+  ${asCol({a:'46650',b:'8300',op:'−',res:'38350',over:['3','16','','',''],strike:[true,true,false,false,false],title:'Stadium C = 46,650 − 8,300 = 38,350'})}
+  ${steps([['Stadium B','62,400 − 15,750','= 46,650'],['Stadium C','46,650 − 8,300','= 38,350'],['ANSWER','38,350 fans','close to 38,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Common slip</div><div class="s-body" style="color:#712B13;">Some pupils take 8,300 from 62,400 (stadium A). But &ldquo;fewer than <strong>B</strong>&rdquo; means subtract from <strong>B</strong>!</div></div></div>
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 38,350 + 8,300 + 15,750 = 62,400 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — How much MORE is needed? (add, then subtract)</div>
+  ${asWarm('A charity needs <strong>£80,000</strong>. It raised <strong>£28,450</strong> at the fair and <strong>£35,875</strong> from sponsors. How much more does it need?')}
+  ${asBar('Whole = target. Known parts + a hidden part', '£80,000 target', [['£28,450',28.45,'#E6F1FB','#378ADD','#0C447C'],['£35,875',35.88,'#FAEEDA','#BA7517','#633806'],['still needed: ?',15.7,'#FAECE7','#D85A30','#712B13']])}
+  <div class="card-body"><strong>Estimate:</strong> 80,000 − 28,000 − 36,000 ≈ 16,000.</div>
+  ${asCol({a:'28450',b:'35875',op:'+',res:'64325',under:['1','1','1','',''],title:'Step 1: raised so far = £64,325'})}
+  ${asCol({a:'80000',b:'64325',op:'−',res:'15675',over:['7','9','9','9','10'],strike:[true,true,true,true,true],title:'Step 2: £80,000 − £64,325 = £15,675 (nines trick)'})}
+  <div class="card-body" style="margin-top:6px;"><strong>Mental shortcut — count on:</strong></div>
+  ${asJump(['64,325','65,000','80,000'],['+675','+15,000'],'Count on from £64,325 up to £80,000')}
+  ${steps([['Jumps','675 + 15,000','= 15,675 ✓ same answer!'],['ANSWER','£15,675 still needed','close to 16,000 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Three parts of a whole: the town&rsquo;s population</div>
+  ${asWarm('A town has <strong>120,000</strong> people. <strong>38,650</strong> are children and <strong>54,200</strong> are working adults. The rest are pensioners. How many pensioners are there?')}
+  ${asBar('Whole = 120,000. Two known parts, one hidden', '120,000 people', [['children 38,650',38.65,'#E6F1FB','#378ADD','#0C447C'],['adults 54,200',54.2,'#FAEEDA','#BA7517','#633806'],['pensioners: ?',27.15,'#EAF3DE','#639922','#27500A']])}
+  <div class="card-body"><strong>Plan (Method B):</strong> add the known parts, then subtract once. <strong>Estimate:</strong> 120,000 − 39,000 − 54,000 ≈ 27,000.</div>
+  ${asCol({a:'38650',b:'54200',op:'+',res:'92850',under:['1','','','',''],title:'Step 1: children + adults = 92,850'})}
+  ${asCol({a:'120000',b:'92850',op:'−',res:'27150',over:['0','11','9','9','10',''],strike:[true,true,true,true,true,false],title:'Step 2: 120,000 − 92,850 = 27,150'})}
+  ${steps([['Add','38,650 + 54,200','= 92,850'],['Subtract','120,000 − 92,850','= 27,150'],['ANSWER','27,150 pensioners','close to 27,000 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 38,650 + 54,200 + 27,150 = 120,000 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: the festival tickets</div>
+  ${asWarm('A festival has <strong>150,000</strong> tickets. <strong>48,750</strong> are sold on Day 1 and <strong>36,925</strong> on Day 2. How many tickets are still for sale?')}
+  <div class="card-body"><strong>Estimate:</strong> 150,000 − 49,000 − 37,000 ≈ 64,000.</div>
+  ${asCol({a:'48750',b:'36925',op:'+',res:'85675',under:['1','1','','',''],title:'Step 1: tickets sold = 85,675'})}
+  ${asCol({a:'150000',b:'85675',op:'−',res:'64325',over:['0','14','9','9','9','10'],strike:[true,true,true,true,true,true],title:'Step 2: 150,000 − 85,675 = 64,325'})}
+  ${steps([['Step 1','48,750 + 36,925','= 85,675 sold'],['Step 2','150,000 − 85,675','= 64,325'],['ANSWER','64,325 tickets left','close to 64,000 ✓'],['CHECK','48,750 + 36,925 + 64,325','= 150,000 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Why Method B shines</div><div class="s-body" style="color:#27500A;">Subtracting twice from 150,000 means exchanging through zeros two times. Adding first and subtracting once means <strong>one</strong> big exchange — fewer chances for errors.</div></div></div>
+</div>
+
+${asExCard(12,[
+ exQ(1,'A farm has 80,000 apples. 21,450 are sold on Monday and 17,300 on Tuesday. How many apples are left?',['41,250','42,250','40,250'],0),
+ exQ(2,'A school library has 95,000 books. 23,400 are lent in week 1 and 31,650 in week 2. How many are still on the shelves?',['39,950','40,950','38,950'],0),
+ exQ(3,'A tank holds 60,000 litres. 14,500 litres are used on Monday and 12,750 on Tuesday. Which plan is correct for finding what is left?',['Add 14,500 + 12,750, then subtract the total from 60,000','Subtract 12,750 from 14,500, then from 60,000','Add 60,000 to 14,500, then subtract 12,750'],0),
+ exQ(4,'Town A has 74,300 people. Town B has 12,800 FEWER than A. Town C has 9,500 FEWER than B. How many people live in Town C?',['52,000','51,000','53,000'],0),
+ exQ(5,'A fund needs £100,000. It has £37,450 from one event and £28,975 from another. How much MORE is needed?',['£33,575','£34,575','£32,575'],0),
+ exQ(6,'Estimate 90,000 − 28,450 − 31,780 by rounding each number to the nearest 10,000.',['30,000','40,000','20,000'],0),
+ exQ(7,'Now find the exact answer to 90,000 − 28,450 − 31,780.',['29,770','30,770','28,770'],0),
+ exQ(8,'A park holds 120,000 visitors: 41,500 children, 38,250 adults and the rest pensioners. How many pensioners?',['40,250','41,250','39,250'],0),
+ exQ(9,'THINK DEEPER: A warehouse has 70,000 boxes. 18,500 leave on Monday and 12,300 on Tuesday. Ella works out 70,000 − 18,500 = 51,500 and stops. Is she finished?',['No — she must also subtract 12,300, giving 39,200','Yes — 51,500 is the final answer','No — she should add 12,300 to get 63,800'],0,'t'),
+ exQ(10,'BOSS LEVEL: A festival has 200,000 tickets. 64,350 are sold on Day 1 and 71,825 on Day 2. Then 12,000 EXTRA tickets are released. How many tickets are now unsold?',['75,825','51,825','63,825'],0,'b')])}`;
+
+
+
 const P5_AS13 = null; // Problems involving addition and subtraction
 const P5_AS14 = null; // Reasoning with addition and subtraction
 
