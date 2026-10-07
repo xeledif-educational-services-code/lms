@@ -3542,8 +3542,183 @@ ${asExCard(8,[
 
 
 
-const P5_AS9  = null; // Checking using inverse operations
-const P5_AS10 = null; // Find missing numbers
+/* ============================================================
+   PRIMARY 5 — ADDITION & SUBTRACTION — LESSONS 9 AND 10
+   INSTALL: delete `const P5_AS9 = null;` and `const P5_AS10 = null;`
+   then paste this whole file BELOW P5_AS8 (above SCHEME_P5).
+   Uses: asHeader, asWarm, asBar, asJump, asPV, asCol, asExCard,
+         steps(), numLine(), exQ().
+
+   asCol reminder:
+     under[i] = digit written BELOW the column that RECEIVES an exchange
+     over[i]  = the NEW value of the top digit AFTER exchanging
+   ============================================================ */
+
+
+/* ============================================================
+   STEP 9 : Checking using inverse operations
+   ============================================================ */
+const P5_AS9 = `
+${asHeader('AS9','Step 9 — Checking Using Inverse Operations','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Undoing with the Inverse</div>
+  ${asWarm('Addition and subtraction are <strong>inverse operations</strong> — each one UNDOES the other. If you put your socks on and then take them off, you are back where you started. Checking with the inverse is how mathematicians <em>know for certain</em> their answer is right.')}
+
+  <div class="card-body"><strong>Pictorial:</strong> the part-whole bar model makes the inverse visible. If two parts join to make a whole, then the whole with one part removed must give back the other part.</div>
+  ${asBar('Part-whole: a + b = c means c − b = a and c − a = b', 'c (the whole)', [['part a',40,'#E6F1FB','#378ADD','#0C447C'],['part b',25,'#FAEEDA','#BA7517','#633806']])}
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 How to check (memorise this)</div><div class="s-body" style="color:#085041;"><strong>Addition</strong> a + b = c → check with subtraction: c − b should give a (or c − a should give b).<br><strong>Subtraction</strong> a − b = c → check with addition: c + b should give a.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Checking subtraction the wrong way round</div><div class="s-body" style="color:#712B13;">To check a − b = c you must do <strong>c + b = a</strong> — add the ANSWER to the number you SUBTRACTED. Doing a − c = b works too, but b + c will <em>only</em> be checked correctly in one order: <strong>smaller + smaller = bigger</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Close enough&rdquo; is not a check</div><div class="s-body" style="color:#712B13;">An estimate (Step 8) says an answer is <em>reasonable</em>. An inverse check says it is <em>exactly right</em>. They work best as a team: estimate first, then check with the inverse.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The golden sentence</div><div class="s-body" style="color:#27500A;">If the inverse does not take you back to the number you started with, the answer is <strong>definitely wrong</strong> — hunt for the mistake!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Checking an addition: 47,386 + 28,659 = 76,045</div>
+  ${asWarm('This is the &ldquo;messy digits&rdquo; question from Step 7. Let us pretend we just finished the column method and want to be SURE.')}
+  <div class="card-body"><strong>The claim:</strong> 47,386 + 28,659 = 76,045. <strong>The check:</strong> subtract one addend from the total. We should land back on the other addend.</div>
+  ${asCol({a:'76045',b:'28659',op:'−',res:'47386',over:['6','15','9','13','15'],strike:[true,true,true,true,true],title:'CHECK: 76,045 − 28,659 — we should get 47,386'})}
+  ${steps([['Ones','15 − 9','= 6 ✓'],['Tens','13 − 5','= 8 ✓'],['Hundreds','9 − 6','= 3 ✓'],['Thousands','15 − 8','= 7 ✓'],['Ten thousands','6 − 2','= 4 ✓'],['VERDICT','47,386 — back to the start!','the addition 47,386 + 28,659 = 76,045 is CORRECT ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 The check itself needed four exchanges — checking is a real calculation, so work neatly and slowly.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Checking a subtraction: 60,402 − 27,538 = 32,864</div>
+  ${asWarm('Remember this zero-trap question from Step 6? Suppose we calculated the answer and now we CHECK it.')}
+  <div class="card-body"><strong>The claim:</strong> 60,402 − 27,538 = 32,864. <strong>The check:</strong> add the answer (32,864) to the number subtracted (27,538). We should get back to 60,402.</div>
+  ${asCol({a:'32864',b:'27538',op:'+',res:'60402',under:['1','1','1','1',''],title:'CHECK: 32,864 + 27,538 — we should get 60,402'})}
+  ${steps([['Ones','4 + 8 = 12','write 2, exchange 1 ✓'],['Tens','6 + 3 + 1 = 10','write 0, exchange 1 ✓'],['Hundreds','8 + 5 + 1 = 14','write 4, exchange 1 ✓'],['Thousands','2 + 7 + 1 = 10','write 0, exchange 1 ✓'],['Ten thousands','3 + 2 + 1 = 6','✓'],['VERDICT','60,402 — back to the start!','the subtraction 60,402 − 27,538 = 32,864 is CORRECT ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Notice the pattern</div><div class="s-body" style="color:#27500A;">Checking a subtraction with zero-heavy numbers produces <em>lots of exchanges back</em> — the 0s in 60,402 re-appear because every column carried. This is normal and it is a very strong check.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — The check that FAILS: 83,000 − 37,465</div>
+  ${asWarm('Priya works out 83,000 − 37,465 and writes 45,635. Her estimate (83,000 − 37,000 ≈ 46,000) looks fine. Now let us check with the inverse — will it pass?')}
+  ${asCol({a:'45635',b:'37465',op:'+',res:'83100',under:['1','1','1','1',''],title:'CHECK: 45,635 + 37,465 — we NEED 83,000… but we get 83,100!'})}
+  ${steps([['Check','45,635 + 37,465 = 83,100','but Priya started with 83,000!'],['Compare','83,100 vs 83,000','the check is 100 too big — the answer is WRONG ✗'],['Hunt','work the column again','83,000 − 37,465: exchange through the zeros (the nines trick)…'],['CORRECT ANSWER','45,535','check: 45,535 + 37,465 = 83,000 ✓ now it lands back on the start!']])}
+  ${asCol({a:'83000',b:'37465',op:'−',res:'45535',over:['7','12','9','9','10'],strike:[true,true,true,true,true],title:'The correct subtraction: the nines trick gives 45,535'})}
+  <div class="card-body" style="margin-top:6px;">💡 Priya&rsquo;s mistake: she forgot to knock the ten-thousands down when the exchange rippled through the zeros (7 should become 6 after lending, but she kept 7 → answer 100 too big).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Real life: the ferry passengers</div>
+  ${asWarm('A ferry carries <strong>8,000</strong> passengers a week. The ticket office counts <strong>3,275</strong> passengers on weekdays. An assistant says: &ldquo;then 4,825 passengers must have travelled at the weekend.&rdquo; Is the assistant right?')}
+  ${asBar('Part-whole: weekly passengers', '8,000', [['weekdays: 3,275',3.3,'#E6F1FB','#378ADD','#0C447C'],['weekend: ? ',4.7,'#FAEEDA','#BA7517','#633806']])}
+  <div class="card-body"><strong>Check the assistant&rsquo;s number with the inverse:</strong> if weekend = 4,825, then 3,275 + 4,825 must equal 8,000.</div>
+  ${steps([['Check','3,275 + 4,825','= 8,100 — NOT 8,000! ✗'],['Find the truth','8,000 − 3,275','= 4,725'],['Final check','3,275 + 4,725','= 8,000 ✓ lands back on the start'],['ANSWER','4,725 passengers at the weekend','the assistant&rsquo;s figure was 100 too many — a digit exchange error in the ones and tens']])}
+  <div class="card-body" style="margin-top:6px;">💡 In real life, checking is not &ldquo;extra work&rdquo; — one wrong passenger count can mean the wrong number of lifeboats, seats or staff.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — The fact family: which checks are TRUE?</div>
+  ${asWarm('One subtraction fact hides FOUR related facts — two of them are checks. But beware: two IMPOSTORS are hiding in the family too!')}
+  <div class="card-body">Start with the fact: <strong>85,324 − 47,856 = 37,468</strong>. Draw the bar model first — it shows which numbers are parts and which is the whole.</div>
+  ${asBar('Fact family for 85,324 − 47,856 = 37,468', '85,324 (whole)', [['47,856 (part)',47.9,'#FAEEDA','#BA7517','#633806'],['37,468 (part)',37.5,'#E1F5EE','#1D9E75','#085041']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ TRUE check 1 (addition)</div><div class="s-body" style="color:#27500A;">37,468 + 47,856 = 85,324<br><em>answer + subtracted = start</em></div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ TRUE check 2 (subtraction)</div><div class="s-body" style="color:#27500A;">85,324 − 37,468 = 47,856<br><em>start − answer = subtracted</em></div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">❌ IMPOSTOR 1</div><div class="s-body" style="color:#712B13;">47,856 + 85,324 = 133,180<br>adding the whole to a part makes no sense — way too big!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">❌ IMPOSTOR 2</div><div class="s-body" style="color:#712B13;">47,856 − 37,468 = 10,388<br>subtracting the two PARTS from each other never rebuilds the whole.</div></div>
+  </div>
+  <div class="card-body" style="margin-top:8px;">🎯 <strong>Memory hook:</strong> a true check always rebuilds the <strong>whole</strong>: parts join (addition) or the whole minus one part gives the other (subtraction).</div>
+</div>
+
+${asExCard(9,[
+ exQ(1,'Which subtraction checks that 52,340 + 27,860 = 80,200?',['80,200 − 27,860 = 52,340','80,200 + 27,860 = 52,340','52,340 − 27,860 = 80,200'],0),
+ exQ(2,'Which addition checks that 90,000 − 38,450 = 51,550?',['51,550 + 38,450 = 90,000','90,000 + 38,450 = 51,550','51,550 − 38,450 = 90,000'],0),
+ exQ(3,'Work out 36,458 + 24,975, then check it with the inverse. What is the answer?',['61,433','62,433','61,343'],0),
+ exQ(4,'A pupil says 75,000 − 26,385 = 48,615. Use the inverse to decide: are they correct?',['Yes — 48,615 + 26,385 = 75,000, so it is correct','No — the correct answer is 47,615','No — the correct answer is 58,615'],0),
+ exQ(5,'Tolu says 63,250 − 28,765 = 34,585. Check it. What is the truth?',['Wrong — 34,585 + 28,765 = 63,350; the correct answer is 34,485','Correct — it passes the addition check','Wrong — the correct answer is 35,485'],0),
+ exQ(6,'If 47,300 − 18,900 = 28,400, which statement is NOT true?',['28,400 − 18,900 = 47,300','18,900 + 28,400 = 47,300','47,300 − 28,400 = 18,900'],0),
+ exQ(7,'To find the missing number in 45,000 − ___ = 17,650, which calculation works?',['45,000 − 17,650','17,650 + 45,000','45,000 + 17,650'],0),
+ exQ(8,'A theatre sold 8,450 tickets on day 1 and some on day 2 — 20,000 in total. The manager calculates day 2 = 11,550. Does the check pass?',['Yes — 11,550 + 8,450 = 20,000 ✓','No — 11,550 − 8,450 = 20,000','No — the correct answer is 12,550'],0),
+ exQ(9,'THINK DEEPER: Tia checks 38,475 + 21,525 = 60,000 by doing 60,000 − 38,475 = 21,525 and nothing else. She says &ldquo;one check is enough.&rdquo; Is she right?',['Yes — for addition, one inverse check is enough: if 60,000 − 38,475 = 21,525, the addition must be correct','No — she must also do 60,000 − 21,525 to be safe','No — addition can only be checked by adding again'],0,'t'),
+ exQ(10,'BOSS LEVEL: A stadium has 60,000 seats. 23,875 tickets are sold. A worker claims 36,235 seats remain. Use an inverse check to judge the claim, then give the correct number of seats remaining.',['The claim fails (36,235 + 23,875 = 60,110); the correct answer is 36,125','The claim passes — 36,235 is correct','The correct answer is 36,025'],0,'b')])}`;
+
+
+/* ============================================================
+   STEP 10 : Find missing numbers
+   ============================================================ */
+const P5_AS10 = `
+${asHeader('AS10','Step 10 — Find Missing Numbers','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — The Mystery Box ▢</div>
+  ${asWarm('A missing number is a mystery to solve, and you already own the detective tool: the <strong>inverse operation</strong> (Step 9). Missing-number questions are not a new skill — they are the SAME addition and subtraction, turned backwards.')}
+
+  <div class="card-body"><strong>Pictorial:</strong> on a bar model, a missing number is simply a hidden part. Find it by &ldquo;uncovering&rdquo;: whole minus the known part.</div>
+  ${asBar('▢ + 18,450 = 52,300 — one part is hidden', '52,300 (whole)', [['18,450 (known part)',18.5,'#FAEEDA','#BA7517','#633806'],['▢ (hidden part)',33.8,'#E1F5EE','#1D9E75','#085041']])}
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The 4-step detective routine</div><div class="s-body" style="color:#085041;">1) Draw or imagine the bar model — <strong>which number is the whole?</strong> 2) Choose the inverse: gap = <strong>whole − known part</strong> (or, for a hidden whole, <strong>add the parts</strong>). 3) Calculate carefully. 4) <strong>Substitute back</strong> to prove it works.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Order matters!</div><div class="s-body" style="color:#712B13;">Subtraction is <strong>not</strong> commutative. To solve ▢ − 28,450 = 15,700 you must <strong>ADD</strong> (15,700 + 28,450). Guessing &ldquo;28,450 − 15,700&rdquo; gives the wrong direction every time.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Two-step machines</div><div class="s-body" style="color:#712B13;">If a number went through <em>two</em> changes (+ then −), undo them in <strong>reverse order with opposite signs</strong>: undo the LAST change first.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Always finish with the proof</div><div class="s-body" style="color:#27500A;">Substitute your answer back into the original question. If it makes the equation true — case closed. If not, your answer is the first suspect!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Missing part: ▢ + 18,450 = 52,300</div>
+  ${asWarm('Something joins with 18,450 to make 52,300. You know the whole and one part — so the missing part is the gap between them.')}
+  <div class="card-body"><strong>Choose the inverse:</strong> the equation is an addition, so subtract the known part from the whole.</div>
+  ${asCol({a:'52300',b:'18450',op:'−',res:'33850',over:['4','11','12','10',''],strike:[true,true,true,true,false],title:'▢ = 52,300 − 18,450'})}
+  ${steps([['Ones','0 − 0','= 0 (no exchange needed) ✓'],['Tens','0 &lt; 5 → exchange from hundreds','hundreds 3 → 2, tens 0 → 10; 10 − 5 = 5 ✓'],['Hundreds','2 &lt; 4 → exchange from thousands','thousands 2 → 1, hundreds 2 → 12; 12 − 4 = 8 ✓'],['Thousands','1 &lt; 8 → exchange from ten thousands','ten thousands 5 → 4, thousands 1 → 11; 11 − 8 = 3 ✓'],['Ten thousands','4 − 1','= 3 ✓'],['PROOF','33,850 + 18,450 = 52,300 ✓','case closed!']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Missing number in a subtraction: 73,600 − ▢ = 29,875</div>
+  ${asWarm('This time the SUBTRACTED number is hidden. What do you know? The whole (73,600) and what is LEFT (29,875). The missing number is the part that was taken away.')}
+  ${asBar('73,600 − ▢ = 29,875', '73,600 (whole)', [['▢ taken away',43.7,'#FAECE7','#D85A30','#712B13'],['29,875 left',29.9,'#EAF3DE','#639922','#27500A']])}
+  <div class="card-body"><strong>Choose the inverse:</strong> taken away = whole − left → 73,600 − 29,875.</div>
+  ${asCol({a:'73600',b:'29875',op:'−',res:'43725',over:['6','12','15','9','10'],strike:[true,true,true,true,true],title:'▢ = 73,600 − 29,875'})}
+  ${steps([['PROOF','73,600 − 43,725 = 29,875','substitute back — it works ✓'],['ANSWER','▢ = 43,725','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Spot the symmetry:</strong> the SAME column working appears whether you solve 73,600 − 29,875 or 73,600 − 43,725 — the two missing-number questions in one fact family are twins!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — The number machine: undo in reverse! · + 12,475 → − 3,250 → 40,000</div>
+  ${asWarm('I think of a number. I ADD 12,475, then SUBTRACT 3,250, and the result is 40,000. What was my number?')}
+  <div class="card-body"><strong>Pictorial:</strong> the journey went <em>forwards</em> like this:</div>
+  ${asJump(['?','43,250','40,000'],['+12,475','−3,250'],'Forwards: start → +12,475 → −3,250 → 40,000')}
+  <div class="card-body">To get back home, walk the path <strong>backwards</strong>: undo the LAST step first, with the OPPOSITE operation.</div>
+  ${asJump(['40,000','43,250','?'],['+3,250','−12,475'],'Backwards: undo −3,250 with +3,250, then undo +12,475 with −12,475')}
+  ${steps([['Undo step 2','40,000 + 3,250','= 43,250 (opposite of − 3,250)'],['Undo step 1','43,250 − 12,475','= 30,775 (opposite of + 12,475)'],['PROOF (forwards)','30,775 + 12,475 − 3,250','= 43,250 − 3,250 = 40,000 ✓'],['ANSWER','the number was 30,775','']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Undo rule</div><div class="s-body" style="color:#27500A;">Undo changes in <strong>reverse order</strong>, using the <strong>opposite</strong> operation: + becomes −, − becomes +. It is like rewinding a video!</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Missing DIGIT detective: 25,▢47 + 3▢,586 = 60,733</div>
+  ${asWarm('Two digits have vanished from a column addition. Solve it column by column — and remember that impossible-looking columns are clues that an exchange happened!')}
+  ${steps([['Ones','7 + 6 = 13 → write 3 ✓','matches — and it exchanges 1'],['Tens','4 + 8 + 1 = 13 → write 3 ✓','matches — and it exchanges 1'],['Hundreds','▢ + 5 + 1 = 7','▢ = 1 (no new exchange, since 7 &lt; 10 — matches!)'],['Thousands','5 + ▢ = 0? Impossible!','so there must be an exchange: 5 + ▢ = 10 → ▢ = 5'],['Ten thousands','2 + 3 + 1 = 6 ✓','everything is consistent']])}
+  ${asCol({a:'25147',b:'35586',op:'+',res:'60733',under:['1','','1','1',''],hi:[2],title:'Solved: 25,147 + 35,586 = 60,733 — the missing digits were 1 and 5'})}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 60,733 − 35,586 = 25,147 ✓ (inverse, as always!)</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: the PTA mystery</div>
+  ${asWarm('The PTA started the year with <strong>£50,000</strong>. After paying for new library books, only <strong>£12,750</strong> was left in the account. How much did the books cost?')}
+  ${asBar('Part-whole: the PTA budget', '£50,000', [['▢ spent on books',37.3,'#FAECE7','#D85A30','#712B13'],['£12,750 left',12.8,'#EAF3DE','#639922','#27500A']])}
+  ${steps([['Identify the whole','£50,000','this is where we started'],['Identify the known part','£12,750 left','the hidden part was spent'],['Choose the inverse','spent = start − left','£50,000 − £12,750'],['Calculate','£50,000 − £12,750 = £37,250','use the nines trick on the zeros!'],['PROOF','£50,000 − £37,250 = £12,750 ✓','the books cost £37,250']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Real-life habit:</strong> bank statements, receipts and budgets are full of missing-number puzzles. Knowing how to find the gap is a genuinely useful life skill.</div>
+</div>
+
+${asExCard(10,[
+ exQ(1,'Solve: ▢ + 24,380 = 71,200.',['46,820','47,820','45,820'],0),
+ exQ(2,'Solve: 83,500 − ▢ = 37,925.',['45,575','46,575','45,475'],0),
+ exQ(3,'Solve: 12,640 + ▢ + 8,975 = 40,000.  (Add the known parts first, then find the gap!)',['18,385','19,385','18,485'],0),
+ exQ(4,'To find ▢ in ▢ − 28,450 = 15,700, which calculation works?',['15,700 + 28,450','28,450 − 15,700','15,700 − 28,450'],0),
+ exQ(5,'MISSING DIGIT: 73,562 − 4▢,789 = 27,773. What is ▢? (Work column by column — the tens column exchanged!)',['5','4','6'],0),
+ exQ(6,'I think of a number, subtract 8,250, then add 3,400, and get 50,000. What was the number?',['54,850','55,650','46,600'],0),
+ exQ(7,'A water tank holds 90,000 litres. After filling some barrels, 47,250 litres remain. How many litres were used?',['42,750','42,650','52,750'],0),
+ exQ(8,'If 28,450 + ▢ = 63,000, which statement is true?',['▢ = 63,000 − 28,450','▢ = 28,450 − 63,000','▢ = 63,000 + 28,450'],0),
+ exQ(9,'THINK DEEPER: Zara says &ldquo;to find ▢ in 52,000 − ▢ = 30,000, I can just do 52,000 − 30,000.&rdquo; Tariq says &ldquo;no — you must add.&rdquo; Who is right?',['Zara — subtracting the answer from the start gives the missing part','Tariq — you must always add in subtraction questions','Neither — the question cannot be solved'],0,'t'),
+ exQ(10,'BOSS LEVEL: A fundraiser totalled ▢3,▢50. After paying costs of £18,475, exactly £24,675 remained. How much was raised — and which two digits fill the boxes?',['£43,150 — the missing digits are 4 and 1','£43,150 — the missing digits are 3 and 1','£34,150 — the missing digits are 4 and 1'],0,'b')])}`;
+
+
+
 const P5_AS11 = null; // Multi-step addition problems
 const P5_AS12 = null; // Multi-step subtraction problems
 const P5_AS13 = null; // Problems involving addition and subtraction
