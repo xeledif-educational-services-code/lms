@@ -3926,9 +3926,289 @@ ${asExCard(12,[
  exQ(10,'BOSS LEVEL: A festival has 200,000 tickets. 64,350 are sold on Day 1 and 71,825 on Day 2. Then 12,000 EXTRA tickets are released. How many tickets are now unsold?',['75,825','51,825','63,825'],0,'b')])}`;
 
 
-
 const P5_AS13 = null; // Problems involving addition and subtraction
 const P5_AS14 = null; // Reasoning with addition and subtraction
+
+
+
+
+/* ============================================================
+   PRIMARY 5 — SPRING — DECIMALS & PERCENTAGES (topic id 'decperc')
+   LESSONS 1 AND 2  +  PLACEHOLDERS 3–12  +  SCHEME BLOCK
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers), SECTION B (lessons) and SECTION C
+      (placeholders) in index.html ABOVE `const SCHEME_P5` — e.g.
+      directly below the last P5_AS# constant.
+   2. In SCHEME_P5 → Spring Term, replace the whole old line
+        { id:'decperc', label:'Decimals & Percentages', ... },
+      with SECTION D.
+   Needs existing helpers: asHeader, asWarm, asBar, asExCard,
+   steps(), exQ(), PLACE_META.
+   ============================================================ */
+ 
+ 
+/* ================= SECTION A — DECIMAL HELPERS ================= */
+ 
+/* Decimal place-value chart.
+   asDecChart('title', '24', '63')   → 24.63
+   hi = optional global column index to highlight (0 = leftmost column) */
+function asDecChart(title, intStr, decStr, hi){
+  const ni=intStr.length, nd=decStr.length;
+  const ik=['T','H','Te','O'].slice(4-ni);
+  const dm=[['TENTHS','#0F766E','#CCFBF1','#115E59'],['HUNDREDTHS','#BE185D','#FCE7F3','#9D174D'],['THOUSANDTHS','#6D28D9','#EDE9FE','#5B21B6']];
+  const cw=84, pw=34, W=ni*cw+pw+nd*cw+20, H=176;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="13" font-weight="700" fill="#333">${title}</text>`;
+  const col=(x,name,fill,stroke,dark,d,val,frac,gi)=>{
+    const h=(hi===gi), cx=x+(cw-8)/2;
+    let t=`<rect x="${x}" y="24" width="${cw-8}" height="${H-30}" rx="9" fill="${fill}" stroke="${h?'#F59E0B':stroke}" stroke-width="${h?4:1.5}"/>`;
+    t+=`<text x="${cx}" y="42" text-anchor="middle" font-size="8.5" font-weight="800" fill="${dark}">${name}</text>`;
+    t+=`<circle cx="${cx}" cy="82" r="21" fill="${stroke}"/>`;
+    t+=`<text x="${cx}" y="90" text-anchor="middle" font-size="22" font-weight="800" fill="#fff">${d}</text>`;
+    t+=`<text x="${cx}" y="128" text-anchor="middle" font-size="12" font-weight="800" fill="${dark}">= ${val}</text>`;
+    if(frac) t+=`<text x="${cx}" y="148" text-anchor="middle" font-size="11" font-weight="700" fill="${dark}">${frac}</text>`;
+    return t;
+  };
+  for(let i=0;i<ni;i++){
+    const m=PLACE_META[ik[i]], d=+intStr[i];
+    s+=col(10+i*cw,m[0],m[2],m[1],m[3],d,(d*m[4]).toLocaleString('en-GB'),'',i);
+  }
+  const px=10+ni*cw;
+  s+=`<circle cx="${px+pw/2-4}" cy="82" r="7" fill="#222"/>`;
+  s+=`<text x="${px+pw/2-4}" y="112" text-anchor="middle" font-size="7.5" font-weight="700" fill="#444">decimal</text>`;
+  s+=`<text x="${px+pw/2-4}" y="121" text-anchor="middle" font-size="7.5" font-weight="700" fill="#444">point</text>`;
+  for(let j=0;j<nd;j++){
+    const m=dm[j], d=+decStr[j], den=Math.pow(10,j+1);
+    s+=col(px+pw+j*cw,m[0],m[2],m[1],m[3],d,(d/den).toFixed(j+1),`${d}/${den.toLocaleString('en-GB')}`,ni+j);
+  }
+  return s+'</svg>';
+}
+ 
+/* One tenth-strip: n of 10 equal parts shaded. */
+function asStrip(n, title){
+  const W=620, cw=58;
+  let s=`<svg viewBox="0 0 ${W} 100" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let i=0;i<10;i++){
+    const on=i<n;
+    s+=`<rect x="${12+i*cw}" y="26" width="${cw}" height="40" fill="${on?'#2DD4BF':'#fff'}" stroke="#0F766E" stroke-width="2"/>`;
+    s+=`<text x="${12+i*cw+cw/2}" y="51" text-anchor="middle" font-size="13" font-weight="800" fill="${on?'#134E4A':'#9CA3AF'}">0.1</text>`;
+  }
+  s+=`<text x="12" y="86" font-size="12" font-weight="700" fill="#555">0</text><text x="${12+10*cw}" y="86" text-anchor="end" font-size="12" font-weight="700" fill="#555">1 whole</text>`;
+  s+=`<text x="${W/2}" y="86" text-anchor="middle" font-size="13" font-weight="800" fill="#0F766E">${n} tenths = ${n}/10 = ${(n/10).toFixed(1)}</text>`;
+  return s+'</svg>';
+}
+ 
+/* 100-square: whole = 100 small squares. tenths full columns (teal) + hundredths squares (pink). */
+function asHundred(tenths, hundredths, title){
+  const c=22, x0=14, y0=26, n=tenths*10+hundredths;
+  let s=`<svg viewBox="0 0 ${x0*2+c*10} ${y0+c*10+30}" class="shape-svg" style="max-width:260px;width:100%;height:auto;">`;
+  if(title) s+=`<text x="${x0+c*5}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let k=0;k<100;k++){
+    const col=Math.floor(k/10), row=k%10, on=k<n;
+    const fill=!on?'#fff':(k<tenths*10?'#2DD4BF':'#F472B6');
+    s+=`<rect x="${x0+col*c}" y="${y0+(9-row)*c}" width="${c}" height="${c}" fill="${fill}" stroke="#555" stroke-width="1"/>`;
+  }
+  s+=`<rect x="${x0}" y="${y0}" width="${c*10}" height="${c*10}" fill="none" stroke="#222" stroke-width="2.5"/>`;
+  s+=`<text x="${x0+c*5}" y="${y0+c*10+20}" text-anchor="middle" font-size="12" font-weight="800" fill="#333">${n} out of 100 squares shaded</text>`;
+  return s+'</svg>';
+}
+ 
+/* Zoom: whole → tenths → hundredths → thousandths. */
+function asZoom(){
+  const W=620, bw=600, cw=60, x0=10, ys=[40,130,220];
+  const lab=['1 WHOLE cut into 10 equal parts → each part is 1 tenth (0.1)','1 TENTH cut into 10 equal parts → each part is 1 hundredth (0.01)','1 HUNDREDTH cut into 10 equal parts → each part is 1 thousandth (0.001)'];
+  const val=['0.1','0.01','0.001'], fills=['#CCFBF1','#FCE7F3','#EDE9FE'], strokes=['#0F766E','#BE185D','#6D28D9'];
+  let s=`<svg viewBox="0 0 ${W} 286" class="shape-svg" style="max-width:100%;height:auto;">`;
+  for(let b=0;b<2;b++){
+    const y1=ys[b]+36, y2=ys[b+1];
+    s+=`<polygon points="${x0},${y1} ${x0+cw},${y1} ${x0+bw},${y2} ${x0},${y2}" fill="#FEF3C7" opacity=".75"/>`;
+  }
+  for(let b=0;b<3;b++){
+    s+=`<text x="${x0}" y="${ys[b]-8}" font-size="11.5" font-weight="800" fill="${strokes[b]}">${lab[b]}</text>`;
+    for(let i=0;i<10;i++){
+      s+=`<rect x="${x0+i*cw}" y="${ys[b]}" width="${cw}" height="36" fill="${i===0?'#FDE68A':fills[b]}" stroke="${i===0?'#B45309':strokes[b]}" stroke-width="${i===0?3:1.5}"/>`;
+      s+=`<text x="${x0+i*cw+cw/2}" y="${ys[b]+23}" text-anchor="middle" font-size="12" font-weight="800" fill="${strokes[b]}">${val[b]}</text>`;
+    }
+  }
+  s+=`<text x="${W/2}" y="278" text-anchor="middle" font-size="11" fill="#666">Each step to the right makes the parts TEN times smaller</text>`;
+  return s+'</svg>';
+}
+ 
+ 
+/* ================= SECTION B — LESSONS ================= */
+ 
+/* ---------- STEP 1 : Decimal place value ---------- */
+const P5_DP1 = `
+${asHeader('DP1','Step 1 — Decimal Place Value','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Cutting the Whole into Tenths and Hundredths</div>
+  ${asWarm('You already know that each column to the LEFT is ten times bigger (ones → tens → hundreds). Now we go the other way! Each column to the RIGHT of the ones is <strong>ten times SMALLER</strong>. That is how we write parts of a whole.')}
+ 
+  <div class="card-body"><strong>Concrete:</strong> picture a <strong>100-square</strong> made of 100 small squares. The WHOLE square is <strong>1</strong>. Each <strong>column strip</strong> (10 small squares) is <strong>1 tenth</strong>. Each <strong>small square</strong> is <strong>1 hundredth</strong>.</div>
+  ${asHundred(2,5,'0.25 = 2 tenth-strips + 5 hundredth-squares')}
+  <div class="card-body" style="text-align:center;margin-top:4px;"><span style="color:#0F766E;font-weight:800;">teal strips = tenths</span> · <span style="color:#BE185D;font-weight:800;">pink squares = hundredths</span></div>
+ 
+  <div class="card-body" style="margin-top:10px;"><strong>Pictorial → Abstract:</strong> the decimal place-value chart. The <strong>decimal point</strong> sits between the ones and the tenths and tells you where the whole-number part ends.</div>
+  ${asDecChart('The number 24.63','24','63')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The key idea</div><div class="s-body" style="color:#27500A;">1 whole = 10 tenths = 100 hundredths. So <strong>0.1 = 1/10</strong> and <strong>0.01 = 1/100</strong>. Moving one column right ALWAYS divides by 10.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;The digits after the point are a whole number&rdquo;</div><div class="s-body" style="color:#712B13;">0.12 is NOT &ldquo;zero point twelve&rdquo;. Say it digit by digit: <strong>&ldquo;zero point one two&rdquo;</strong> = 1 tenth and 2 hundredths.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — 0.5 and 0.05 are different!</div><div class="s-body" style="color:#712B13;">0.5 is 5 <em>tenths</em> (half a whole). 0.05 is 5 <em>hundredths</em> — only a tiny sliver. The zero is not decoration: it holds the tenths column.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Tenths: 0.3 and 2.4</div>
+  ${asWarm('Cut one whole into 10 equal strips. Each strip is one tenth. How many strips make 0.3?')}
+  ${asStrip(3,'0.3 = 3 tenths')}
+  ${steps([['Count the parts','3 strips shaded','out of 10 equal strips'],['As a fraction','3/10','three tenths'],['As a decimal','0.3','zero point three']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A number with a whole part: 2.4</strong> — 2 ones and 4 tenths.</div>
+  ${asDecChart('2.4 = 2 ones + 4 tenths','2','4')}
+  ${steps([['Ones','2','= 2'],['Tenths','4','= 0.4 (4/10)'],['TOTAL','2 + 0.4','= 2.4']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Hundredths: 0.34</div>
+  ${asWarm('If we need more detail than tenths, we cut each tenth-strip into 10 small squares. Each small square is 1 hundredth.')}
+  ${asHundred(3,4,'0.34 on a 100-square')}
+  ${steps([['Full strips','3 tenths','= 0.3 (30 small squares)'],['Loose squares','4 hundredths','= 0.04'],['Add them','0.3 + 0.04','= 0.34'],['As a fraction','34/100','34 small squares out of 100']])}
+  ${asDecChart('0.34 on the place-value chart','0','34')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Notice:</strong> 3 tenths and 4 hundredths is the same as <strong>34 hundredths</strong> — because 3 tenths = 30 hundredths.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Reading and writing: 12.56</div>
+  ${asWarm('Read the whole part like a normal number, say &ldquo;point&rdquo;, then say each decimal digit ONE AT A TIME.')}
+  ${asDecChart('12.56','12','56')}
+  ${steps([['Say it','twelve point five six','NOT &ldquo;twelve point fifty-six&rdquo;'],['Value of the 5','5 tenths','= 0.5'],['Value of the 6','6 hundredths','= 0.06'],['Partition','10 + 2 + 0.5 + 0.06','= 12.56']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — The zero holds the place: 3.05 or 3.5?</div>
+  ${asWarm('Two numbers, almost the same digits. Which one is bigger — and why?')}
+  ${asDecChart('3.05 → the 5 is in the HUNDREDTHS','3','05',2)}
+  ${asDecChart('3.5 → the 5 is in the TENTHS','3','5',1)}
+  ${steps([['3.05','3 + 0 tenths + 5 hundredths','= 3 + 0.05'],['3.5','3 + 5 tenths','= 3 + 0.5'],['Compare','0.05 is MUCH smaller than 0.5','so 3.5 &gt; 3.05']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The hero zero again</div><div class="s-body" style="color:#27500A;">In 3.05 the 0 says &ldquo;no tenths here&rdquo; and pushes the 5 into the hundredths column. Remove it and the number changes!</div></div></div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Real life: money and ribbon</div>
+  ${asWarm('Money is the decimal system you meet every day! <strong>£4.75</strong> — what does each digit mean?')}
+  ${steps([['4','£4','4 whole pounds'],['7','7 tenths of a pound','= 70p (7 ten-pence coins)'],['5','5 hundredths of a pound','= 5p (5 pennies)'],['TOTAL','£4.75','4 + 0.70 + 0.05']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Measures:</strong> a ribbon is <strong>2.35 m</strong>. The 2 is 2 whole metres. The 3 is 3 tenths of a metre (30 cm). The 5 is 5 hundredths of a metre (5 cm). So 2.35 m = 2 m + 30 cm + 5 cm = <strong>235 cm</strong>.</div>
+  ${asDecChart('2.35 m','2','35')}
+</div>
+ 
+${asExCard(1,[
+ exQ(1,'What is the value of the 3 in 4.37?',['0.3','0.03','3'],0),
+ exQ(2,'What is the value of the 7 in 4.37?',['0.07','0.7','7'],0),
+ exQ(3,'Write 0.6 as a fraction.',['6/10','6/100','60'],0),
+ exQ(4,'Write 0.05 as a fraction.',['5/100','5/10','50/100'],0),
+ exQ(5,'5 ones, 2 tenths and 8 hundredths make…',['5.28','5.82','52.8'],0),
+ exQ(6,'In which number does the digit 4 have the value 0.04?',['3.14','3.41','4.31'],0),
+ exQ(7,'Which digit is in the TENTHS place of 18.69?',['6','9','8'],0),
+ exQ(8,'Which is the correct partition of 6.07?',['6 + 0.07','6 + 0.7','6 + 7'],0),
+ exQ(9,'THINK DEEPER: Mia says 0.50 and 0.5 have the same value. Sam says 0.5 and 0.05 have the same value. Who is right?',['Mia is right; Sam is wrong because 0.05 is ten times smaller than 0.5','Sam is right; Mia is wrong','Both are right'],0,'t'),
+ exQ(10,'BOSS LEVEL: Which number is made of 2 tens, 0 ones, 9 tenths and 4 hundredths?',['20.94','2.94','20.49'],0,'b')])}`;
+ 
+ 
+/* ---------- STEP 2 : Thousandths ---------- */
+const P5_DP2 = `
+${asHeader('DP2','Step 2 — Thousandths','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — One More Zoom In</div>
+  ${asWarm('Tenths and hundredths are not the end of the story! Scientists, athletes and engineers measure things more finely than hundredths. Let us cut a hundredth into ten equal parts — and meet the <strong>thousandths</strong>.')}
+ 
+  <div class="card-body"><strong>Pictorial:</strong> keep zooming in. Each time, ONE part is cut into 10 equal parts:</div>
+  ${asZoom()}
+ 
+  <div class="card-body" style="margin-top:8px;"><strong>Abstract:</strong> the chart now has THREE columns after the decimal point.</div>
+  ${asDecChart('The number 0.375','0','375')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Relationships to know</div><div class="s-body" style="color:#27500A;"><strong>10</strong> thousandths = <strong>1</strong> hundredth<br><strong>100</strong> thousandths = <strong>1</strong> tenth<br><strong>1,000</strong> thousandths = <strong>1</strong> whole<br>0.001 = 1/1,000</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Reading the digits</div><div class="s-body" style="color:#712B13;">0.375 is read &ldquo;zero point <strong>three seven five</strong>&rdquo; — NOT &ldquo;three hundred and seventy-five&rdquo;. (It <em>means</em> 375 thousandths, but we say the digits one by one.)</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Longer means bigger</div><div class="s-body" style="color:#712B13;">0.35 and 0.350 have the SAME value (a trailing zero adds nothing). And 0.5 is far bigger than 0.499, even though 0.499 has more digits!</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Zooming in: how many thousandths in a hundredth?</div>
+  ${asWarm('If 1 hundredth is cut into 10 equal parts, how many of the new tiny parts make the hundredth? And how many make a tenth?')}
+  ${steps([['1 hundredth','= 10 thousandths','0.01 = 0.010'],['1 tenth','= 10 hundredths','= 10 × 10 = 100 thousandths'],['1 whole','= 10 tenths','= 100 hundredths = 1,000 thousandths'],['CONCLUSION','0.001 is 1/1,000','one part when a whole is cut into 1,000']])}
+  <div class="card-body" style="margin-top:8px;">💡 <strong>Think of money:</strong> £1 = 100p, so 1p is one hundredth of a pound. Imagine a coin that is a thousandth of a pound — it would be a tenth of a penny!</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Reading 0.375</div>
+  ${asWarm('Find the value of every digit in 0.375.')}
+  ${asDecChart('0.375','0','375')}
+  ${steps([['Tenths','3','= 0.3 (3/10)'],['Hundredths','7','= 0.07 (7/100)'],['Thousandths','5','= 0.005 (5/1,000)'],['TOTAL','0.3 + 0.07 + 0.005','= 0.375'],['As a fraction','375/1,000','375 thousandths']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Say it:</strong> &ldquo;zero point three seven five&rdquo;.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Partitioning a number with a whole part: 4.268</div>
+  ${asWarm('Four columns of information in one number! Take them one at a time.')}
+  ${asDecChart('4.268','4','268')}
+  ${steps([['Ones','4','= 4'],['Tenths','2','= 0.2'],['Hundredths','6','= 0.06'],['Thousandths','8','= 0.008'],['PARTITION','4 + 0.2 + 0.06 + 0.008','= 4.268 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> adding the parts back together gives the original number — always do this!</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Zeros as place-holders: 0.305, 0.035 and 0.35</div>
+  ${asWarm('The digits 3 and 5 can sit in different columns. Watch how the zeros change the value of each digit.')}
+  ${asDecChart('0.305 → 3 tenths and 5 thousandths','0','305')}
+  ${asDecChart('0.035 → 3 hundredths and 5 thousandths','0','035')}
+  ${asDecChart('0.350 = 0.35 → 3 tenths and 5 hundredths','0','350')}
+  ${steps([['0.305','0.3 + 0.005','the zero holds the hundredths'],['0.035','0.03 + 0.005','the zero holds the tenths'],['0.350','0.3 + 0.05 + 0.000','same value as 0.35']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Two kinds of zero</div><div class="s-body" style="color:#27500A;"><strong>Zero in the MIDDLE</strong> (0.305) is a place-holder — it matters. <strong>Zero at the END</strong> of a decimal (0.350) adds nothing — you may remove it.</div></div></div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Real life: distance and weight</div>
+  ${asWarm('Thousandths appear every time you convert between a big unit and a small one: 1 kilometre = 1,000 metres, 1 kilogram = 1,000 grams, 1 litre = 1,000 millilitres.')}
+  <div class="card-body"><strong>A footpath is 2.350 km long.</strong> The 3 is 3 tenths of a km (300 m), the 5 is 5 hundredths (50 m), the 0 is 0 thousandths.</div>
+  ${steps([['2.350 km','2 km + 0.350 km','the whole part and the decimal part'],['0.350 km','= 350 thousandths of a km','= 350 m (since 1 km = 1,000 m)'],['ANSWER','2 km 350 m','2.350 km = 2,350 m']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A bag of flour weighs 1.275 kg.</strong> That is 1 kg and 275 thousandths of a kg:</div>
+  ${steps([['Whole part','1 kg','= 1,000 g'],['Decimal part','0.275 kg','= 275 g'],['TOTAL','1,275 g','1.275 kg = 1 kg 275 g']])}
+</div>
+ 
+${asExCard(2,[
+ exQ(1,'What is the value of the 6 in 0.416?',['0.006','0.06','0.6'],0),
+ exQ(2,'Write 0.007 as a fraction.',['7/1,000','7/100','7/10'],0),
+ exQ(3,'How many thousandths make 1 hundredth?',['10','100','1,000'],0),
+ exQ(4,'100 thousandths is the same as…',['1 tenth','1 hundredth','1 whole'],0),
+ exQ(5,'5 ones, 3 tenths, 0 hundredths and 8 thousandths make…',['5.308','5.38','5.038'],0),
+ exQ(6,'Which digit is in the THOUSANDTHS place of 2.754?',['4','5','7'],0),
+ exQ(7,'How do 0.35 and 0.350 compare?',['They are equal in value','0.350 is bigger','0.35 is bigger'],0),
+ exQ(8,'Which is the correct partition of 3.462?',['3 + 0.4 + 0.06 + 0.002','3 + 0.4 + 0.6 + 0.2','3 + 4 + 6 + 2'],0),
+ exQ(9,'THINK DEEPER: How many thousandths are there in 0.35?',['350','35','3,500'],0,'t'),
+ exQ(10,'BOSS LEVEL: A cyclist rides 3.075 km. Which statement is correct?',['The 7 is worth 0.07 and the 5 is worth 0.005','The 7 is worth 0.7 and the 5 is worth 0.05','The 7 is worth 0.007 and the 5 is worth 0.5'],0,'b')])}`;
+ 
+ 
+/* ================= SECTION C — PLACEHOLDERS (steps 3–12) ================= */
+const P5_DP3  = null; // Decimal number lines
+const P5_DP4  = null; // Equivalent fractions and decimals
+const P5_DP5  = null; // Compare decimals
+const P5_DP6  = null; // Order decimals
+const P5_DP7  = null; // Round decimals
+const P5_DP8  = null; // Multiply decimals by 10, 100 and 1,000
+const P5_DP9  = null; // Divide decimals by 10, 100 and 1,000
+const P5_DP10 = null; // Percentages as fractions
+const P5_DP11 = null; // Percentages as decimals
+const P5_DP12 = null; // Find simple percentages of quantities
+
+
+
+
+
+
 
 /* ============================================================
    SCHEME DATA — Primary 5
@@ -3988,7 +4268,21 @@ const SCHEME_P5 = [
     topics: [
       { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
       { id:'fractionsB', label:'Fractions B', col: TOPIC_PALETTE[2], steps:['Multiply fractions by integers','Find fractions of quantities','Find fractions of amounts','Multiply a mixed number by an integer','Divide fractions by integers','Find the whole from a fraction','Fractions as division','Add fractions with different denominators','Subtract fractions with different denominators','Solve multi-step fraction problems'].map(s=>({label:s,content:null}))},
-      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3], steps:['Decimal place value','Thousandths','Decimal number lines','Equivalent fractions and decimals','Compare decimals','Order decimals','Round decimals','Multiply decimals by 10, 100 and 1,000','Divide decimals by 10, 100 and 1,000','Percentages as fractions','Percentages as decimals','Find simple percentages of quantities'].map(s=>({label:s,content:null}))},
+            { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],
+        steps: [
+          { label:'Decimal place value', content: P5_DP1 },
+          { label:'Thousandths', content: P5_DP2 },
+          { label:'Decimal number lines', content: P5_DP3 },
+          { label:'Equivalent fractions and decimals', content: P5_DP4 },
+          { label:'Compare decimals', content: P5_DP5 },
+          { label:'Order decimals', content: P5_DP6 },
+          { label:'Round decimals', content: P5_DP7 },
+          { label:'Multiply decimals by 10, 100 and 1,000', content: P5_DP8 },
+          { label:'Divide decimals by 10, 100 and 1,000', content: P5_DP9 },
+          { label:'Percentages as fractions', content: P5_DP10 },
+          { label:'Percentages as decimals', content: P5_DP11 },
+          { label:'Find simple percentages of quantities', content: P5_DP12 }
+        ]},
       { id:'perarea', label:'Perimeter & Area', col: TOPIC_PALETTE[1], steps:['What is perimeter?','Perimeter of rectangles','Perimeter of rectilinear shapes','Find missing lengths','What is area?','Calculate area by counting squares','Area of rectangles','Area of compound shapes','Compare area and perimeter'].map(s=>({label:s,content:null}))},
       { id:'stats', label:'Statistics', col: TOPIC_PALETTE[4], steps:['Read tables','Interpret tables','Read line graphs','Interpret line graphs','Solve comparison problems from line graphs','Complete tables','Read timetables','Interpret timetables'].map(s=>({label:s,content:null}))},
     ]},
