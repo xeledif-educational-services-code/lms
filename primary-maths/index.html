@@ -4192,15 +4192,933 @@ ${asExCard(2,[
  exQ(10,'BOSS LEVEL: A cyclist rides 3.075 km. Which statement is correct?',['The 7 is worth 0.07 and the 5 is worth 0.005','The 7 is worth 0.7 and the 5 is worth 0.05','The 7 is worth 0.007 and the 5 is worth 0.5'],0,'b')])}`;
  
  
-/* ================= SECTION C — PLACEHOLDERS (steps 3–12) ================= */
-const P5_DP3  = null; // Decimal number lines
-const P5_DP4  = null; // Equivalent fractions and decimals
-const P5_DP5  = null; // Compare decimals
-const P5_DP6  = null; // Order decimals
-const P5_DP7  = null; // Round decimals
-const P5_DP8  = null; // Multiply decimals by 10, 100 and 1,000
-const P5_DP9  = null; // Divide decimals by 10, 100 and 1,000
-const P5_DP10 = null; // Percentages as fractions
+/* ============================================================
+   PRIMARY 5 — DECIMALS & PERCENTAGES — LESSONS 3 AND 4
+   INSTALL
+   1. In index.html DELETE these two lines:
+        const P5_DP3  = null;
+        const P5_DP4  = null;
+   2. Paste this whole file ABOVE `const SCHEME_P5` (e.g. below
+      P5_DP2). SCHEME_P5 already points at P5_DP3 and P5_DP4.
+   Needs: asHeader, asWarm, asBar, asJump, asHundred, asStrip,
+          asDecChart, asExCard, steps(), exQ().
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* Decimal number line (float-safe labels).
+   asDecLine(min,max,step,[[value,label,colour?],...],{every:n,title:'..'})
+   every = label only every nth tick (use when ticks are crowded). */
+function asDecLine(min,max,step,marks,opts){
+  opts=opts||{};
+  const W=660,H=124,pad=45,y=76,n=Math.round((max-min)/step);
+  const dp=Math.max(((''+step).split('.')[1]||'').length,((''+min).split('.')[1]||'').length,((''+max).split('.')[1]||'').length);
+  const every=opts.every||1;
+  const X=v=>pad+(v-min)/(max-min)*(W-2*pad);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(opts.title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${opts.title}</text>`;
+  s+=`<line x1="${pad-18}" y1="${y}" x2="${W-pad+18}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  s+=`<polygon points="${W-pad+18},${y} ${W-pad+6},${y-6} ${W-pad+6},${y+6}" fill="#444"/>`;
+  s+=`<polygon points="${pad-18},${y} ${pad-6},${y-6} ${pad-6},${y+6}" fill="#444"/>`;
+  for(let i=0;i<=n;i++){
+    const v=min+i*step, x=X(v), big=(i%every===0||i===n);
+    s+=`<line x1="${x}" y1="${y-(big?9:6)}" x2="${x}" y2="${y+(big?9:6)}" stroke="#444" stroke-width="${big?2:1.5}"/>`;
+    if(big) s+=`<text x="${x}" y="${y+28}" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${v.toFixed(dp)}</text>`;
+  }
+  (marks||[]).forEach(m=>{
+    const x=X(m[0]), c=m[2]||'#D85A30';
+    s+=`<polygon points="${x},${y-3} ${x-7},${y-20} ${x+7},${y-20}" fill="${c}"/>`;
+    s+=`<text x="${x}" y="${y-26}" text-anchor="middle" font-size="13" font-weight="800" fill="${c}">${m[1]}</text>`;
+  });
+  return s+'</svg>';
+}
+
+/* Equivalent-fraction bars lined up with a dashed guide.
+   rows = [[numerator, denominator, 'label'], ...] — all rows must be equal in value. */
+function asEquivBars(rows,title){
+  const W=620,x0=10,bw=600,rh=34,gap=26;
+  const H=34+rows.length*(rh+gap);
+  const cols=['#2DD4BF','#F472B6','#A78BFA','#FBBF24'];
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  rows.forEach((r,i)=>{
+    const y=34+i*(rh+gap), num=r[0], den=r[1], cw=bw/den, c=cols[i%cols.length];
+    s+=`<text x="${x0}" y="${y-6}" font-size="12" font-weight="800" fill="#333">${r[2]}</text>`;
+    s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${rh}" fill="#fff" stroke="#333" stroke-width="2"/>`;
+    s+=`<rect x="${x0}" y="${y}" width="${cw*num}" height="${rh}" fill="${c}" stroke="#333" stroke-width="2"/>`;
+    if(den<=20) for(let k=1;k<den;k++) s+=`<line x1="${x0+k*cw}" y1="${y}" x2="${x0+k*cw}" y2="${y+rh}" stroke="#333" stroke-width="1"/>`;
+  });
+  const gx=x0+bw*rows[0][0]/rows[0][1];
+  s+=`<line x1="${gx}" y1="26" x2="${gx}" y2="${H-4}" stroke="#D85A30" stroke-width="2.5" stroke-dasharray="6 4"/>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 3 : Decimal number lines ---------- */
+const P5_DP3 = `
+${asHeader('DP3','Step 3 — Decimal Number Lines','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — A Ruler for Decimals</div>
+  ${asWarm('A <strong>metre stick</strong> is one whole metre split into 10 equal parts. Each part is one tenth of a metre — 0.1 m. A decimal number line works exactly like that ruler: you read the numbers by <strong>counting equal gaps</strong>.')}
+
+  <div class="card-body"><strong>Concrete → Pictorial:</strong> this line is a metre stick. The arrow points at the 3rd mark after 0:</div>
+  ${asDecLine(0,1,0.1,[[0.3,'0.3']],{title:'One whole split into 10 equal parts — each gap is 0.1'})}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Three questions for EVERY number line</div><div class="s-body" style="color:#085041;">1) What number is at the <strong>start</strong> and the <strong>end</strong>? 2) How many equal <strong>gaps</strong> are there? 3) <strong>Interval = (end − start) ÷ number of gaps.</strong> Then count in that interval.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Counting marks, not gaps</div><div class="s-body" style="color:#712B13;">A line from 0 to 1 with 11 marks has only <strong>10 gaps</strong>. Always count the spaces <em>between</em> the marks.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Every gap is 0.1&rdquo;</div><div class="s-body" style="color:#712B13;">Gaps can be 0.2, 0.5, 0.01… Never guess! Work out the interval from the labelled start and end first.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Tenths on a 0–1 line, and counting across a whole</div>
+  ${asWarm('Where does the arrow land? Use the three questions!')}
+  ${asDecLine(0,1,0.1,[[0.7,'0.7']],{title:'The arrow points at the 7th mark'})}
+  ${steps([['Start and end','0 and 1','the labelled ends'],['Number of gaps','10 equal gaps','count the spaces'],['Interval','1 ÷ 10 = 0.1','each gap is one tenth'],['Count to the arrow','7 gaps → 7 × 0.1','= 0.7']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Counting on in tenths crosses the whole number:</strong> after 0.9 comes <strong>1.0</strong> (one whole) — NOT 0.10!</div>
+  ${asJump(['0.8','0.9','1.0','1.1'],['+0.1','+0.1','+0.1'],'Counting on in tenths')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — When the gap is NOT 0.1</div>
+  ${asWarm('This 0–1 line is split into only 5 gaps. What is each gap worth?')}
+  ${asDecLine(0,1,0.2,[[0.6,'0.6']],{title:'0 to 1 in FIVE equal gaps'})}
+  ${steps([['Gaps','5 equal gaps','count the spaces'],['Interval','1 ÷ 5 = 0.2','each gap is 0.2'],['Count to the arrow','3 gaps → 3 × 0.2','= 0.6']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A longer line:</strong> 0 to 2 in 10 gaps.</div>
+  ${asDecLine(0,2,0.2,[[1.4,'1.4']],{title:'0 to 2 in TEN equal gaps — each gap is 2 ÷ 10 = 0.2'})}
+  ${steps([['Interval','2 ÷ 10 = 0.2','not 0.1!'],['Count to the arrow','7 gaps → 7 × 0.2','= 1.4']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Careful</div><div class="s-body" style="color:#712B13;">Counting 7 marks and saying 0.7 would be wrong here: each gap is 0.2, so 7 gaps = 1.4.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Zooming in on hundredths: 0.73</div>
+  ${asWarm('0.73 is not on a tenths mark. Between which two tenths does it live?')}
+  ${asDecLine(0,1,0.1,[[0.73,'0.73']],{title:'Step 1: 0.73 is between 0.7 and 0.8'})}
+  <div class="card-body"><strong>Zoom in</strong> on the gap from 0.7 to 0.8 and cut it into 10 equal parts:</div>
+  ${asDecLine(0.7,0.8,0.01,[[0.73,'0.73']],{every:5,title:'Step 2: 0.7 to 0.8 in ten gaps — each gap is 0.01'})}
+  ${steps([['Which tenths?','0.7 and 0.8','73 hundredths is 7 tenths and 3 more'],['Zoomed interval','0.1 ÷ 10 = 0.01','each gap is one hundredth'],['From 0.7','3 gaps → 0.7 + 0.03','= 0.73']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Zooming in on thousandths: 0.375</div>
+  ${asWarm('Between which two hundredths is 0.375? Is it nearer one of them, or exactly halfway?')}
+  ${asDecLine(0.3,0.4,0.01,[[0.375,'0.375']],{every:5,title:'Step 1: 0.375 is between 0.37 and 0.38'})}
+  ${asDecLine(0.37,0.38,0.001,[[0.375,'0.375']],{every:5,title:'Step 2: zoom in — each gap is 0.001'})}
+  ${steps([['Zoomed interval','0.01 ÷ 10 = 0.001','each gap is one thousandth'],['From 0.37','5 gaps → 0.37 + 0.005','= 0.375'],['Midpoint','0.375 is exactly halfway','between 0.37 and 0.38']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Handy fact:</strong> halfway between two numbers = add them and halve: (0.37 + 0.38) ÷ 2 = 0.375.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real life: reading a ruler</div>
+  ${asWarm('A pencil is held against a ruler. Its tip is at the 7th small mark after 14 cm. How long is the pencil?')}
+  ${asDecLine(14,15,0.1,[[14.7,'14.7 cm']],{title:'1 cm is split into 10 millimetres — each gap is 0.1 cm'})}
+  ${steps([['Start and end','14 cm and 15 cm','the labelled numbers'],['Interval','1 cm ÷ 10 = 0.1 cm','one millimetre'],['Count','7 gaps → 14 + 0.7','= 14.7 cm'],['In mixed units','14 cm 7 mm','14.7 cm = 147 mm']])}
+</div>
+
+${asExCard(3,[
+ exQ(1,'A line from 0 to 1 is split into 10 equal gaps. An arrow points at the 4th mark after 0. What number is it?',['0.4','0.04','4'],0),
+ exQ(2,'A line from 0 to 1 is split into 5 equal gaps. An arrow points at the 3rd mark after 0. What number is it?',['0.6','0.3','0.35'],0),
+ exQ(3,'A line from 3 to 4 is split into 10 equal gaps. An arrow points at the 7th mark after 3. What number is it?',['3.7','3.07','4.7'],0),
+ exQ(4,'A line from 0 to 2 is split into 10 equal gaps. What is each gap worth?',['0.2','0.1','2'],0),
+ exQ(5,'Between which two tenths does 0.73 lie?',['0.7 and 0.8','0.3 and 0.4','0.73 and 0.74'],0),
+ exQ(6,'Continue the count: 0.8, 0.9, 1.0, ___',['1.1','1.01','0.10'],0),
+ exQ(7,'Count back in hundredths: 0.53, 0.52, 0.51, ___',['0.50','0.49','0.41'],0),
+ exQ(8,'A ruler line from 12 to 13 cm is split into 10 equal gaps. A pencil ends at the 7th mark after 12. How long is it?',['12.7 cm','12.07 cm','13.7 cm'],0),
+ exQ(9,'THINK DEEPER: Mark A sits exactly halfway between 0.4 and 0.5. Priya says A = 0.45. Tom says A = 0.5. Who is right?',['Priya — halfway between 0.4 and 0.5 is 0.45','Tom — halfway is always the larger number','Both are right'],0,'t'),
+ exQ(10,'BOSS LEVEL: A line from 0.5 to 0.6 is split into 10 equal gaps. An arrow points at the 4th mark after 0.5. What number is it?',['0.54','0.64','0.45'],0,'b')])}`;
+
+
+/* ---------- STEP 4 : Equivalent fractions and decimals ---------- */
+const P5_DP4 = `
+${asHeader('DP4','Step 4 — Equivalent Fractions and Decimals','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Same Amount, Different Names</div>
+  ${asWarm('A fraction and a decimal can be two names for the <strong>same amount</strong>. Half a pizza can be written ½ or 0.5 — it is the same piece of pizza! Today you learn to switch between the names.')}
+
+  <div class="card-body"><strong>Concrete / Pictorial:</strong> cut the same whole in different ways. The shaded part is the same size every time — the red dashed line shows it.</div>
+  ${asEquivBars([[1,2,'1/2'],[5,10,'5/10 = 0.5'],[50,100,'50/100 = 0.50']],'1/2 = 5/10 = 50/100 = 0.5')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Fraction → decimal</div><div class="s-body" style="color:#085041;">Scale the fraction up until the denominator is <strong>10, 100 or 1,000</strong>. Then read it off: 3/5 = 6/10 = 0.6.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Decimal → fraction</div><div class="s-body" style="color:#633806;">Write it as tenths, hundredths or thousandths, then <strong>simplify</strong> by dividing top and bottom by the same number: 0.35 = 35/100 = 7/20.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;1/5 is 0.5&rdquo;</div><div class="s-body" style="color:#712B13;">Do NOT just put the denominator after the point! 1/5 = 2/10 = <strong>0.2</strong>. (1/2 is 0.5.)</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Wrong place value</div><div class="s-body" style="color:#712B13;">7/100 is <strong>0.07</strong>, not 0.7. Hundredths need TWO decimal places — use a zero to hold the tenths.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Tenths: 0.2 = □/10</div>
+  ${asWarm('This is the type of question that appears in school! A decimal with one decimal place is a number of <strong>tenths</strong>.')}
+  ${asStrip(2,'0.2 = 2 tenths of the whole')}
+  ${steps([['Decimal','0.2','2 in the tenths column'],['As a fraction','2/10','so 0.2 = <strong>2</strong>/10 — the box holds 2']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Simplify it:</strong> 2/10 is the same amount as 1/5. Compare the bars:</div>
+  ${asEquivBars([[2,10,'2/10 = 0.2'],[1,5,'1/5 = 0.2']],'The shaded part is the same length')}
+  ${steps([['Divide top and bottom by 2','2 ÷ 2 = 1 · 10 ÷ 2 = 5','the same number on both'],['ANSWER','0.2 = 2/10 = 1/5','three names for one amount']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Hundredths: 0.25 = 1/4</div>
+  ${asWarm('Quarters are very common: a quarter of an hour, a quarter of a litre, 25p out of £1…')}
+  ${asHundred(2,5,'0.25 = 25 out of 100 squares')}
+  ${asEquivBars([[1,4,'1/4'],[25,100,'25/100 = 0.25']],'A quarter of the whole = 25 hundredths')}
+  ${steps([['Decimal','0.25','2 tenths 5 hundredths = 25 hundredths'],['As a fraction','25/100','25 out of 100'],['Simplify ÷ 25','25 ÷ 25 = 1 · 100 ÷ 25 = 4','divide top and bottom by 25'],['ANSWER','0.25 = 25/100 = 1/4','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Fractions to decimals: halves, quarters and fifths</div>
+  ${asWarm('Make the denominator 10 or 100 by multiplying the top and bottom by the SAME number.')}
+  ${steps([['3/5','× 2 on top and bottom','= 6/10 = <strong>0.6</strong>'],['3/4','× 25 on top and bottom','= 75/100 = <strong>0.75</strong>'],['4/5','× 2 on top and bottom','= 8/10 = <strong>0.8</strong>'],['1/2','× 5 on top and bottom','= 5/10 = <strong>0.5</strong>']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Facts worth remembering:</strong></div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:8px 0;">
+    ${[['1/2','0.5'],['1/4','0.25'],['3/4','0.75'],['1/5','0.2'],['2/5','0.4'],['3/5','0.6'],['4/5','0.8'],['1/10','0.1']].map(p=>`<div style="background:#CCFBF1;border:1.5px solid #0F766E;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:15px;font-weight:800;color:#134E4A;">${p[0]}</div><div style="font-size:13px;font-weight:700;color:#0F766E;">= ${p[1]}</div></div>`).join('')}
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Decimals to the simplest fraction: 0.35 and 0.8</div>
+  ${asWarm('Step 1: say the decimal as tenths or hundredths. Step 2: simplify as far as you can.')}
+  <div class="card-body"><strong>0.35</strong></div>
+  ${steps([['Say it','35 hundredths','two decimal places → hundredths'],['Write it','35/100','35 out of 100'],['Simplify ÷ 5','7/20','35 ÷ 5 = 7 · 100 ÷ 5 = 20'],['Check','7 and 20 share no factor','so 7/20 is as simple as possible ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>0.8</strong></div>
+  ${steps([['Say it','8 tenths','8/10'],['Simplify ÷ 2','4/5','8 ÷ 2 = 4 · 10 ÷ 2 = 5'],['ANSWER','0.8 = 8/10 = 4/5','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Mixed numbers and real life</div>
+  ${asWarm('A mixed number is a whole number plus a fraction. Just convert the fraction part!')}
+  ${steps([['1 1/2','1 + 1/2','= 1 + 0.5 = <strong>1.5</strong>'],['2 3/4','2 + 3/4','= 2 + 0.75 = <strong>2.75</strong>']])}
+  ${asDecChart('2.75 = 2 + 3/4','2','75')}
+  <div class="card-body" style="margin-top:8px;"><strong>Real life:</strong> a recipe needs <strong>3/4 of a litre</strong> of milk. 3/4 = 0.75 and 1 litre = 1,000 ml, so 0.75 L = 0.75 × 1,000 = <strong>750 ml</strong>.</div>
+  ${steps([['3/4 of a litre','= 0.75 L','75 hundredths of a litre'],['In ml','0.75 × 1,000','= 750 ml'],['Check','750 ml is 3/4 of 1,000 ml','250 + 250 + 250 ✓']])}
+</div>
+
+${asExCard(4,[
+ exQ(1,'0.2 = □/10. What number goes in the box?',['2','20','0.2'],0),
+ exQ(2,'Write 0.7 as a fraction.',['7/10','7/100','70/10'],0),
+ exQ(3,'Write 0.25 as a fraction in its simplest form.',['1/4','1/25','25/10'],0),
+ exQ(4,'Write 3/4 as a decimal.',['0.75','0.34','3.4'],0),
+ exQ(5,'Write 1/5 as a decimal.',['0.2','0.5','0.15'],0),
+ exQ(6,'Write 4/5 as a decimal.',['0.8','0.45','4.5'],0),
+ exQ(7,'Write 0.6 as a fraction in its simplest form.',['3/5','6/5','1/6'],0),
+ exQ(8,'Write 2 1/2 as a decimal.',['2.5','2.12','2.2'],0),
+ exQ(9,'THINK DEEPER: Which group contains ONLY fractions equal to 0.5?',['1/2, 5/10 and 50/100','1/5, 5/10 and 5/100','1/2, 1/5 and 1/10'],0,'t'),
+ exQ(10,'BOSS LEVEL: A recipe needs 3/4 of a litre of milk. Write this as a decimal and in millilitres.',['0.75 L = 750 ml','0.34 L = 340 ml','0.75 L = 75 ml'],0,'b')])}`;
+
+
+
+/* ============================================================
+   PRIMARY 5 — DECIMALS & PERCENTAGES — LESSONS 5 AND 6
+   (8 worked examples each — extended to cover all Year 5 tasks)
+   INSTALL
+   1. In index.html DELETE these two lines:
+        const P5_DP5  = null;
+        const P5_DP6  = null;
+   2. Paste this whole file ABOVE `const SCHEME_P5`.
+   Needs: asHeader, asWarm, asHundred, asDecChart, asDecLine,
+          asExCard, steps(), exQ(), PLACE_META.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPER ================= */
+
+/* Aligned decimal grid: lines up decimal points and pads with faded zeros.
+   asDecAlign([['0.45','tag'],['0.5','tag']], {hi:false})
+   hi = column index to highlight; default = first column where the numbers differ; false = none.
+   Supports up to 3 whole-number digits and 3 decimal places. */
+function asDecAlign(rows,opts){
+  opts=opts||{};
+  const R=rows.map(r=>Array.isArray(r)?r:[r]);
+  const P=R.map(r=>{const p=String(r[0]).split('.');return [p[0],p[1]||''];});
+  const ni=Math.min(3,Math.max(...P.map(p=>p[0].length))), nd=Math.min(3,Math.max(...P.map(p=>p[1].length),1));
+  const ik=['H','Te','O'].slice(3-ni);
+  const dm=[['TENTHS','#0F766E','#CCFBF1','#115E59'],['HUNDREDTHS','#BE185D','#FCE7F3','#9D174D'],['THOUSANDTHS','#6D28D9','#EDE9FE','#5B21B6']];
+  const cw=62,lw=84,pw=22,hasTag=R.some(r=>r[1]),tw=hasTag?112:6;
+  const W=lw+ni*cw+pw+nd*cw+tw+8, rowH=46, H=40+R.length*rowH+10;
+  const cells=P.map(p=>{
+    const iD=p[0].padStart(ni,'_').split('').map(c=>c==='_'?['0',true]:[c,false]);
+    const dD=p[1].padEnd(nd,'_').split('').map(c=>c==='_'?['0',true]:[c,false]);
+    return iD.concat(dD);
+  });
+  let hi=opts.hi;
+  if(hi===undefined){
+    hi=-1;
+    for(let c=0;c<ni+nd;c++){ if(new Set(cells.map(r=>r[c][0])).size>1){hi=c;break;} }
+  }
+  const colX=c=>c<ni?lw+c*cw:lw+ni*cw+pw+(c-ni)*cw;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  for(let c=0;c<ni+nd;c++){
+    const m=c<ni?PLACE_META[ik[c]]:null, d=c>=ni?dm[c-ni]:null;
+    const fill=m?m[2]:d[2], stroke=m?m[1]:d[1], dark=m?m[3]:d[3], name=m?m[0]:d[0];
+    s+=`<rect x="${colX(c)+2}" y="6" width="${cw-4}" height="${H-12}" rx="9" fill="${fill}" opacity=".55"/>`;
+    s+=`<text x="${colX(c)+cw/2}" y="22" text-anchor="middle" font-size="7.5" font-weight="800" fill="${dark}">${name}</text>`;
+  }
+  R.forEach((r,i)=>{
+    const y=34+i*rowH+rowH/2;
+    s+=`<text x="${lw-10}" y="${y+5}" text-anchor="end" font-size="15" font-weight="800" fill="#222">${r[0]}</text>`;
+    s+=`<circle cx="${lw+ni*cw+pw/2}" cy="${y+8}" r="3.5" fill="#222"/>`;
+    cells[i].forEach((cd,c)=>{
+      const cx=colX(c)+cw/2, m=c<ni?PLACE_META[ik[c]]:null, d=c>=ni?dm[c-ni]:null;
+      const stroke=m?m[1]:d[1];
+      if(cd[1]) s+=`<circle cx="${cx}" cy="${y}" r="15" fill="#fff" stroke="${stroke}" stroke-width="2" stroke-dasharray="4 3" opacity=".7"/><text x="${cx}" y="${y+6}" text-anchor="middle" font-size="16" font-weight="700" fill="${stroke}" opacity=".55">0</text>`;
+      else s+=`<circle cx="${cx}" cy="${y}" r="15" fill="${stroke}"/><text x="${cx}" y="${y+6}" text-anchor="middle" font-size="17" font-weight="800" fill="#fff">${cd[0]}</text>`;
+    });
+    if(r[1]) s+=`<text x="${W-tw+8}" y="${y+5}" font-size="11.5" font-weight="800" fill="#B45309">${r[1]}</text>`;
+  });
+  if(hi>=0) s+=`<rect x="${colX(hi)+1}" y="28" width="${cw-2}" height="${R.length*rowH+8}" rx="10" fill="none" stroke="#F59E0B" stroke-width="4"/>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 5 : Compare decimals ---------- */
+const P5_DP5 = `
+${asHeader('DP5','Step 5 — Compare Decimals','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Which Is Bigger: 0.5 or 0.45?</div>
+  ${asWarm('Many pupils say &ldquo;0.45 is bigger because 45 is bigger than 5.&rdquo; Is that true? Let us find out with a 100-square. Remember: the WHOLE square is 1.')}
+  ${asHundred(5,0,'0.5 = 5 tenth-strips = 50 small squares')}
+  ${asHundred(4,5,'0.45 = 4 strips + 5 squares = 45 small squares')}
+  <div class="card-body" style="text-align:center;margin-top:4px;font-size:15px;"><strong>50 squares &gt; 45 squares, so 0.5 &gt; 0.45!</strong></div>
+
+  <div class="card-body" style="margin-top:10px;"><strong>Pictorial → Abstract:</strong> line up the decimal points. Fill the empty places with zeros (shown faded). Now compare column by column, from the LEFT.</div>
+  ${asDecAlign([['0.5','bigger'],['0.45','']])}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The Column Compare Method</div><div class="s-body" style="color:#085041;">1) <strong>Line up</strong> the decimal points. 2) <strong>Add zeros</strong> so every number has the same number of decimal places. 3) Compare from the <strong>left</strong>. 4) The <strong>first column that differs</strong> decides the winner.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Longer is bigger&rdquo;</div><div class="s-body" style="color:#712B13;">0.45 has more digits than 0.5, but it is SMALLER. With whole numbers more digits means bigger. With decimals it does NOT.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Reading after the point as a whole number</div><div class="s-body" style="color:#712B13;">&ldquo;Zero point forty-five&rdquo; vs &ldquo;zero point five&rdquo; tempts you to compare 45 and 5. Compare tenths with tenths, hundredths with hundredths!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Same whole part, different tenths: 3.7 and 3.4</div>
+  ${asWarm('The ones are the same (3 = 3). Which column is the first to differ?')}
+  ${asDecAlign([['3.7','bigger'],['3.4','']])}
+  ${steps([['Ones','3 = 3','same — move right'],['Tenths','7 vs 4','7 is bigger!'],['ANSWER','3.7 &gt; 3.4','the tenths column decided']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Different whole parts: 12.3 and 9.8</div>
+  ${asWarm('Is 9.8 bigger because 8 is bigger than 3? Check the grid carefully!')}
+  ${asDecAlign([['12.3','bigger'],['9.8','']])}
+  ${steps([['Tens','1 vs 0','1 is bigger — the first difference!'],['STOP','no need to look further','the tens column decided'],['ANSWER','12.3 &gt; 9.8','the WHOLE part always matters most']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Trap</div><div class="s-body" style="color:#712B13;">The 8 in 9.8 looks big, but it is only 8 <em>tenths</em>. 12.3 already has more than 12 wholes.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Different number of decimal places: 0.5 and 0.45</div>
+  ${asWarm('We saw this with the 100-square. Now write the proof with the grid: pad 0.5 to 0.50.')}
+  ${asDecAlign([['0.5','bigger'],['0.45','']])}
+  ${steps([['Tenths','5 vs 4','5 is bigger — first difference'],['Check with hundredths','0.50 = 50 hundredths vs 45 hundredths','50 &gt; 45 ✓'],['ANSWER','0.5 &gt; 0.45','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Thousandths: 0.407 and 0.47</div>
+  ${asWarm('0.407 has THREE decimal places, 0.47 has only two. Add a zero to make them match.')}
+  ${asDecAlign([['0.407',''],['0.47','bigger']])}
+  ${steps([['Tenths','4 = 4','same'],['Hundredths','0 vs 7','7 is bigger — first difference'],['Pad to check','0.407 vs 0.470','407 thousandths &lt; 470 thousandths'],['ANSWER','0.407 &lt; 0.47','the longer number is smaller!']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Equal decimals: 2.30 and 2.3</div>
+  ${asWarm('Are these two numbers different? Look at what the extra zero is doing.')}
+  ${asDecAlign([['2.30',''],['2.3','']],{hi:false})}
+  ${steps([['Ones','2 = 2','same'],['Tenths','3 = 3','same'],['Hundredths','0 = 0 (the faded zero)','same'],['ANSWER','2.30 = 2.3','a zero at the END of a decimal changes nothing']])}
+  <div class="card-body" style="margin-top:6px;">💡 Also: 0.5 = 0.50 = 0.500. But a zero in the MIDDLE changes the value: 2.03 ≠ 2.3.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Comparing on a number line: 0.7 and 0.65</div>
+  ${asWarm('On a number line, the number further RIGHT is the bigger one.')}
+  ${asDecLine(0.6,0.8,0.05,[[0.65,'0.65'],[0.7,'0.7','#0F766E']],{title:'0.6 to 0.8 in gaps of 0.05'})}
+  ${steps([['Read the line','0.65 is left of 0.70','0.7 = 0.70'],['Further right = bigger','0.70 is right of 0.65','so 0.7 is bigger'],['ANSWER','0.7 &gt; 0.65','70 hundredths &gt; 65 hundredths']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Comparing a fraction with a decimal: 3/5 and 0.65</div>
+  ${asWarm('You cannot compare a fraction and a decimal directly. Change the fraction into a decimal first (Step 4!).')}
+  ${steps([['Convert 3/5','× 2 on top and bottom','= 6/10 = 0.6'],['Line up','0.60 vs 0.65','pad 0.6 with a zero'],['Compare','hundredths: 0 vs 5','5 is bigger'],['ANSWER','3/5 &lt; 0.65','0.60 &lt; 0.65']])}
+  ${asDecAlign([['0.60','3/5'],['0.65','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Real life and missing digits</div>
+  ${asWarm('In a long-jump contest Ade jumped <strong>1.45 m</strong> and Bola jumped <strong>1.5 m</strong>. Who jumped further?')}
+  ${asDecAlign([['1.45','Ade'],['1.5','Bola — further!']])}
+  ${steps([['Tenths','4 vs 5','5 is bigger'],['ANSWER','1.5 &gt; 1.45','Bola jumped 0.05 m further (5 cm)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing-digit puzzle:</strong> which digits can go in the box so that 0.4▢ &gt; 0.47?</div>
+  ${steps([['Compare','0.4▢ vs 0.47','tenths are equal (4 = 4)'],['Hundredths','▢ must be bigger than 7','so ▢ = 8 or 9'],['Check','0.48 &gt; 0.47 ✓ · 0.49 &gt; 0.47 ✓','0.47 itself is equal, not bigger']])}
+</div>
+
+${asExCard(5,[
+ exQ(1,'Which symbol completes: 3.7 ___ 3.4?',['&gt;','&lt;','='],0),
+ exQ(2,'Which symbol completes: 12.3 ___ 9.8?',['&gt;','&lt;','='],0),
+ exQ(3,'Which symbol completes: 0.45 ___ 0.5?',['&lt;','&gt;','='],0),
+ exQ(4,'Which symbol completes: 0.407 ___ 0.47?',['&lt;','&gt;','='],0),
+ exQ(5,'Which symbol completes: 2.30 ___ 2.3?',['=','&lt;','&gt;'],0),
+ exQ(6,'Which is larger: 0.399 or 0.4?',['0.4','0.399','They are equal'],0),
+ exQ(7,'Which symbol completes: 3/5 ___ 0.65?',['&lt;','&gt;','='],0),
+ exQ(8,'Which is the greatest number: 5.09, 5.9 or 5.19?',['5.9','5.19','5.09'],0),
+ exQ(9,'THINK DEEPER: Which digits could go in the box so that 0.6▢ &gt; 0.67?',['8 and 9 only','7, 8 and 9','Any digit'],0,'t'),
+ exQ(10,'BOSS LEVEL: Ade jumped 1.45 m, Bola jumped 1.5 m and Chi jumped 1.405 m. Which statement is TRUE?',['1.5 &gt; 1.45 &gt; 1.405','1.405 &gt; 1.45 &gt; 1.5','1.45 &gt; 1.5 &gt; 1.405'],0,'b')])}`;
+
+
+/* ---------- STEP 6 : Order decimals ---------- */
+const P5_DP6 = `
+${asHeader('DP6','Step 6 — Order Decimals','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Putting Decimals in a Queue</div>
+  ${asWarm('Ordering is just <strong>comparing again and again</strong>! Imagine four runners lining up. Each decimal needs to find its correct place in the queue.')}
+
+  <div class="strategy-grid" style="margin-top:6px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📖 Key words</div><div class="s-body" style="color:#085041;"><strong>Ascending</strong> = smallest → largest (going UP the stairs).<br><strong>Descending</strong> = largest → smallest (going DOWN).<br>&ldquo;Smallest first&rdquo; = ascending. &ldquo;Greatest first&rdquo; = descending.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 4-step method</div><div class="s-body" style="color:#633806;">1) <strong>Line up</strong> the decimal points. 2) <strong>Add zeros</strong> so all have the same decimal places. 3) Compare <strong>column by column</strong> from the left. 4) <strong>Write the list</strong> in the right order, then check neighbours.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert</div><div class="s-body" style="color:#712B13;">Do not order by LENGTH or by the digits after the point as whole numbers. 0.5 is greater than 0.45 and 0.405 even though it is the shortest.</div></div>
+  </div>
+  ${asDecAlign([['0.54','4th'],['0.5','3rd'],['0.45','2nd'],['0.405','1st']],{hi:false})}
+  <div class="card-body" style="text-align:center;font-size:14px;margin-top:4px;"><strong>Padded to three places:</strong> 0.540 · 0.500 · 0.450 · 0.405 → ascending: 0.405, 0.45, 0.5, 0.54</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Same whole part: 0.6, 0.2, 0.9, 0.4</div>
+  ${asWarm('All the whole numbers are 0. Put them on a number line — the order appears from left to right!')}
+  ${asDecLine(0,1,0.1,[[0.2,'0.2'],[0.4,'0.4'],[0.6,'0.6'],[0.9,'0.9']],{title:'Read left → right = smallest → largest'})}
+  ${steps([['Compare tenths','2, 4, 6, 9','just compare the tenth digits'],['Ascending','0.2, 0.4, 0.6, 0.9','smallest first'],['Descending','0.9, 0.6, 0.4, 0.2','largest first']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Different whole parts: 4.3, 12.1, 4.03, 9.8</div>
+  ${asWarm('Start with the WHOLE parts. Then settle ties using the decimals.')}
+  ${asDecAlign([['4.3',''],['12.1',''],['4.03',''],['9.8','']],{hi:false})}
+  ${steps([['Biggest whole part','12.1','12 is the largest whole part → largest'],['Next','9.8','9 is next'],['Tie on 4','4.3 vs 4.03','tenths: 3 vs 0 → 4.3 is bigger'],['Ascending','4.03, 4.3, 9.8, 12.1','smallest first']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Different decimal places: 0.5, 0.45, 0.405, 0.54</div>
+  ${asWarm('Pad every number to THREE decimal places, then compare as if they were whole thousandths.')}
+  ${steps([['Pad','0.500, 0.450, 0.405, 0.540','all three places now'],['Compare tenths','5, 4, 4, 5','0.45 and 0.405 are smaller; 0.5 and 0.54 are larger'],['Compare hundredths','the 4s: 5 vs 0 · the 5s: 0 vs 4','0.405 &lt; 0.45 and 0.5 &lt; 0.54'],['Ascending','0.405, 0.45, 0.5, 0.54',''],['Descending','0.54, 0.5, 0.45, 0.405','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Equal values in a list: 2.5, 2.05, 2.50, 2.505</div>
+  ${asWarm('Two numbers might be equal! Equal numbers sit side by side, with an = sign between them.')}
+  ${asDecAlign([['2.5',''],['2.05',''],['2.50',''],['2.505','']],{hi:false})}
+  ${steps([['Pad to 3 places','2.500, 2.050, 2.500, 2.505',''],['Smallest','2.050','hundredths 5 &lt; 50'],['Equal pair','2.500 = 2.500','2.5 = 2.50'],['Biggest','2.505','5 thousandths more than 2.500'],['Ascending','2.05, 2.5 = 2.50, 2.505','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Ordering on a zoomed number line: 0.7, 0.65, 0.75, 0.6</div>
+  ${asWarm('Zoom in to a line from 0.6 to 0.8 in steps of 0.05, then place each number.')}
+  ${asDecLine(0.6,0.8,0.05,[[0.6,'0.6','#0F766E'],[0.65,'0.65','#D4537E'],[0.7,'0.7','#BA7517'],[0.75,'0.75','#6D28D9']],{title:'The four numbers marked on the line'})}
+  ${steps([['Read left → right','0.6, 0.65, 0.7, 0.75','that is already ascending'],['Descending','0.75, 0.7, 0.65, 0.6','read right → left']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Fractions and decimals mixed: 1/2, 0.45, 3/5, 0.6</div>
+  ${asWarm('Convert every fraction to a decimal first (Step 4), then order.')}
+  ${steps([['1/2','× 5 on top and bottom','= 5/10 = 0.5'],['3/5','× 2 on top and bottom','= 6/10 = 0.6'],['Pad','0.45, 0.50, 0.60, 0.60','two decimal places'],['Descending (largest first)','3/5 = 0.6, then 1/2, then 0.45','0.6 = 0.6 are equal']])}
+  ${asDecAlign([['0.60','3/5'],['0.6','0.6'],['0.50','1/2'],['0.45','']],{hi:false})}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: race times (smaller time = faster!)</div>
+  ${asWarm('Four runners finish a 100 m race in 12.58 s, 12.5 s, 12.085 s and 12.6 s. Who won? Put them in order, fastest first.')}
+  ${asDecAlign([['12.58','C'],['12.5','B'],['12.085','A'],['12.6','D']],{hi:false})}
+  ${steps([['Pad to 3 places','12.580, 12.500, 12.085, 12.600',''],['Smallest time','12.085 s (A)','= the FASTEST — fewest seconds'],['Order smallest → largest','12.085, 12.5, 12.58, 12.6','A, B, C, D']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Read the question</div><div class="s-body" style="color:#712B13;">For times, the SMALLEST number wins. For jumps or scores, the LARGEST number wins. Always ask: &ldquo;what does &lsquo;best&rsquo; mean here?&rdquo;</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Different units: 1.2 kg, 1,150 g, 1.09 kg, 1,300 g</div>
+  ${asWarm('You cannot compare kilograms with grams! Convert everything to ONE unit first. Remember: 1 kg = 1,000 g, so grams ÷ 1,000 = kilograms.')}
+  ${steps([['1,150 g','÷ 1,000','= 1.15 kg'],['1,300 g','÷ 1,000','= 1.3 kg'],['Pad','1.20, 1.15, 1.09, 1.30','two decimal places'],['Ascending','1.09 kg, 1,150 g, 1.2 kg, 1,300 g','1.09 &lt; 1.15 &lt; 1.20 &lt; 1.30']])}
+  ${asDecAlign([['1.20','1.2 kg'],['1.15','1,150 g'],['1.09','1.09 kg'],['1.30','1,300 g']],{hi:false})}
+</div>
+
+${asExCard(6,[
+ exQ(1,'Order from smallest to largest: 0.6, 0.2, 0.9, 0.4',['0.2, 0.4, 0.6, 0.9','0.9, 0.6, 0.4, 0.2','0.4, 0.2, 0.6, 0.9'],0),
+ exQ(2,'Order from smallest to largest: 4.3, 12.1, 4.03, 9.8',['4.03, 4.3, 9.8, 12.1','4.3, 4.03, 9.8, 12.1','12.1, 9.8, 4.3, 4.03'],0),
+ exQ(3,'Order from largest to smallest: 0.5, 0.45, 0.405, 0.54',['0.54, 0.5, 0.45, 0.405','0.5, 0.54, 0.45, 0.405','0.405, 0.45, 0.5, 0.54'],0),
+ exQ(4,'Which is the SMALLEST: 2.5, 2.05, 2.55 or 2.505?',['2.05','2.5','2.505'],0),
+ exQ(5,'Race times: 12.58 s, 12.5 s, 12.085 s, 12.6 s. Which time is the FASTEST?',['12.085 s','12.5 s','12.6 s'],0),
+ exQ(6,'Order from smallest to largest: 1/2, 0.45, 0.6',['0.45, 1/2, 0.6','1/2, 0.45, 0.6','0.6, 1/2, 0.45'],0),
+ exQ(7,'Which number is in the MIDDLE when 3.4, 3.04 and 3.44 are ordered?',['3.4','3.04','3.44'],0),
+ exQ(8,'Order from smallest to largest: 1.2 kg, 1,150 g, 1.09 kg',['1.09 kg, 1,150 g, 1.2 kg','1,150 g, 1.09 kg, 1.2 kg','1.2 kg, 1,150 g, 1.09 kg'],0),
+ exQ(9,'THINK DEEPER: Which list is in DESCENDING order?',['7.5, 7.45, 7.405, 7.04','7.04, 7.405, 7.45, 7.5','7.45, 7.5, 7.405, 7.04'],0,'t'),
+ exQ(10,'BOSS LEVEL: A pupil wrote these in order from smallest to largest: 0.35, 0.4, 0.305, 0.45. What is wrong?',['0.305 should be first','0.45 should be first','0.4 should be last'],0,'b')])}`;
+
+
+
+
+/* ============================================================
+   PRIMARY 5 — DECIMALS & PERCENTAGES — LESSONS 7 AND 8
+   (8 worked examples each)
+   INSTALL
+   1. In index.html DELETE these two lines:
+        const P5_DP7  = null;
+        const P5_DP8  = null;
+   2. Paste this whole file ABOVE `const SCHEME_P5`.
+   Needs: asHeader, asWarm, asDecChart, asDecLine, asDecAlign,
+          asExCard, steps(), exQ(), PLACE_META.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPER ================= */
+
+/* Digit-shift diagram for ×10/×100/×1000 and ÷10/÷100/÷1000.
+   asShift('3.45','34.5',1,'left','× 10')
+   Digits move; the decimal point stays still. Zeros that appear with no
+   arrow pointing at them are "hero zeros" (dashed circles). */
+function asShift(from,to,places,dir,opLabel){
+  const parse=s=>{const p=String(s).split('.');return [p[0],p[1]||''];};
+  const f=parse(from), t=parse(to);
+  const ni=Math.min(7,Math.max(f[0].length,t[0].length)), nd=Math.min(5,Math.max(f[1].length,t[1].length,1));
+  const nc=ni+nd, cw=54, lw=96, pw=22, W=lw+ni*cw+pw+nd*cw+10, H=214, yT=78, yB=170, r=17;
+  const keys=['M','HT','TT','T','H','Te','O'].slice(7-ni);
+  const dc=[['#CCFBF1','#0F766E'],['#FCE7F3','#BE185D'],['#EDE9FE','#6D28D9'],['#FEF3C7','#B45309'],['#DBEAFE','#1D4ED8']];
+  const dv=['0.1','0.01','0.001','0.0001','0.00001'];
+  const colX=c=>c<ni?lw+c*cw:lw+ni*cw+pw+(c-ni)*cw;
+  const cx=c=>colX(c)+cw/2;
+  const fill=c=>c<ni?PLACE_META[keys[c]][2]:dc[c-ni][0];
+  const strk=c=>c<ni?PLACE_META[keys[c]][1]:dc[c-ni][1];
+  const label=c=>c<ni?PLACE_META[keys[c]][4].toLocaleString('en-GB'):dv[c-ni];
+  const place=p=>{const a=new Array(nc).fill(null);for(let k=0;k<p[0].length;k++)a[ni-p[0].length+k]=p[0][k];for(let k=0;k<p[1].length;k++)a[ni+k]=p[1][k];return a;};
+  const A=place(f), B=place(t), incoming=new Set(), arrows=[];
+  for(let c=0;c<nc;c++){
+    if(A[c]===null) continue;
+    const d=dir==='left'?c-places:c+places;
+    if(d>=0&&d<nc&&B[d]!==null){arrows.push([c,d]);incoming.add(d);}
+  }
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  for(let c=0;c<nc;c++){
+    s+=`<rect x="${colX(c)+2}" y="26" width="${cw-4}" height="${H-34}" rx="9" fill="${fill(c)}" opacity=".6"/>`;
+    s+=`<text x="${cx(c)}" y="20" text-anchor="middle" font-size="8.5" font-weight="800" fill="${strk(c)}">${label(c)}</text>`;
+  }
+  const px=lw+ni*cw+pw/2;
+  s+=`<line x1="${px}" y1="30" x2="${px}" y2="${H-8}" stroke="#222" stroke-width="2" stroke-dasharray="5 4"/>`;
+  s+=`<circle cx="${px}" cy="${yT+9}" r="4" fill="#222"/><circle cx="${px}" cy="${yB+9}" r="4" fill="#222"/>`;
+  s+=`<text x="${px}" y="${H-12}" text-anchor="middle" font-size="7.5" font-weight="800" fill="#222">point stays</text>`;
+  s+=`<text x="${lw-10}" y="${yT+5}" text-anchor="end" font-size="15" font-weight="800" fill="#222">${from}</text>`;
+  s+=`<text x="${lw-10}" y="${yB+5}" text-anchor="end" font-size="15" font-weight="800" fill="#222">${to}</text>`;
+  if(opLabel) s+=`<text x="${lw-10}" y="${(yT+yB)/2+5}" text-anchor="end" font-size="15" font-weight="800" fill="#D85A30">${opLabel}</text>`;
+  arrows.forEach(a=>{
+    const x1=cx(a[0]),y1=yT+r+2,x2=cx(a[1]),y2=yB-r-2,ang=Math.atan2(y2-y1,x2-x1);
+    s+=`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#D85A30" stroke-width="2.2"/>`;
+    s+=`<polygon points="${x2},${y2} ${x2-10*Math.cos(ang-0.4)},${y2-10*Math.sin(ang-0.4)} ${x2-10*Math.cos(ang+0.4)},${y2-10*Math.sin(ang+0.4)}" fill="#D85A30"/>`;
+  });
+  for(let c=0;c<nc;c++){
+    if(A[c]!==null) s+=`<circle cx="${cx(c)}" cy="${yT}" r="${r}" fill="${strk(c)}"/><text x="${cx(c)}" y="${yT+6}" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">${A[c]}</text>`;
+    if(B[c]!==null){
+      if(incoming.has(c)) s+=`<circle cx="${cx(c)}" cy="${yB}" r="${r}" fill="${strk(c)}"/><text x="${cx(c)}" y="${yB+6}" text-anchor="middle" font-size="18" font-weight="800" fill="#fff">${B[c]}</text>`;
+      else s+=`<circle cx="${cx(c)}" cy="${yB}" r="${r}" fill="#fff" stroke="${strk(c)}" stroke-width="3" stroke-dasharray="4 3"/><text x="${cx(c)}" y="${yB+6}" text-anchor="middle" font-size="18" font-weight="800" fill="${strk(c)}">${B[c]}</text>`;
+    }
+  }
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 7 : Round decimals ---------- */
+const P5_DP7 = `
+${asHeader('DP7','Step 7 — Round Decimals','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Which Stop Is Closer?</div>
+  ${asWarm('You already round whole numbers: 67 rounds to 70 because it is nearer 70 than 60. Decimals work the <em>same way</em> — you just choose a different &ldquo;stop&rdquo; on the number line: the nearest <strong>whole number</strong>, <strong>tenth</strong> or <strong>hundredth</strong>.')}
+
+  ${asDecLine(3,4,0.1,[[3.5,'halfway 3.5','#BA7517'],[3.7,'3.7']],{title:'3.7 is past halfway, so it is closer to 4 than to 3'})}
+  <div class="card-body">3.7 is <strong>past the halfway mark</strong> (3.5), so it rounds <strong>UP</strong> to <strong>4</strong>.</div>
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The Rounding Rule (same as whole numbers!)</div><div class="s-body" style="color:#085041;">1) <strong>Underline</strong> the digit you are rounding TO. 2) Look at the <strong>very next digit on the right</strong> — the &ldquo;decider&rdquo;. 3) Decider <strong>0–4</strong>: the underlined digit stays. Decider <strong>5–9</strong>: it goes up by 1. 4) Everything to the right is dropped.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🎯 Which decider?</div><div class="s-body" style="color:#633806;">To the nearest <strong>whole number</strong> → decider is the <strong>tenths</strong> digit.<br>To the nearest <strong>tenth (1 d.p.)</strong> → decider is the <strong>hundredths</strong> digit.<br>To the nearest <strong>hundredth (2 d.p.)</strong> → decider is the <strong>thousandths</strong> digit.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Chain rounding</div><div class="s-body" style="color:#712B13;">Look at ONE decider only. 4.349 to 1 d.p.: the decider is 4 → <strong>4.3</strong>. Do NOT round 4.349 → 4.35 → 4.4!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Dropping the zero</div><div class="s-body" style="color:#712B13;">When you round to 1 d.p., KEEP the decimal digit even if it is 0: 6.96 → <strong>7.0</strong>, not 7. The zero shows how accurate you were.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Nearest whole number: 3.7</div>
+  ${asWarm('Underline the ones digit. What is the decider?')}
+  ${asDecLine(3,4,0.1,[[3.7,'3.7']],{title:'3.7 sits between 3 and 4'})}
+  ${steps([['Round to','the nearest WHOLE number','underline the ones digit: 3.7'],['Decider','the tenths digit = 7','7 is 5 or more'],['Round UP','3 → 4','drop the decimal part'],['ANSWER','3.7 ≈ 4','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Rounding down and the halfway rule: 12.4 and 8.5</div>
+  ${asWarm('What if the decider is exactly 5? Halfway always rounds UP.')}
+  ${steps([['12.4','decider (tenths) = 4','4 is less than 5 → stays 12'],['8.5','decider (tenths) = 5','exactly halfway → rounds UP to 9'],['ANSWER','12.4 ≈ 12 and 8.5 ≈ 9','']])}
+  ${asDecLine(8,9,0.1,[[8.5,'8.5 → 9','#BA7517']],{title:'Halfway between 8 and 9 rounds up'})}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Nearest tenth (1 decimal place): 4.36</div>
+  ${asWarm('Now the stops are the tenths: 4.3 and 4.4. Zoom in!')}
+  ${asDecLine(4.3,4.4,0.01,[[4.35,'halfway 4.35','#BA7517'],[4.36,'4.36']],{every:5,title:'4.36 is just past the halfway mark 4.35'})}
+  ${steps([['Round to','1 d.p. (nearest tenth)','underline the tenths digit: 4.<u>3</u>6'],['Decider','hundredths digit = 6','6 is 5 or more'],['Round UP','3 → 4','4.3 becomes 4.4'],['ANSWER','4.36 ≈ 4.4','']])}
+  <div class="card-body" style="margin-top:6px;">💡 And 6.83 to 1 d.p.: decider 3 → stays → <strong>6.8</strong>.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Nearest hundredth (2 decimal places): 2.846</div>
+  ${asWarm('The stops are hundredths: 2.84 and 2.85. The decider is the THOUSANDTHS digit.')}
+  ${asDecLine(2.84,2.85,0.001,[[2.845,'halfway','#BA7517'],[2.846,'2.846']],{every:5,title:'2.846 is just past the halfway mark 2.845'})}
+  ${steps([['Round to','2 d.p. (nearest hundredth)','2.84<u></u>6 → underline the 4 in the hundredths'],['Decider','thousandths digit = 6','6 is 5 or more'],['Round UP','4 → 5','2.84 becomes 2.85'],['ANSWER','2.846 ≈ 2.85','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — The 9s trap: 6.96 and 0.996</div>
+  ${asWarm('What happens when the digit you must round UP is a 9? It carries, just like in addition!')}
+  <div class="card-body"><strong>6.96 to the nearest tenth:</strong></div>
+  ${steps([['Underline','tenths digit = 9','6.<u>9</u>6'],['Decider','hundredths digit = 6','round UP'],['9 + 1','= 10 tenths','write 0 tenths, carry 1 to the ones'],['ANSWER','6.96 ≈ <strong>7.0</strong>','keep the 0 (one decimal place)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>0.996 to 2 d.p.:</strong></div>
+  ${steps([['Underline','hundredths digit = 9','0.9<u>9</u>6'],['Decider','thousandths digit = 6','round UP'],['Carry','9 + 1 = 10 hundredths','0.99 + 0.01 = 1.00'],['ANSWER','0.996 ≈ <strong>1.00</strong>','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Three roundings of one number: 7.648</div>
+  ${asWarm('The SAME number can be rounded to different degrees of accuracy. Each time, find the new underlined digit and its decider.')}
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0;">
+    ${[['Nearest whole','7.<span style="color:#D85A30;">6</span>48','decider 6 (tenths) → up','8','#E1F5EE','#085041'],['1 d.p.','7.6<span style="color:#D85A30;">4</span>8','decider 4 (hundredths) → stay','7.6','#FAEEDA','#633806'],['2 d.p.','7.64<span style="color:#D85A30;">8</span>','decider 8 (thousandths) → up','7.65','#EDE9FE','#5B21B6']].map(c=>`<div style="background:${c[4]};border-radius:10px;padding:10px;text-align:center;"><div style="font-size:11px;font-weight:800;color:${c[5]};">${c[0]}</div><div style="font-size:17px;font-weight:800;margin:6px 0;color:${c[5]};">${c[1]}</div><div style="font-size:10.5px;color:${c[5]};">${c[2]}</div><div style="font-size:18px;font-weight:800;margin-top:6px;color:${c[5]};">≈ ${c[3]}</div></div>`).join('')}
+  </div>
+  <div class="card-body">The red digit is the <strong>decider</strong>. Notice each rounding looks at the ORIGINAL number 7.648 — never at a previous rounding.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: money and measures</div>
+  ${asWarm('Rounding decimals is useful every day.')}
+  ${steps([['Money','£12.678 to the nearest penny','pence = hundredths of a pound → 2 d.p.'],['Decider','thousandths digit = 8','round UP'],['ANSWER','£12.68','12.67 + 0.01'],['Estimate','£18.49 to the nearest pound','decider (tenths) = 4 → £18']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A parcel weighs 2.386 kg.</strong></div>
+  ${steps([['Nearest kg','decider 3 → stays','2 kg'],['Nearest 0.1 kg','decider 8 → up','2.4 kg'],['Nearest 0.01 kg','decider 6 → up','2.39 kg']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — The range puzzle: which numbers round to 5.3?</div>
+  ${asWarm('A number with two decimal places is rounded to the nearest tenth and becomes 5.3. What is the smallest and the largest it could be?')}
+  ${asDecLine(5.2,5.4,0.05,[[5.25,'5.25','#0F766E'],[5.34,'5.34','#0F766E']],{title:'Numbers from 5.25 up to 5.34 all round to 5.3'})}
+  ${steps([['Smallest','5.25','decider 5 → rounds UP to 5.3'],['Just below it','5.24','decider 4 → rounds DOWN to 5.2 ✗'],['Largest','5.34','decider 4 → stays 5.3'],['Just above it','5.35','decider 5 → rounds UP to 5.4 ✗'],['ANSWER','from 5.25 to 5.34','(2 d.p.)']])}
+  <div class="card-body" style="margin-top:6px;">💡 Rule of thumb: when rounding to the nearest 0.1, the numbers that give 5.3 start <strong>0.05 below</strong> and stop <strong>just before 0.05 above</strong>.</div>
+</div>
+
+${asExCard(7,[
+ exQ(1,'Round 6.4 to the nearest whole number.',['6','7','6.5'],0),
+ exQ(2,'Round 8.5 to the nearest whole number.',['9','8','8.5'],0),
+ exQ(3,'Round 4.36 to 1 decimal place.',['4.4','4.3','4.36'],0),
+ exQ(4,'Round 2.846 to 2 decimal places.',['2.85','2.84','2.9'],0),
+ exQ(5,'Round 6.96 to the nearest tenth.',['7.0','6.9','6.10'],0),
+ exQ(6,'Round 0.996 to 2 decimal places.',['1.00','0.99','1.10'],0),
+ exQ(7,'Round 7.648 to 1 decimal place.',['7.6','7.7','7.65'],0),
+ exQ(8,'A price is £12.678. What is it to the nearest penny?',['£12.68','£12.67','£12.70'],0),
+ exQ(9,'THINK DEEPER: What is the SMALLEST number with 2 decimal places that rounds to 5.3 when rounded to 1 decimal place?',['5.25','5.30','5.20'],0,'t'),
+ exQ(10,'BOSS LEVEL: A number rounds to 8 (nearest whole number) AND to 7.5 (nearest tenth). Which number could it be?',['7.52','7.46','8.52'],0,'b')])}`;
+
+
+/* ---------- STEP 8 : Multiply decimals by 10, 100 and 1,000 ---------- */
+const P5_DP8 = `
+${asHeader('DP8','Step 8 — Multiply Decimals by 10, 100 and 1,000','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — The ×10 Machine Works on Decimals Too</div>
+  ${asWarm('In Place Value you met the <strong>×10 machine</strong>: every digit moves ONE column to the left and becomes ten times bigger. The same machine works for decimals! The big secret: <strong>the digits move — the decimal point stays still.</strong>')}
+
+  <div class="card-body"><strong>Concrete:</strong> 3.45 is 3 ones, 4 tenths and 5 hundredths. Multiply by 10 and each counter becomes worth ten times more, so it jumps one column left:</div>
+  ${asShift('3.45','34.5',1,'left','× 10')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The rule</div><div class="s-body" style="color:#085041;">× 10 → digits move <strong>1 place left</strong>. × 100 → <strong>2 places left</strong>. × 1,000 → <strong>3 places left</strong>. Fill any gap with a <strong>hero zero</strong> (a dashed circle). Remember: number of zeros = number of places!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Add a zero&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;Multiplying by 10 adds a zero&rdquo; is only true for whole numbers! 2.5 × 10 is NOT 2.50 (that equals 2.5 — nothing changed!). It is <strong>25</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;The point moves&rdquo;</div><div class="s-body" style="color:#712B13;">Saying &ldquo;move the decimal point&rdquo; works only if you move it the right way and the right distance. Safer picture: the point is fixed; the DIGITS slide left.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — × 10 with tenths: 3.4 × 10</div>
+  ${asWarm('3 ones and 4 tenths. Each digit moves one place left.')}
+  ${asShift('3.4','34',1,'left','× 10')}
+  ${steps([['The 3','ones → tens','3 ones become 3 tens = 30'],['The 4','tenths → ones','4 tenths become 4 ones = 4'],['ANSWER','3.4 × 10 = 34','no decimal part left']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — × 10 with hundredths: 3.45 × 10</div>
+  ${asWarm('The decimal part survives, but every digit moves.')}
+  ${asShift('3.45','34.5',1,'left','× 10')}
+  ${steps([['The 3','ones → tens','= 30'],['The 4','tenths → ones','= 4'],['The 5','hundredths → tenths','= 0.5'],['ANSWER','3.45 × 10 = 34.5','30 + 4 + 0.5']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — × 100 with a hero zero: 3.2 × 100</div>
+  ${asWarm('Two places left. The 2 moves from tenths to tens — what is left in the ones column?')}
+  ${asShift('3.2','320',2,'left','× 100')}
+  ${steps([['The 3','ones → hundreds','= 300'],['The 2','tenths → tens','= 20'],['The ones column','nothing arrives','a hero zero holds the place'],['ANSWER','3.2 × 100 = 320','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Another:</strong> 6.72 × 100 = 672 (no zero needed — every column is filled).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — × 1,000: 4.5 × 1,000 and 0.073 × 1,000</div>
+  ${asWarm('Three places left!')}
+  ${asShift('4.5','4500',3,'left','× 1,000')}
+  ${steps([['4','ones → thousands','= 4,000'],['5','tenths → hundreds','= 500'],['Two empty columns','tens and ones','two hero zeros'],['ANSWER','4.5 × 1,000 = 4,500','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>0.073 × 1,000:</strong> the 7 moves from hundredths to tens; the 3 moves from thousandths to ones.</div>
+  ${asShift('0.073','73',3,'left','× 1,000')}
+  ${steps([['ANSWER','0.073 × 1,000 = 73','the leading 0 disappears']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Beating the &ldquo;add a zero&rdquo; trap: 2.5 × 10 compared with 25 × 10</div>
+  ${asWarm('A pupil says: &ldquo;× 10 means add a zero, so 2.5 × 10 = 2.50.&rdquo; Test that idea!')}
+  ${steps([['2.5 × 10 using the shift','digits move 1 place left','= 25'],['2.50','= 2.5 (a zero at the end of a decimal changes nothing)','so &ldquo;2.50&rdquo; cannot be 10 times bigger!'],['25 × 10 (whole number)','digits move 1 place left','= 250 — the hero zero fills the ones'],['LESSON','the rule is: SHIFT the digits','adding a zero only works when there is no decimal point']])}
+  ${asShift('2.5','25',1,'left','× 10')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Missing numbers: 3.7 × ▢ = 3,700 and 0.56 × ▢ = 56</div>
+  ${asWarm('How many places did the digits move?')}
+  ${steps([['3.7 → 3,700','the 3 moved ones → thousands','3 places left → × 1,000'],['0.56 → 56','the 5 moved tenths → tens','2 places left → × 100'],['Check','3.7 × 1,000 = 3,700 ✓ · 0.56 × 100 = 56 ✓','']])}
+  <div class="card-body" style="margin-top:6px;"><strong>Another way:</strong> ▢ × 100 = 8.4 asks &ldquo;what number gives 8.4 after the digits move 2 places left?&rdquo; We will meet this in Step 9 (dividing)!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: changing units</div>
+  ${asWarm('Multiplying by 10, 100 and 1,000 is how we change units: 1 m = 100 cm, 1 L = 1,000 ml, 1 kg = 1,000 g, £1 = 100p.')}
+  ${steps([['£2.35 → pence','× 100','= 235p'],['1.8 m → cm','× 100','= 180 cm'],['0.75 L → ml','× 1,000','= 750 ml'],['3.25 kg → g','× 1,000','= 3,250 g']])}
+  ${asShift('3.25','3250',3,'left','× 1,000')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Problem solving: the pile of paper</div>
+  ${asWarm('One sheet of paper is <strong>0.1 mm</strong> thick. How tall is a pile of <strong>1,000</strong> sheets — in mm and in cm?')}
+  ${steps([['Plan','0.1 × 1,000','digits move 3 places left'],['In mm','100 mm','0.1 → 100 (two hero zeros)'],['Convert','100 mm ÷ 10','= 10 cm (1 cm = 10 mm)'],['ANSWER','100 mm = 10 cm','about the size of a thick book!']])}
+  ${asShift('0.1','100',3,'left','× 1,000')}
+  <div class="card-body" style="margin-top:8px;"><strong>Comparing:</strong> which is greater, 0.9 × 100 or 9.9 × 10? 0.9 × 100 = 90, 9.9 × 10 = 99 → <strong>9.9 × 10 is greater</strong>.</div>
+</div>
+
+${asExCard(8,[
+ exQ(1,'3.4 × 10 = ?',['34','3.40','340'],0),
+ exQ(2,'3.45 × 10 = ?',['34.5','345','3.450'],0),
+ exQ(3,'6.72 × 100 = ?',['672','67.2','6,720'],0),
+ exQ(4,'3.2 × 100 = ?',['320','32','3.200'],0),
+ exQ(5,'0.073 × 1,000 = ?',['73','7.3','730'],0),
+ exQ(6,'4.5 × 1,000 = ?',['4,500','450','45,000'],0),
+ exQ(7,'0.56 × ▢ = 56. What goes in the box?',['100','10','1,000'],0),
+ exQ(8,'A sweet costs £2.35. How much is that in pence?',['235p','23.5p','2,350p'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 0.9 × 100 or 9.9 × 10?',['9.9 × 10 (= 99)','0.9 × 100 (= 90)','They are equal'],0,'t'),
+ exQ(10,'BOSS LEVEL: One sheet of card is 0.45 mm thick. How thick is a stack of 1,000 sheets, in mm and in cm?',['450 mm = 45 cm','45 mm = 4.5 cm','4,500 mm = 450 cm'],0,'b')])}`;
+
+
+
+/* ============================================================
+   PRIMARY 5 — DECIMALS & PERCENTAGES — LESSONS 9 AND 10
+   (8 worked examples each)
+   INSTALL
+   1. In index.html DELETE these two lines:
+        const P5_DP9  = null;
+        const P5_DP10 = null;
+   2. Paste this whole file ABOVE `const SCHEME_P5`.
+   REQUIRES the helper asShift() from p5_decperc_lessons_7_8.js
+   (install that file first), plus asDecChart, asDecLine,
+   asHundred, asEquivBars, asBar, asHeader, asWarm, asExCard,
+   steps(), exQ().
+   ============================================================ */
+
+
+/* ---------- STEP 9 : Divide decimals by 10, 100 and 1,000 ---------- */
+const P5_DP9 = `
+${asHeader('DP9','Step 9 — Divide Decimals by 10, 100 and 1,000','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — The ×10 Machine in Reverse</div>
+  ${asWarm('In Step 8 the digits slid LEFT and became ten times bigger. Division is the <strong>inverse</strong> — it undoes multiplication. So when we divide by 10, every digit slides ONE place to the <strong>RIGHT</strong> and becomes ten times <strong>smaller</strong>. The decimal point never moves!')}
+
+  <div class="card-body"><strong>Concrete:</strong> 34 is 3 tens and 4 ones. Divide by 10 and each counter becomes ten times smaller, so it moves one column right:</div>
+  ${asShift('34','3.4',1,'right','÷ 10')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The rule</div><div class="s-body" style="color:#085041;">÷ 10 → digits move <strong>1 place right</strong>. ÷ 100 → <strong>2 places right</strong>. ÷ 1,000 → <strong>3 places right</strong>. Any column left empty gets a <strong>hero zero</strong> (a dashed circle) — including the ones column in answers like 0.4671.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Take off zeros&rdquo;</div><div class="s-body" style="color:#712B13;">Dividing by 100 does NOT mean &ldquo;remove two zeros&rdquo;. That only works if the number ends in two zeros. 53.16 ÷ 100 = 0.5316 — nothing is removed; the digits slide.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting the hero zeros</div><div class="s-body" style="color:#712B13;">7.2 ÷ 100 = 0.072, NOT 0.72 or 0.72. After the 7 moves two places right it lands in the hundredths, so the TENTHS column needs a hero zero.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Check with the inverse</div><div class="s-body" style="color:#27500A;">Multiply your answer back: 0.4671 × 1,000 should give 467.1. If it does, you are right!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — ÷ 10, whole number to decimal: 34 ÷ 10</div>
+  ${asWarm('Which column does each digit land in?')}
+  ${asShift('34','3.4',1,'right','÷ 10')}
+  ${steps([['The 3','tens → ones','30 ÷ 10 = 3'],['The 4','ones → tenths','4 ÷ 10 = 0.4'],['ANSWER','34 ÷ 10 = 3.4','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 3.4 × 10 = 34 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — ÷ 10 with a decimal: 45.6 ÷ 10</div>
+  ${asWarm('The decimal digits move too — every digit moves one place right.')}
+  ${asShift('45.6','4.56',1,'right','÷ 10')}
+  ${steps([['The 4','tens → ones','= 4'],['The 5','ones → tenths','= 0.5'],['The 6','tenths → hundredths','= 0.06'],['ANSWER','45.6 ÷ 10 = 4.56','4 + 0.5 + 0.06']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 4.56 × 10 = 45.6 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — ÷ 100 with a hero zero: 7.2 ÷ 100</div>
+  ${asWarm('Two places right. The 7 lands in the hundredths. What fills the tenths?')}
+  ${asShift('7.2','0.072',2,'right','÷ 100')}
+  ${steps([['The 7','ones → hundredths','= 0.07'],['The 2','tenths → thousandths','= 0.002'],['The tenths column','nothing arrives','a hero zero holds the place'],['The ones column','nothing arrives','another hero zero (0.072 starts with 0.)'],['ANSWER','7.2 ÷ 100 = 0.072','0.07 + 0.002']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 0.072 × 100 = 7.2 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — ÷ 1,000 (a school task!): 467.1 ÷ 1,000</div>
+  ${asWarm('Three places right. Watch where every digit lands, and which columns need hero zeros.')}
+  ${asShift('467.1','0.4671',3,'right','÷ 1,000')}
+  ${steps([['The 4','hundreds → tenths','400 ÷ 1,000 = 0.4'],['The 6','tens → hundredths','60 ÷ 1,000 = 0.06'],['The 7','ones → thousandths','7 ÷ 1,000 = 0.007'],['The 1','tenths → ten-thousandths','0.1 ÷ 1,000 = 0.0001'],['The ones column','nothing arrives','hero zero → 0.4671'],['ANSWER','467.1 ÷ 1,000 = 0.4671','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 0.4671 × 1,000 = 467.1 ✓ (digits slide 3 places left and the hero zero vanishes).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — ÷ 1,000 with TWO hero zeros: 53.16 ÷ 1,000</div>
+  ${asWarm('This answer needs a zero in the tenths AND a zero in the ones. Let us see why.')}
+  ${asShift('53.16','0.05316',3,'right','÷ 1,000')}
+  ${steps([['The 5','tens → hundredths','50 ÷ 1,000 = 0.05'],['The 3','ones → thousandths','3 ÷ 1,000 = 0.003'],['The 1','tenths → ten-thousandths','= 0.0001'],['The 6','hundredths → hundred-thousandths','= 0.00006'],['The tenths and ones columns','nothing arrives','two hero zeros'],['ANSWER','53.16 ÷ 1,000 = 0.05316','']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Common slip</div><div class="s-body" style="color:#712B13;">Writing 0.5316 — that is only ÷ 100! Count three places: the 5 must land in the hundredths, not the tenths.</div></div></div>
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 0.05316 × 1,000 = 53.16 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Dividing whole numbers: 5,316 ÷ 1,000 and 8 ÷ 100</div>
+  ${asWarm('Whole numbers have a decimal point too — it is hiding after the ones: 5,316 = 5,316.0')}
+  ${asShift('5316','5.316',3,'right','÷ 1,000')}
+  ${steps([['5,316 ÷ 1,000','3 places right','= 5.316 (5 ones and 316 thousandths)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>8 ÷ 100</strong> — the 8 moves two places, from ones to hundredths:</div>
+  ${asShift('8','0.08',2,'right','÷ 100')}
+  ${steps([['The 8','ones → hundredths','= 0.08'],['The tenths','nothing arrives','a hero zero'],['ANSWER','8 ÷ 100 = 0.08','NOT 0.8']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Also:</strong> 40 ÷ 1,000 = 0.04 — the 4 moves from tens to hundredths.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Missing numbers and the inverse</div>
+  ${asWarm('Multiplication and division undo each other. Use that to solve missing-number puzzles.')}
+  ${steps([['▢ ÷ 100 = 0.35','undo ÷ 100 with × 100','0.35 × 100 = 35'],['6.4 ÷ ▢ = 0.064','the 6 moved ones → hundredths','2 places right → ▢ = 100'],['▢ ÷ 1,000 = 4.5','undo with × 1,000','4.5 × 1,000 = 4,500'],['Check','35 ÷ 100 = 0.35 ✓ · 6.4 ÷ 100 = 0.064 ✓','4,500 ÷ 1,000 = 4.5 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Real life: changing to bigger units</div>
+  ${asWarm('Small units → big units means dividing: 100p = £1, 100 cm = 1 m, 1,000 g = 1 kg, 1,000 ml = 1 L.')}
+  ${steps([['235p → pounds','÷ 100','= £2.35'],['75 cm → metres','÷ 100','= 0.75 m'],['450 g → kilograms','÷ 1,000','= 0.45 kg'],['1,250 ml → litres','÷ 1,000','= 1.25 L']])}
+  ${asShift('450','0.45',3,'right','÷ 1,000')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Remember the pair:</strong> big → small units, multiply (Step 8). Small → big units, divide (this step).</div>
+</div>
+
+${asExCard(9,[
+ exQ(1,'34 ÷ 10 = ?',['3.4','340','0.34'],0),
+ exQ(2,'45.6 ÷ 10 = ?',['4.56','456','0.456'],0),
+ exQ(3,'7.2 ÷ 100 = ?',['0.072','0.72','0.0072'],0),
+ exQ(4,'467.1 ÷ 1,000 = ?',['0.4671','4.671','0.04671'],0),
+ exQ(5,'53.16 ÷ 1,000 = ?',['0.05316','0.5316','0.005316'],0),
+ exQ(6,'5,316 ÷ 1,000 = ?',['5.316','53.16','0.5316'],0),
+ exQ(7,'40 ÷ 1,000 = ?',['0.04','0.4','0.004'],0),
+ exQ(8,'A pencil costs 235p. How much is that in pounds?',['£2.35','£23.50','£0.235'],0),
+ exQ(9,'THINK DEEPER: ▢ ÷ 100 = 0.35. What number goes in the box?',['35','3.5','350'],0,'t'),
+ exQ(10,'BOSS LEVEL: Tomi says 8 ÷ 100 = 0.8. Is she right?',['No — 8 ÷ 100 = 0.08; the 8 moves two places right, so a hero zero holds the tenths','Yes — 8 ÷ 100 = 0.8','No — 8 ÷ 100 = 0.008'],0,'b')])}`;
+
+
+/* ---------- STEP 10 : Percentages as fractions ---------- */
+const P5_DP10 = `
+${asHeader('DP10','Step 10 — Percentages as Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Per Cent Means &ldquo;Out of 100&rdquo;</div>
+  ${asWarm('The word <strong>per cent</strong> comes from Latin: <em>per</em> = for each, <em>centum</em> = hundred. So <strong>1% means 1 out of every 100</strong> — exactly one small square on our 100-square!')}
+
+  ${asHundred(3,7,'37% = 37 out of 100 squares shaded')}
+  <div class="card-body" style="text-align:center;margin-top:4px;font-size:15px;"><strong>37% = 37/100</strong></div>
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 % → fraction</div><div class="s-body" style="color:#085041;">Write the number over <strong>100</strong>, then <strong>simplify</strong> if you can. 20% = 20/100 = 1/5.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Fraction → %</div><div class="s-body" style="color:#633806;">Make the denominator <strong>100</strong> by multiplying top and bottom by the same number, then the top number is the percentage. 3/5 = 60/100 = 60%.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Writing over 10</div><div class="s-body" style="color:#712B13;">9% is 9/<strong>100</strong>, not 9/10! 9/10 is 90%. Percentages are ALWAYS out of 100.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;50% = 5/10 only&rdquo;</div><div class="s-body" style="color:#712B13;">50% = 50/100 = 5/10 = 1/2. Same amount, three names. Always simplify to the smallest form when asked.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Reading a 100-square: 28%</div>
+  ${asWarm('How many squares are shaded out of the whole 100?')}
+  ${asHundred(2,8,'28 of the 100 squares are shaded')}
+  ${steps([['Shaded','28 squares','2 full strips + 8 squares'],['Out of','100','the whole square'],['As a fraction','28/100','28 out of 100'],['As a percentage','28%','per cent = per hundred']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Writing a % as a fraction over 100: 9%, 47%, 100%</div>
+  ${asWarm('The percentage number goes on top and 100 goes on the bottom. Every time!')}
+  ${steps([['9%','9/100','9 out of 100 — NOT 9/10'],['47%','47/100','47 out of 100'],['100%','100/100 = 1','the whole thing'],['0%','0/100 = 0','none of it']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Think:</strong> 100% means &ldquo;everything&rdquo;. If you scored 100% in a test, you got every mark!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Simplifying the friendly ones: 50%, 25%, 75%, 10%</div>
+  ${asWarm('Four percentages you will use every day. Divide the top and bottom by the same number.')}
+  ${asEquivBars([[1,2,'1/2'],[50,100,'50% = 50/100']],'50% is half of the whole')}
+  ${asEquivBars([[1,4,'1/4'],[25,100,'25% = 25/100']],'25% is a quarter of the whole')}
+  ${steps([['50%','50/100 ÷ 50','= 1/2'],['25%','25/100 ÷ 25','= 1/4'],['75%','75/100 ÷ 25','= 3/4'],['10%','10/100 ÷ 10','= 1/10']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Fifths: 20%, 40%, 60%, 80%</div>
+  ${asWarm('Fifths turn into tidy percentages: 1/5 = 20/100 because 5 × 20 = 100.')}
+  ${asEquivBars([[1,5,'1/5'],[20,100,'20% = 20/100']],'20% = 1/5')}
+  ${steps([['20%','20/100 ÷ 20','= 1/5'],['40%','40/100 ÷ 20','= 2/5'],['60%','60/100 ÷ 20','= 3/5'],['80%','80/100 ÷ 20','= 4/5']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Fractions to percentages: 3/5, 3/4, 9/10, 7/20</div>
+  ${asWarm('What do we multiply the bottom number by to reach 100? Do the same to the top!')}
+  ${steps([['3/5','× 20 top and bottom','= 60/100 = <strong>60%</strong>'],['3/4','× 25 top and bottom','= 75/100 = <strong>75%</strong>'],['9/10','× 10 top and bottom','= 90/100 = <strong>90%</strong>'],['7/20','× 5 top and bottom','= 35/100 = <strong>35%</strong>']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Handy:</strong> denominators 2, 4, 5, 10, 20, 25 and 50 all fit into 100 exactly.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Simplifying harder ones: 35%, 12%, 45%</div>
+  ${asWarm('Find the biggest number that divides into both the top and bottom.')}
+  ${steps([['35%','35/100 ÷ 5','= 7/20'],['12%','12/100 ÷ 4','= 3/25'],['45%','45/100 ÷ 5','= 9/20'],['Check','7 and 20 have no common factor','7/20 is simplest ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: test marks</div>
+  ${asWarm('Amina scored <strong>17 out of 20</strong> and Kemi scored <strong>18 out of 25</strong>. Write each score as a percentage.')}
+  ${asBar('Amina: 17 out of 20', '20 marks', [['17 correct',17,'#EAF3DE','#639922','#27500A'],['3 wrong',3,'#FAECE7','#D85A30','#712B13']])}
+  ${steps([['Amina','17/20 × 5 top and bottom','= 85/100 = <strong>85%</strong>'],['Kemi','18/25 × 4 top and bottom','= 72/100 = <strong>72%</strong>'],['Who did better?','85% &gt; 72%','Amina']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Comparing a fraction with a percentage</div>
+  ${asWarm('Ade scored 17/20, Bola scored 80% and Chi scored 4/5. Who got the highest score? You cannot compare different forms — change them ALL into percentages.')}
+  ${steps([['Ade','17/20 = 85/100','= 85%'],['Bola','80%','already a percentage'],['Chi','4/5 = 80/100','= 80%'],['Compare','85% &gt; 80% = 80%','Ade scored highest; Bola and Chi tied']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Strategy</div><div class="s-body" style="color:#27500A;">To compare scores in different forms, convert them all to the SAME form first — percentages are the easiest for tests.</div></div></div>
+</div>
+
+${asExCard(10,[
+ exQ(1,'Write 37% as a fraction.',['37/100','37/10','3.7/100'],0),
+ exQ(2,'Write 9% as a fraction.',['9/100','9/10','90/100'],0),
+ exQ(3,'Write 50% as a fraction in its simplest form.',['1/2','1/5','50/10'],0),
+ exQ(4,'Write 25% as a fraction in its simplest form.',['1/4','1/25','2/5'],0),
+ exQ(5,'Write 20% as a fraction in its simplest form.',['1/5','1/2','2/5'],0),
+ exQ(6,'Write 3/5 as a percentage.',['60%','35%','53%'],0),
+ exQ(7,'Write 7/20 as a percentage.',['35%','7%','70%'],0),
+ exQ(8,'Write 35% as a fraction in its simplest form.',['7/20','35/20','3/5'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 3/5 or 65%?',['65%','3/5','They are equal'],0,'t'),
+ exQ(10,'BOSS LEVEL: Ade scored 17/20, Bola scored 80% and Chi scored 4/5. Who scored highest?',['Ade (85%)','Bola (80%)','Chi (80%)'],0,'b')])}`;
+
+
+
+ 
 const P5_DP11 = null; // Percentages as decimals
 const P5_DP12 = null; // Find simple percentages of quantities
 
@@ -4216,9 +5134,9 @@ const P5_DP12 = null; // Find simple percentages of quantities
 const SCHEME_P5 = [
   {
     id:'autumn', emoji:'🍂', label:'Autumn Term', meta:'September – December 2026',
-    col: TERM_COLORS.autumn, open: true,
+    col: TERM_COLORS.autumn, open: false,
     topics: [
-      { id:'placevalue', label:'Place Value ★ (Current)', col: TOPIC_PALETTE[0],
+      { id:'placevalue', label:'Place Value', col: TOPIC_PALETTE[0],
         steps: [
           { label:'Roman numerals to 1,000', content: P5_PV1 },
           { label:'Numbers to 10,000', content: P5_PV2 },
@@ -4264,11 +5182,11 @@ const SCHEME_P5 = [
         steps: ['What is a fraction?','Equivalent fractions','Simplifying fractions','Improper fractions','Mixed numbers','Convert improper fractions to mixed numbers','Convert mixed numbers to improper fractions','Compare fractions','Order fractions','Fractions on a number line','Fractions greater than one','Add fractions with the same denominator','Add fractions with related denominators','Subtract fractions with the same denominator','Subtract fractions with related denominators','Add mixed numbers','Subtract mixed numbers','Fraction problem-solving'].map(s=>({label:s, content:null}))},
     ]
   },
-  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:false,
+  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:true,
     topics: [
       { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
       { id:'fractionsB', label:'Fractions B', col: TOPIC_PALETTE[2], steps:['Multiply fractions by integers','Find fractions of quantities','Find fractions of amounts','Multiply a mixed number by an integer','Divide fractions by integers','Find the whole from a fraction','Fractions as division','Add fractions with different denominators','Subtract fractions with different denominators','Solve multi-step fraction problems'].map(s=>({label:s,content:null}))},
-            { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],
+      { id:'decperc', label:'Decimals & Percentages ★ (Current)', col: TOPIC_PALETTE[3], open: true,
         steps: [
           { label:'Decimal place value', content: P5_DP1 },
           { label:'Thousandths', content: P5_DP2 },
@@ -4626,9 +5544,9 @@ function buildTopic(topic, termId, termLabel) {
   hdr.innerHTML = `<div class="topic-dot" style="background:${col.dot};color:${col.dotTxt};">${topic.steps.length}</div>
     <div class="topic-title" style="color:${col.text};">${topic.label}</div>
     <div class="topic-meta" style="color:${col.text};">${topic.steps.length} steps</div>
-    <div class="topic-arrow" id="tarr-${termId}-${topic.id}" style="color:${col.text};">&#9654;</div>`;
+    <div class="topic-arrow${topic.open?' open':''}" id="tarr-${termId}-${topic.id}" style="color:${col.text};">&#9654;</div>`;
   const body = document.createElement('div');
-  body.className = 'topic-body';
+  body.className = 'topic-body' + (topic.open ? ' open' : '');
   body.id = `tbody-${termId}-${topic.id}`;
   const tabsRow = document.createElement('div');
   tabsRow.className = 'step-tabs-row';
