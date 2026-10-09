@@ -5119,8 +5119,228 @@ ${asExCard(10,[
 
 
  
-const P5_DP11 = null; // Percentages as decimals
-const P5_DP12 = null; // Find simple percentages of quantities
+/* ============================================================
+   PRIMARY 5 — DECIMALS & PERCENTAGES — LESSONS 11 AND 12
+   (8 worked examples each)  — finishes the topic
+   INSTALL
+   1. In index.html DELETE these two lines:
+        const P5_DP11 = null;
+        const P5_DP12 = null;
+   2. Paste this whole file ABOVE `const SCHEME_P5`.
+   REQUIRES (already installed from earlier files): asShift,
+   asDecChart, asHundred, asEquivBars, asBar, asHeader, asWarm,
+   asExCard, steps(), exQ().
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPER ================= */
+
+/* Percentage bar: the whole is cut into 10 equal parts (each 10%).
+   asPctBar(250, 3, '£')  → shades 3 parts (30%) and shows the value of each 10%.
+   prefix is optional (e.g. '£'). */
+function asPctBar(whole,k,prefix,title){
+  prefix=prefix||'';
+  const W=620,cw=58,x0=12,fmt=v=>prefix+(Number.isInteger(v)?v.toLocaleString('en-GB'):v.toFixed(2));
+  const tenth=whole/10;
+  let s=`<svg viewBox="0 0 ${W} 124" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||('100% = '+fmt(whole))}</text>`;
+  for(let i=0;i<10;i++){
+    const on=i<k;
+    s+=`<rect x="${x0+i*cw}" y="28" width="${cw}" height="44" fill="${on?'#2DD4BF':'#fff'}" stroke="#0F766E" stroke-width="2"/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="47" text-anchor="middle" font-size="11" font-weight="800" fill="${on?'#134E4A':'#9CA3AF'}">10%</text>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="63" text-anchor="middle" font-size="11" font-weight="700" fill="${on?'#134E4A':'#9CA3AF'}">${fmt(tenth)}</text>`;
+  }
+  if(k>0){
+    s+=`<line x1="${x0}" y1="84" x2="${x0+k*cw}" y2="84" stroke="#D85A30" stroke-width="3"/>`;
+    s+=`<text x="${x0+k*cw/2}" y="104" text-anchor="middle" font-size="13" font-weight="800" fill="#D85A30">${k*10}% = ${fmt(k*tenth)}</text>`;
+  }
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 11 : Percentages as decimals ---------- */
+const P5_DP11 = `
+${asHeader('DP11','Step 11 — Percentages as Decimals','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — One Fraction, Three Names</div>
+  ${asWarm('You now know that 37% = 37/100 (Step 10) and that 37 hundredths is written <strong>0.37</strong> (Steps 1 and 4). So a percentage, a fraction and a decimal are three names for the SAME amount!')}
+  ${asHundred(3,7,'37 squares shaded: 37% = 37/100 = 0.37')}
+
+  <div class="card-body"><strong>The bridge:</strong> to change a percentage into a decimal, <strong>divide by 100</strong>. That is the ÷ 100 skill from Step 9 — the digits slide two places right.</div>
+  ${asShift('37','0.37',2,'right','÷ 100')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 % → decimal</div><div class="s-body" style="color:#085041;">Divide by 100: the digits slide <strong>2 places right</strong>. 37% → 0.37. 5% → 0.05.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Decimal → %</div><div class="s-body" style="color:#633806;">Multiply by 100: the digits slide <strong>2 places left</strong>. 0.63 → 63%. 0.7 → 70%.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — 5% is 0.5</div><div class="s-body" style="color:#712B13;">No! 5% = 5/100 = <strong>0.05</strong>. 0.5 is 50%. The hero zero in the tenths column makes all the difference.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Just stick 0. in front&rdquo;</div><div class="s-body" style="color:#712B13;">0.&nbsp;+&nbsp;the number works for 37% (0.37) but fails for 5% and for 40%… use ÷ 100 and place the digits carefully.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Two digits: 37% as a decimal</div>
+  ${asWarm('37% means 37 out of 100. How is 37 hundredths written as a decimal?')}
+  ${asDecChart('0.37 = 3 tenths + 7 hundredths','0','37')}
+  ${steps([['As a fraction','37/100','37 out of 100'],['As a decimal','37 ÷ 100','digits slide 2 places right'],['ANSWER','37% = 0.37','3 tenths and 7 hundredths']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — A single digit needs a hero zero: 5% and 9%</div>
+  ${asWarm('5 ÷ 100 — where does the 5 land? Which column is left empty?')}
+  ${asShift('5','0.05',2,'right','÷ 100')}
+  ${steps([['5%','5 ÷ 100','5 lands in the hundredths; the tenths hold a hero zero'],['ANSWER','5% = 0.05','NOT 0.5'],['9%','9 ÷ 100','= 0.09']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Round percentages: 40% and 70%</div>
+  ${asWarm('40 ÷ 100 = ? The answer has a zero at the end — do we keep it?')}
+  ${asShift('40','0.4',2,'right','÷ 100')}
+  ${steps([['40%','40 ÷ 100','= 0.40'],['Tidy up','0.40 = 0.4','a zero at the END of a decimal changes nothing'],['ANSWER','40% = 0.4','and 70% = 0.7']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — The whole thing: 100% and 0%</div>
+  ${asWarm('What decimal means &ldquo;all of it&rdquo;? And &ldquo;none of it&rdquo;?')}
+  ${asShift('100','1',2,'right','÷ 100')}
+  ${steps([['100%','100 ÷ 100','= 1 (one whole)'],['0%','0 ÷ 100','= 0 (nothing)'],['10%','10 ÷ 100','= 0.1 (one tenth)'],['1%','1 ÷ 100','= 0.01 (one hundredth)']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Decimals to percentages: 0.63, 0.7 and 0.05</div>
+  ${asWarm('Going the other way multiplies by 100: the digits slide TWO places left.')}
+  ${asShift('0.63','63',2,'left','× 100')}
+  ${steps([['0.63','× 100','= 63%']])}
+  ${asShift('0.7','70',2,'left','× 100')}
+  ${steps([['0.7','× 100','= 70% (hero zero in the ones)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>0.05 × 100 = 5%.</strong> The 5 moves from hundredths to ones.</div>
+  ${asShift('0.05','5',2,'left','× 100')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — The family table: fraction = decimal = percentage</div>
+  ${asWarm('These are worth learning by heart — they appear in questions, in shops and in sport.')}
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:10px 0;">
+    ${[['1/2','0.5','50%'],['1/4','0.25','25%'],['3/4','0.75','75%'],['1/5','0.2','20%'],['2/5','0.4','40%'],['3/5','0.6','60%'],['1/10','0.1','10%'],['9/10','0.9','90%'],['1/100','0.01','1%']].map(r=>`<div style="background:#FBEAF0;border:1.5px solid #D4537E;border-radius:10px;padding:8px;text-align:center;"><div style="font-size:15px;font-weight:800;color:#72243E;">${r[0]}</div><div style="font-size:13px;font-weight:700;color:#0F766E;">= ${r[1]}</div><div style="font-size:13px;font-weight:700;color:#B45309;">= ${r[2]}</div></div>`).join('')}
+  </div>
+  <div class="card-body">💡 Notice each row: fraction → decimal (Step 4), decimal → % (× 100).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Ordering mixed forms: 40%, 0.45, 1/2, 3/5</div>
+  ${asWarm('Change EVERYTHING into decimals first, then order (Step 6!).')}
+  ${steps([['40%','÷ 100','= 0.40'],['0.45','already a decimal','= 0.45'],['1/2','5/10','= 0.50'],['3/5','6/10','= 0.60'],['Ascending','40%, 0.45, 1/2, 3/5','0.40 &lt; 0.45 &lt; 0.50 &lt; 0.60']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Real life: a survey</div>
+  ${asWarm('In a school survey, <strong>72%</strong> of pupils said they like football. Write this as a fraction in its simplest form and as a decimal.')}
+  ${asHundred(7,2,'72% of the squares shaded')}
+  ${steps([['As a fraction','72/100','72 out of 100'],['Simplify ÷ 4','18/25','72 ÷ 4 = 18 · 100 ÷ 4 = 25'],['As a decimal','72 ÷ 100','= 0.72'],['ANSWER','72% = 18/25 = 0.72','three names, one amount']])}
+</div>
+
+${asExCard(11,[
+ exQ(1,'Write 37% as a decimal.',['0.37','3.7','0.037'],0),
+ exQ(2,'Write 5% as a decimal.',['0.05','0.5','5.0'],0),
+ exQ(3,'Write 40% as a decimal.',['0.4','0.04','4.0'],0),
+ exQ(4,'Write 100% as a decimal.',['1','0.1','10'],0),
+ exQ(5,'Write 0.63 as a percentage.',['63%','6.3%','0.63%'],0),
+ exQ(6,'Write 0.7 as a percentage.',['70%','7%','0.7%'],0),
+ exQ(7,'Write 0.05 as a percentage.',['5%','50%','0.5%'],0),
+ exQ(8,'Write 3/4 as a decimal and a percentage.',['0.75 and 75%','0.34 and 34%','7.5 and 75%'],0),
+ exQ(9,'THINK DEEPER: Which is the LARGEST of 0.45, 40%, 1/2 and 3/5?',['3/5','1/2','0.45'],0,'t'),
+ exQ(10,'BOSS LEVEL: 72% of pupils like football. Write 72% as a decimal and as a fraction in its simplest form.',['0.72 and 18/25','0.72 and 72/10','7.2 and 18/25'],0,'b')])}`;
+
+
+/* ---------- STEP 12 : Find simple percentages of quantities ---------- */
+const P5_DP12 = `
+${asHeader('DP12','Step 12 — Find Simple Percentages of Quantities','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#D4537E;">
+  <div class="card-title" style="color:#72243E;">1. Concrete &amp; Pictorial Stage — Cutting the Whole into Tenths</div>
+  ${asWarm('Finding a percentage of an amount is just finding a <strong>fraction of an amount</strong>. The key is to cut the whole into friendly pieces. 10% is one tenth, so we divide by 10. Everything else is built from 10%!')}
+
+  ${asPctBar(140,3,'','30% of 140: cut the 140 into ten equal 10% parts')}
+  <div class="card-body" style="text-align:center;margin-top:4px;">Each 10% part is 140 ÷ 10 = <strong>14</strong>. Three parts: 3 × 14 = <strong>42</strong>.</div>
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Your percentage toolkit</div><div class="s-body" style="color:#085041;"><strong>50%</strong> = ÷ 2 · <strong>25%</strong> = ÷ 4 · <strong>75%</strong> = 3 × (÷ 4)<br><strong>10%</strong> = ÷ 10 · <strong>1%</strong> = ÷ 100<br><strong>20%</strong> = 2 × 10% · <strong>5%</strong> = half of 10% · <strong>15%</strong> = 10% + 5%</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The build-up method</div><div class="s-body" style="color:#633806;">1) Find <strong>10%</strong> (÷ 10) or <strong>1%</strong> (÷ 100). 2) Multiply or split it to build the percentage you need. 3) Add the pieces. 4) Check it is sensible (is 35% of 60 more than 25% and less than 50%?).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Subtracting instead of dividing</div><div class="s-body" style="color:#712B13;">10% of 250 is NOT 250 − 10. It is 250 ÷ 10 = 25. A percentage of an amount is a PART of it, found by dividing.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — 50% of 6 is not 6 ÷ 50</div><div class="s-body" style="color:#712B13;">50% means HALF, so you divide by 2, not by 50. Use the fraction friends: 50% = 1/2, 25% = 1/4, 10% = 1/10.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — 50% of 60</div>
+  ${asWarm('50% is another name for one half. How do you find half of an amount?')}
+  ${asBar('50% = half of 60', '60', [['50% = 30',50,'#EAF3DE','#639922','#27500A'],['50% = 30',50,'#E6F1FB','#378ADD','#0C447C']])}
+  ${steps([['50%','= 1/2','divide by 2'],['Calculate','60 ÷ 2','= 30'],['ANSWER','50% of 60 = 30','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — 25% and 75% of 80</div>
+  ${asWarm('25% is one quarter. 75% is three quarters.')}
+  ${asBar('Four equal quarters of 80', '80', [['25% = 20',25,'#EAF3DE','#639922','#27500A'],['25% = 20',25,'#E6F1FB','#378ADD','#0C447C'],['25% = 20',25,'#FAEEDA','#BA7517','#633806'],['25% = 20',25,'#EEEDFE','#7F77DD','#3C3489']])}
+  ${steps([['25%','÷ 4','80 ÷ 4 = 20'],['75%','3 quarters','3 × 20 = 60'],['Check','25% + 75%','= 20 + 60 = 80 = 100% ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — 10% and 1%: 250 and 400</div>
+  ${asWarm('10% and 1% are the building blocks. Divide by 10 for 10%, by 100 for 1%.')}
+  ${asPctBar(250,1,'','10% of 250')}
+  ${steps([['10% of 250','250 ÷ 10','= 25'],['1% of 400','400 ÷ 100','= 4'],['Link','Step 9!','÷ 10 and ÷ 100 are exactly the digit slides you practised']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Build-up: 30% of 140 and 20% of 350</div>
+  ${asWarm('Find 10% first, then multiply.')}
+  ${asPctBar(140,3,'','30% of 140 = 3 lots of 10%')}
+  ${steps([['10% of 140','140 ÷ 10','= 14'],['30%','3 × 14','= 42'],['10% of 350','350 ÷ 10','= 35'],['20%','2 × 35','= 70']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Using half of 10%: 5% of 80 and 15% of 60</div>
+  ${asWarm('If 10% is a tenth, then 5% is HALF of that tenth.')}
+  ${steps([['10% of 80','80 ÷ 10','= 8'],['5% of 80','half of 8','= 4'],['10% of 60','60 ÷ 10','= 6'],['5% of 60','half of 6','= 3'],['15% of 60','10% + 5%','= 6 + 3 = 9']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Harder:</strong> 35% of 60 = 3 × 6 (30%) + 3 (5%) = 18 + 3 = <strong>21</strong>.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Money: 40% of £35</div>
+  ${asWarm('The same method works with pounds. Keep the decimal point carefully!')}
+  ${asPctBar(35,4,'£','40% of £35')}
+  ${steps([['10% of £35','35 ÷ 10','= £3.50'],['40%','4 × £3.50','= £14.00'],['Check','£14 is a bit less than half of £35 (£17.50)','sensible ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the sale</div>
+  ${asWarm('A coat costs <strong>£45</strong>. The shop takes <strong>20% off</strong>. What is the sale price?')}
+  ${asPctBar(45,2,'£','20% off £45: the shaded part is the saving')}
+  ${steps([['10% of £45','45 ÷ 10','= £4.50'],['20% (the saving)','2 × £4.50','= £9.00'],['Sale price','£45 − £9','= £36'],['Check','£36 is 80% of £45','8 × £4.50 = £36 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: which is greater, and a school survey</div>
+  ${asWarm('Which is greater: <strong>25% of 80</strong> or <strong>10% of 250</strong>?')}
+  ${steps([['25% of 80','80 ÷ 4','= 20'],['10% of 250','250 ÷ 10','= 25'],['Compare','25 &gt; 20','10% of 250 is greater'],['Lesson','a smaller % of a bigger amount can win','always calculate before comparing!']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A school has 240 pupils.</strong> 35% walk, 25% come by bus and the rest come by car. How many come by car?</div>
+  ${steps([['Walk','35% of 240','10% = 24 → 30% = 72, 5% = 12 → 84'],['Bus','25% of 240','240 ÷ 4 = 60'],['Walk + bus','84 + 60','= 144'],['Car','240 − 144','= 96 pupils'],['Check','car = 100% − 35% − 25% = 40%','40% of 240 = 4 × 24 = 96 ✓']])}
+</div>
+
+${asExCard(12,[
+ exQ(1,'What is 50% of 90?',['45','50','9'],0),
+ exQ(2,'What is 25% of 120?',['30','25','12'],0),
+ exQ(3,'What is 10% of 450?',['45','4.5','450'],0),
+ exQ(4,'What is 1% of 700?',['7','70','0.7'],0),
+ exQ(5,'What is 30% of 250?',['75','25','30'],0),
+ exQ(6,'What is 5% of 200?',['10','20','5'],0),
+ exQ(7,'What is 40% of £60?',['£24','£6','£40'],0),
+ exQ(8,'A game costs £80 and is 25% off. What is the sale price?',['£60','£20','£75'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 25% of 80 or 10% of 250?',['10% of 250 (= 25)','25% of 80 (= 20)','They are equal'],0,'t'),
+ exQ(10,'BOSS LEVEL: A school has 240 pupils. 35% walk and 25% come by bus. The rest come by car. How many come by car?',['96','84','144'],0,'b')])}`;
 
 
 
