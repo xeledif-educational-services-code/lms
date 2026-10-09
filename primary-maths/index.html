@@ -3932,6 +3932,1495 @@ const P5_AS14 = null; // Reasoning with addition and subtraction
 
 
 
+
+
+
+
+
+/* ============================================================
+   PRIMARY 5 — SPRING — FRACTIONS B (topic id 'fractionsB')
+   LESSONS 1 AND 2  +  PLACEHOLDERS 3–10  +  SCHEME BLOCK
+   8 worked examples + 10 exercises per lesson.
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers), B (lessons) and C (placeholders)
+      ABOVE `const SCHEME_P5` in index.html.
+   2. In SCHEME_P5 → Spring Term, replace the old one-line
+        { id:'fractionsB', label:'Fractions B', ... },
+      with SECTION D.
+   Needs (already installed): asHeader, asWarm, asBar, asJump,
+   asEquivBars, asExCard, steps(), exQ().
+   NOTE: the pupil's school task 1⅓ × 2 is Step 4 of this topic
+   ("Multiply a mixed number by an integer"). Steps 1–2 build the
+   skills it depends on.
+   ============================================================ */
+
+
+/* ================= SECTION A — HELPERS ================= */
+
+/* Stacked fraction for inline HTML:  ${fr(2,5)}  → 2 over 5.  ${mx(1,1,3)} → 1 and 1/3 */
+function fr(n,d){
+  return `<span style="display:inline-block;vertical-align:middle;text-align:center;line-height:1.15;margin:0 2px;font-weight:800;"><span style="display:block;padding:0 4px;border-bottom:2px solid currentColor;">${n}</span><span style="display:block;padding:0 4px;">${d}</span></span>`;
+}
+function mx(w,n,d){ return `<span style="font-weight:800;">${w}</span>${fr(n,d)}`; }
+
+/* Rows of equal fraction bars. counts = number of parts shaded in each bar.
+   asFracBars(5,[2,2,2],'title','foot text') */
+function asFracBars(den,counts,title,foot){
+  const rowH=34,gap=10,x0=10,bw=360,cw=bw/den;
+  const H=34+counts.length*(rowH+gap)+(foot?32:6);
+  const cols=['#2DD4BF','#F472B6','#A78BFA','#FBBF24'];
+  let s=`<svg viewBox="0 0 520 ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="260" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  counts.forEach((n,i)=>{
+    const y=28+i*(rowH+gap), c=cols[i%cols.length];
+    s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${rowH}" fill="#fff" stroke="#333" stroke-width="2"/>`;
+    s+=`<rect x="${x0}" y="${y}" width="${cw*n}" height="${rowH}" fill="${c}" stroke="#333" stroke-width="2"/>`;
+    for(let k=1;k<den;k++) s+=`<line x1="${x0+k*cw}" y1="${y}" x2="${x0+k*cw}" y2="${y+rowH}" stroke="#333" stroke-width="1"/>`;
+    s+=`<text x="${x0+bw+16}" y="${y+22}" font-size="15" font-weight="800" fill="#333">${n}/${den}</text>`;
+  });
+  if(foot) s+=`<text x="260" y="${H-10}" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
+  return s+'</svg>';
+}
+
+/* Bar model for a fraction OF a quantity.
+   asFracOf(20,4,3,'','3/4 of 20') — whole cut into `den` equal parts, `num` shaded, each part's value shown. */
+function asFracOf(whole,den,num,prefix,title){
+  prefix=prefix||'';
+  const W=620,x0=10,bw=600,cw=bw/den,part=whole/den;
+  const fmt=v=>prefix+(Number.isInteger(v)?v.toLocaleString('en-GB'):v.toFixed(2));
+  let s=`<svg viewBox="0 0 ${W} 126" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||('Whole = '+fmt(whole))}</text>`;
+  for(let i=0;i<den;i++){
+    const on=i<num;
+    s+=`<rect x="${x0+i*cw}" y="28" width="${cw}" height="46" fill="${on?'#FCD34D':'#fff'}" stroke="#B45309" stroke-width="2"/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#92400E">1/${den}</text>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="64" text-anchor="middle" font-size="12" font-weight="800" fill="#92400E">${fmt(part)}</text>`;
+  }
+  if(num>0){
+    s+=`<line x1="${x0}" y1="86" x2="${x0+num*cw}" y2="86" stroke="#D85A30" stroke-width="3"/>`;
+    s+=`<text x="${x0+num*cw/2}" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#D85A30">${num}/${den} of ${fmt(whole)} = ${fmt(num*part)}</text>`;
+  }
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 1 : Multiply fractions by integers ---------- */
+const P5_FB1 = `
+${asHeader('FB1','Step 1 — Multiply Fractions by Integers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Groups of Fractions</div>
+  ${asWarm('If you have <strong>3 bags</strong> and each bag holds <strong>2 apples</strong>, you have 3 × 2 = 6 apples. Now change the apples into <strong>fifths</strong>! If each bag holds 2 <em>fifths</em>, then 3 bags hold 3 × 2 = <strong>6 fifths</strong>. The unit (fifths) stays the same; we just count more of them.')}
+
+  <div class="card-body"><strong>Concrete:</strong> use three identical fraction strips, each cut into 5 equal parts with 2 parts shaded. Put them together and count the shaded fifths.</div>
+  ${asFracBars(5,[2,2,2],'3 × 2/5 → three strips, each with 2 fifths shaded','2 fifths + 2 fifths + 2 fifths = 6 fifths')}
+  <div class="card-body" style="margin-top:6px;"><strong>Regroup:</strong> 5 fifths make one whole, so 6 fifths is <strong>1 whole and 1 fifth</strong>:</div>
+  ${asFracBars(5,[5,1],'6 fifths = one full strip + 1 more fifth','6/5 = 1 1/5')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;">${'Multiply the <strong>numerator</strong> (top) by the integer. <strong>Keep the denominator</strong> (bottom) the same.'} &nbsp; 3 × ${fr(2,5)} = ${fr('3 × 2',5)} = ${fr(6,5)}</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Then tidy up</div><div class="s-body" style="color:#085041;">If the answer is an <strong>improper fraction</strong> (top ≥ bottom), change it to a <strong>mixed number</strong>: divide the top by the bottom. The quotient is the whole number; the remainder is the new top. Simplify if you can.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying both numbers</div><div class="s-body" style="color:#712B13;">3 × ${fr(2,5)} is NOT ${fr(6,15)}! The denominator names the SIZE of the pieces; multiplying it would change the pieces. Only the number of pieces is multiplied.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Stopping at the improper fraction</div><div class="s-body" style="color:#712B13;">${fr(6,5)} is correct but it may not be &ldquo;finished&rdquo;. Questions often ask for a mixed number or the simplest form — read the question!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — A unit fraction times an integer: 4 × 1/5</div>
+  ${asWarm('1 fifth, four times. How many fifths altogether?')}
+  ${asFracBars(5,[1,1,1,1],'Four strips, each with 1 fifth shaded','1 + 1 + 1 + 1 = 4 fifths')}
+  ${steps([['Repeated addition',`${fr(1,5)} + ${fr(1,5)} + ${fr(1,5)} + ${fr(1,5)}`,'= 4 fifths'],['Multiply the top','4 × 1 = 4','keep the 5'],['ANSWER',`4 × ${fr(1,5)} = ${fr(4,5)}`,'less than 1 whole, so no change needed']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Making an improper fraction: 3 × 2/5</div>
+  ${asWarm('We met this in the concrete stage. Now follow the number line jumps: three jumps of 2 fifths.')}
+  ${asJump(['0','2/5','4/5','1 1/5'],['+2/5','+2/5','+2/5'],'Three jumps of 2/5 — we pass 1 whole (5/5) on the way!')}
+  ${steps([['Multiply the top','3 × 2 = 6','keep the denominator 5'],['Improper fraction',`${fr(6,5)}`,'top is bigger than bottom'],['Divide','6 ÷ 5 = 1 remainder 1','1 whole and 1 fifth'],['ANSWER',`3 × ${fr(2,5)} = ${mx(1,1,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Simplifying the answer: 2 × 3/8</div>
+  ${asWarm('Multiply first. Then ask: can this fraction be made simpler?')}
+  ${asFracBars(8,[3,3],'Two strips of 3 eighths','3/8 + 3/8 = 6/8')}
+  ${steps([['Multiply the top','2 × 3 = 6',`so ${fr(6,8)}`],['Simplify','÷ 2 on top and bottom',`${fr(6,8)} = ${fr(3,4)}`],['ANSWER',`2 × ${fr(3,8)} = ${fr(3,4)}`,'the biggest number that divides 6 and 8 is 2']])}
+  ${asEquivBars([[6,8,'6/8'],[3,4,'3/4']],'6/8 and 3/4 are the same amount')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Improper fraction to mixed number: 5 × 3/4</div>
+  ${asWarm('5 groups of 3 quarters. That is a lot of quarters! How many whole ones can we make?')}
+  ${asFracBars(4,[4,4,4,3],'15 quarters packed into bars of 4: three full bars and 3 quarters','15/4 = 3 3/4')}
+  ${steps([['Multiply the top','5 × 3 = 15',`${fr(15,4)}`],['Divide','15 ÷ 4 = 3 remainder 3','3 wholes with 3 quarters left'],['ANSWER',`5 × ${fr(3,4)} = ${mx(3,3,4)}`,'check: 3 × 4 = 12, 12 + 3 = 15 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — The integer can go first or second: 4 × 2/9 and 2/9 × 4</div>
+  ${asWarm('Does the order matter in multiplication? 4 × 2 = 2 × 4. What about with fractions?')}
+  ${asFracBars(9,[2,2,2,2],'Four strips of 2 ninths','2/9 + 2/9 + 2/9 + 2/9 = 8/9')}
+  ${steps([['4 × 2/9','4 × 2 = 8',`= ${fr(8,9)}`],['2/9 × 4','2 × 4 = 8',`= ${fr(8,9)} — same answer!`],['Rule','multiplication works in any order','the integer can be written before or after the fraction']])}
+  <div class="card-body" style="margin-top:6px;">⚠️ <strong>Sense check:</strong> if someone says 4 × ${fr(2,9)} = ${fr(8,36)}, notice ${fr(8,36)} = ${fr(2,9)} — it did NOT get bigger, but four lots of anything must be bigger than one lot!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Bigger numerators: 4 × 5/6 and 6 × 5/12</div>
+  ${asWarm('Do both steps: multiply, then convert and simplify.')}
+  <div class="card-body"><strong>4 × 5/6</strong></div>
+  ${steps([['Multiply the top','4 × 5 = 20',`${fr(20,6)}`],['Mixed number','20 ÷ 6 = 3 remainder 2',`${mx(3,2,6)}`],['Simplify the fraction part','÷ 2 on top and bottom',`${mx(3,2,6)} = ${mx(3,1,3)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>6 × 5/12</strong></div>
+  ${steps([['Multiply the top','6 × 5 = 30',`${fr(30,12)}`],['Mixed number','30 ÷ 12 = 2 remainder 6',`${mx(2,6,12)}`],['Simplify','÷ 6',`${mx(2,6,12)} = ${mx(2,1,2)}`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: milk and running</div>
+  ${asWarm('Four pupils each drink <strong>2/3 of a litre</strong> of milk. How much milk is that altogether?')}
+  ${asFracBars(3,[2,2,2,2],'Four pupils, each with 2 thirds of a litre','8/3 L = 2 2/3 L')}
+  ${steps([['Multiply','4 × 2 = 8',`${fr(8,3)} L`],['Mixed number','8 ÷ 3 = 2 remainder 2',`${mx(2,2,3)} L`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>A runner runs 3/5 km each day for 4 days.</strong></div>
+  ${steps([['Multiply','4 × 3 = 12',`${fr(12,5)} km`],['Mixed number','12 ÷ 5 = 2 remainder 2',`${mx(2,2,5)} km`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and missing numbers</div>
+  ${asWarm('Which is greater: <strong>4 × 3/8</strong> or <strong>2 × 5/8</strong>? Both are measured in eighths, so just compare the number of eighths!')}
+  ${steps([['4 × 3/8','12 eighths',`${fr(12,8)} = ${mx(1,1,2)}`],['2 × 5/8','10 eighths',`${fr(10,8)} = ${mx(1,1,4)}`],['Compare','12 eighths &gt; 10 eighths','4 × 3/8 is greater']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> ▢ × ${fr(2,7)} = ${fr(10,7)}. What goes in the box?</div>
+  ${steps([['Think in sevenths','▢ × 2 sevenths = 10 sevenths','▢ × 2 = 10'],['Divide','10 ÷ 2','= 5'],['ANSWER',`5 × ${fr(2,7)} = ${fr(10,7)} ✓`,'']])}
+</div>
+
+${asExCard(1,[
+ exQ(1,'4 × 1/5 = ?',['4/5','4/20','1/20'],0),
+ exQ(2,'3 × 2/5 = ?',['6/5','6/15','5/6'],0),
+ exQ(3,'2 × 3/8 = ? Give the answer in its simplest form.',['3/4','6/8','6/16'],0),
+ exQ(4,'5 × 3/4 = ? Give the answer as a mixed number.',['3 3/4','15/20','2 3/4'],0),
+ exQ(5,'4 × 2/9 = ?',['8/9','8/36','2/36'],0),
+ exQ(6,'4 × 5/6 = ? Give the answer as a mixed number in its simplest form.',['3 1/3','3 2/3','20/24'],0),
+ exQ(7,'Four pupils each drink 2/3 of a litre of milk. How much milk altogether?',['2 2/3 L','8/12 L','2 1/3 L'],0),
+ exQ(8,'Which statement is true?',['4 × 3/8 is greater than 2 × 5/8','2 × 5/8 is greater than 4 × 3/8','They are equal'],0),
+ exQ(9,'THINK DEEPER: ▢ × 2/7 = 10/7. What number goes in the box?',['5','10','20'],0,'t'),
+ exQ(10,'BOSS LEVEL: Each bottle holds 3/4 of a litre. A shop sells 7 bottles. How many litres is that?',['5 1/4 L','21/28 L','4 1/4 L'],0,'b')])}`;
+
+
+/* ---------- STEP 2 : Find fractions of quantities ---------- */
+const P5_FB2 = `
+${asHeader('FB2','Step 2 — Find Fractions of Quantities','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Sharing into Equal Parts</div>
+  ${asWarm('Finding <strong>a fraction OF an amount</strong> means: cut the amount into equal parts (the <em>denominator</em> tells you how many), then take some of the parts (the <em>numerator</em> tells you how many). It is sharing — then collecting!')}
+
+  <div class="card-body"><strong>Concrete:</strong> 20 counters shared equally into 4 groups. Each group is 1/4 of 20.</div>
+  ${asFracOf(20,4,1,'','1/4 of 20 = 20 ÷ 4 = 5')}
+  <div class="card-body" style="margin-top:6px;"><strong>Take 3 groups</strong> for 3/4:</div>
+  ${asFracOf(20,4,3,'','3/4 of 20')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 2-step method</div><div class="s-body" style="color:#633806;">1) <strong>Divide</strong> the amount by the <strong>denominator</strong> → this is one part (the unit fraction). 2) <strong>Multiply</strong> by the <strong>numerator</strong> → this is the part(s) you want.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 1</div><div class="s-body" style="color:#085041;">3/5 of 20 = 3 × (20 ÷ 5) = 3 × 4 = 12. It is the same as 20 × ${fr(3,5)} = ${fr(60,5)} = 12. Two roads, one answer!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying by the denominator</div><div class="s-body" style="color:#712B13;">1/4 of 20 is NOT 20 × 4. A fraction OF an amount is a part of it — so the answer is SMALLER than the amount (for fractions less than 1).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting the numerator</div><div class="s-body" style="color:#712B13;">Finding ONE part (1/5) is only step 1. For 3/5, you must take THREE of those parts. Always finish with the multiplication!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Unit fraction of an amount: 1/4 of 20</div>
+  ${asWarm('1/4 means one of four equal parts.')}
+  ${asFracOf(20,4,1,'','1/4 of 20: cut 20 into 4 equal parts')}
+  ${steps([['Denominator','4','cut into 4 equal parts'],['Divide','20 ÷ 4','= 5 in each part'],['ANSWER',`${fr(1,4)} of 20 = 5`,'check: 4 × 5 = 20 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Another unit fraction: 1/8 of 56</div>
+  ${asWarm('Does a bigger denominator make the part bigger or smaller?')}
+  ${asFracOf(56,8,1,'','1/8 of 56: cut 56 into 8 equal parts')}
+  ${steps([['Divide','56 ÷ 8','= 7'],['ANSWER',`${fr(1,8)} of 56 = 7`,'check: 8 × 7 = 56 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Pattern:</strong> 1/4 of 20 = 5, but 1/8 of 56 = 7. A bigger denominator means MORE parts, each one smaller.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A non-unit fraction: 3/4 of 20</div>
+  ${asWarm('We already know one quarter of 20 is 5. How many quarters do we want?')}
+  ${asFracOf(20,4,3,'','3/4 of 20 = 3 parts of 5')}
+  ${steps([['Divide by the denominator','20 ÷ 4','= 5 (one part)'],['Multiply by the numerator','3 × 5','= 15'],['ANSWER',`${fr(3,4)} of 20 = 15`,'the quarter that is NOT taken is 5 → 15 + 5 = 20 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — 2/5 of 35 (two ways)</div>
+  ${asWarm('Method A: share into fifths and take 2. Method B: multiply 35 by the fraction.')}
+  ${asFracOf(35,5,2,'','2/5 of 35: each fifth is 7')}
+  ${steps([['Method A: divide','35 ÷ 5','= 7'],['Method A: multiply','2 × 7','= 14'],['Method B','35 × '+fr(2,5)+' = '+fr(70,5),'70 ÷ 5 = 14 ✓'],['ANSWER',`${fr(2,5)} of 35 = 14`,'both ways agree']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Bigger amounts and money: 3/8 of 64 and 3/5 of £250</div>
+  ${asWarm('The method does not change when the numbers get big!')}
+  ${asFracOf(64,8,3,'','3/8 of 64: each eighth is 8')}
+  ${steps([['3/8 of 64','64 ÷ 8 = 8','then 3 × 8 = 24']])}
+  ${asFracOf(250,5,3,'£','3/5 of £250: each fifth is £50')}
+  ${steps([['3/5 of £250','£250 ÷ 5 = £50','then 3 × £50 = £150'],['Check','£150 is a bit more than half of £250 (£125)','60% is more than 50% ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Fractions of measures: 3/4 of 2 m and 2/5 of 1 L</div>
+  ${asWarm('Change the amount into a smaller unit first so the division works out nicely.')}
+  ${steps([['2 m','= 200 cm','1 m = 100 cm'],['1/4 of 200 cm','200 ÷ 4','= 50 cm'],['3/4 of 200 cm','3 × 50','= 150 cm = 1.5 m']])}
+  ${asFracOf(1000,5,2,'','2/5 of 1 L = 2/5 of 1,000 ml')}
+  ${steps([['1 L','= 1,000 ml','1 L = 1,000 ml'],['1/5 of 1,000','1,000 ÷ 5','= 200 ml'],['2/5 of 1,000','2 × 200','= 400 ml']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life, more than one fraction: the class journey</div>
+  ${asWarm('There are <strong>30 pupils</strong> in a class. <strong>2/5</strong> walk to school, <strong>1/3</strong> come by bus and the rest come by car. How many come by car?')}
+  ${asFracOf(30,5,2,'','2/5 of 30 walk')}
+  ${steps([['Walk','30 ÷ 5 = 6, then 2 × 6','= 12 pupils'],['Bus','30 ÷ 3','= 10 pupils'],['Walk + bus','12 + 10','= 22 pupils'],['Car','30 − 22','= 8 pupils']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with fractions:</strong> 2/5 + 1/3 = 6/15 + 5/15 = 11/15, so the rest is 4/15 of 30 = 2 × 4 = 8 ✓ (we will master this adding in Step 8!).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: improper fractions and comparing</div>
+  ${asWarm('Can a fraction of an amount be BIGGER than the amount? What about 5/4 of 20?')}
+  ${steps([['One quarter','20 ÷ 4','= 5'],['Five quarters','5 × 5','= 25'],['ANSWER',`${fr(5,4)} of 20 = 25`,'5/4 is more than one whole, so the answer is bigger than 20']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: 3/4 of 24 or 2/3 of 30?</strong></div>
+  ${steps([['3/4 of 24','24 ÷ 4 = 6, then 3 × 6','= 18'],['2/3 of 30','30 ÷ 3 = 10, then 2 × 10','= 20'],['Compare','20 &gt; 18','2/3 of 30 is greater']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">A bigger fraction of a SMALLER amount can lose to a smaller fraction of a BIGGER amount. Always calculate before comparing!</div></div></div>
+</div>
+
+${asExCard(2,[
+ exQ(1,'What is 1/4 of 20?',['5','80','16'],0),
+ exQ(2,'What is 1/8 of 56?',['7','448','48'],0),
+ exQ(3,'What is 3/4 of 20?',['15','5','60'],0),
+ exQ(4,'What is 2/5 of 35?',['14','7','70'],0),
+ exQ(5,'What is 3/8 of 64?',['24','8','192'],0),
+ exQ(6,'What is 3/5 of £250?',['£150','£50','£750'],0),
+ exQ(7,'What is 3/4 of 2 m, in centimetres?',['150 cm','50 cm','75 cm'],0),
+ exQ(8,'A class has 30 pupils. 2/5 of them walk to school. How many walk?',['12','10','15'],0),
+ exQ(9,'THINK DEEPER: What is 5/4 of 20?',['25','4','16'],0,'t'),
+ exQ(10,'BOSS LEVEL: A class has 30 pupils. 2/5 walk and 1/3 come by bus. The rest come by car. How many come by car?',['8','12','18'],0,'b')])}`;
+
+
+/* ================= SECTION C — PLACEHOLDERS (steps 3–10) ================= */
+/* Whole-number answer bar: shows a fraction OF a whole number amount, with a
+   clean "answer = ..." strip underneath. Used in FB3.
+   asWholeOf(48,3,4,'48','3/4 of 48') */
+function asWholeOf(whole,den,num,prefix,title){
+  prefix = prefix || '';
+  const W=620,x0=10,bw=600,cw=bw/den,part=whole/den;
+  const fmt=v=>prefix+(Number.isInteger(v)?v.toLocaleString('en-GB'):v.toFixed(2));
+  const H = 150;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||('Whole = '+fmt(whole))}</text>`;
+  for(let i=0;i<den;i++){
+    const on=i<num;
+    s+=`<rect x="${x0+i*cw}" y="28" width="${cw}" height="46" fill="${on?'#A7F3D0':'#fff'}" stroke="#0F766E" stroke-width="2"/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#0F766E">1/${den}</text>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="64" text-anchor="middle" font-size="12" font-weight="800" fill="#0F766E">${fmt(part)}</text>`;
+  }
+  if(num>0){
+    s+=`<line x1="${x0}" y1="86" x2="${x0+num*cw}" y2="86" stroke="#D85A30" stroke-width="3"/>`;
+    s+=`<text x="${x0+num*cw/2}" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#D85A30">${num}/${den} of ${fmt(whole)} = ${fmt(num*part)}</text>`;
+  }
+  s+=`<rect x="${W/2-150}" y="120" width="300" height="24" rx="12" fill="#0F766E"/>`;
+  s+=`<text x="${W/2}" y="137" text-anchor="middle" font-size="14" font-weight="800" fill="white">Answer: ${fmt(num*part)}</text>`;
+  return s+'</svg>';
+}
+
+/* Decomposition of a mixed number: whole + fraction, with a brace diagram.
+   asMixedSplit(1,1,3) → shows 1 1/3 = 1 + 1/3 */
+function asMixedSplit(whole,num,den){
+  const W=620,H=150;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="13" font-weight="800" fill="#5B21B6">A mixed number = a whole number + a proper fraction</text>`;
+  // left box: whole
+  s+=`<rect x="30" y="40" width="180" height="70" rx="12" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2"/>`;
+  s+=`<text x="120" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#5B21B6">WHOLE NUMBER</text>`;
+  s+=`<text x="120" y="98" text-anchor="middle" font-size="30" font-weight="900" fill="#4C1D95">${whole}</text>`;
+  // plus
+  s+=`<text x="240" y="90" text-anchor="middle" font-size="34" font-weight="800" fill="#333">+</text>`;
+  // right box: fraction
+  s+=`<rect x="280" y="40" width="310" height="70" rx="12" fill="#FAEEDA" stroke="#B45309" stroke-width="2"/>`;
+  s+=`<text x="435" y="70" text-anchor="middle" font-size="13" font-weight="700" fill="#633806">PROPER FRACTION</text>`;
+  s+=`<text x="435" y="98" text-anchor="middle" font-size="26" font-weight="900" fill="#92400E">${num}/${den}</text>`;
+  // equals
+  s+=`<rect x="30" y="122" width="560" height="24" rx="12" fill="#5B21B6"/>`;
+  s+=`<text x="310" y="139" text-anchor="middle" font-size="14" font-weight="800" fill="white">${whole} ${num}/${den}  =  ${whole} + ${num}/${den}</text>`;
+  return s+'</svg>';
+}
+
+/* Repeated-addition arrow line for mixed numbers:
+   asMixedLine([['1 1/3','+1 1/3','+1 1/3']], ...) — draws the integer × mixed number as jumps. */
+function asMixedJumps(start,count,w,n,d,title){
+  const W=660,H=150,pad=60,y=80;
+  const step=(W-2*pad)/(count+1);
+  // Value in impropers to position correctly
+  const impW=w*d+n;              // improper numerator of the mixed number
+  const total=(count*impW);      // total in units of 1/d
+  const maxVal=total;
+  const X=v=>pad+(v/maxVal)*(W-2*pad);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||(count+' jumps of '+w+' '+n+'/'+d)}</text>`;
+  s+=`<line x1="${pad-20}" y1="${y}" x2="${W-pad+20}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  s+=`<polygon points="${W-pad+20},${y} ${W-pad+8},${y-6} ${W-pad+8},${y+6}" fill="#444"/>`;
+  // marks: 0, impW, 2*impW, ...
+  for(let i=0;i<=count;i++){
+    const v=i*impW;
+    const x=X(v);
+    s+=`<line x1="${x}" y1="${y-7}" x2="${x}" y2="${y+7}" stroke="#444" stroke-width="2"/>`;
+    // label in mixed form
+    const wholeVal=Math.floor(i*w + Math.floor(i*n/d));
+    let label;
+    if(i===0) label='0';
+    else {
+      const totImp=i*impW;
+      const whole=Math.floor(totImp/d);
+      const rem=totImp%d;
+      label = rem===0 ? String(whole) : whole+' '+rem+'/'+d;
+    }
+    s+=`<text x="${x}" y="${y+28}" text-anchor="middle" font-size="12" font-weight="800" fill="#5B21B6">${label}</text>`;
+  }
+  // arrows
+  for(let i=0;i<count;i++){
+    const x1=X(i*impW), x2=X((i+1)*impW);
+    const xm=(x1+x2)/2;
+    s+=`<path d="M ${x1+4} ${y-18} Q ${xm} ${y-38} ${x2-4} ${y-18}" fill="none" stroke="#D85A30" stroke-width="2"/>`;
+    s+=`<polygon points="${x2-4},${y-18} ${x2-14},${y-24} ${x2-10},${y-12}" fill="#D85A30"/>`;
+    s+=`<text x="${xm}" y="${y-30}" text-anchor="middle" font-size="11" font-weight="800" fill="#D85A30">+${w} ${n}/${d}</text>`;
+  }
+  return s+'</svg>';
+}
+
+/* Improper → mixed conversion machine.
+   asImpToMixed(impNum,den)  e.g. (4,3) → 4/3 = 1 1/3 */
+function asImpToMixed(impNum,den){
+  const W=620,H=130;
+  const whole=Math.floor(impNum/den), rem=impNum%den;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Turn the improper fraction into a mixed number</text>`;
+  // input
+  s+=`<rect x="20" y="35" width="150" height="70" rx="12" fill="#FAEEDA" stroke="#B45309" stroke-width="2"/>`;
+  s+=`<text x="95" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">IMPROPER</text>`;
+  s+=`<text x="95" y="92" text-anchor="middle" font-size="26" font-weight="900" fill="#633806">${impNum}/${den}</text>`;
+  // divide arrow
+  s+=`<line x1="180" y1="70" x2="240" y2="70" stroke="#6D28D9" stroke-width="3"/>`;
+  s+=`<polygon points="240,70 230,64 230,76" fill="#6D28D9"/>`;
+  s+=`<text x="210" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#6D28D9">divide</text>`;
+  // middle working
+  s+=`<rect x="250" y="30" width="180" height="80" rx="12" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2"/>`;
+  s+=`<text x="340" y="55" text-anchor="middle" font-size="13" font-weight="800" fill="#4C1D95">${impNum} ÷ ${den}</text>`;
+  s+=`<text x="340" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#4C1D95">= ${whole} r ${rem}</text>`;
+  // arrow
+  s+=`<line x1="440" y1="70" x2="500" y2="70" stroke="#6D28D9" stroke-width="3"/>`;
+  s+=`<polygon points="500,70 490,64 490,76" fill="#6D28D9"/>`;
+  // output
+  s+=`<rect x="510" y="35" width="95" height="70" rx="12" fill="#E1F5EE" stroke="#0F766E" stroke-width="2"/>`;
+  s+=`<text x="557" y="60" text-anchor="middle" font-size="12" font-weight="700" fill="#085041">MIXED</text>`;
+  s+=`<text x="557" y="92" text-anchor="middle" font-size="24" font-weight="900" fill="#085041">${whole} ${rem}/${den}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 3 : Find fractions of amounts ---------- */
+const P5_FB3 = `
+${asHeader('FB3','Step 3 — Find Fractions of Amounts','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — From a Known Part to Any Part</div>
+  ${asWarm('In Step 2 you found fractions of quantities by dividing by the denominator, then multiplying by the numerator. <strong>Same idea today — but the amounts are bigger and the numbers do not always divide neatly in one go.</strong> We will also meet <em>amounts with remainders</em>, <em>comparisons</em> and <em>reverse questions</em> where you know the part and must find the whole.')}
+
+  <div class="card-body"><strong>Concrete:</strong> 48 counters shared equally into 4 groups. One group is <strong>1/4 of 48</strong>.</div>
+  ${asWholeOf(48,4,1,'','1/4 of 48 = 48 ÷ 4 = 12')}
+  <div class="card-body" style="margin-top:6px;"><strong>Three groups</strong> give <strong>3/4 of 48</strong>:</div>
+  ${asWholeOf(48,4,3,'','3/4 of 48: each quarter is 12, so three quarters is 3 × 12')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 2-step method (recap)</div><div class="s-body" style="color:#633806;">1) <strong>Divide</strong> by the denominator → one part. 2) <strong>Multiply</strong> by the numerator → the part(s) you want. E.g. 3/4 of 48 = (48 ÷ 4) × 3 = 12 × 3 = 36.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Mental shortcut</div><div class="s-body" style="color:#085041;">When the amount is a <strong>multiple of the denominator</strong>, you can do the whole thing mentally. For 3/4 of 48: half of 48 is 24, half of 24 is 12 → one quarter. Then 3 × 12 = 36.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Multiply first</div><div class="s-body" style="color:#712B13;">Doing 48 × 3 first and then ÷ 4 often works, but with big numbers it is messier: 48 × 3 = 144, then 144 ÷ 4 = 36. Both roads lead to 36 — pick whichever is easier for the numbers.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Non-multiples</div><div class="s-body" style="color:#712B13;">If the amount is NOT a multiple of the denominator (e.g. 1/4 of 30), you get a fraction of one unit — money becomes pence, metres become centimetres. We handle this in Example 6.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Warm-up with a familiar amount: 1/4 of 48</div>
+  ${asWarm('You already met this one. Say the two steps out loud before you calculate.')}
+  ${asWholeOf(48,4,1,'','1/4 of 48: cut into 4 equal parts')}
+  ${steps([['Denominator','4','cut into 4 equal parts'],['Divide','48 ÷ 4','= 12 in each part'],['ANSWER',`${fr(1,4)} of 48 = 12`,'check: 4 × 12 = 48 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Non-unit fraction, clean numbers: 3/4 of 48</div>
+  ${asWarm('One quarter of 48 is 12. How many quarters do we want?')}
+  ${asWholeOf(48,4,3,'','3/4 of 48 = 3 parts of 12')}
+  ${steps([['One part','48 ÷ 4','= 12'],['Three parts','3 × 12','= 36'],['ANSWER',`${fr(3,4)} of 48 = 36`,'the missing quarter is 12, and 36 + 12 = 48 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Two different unit fractions of the same amount: 1/6 and 1/8 of 72</div>
+  ${asWarm('Same amount, different denominators. Which part is bigger?')}
+  ${asWholeOf(72,6,1,'','1/6 of 72: 72 ÷ 6 = 12')}
+  ${asWholeOf(72,8,1,'','1/8 of 72: 72 ÷ 8 = 9')}
+  ${steps([['1/6 of 72','72 ÷ 6','= 12'],['1/8 of 72','72 ÷ 8','= 9'],['Compare','12 &gt; 9','sixths are bigger parts than eighths, so 1/6 of 72 &gt; 1/8 of 72 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A non-unit fraction and comparison: 2/5 of 60 vs 3/4 of 60</div>
+  ${asWarm('Both amounts are 60. Which fraction gives more?')}
+  ${asWholeOf(60,5,2,'','2/5 of 60')}
+  ${asWholeOf(60,4,3,'','3/4 of 60')}
+  ${steps([['2/5 of 60','60 ÷ 5 = 12, then 2 × 12','= 24'],['3/4 of 60','60 ÷ 4 = 15, then 3 × 15','= 45'],['Compare','45 &gt; 24','3/4 of 60 is greater']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Sense check</div><div class="s-body" style="color:#27500A;">3/4 is more than half of 60 (= 30). 2/5 is less than half (1/2 of 60 = 30, and 1/5 = 12). So the answer must be bigger than 30 for 3/4 and less than 30 for 2/5 ✓</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Money and measures: 3/4 of £2.40 and 5/8 of 4 kg</div>
+  ${asWarm('Turn the amount into the smallest unit first, so the division is clean.')}
+  ${asWholeOf(240,4,3,'£','3/4 of £2.40 = 3/4 of 240p')}
+  ${steps([['£2.40','= 240p',''],['1/4 of 240p','240 ÷ 4','= 60p'],['3/4 of 240p','3 × 60p','= 180p = £1.80']])}
+  ${asWholeOf(4000,8,5,'','5/8 of 4 kg = 5/8 of 4,000 g')}
+  ${steps([['4 kg','= 4,000 g',''],['1/8 of 4,000 g','4,000 ÷ 8','= 500 g'],['5/8 of 4,000 g','5 × 500 g','= 2,500 g = 2.5 kg']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Non-multiple amounts: 1/4 of 30 and 2/5 of 7</div>
+  ${asWarm('The amount does not divide exactly by the denominator. What do we do?')}
+  ${asWholeOf(30,4,1,'','1/4 of 30 — 30 does not divide neatly by 4')}
+  ${steps([['1/4 of 30','30 ÷ 4','= 7.5 (or 7 remainder 2)'],['Meaning','one quarter of 30 is 7.5','half of 7.5 would be 3.75 — one eighth of 30 ✓']])}
+  ${asWholeOf(7,5,2,'','2/5 of 7 — use a decimal or a fraction of 7')}
+  ${steps([['1/5 of 7','7 ÷ 5','= 1.4'],['2/5 of 7','2 × 1.4','= 2.8']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Alternative:</strong> you can also write 2/5 of 7 as 2 × 7 ÷ 5 = 14 ÷ 5 = 2.8, or as the fraction 14/5 = 2 4/5. Any of these is fine — match the unit the question asks for.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real-life, comparing two fractions of the same amount: the school fair</div>
+  ${asWarm('A school fair raises <strong>£180</strong>. <strong>2/3</strong> goes to the library, <strong>1/4</strong> to the garden. Which is more — and by how much?')}
+  ${asWholeOf(180,3,2,'£','2/3 of £180 to the library')}
+  ${asWholeOf(180,4,1,'£','1/4 of £180 to the garden')}
+  ${steps([['Library','£180 ÷ 3 = £60, then 2 × £60','= £120'],['Garden','£180 ÷ 4','= £45'],['Difference','£120 − £45','= £75 more to the library']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and reverse questions: given the part, find the whole</div>
+  ${asWarm('<strong>1/5 of a number is 7. What is the number?</strong> This reverses the usual question.')}
+  ${steps([['1/5 is 7','so 5 fifths = 5 × 7','= 35'],['ANSWER','the number is 35','check: 1/5 of 35 = 35 ÷ 5 = 7 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Harder:</strong> <strong>3/4 of a number is 24. What is the number?</strong></div>
+  ${steps([['3/4 is 24','so 1/4 = 24 ÷ 3','= 8'],['Whole = 4 quarters','4 × 8','= 32'],['ANSWER','the number is 32','check: 3/4 of 32 = (32 ÷ 4) × 3 = 8 × 3 = 24 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 Reverse rule</div><div class="s-body" style="color:#4C1D95;">If you know the <em>part</em>, always find <strong>ONE part</strong> first (divide by the numerator), then find the whole (multiply by the denominator). You will meet this again in Step 6 — Find the Whole from a Fraction.</div></div></div>
+</div>
+
+${asExCard(3,[
+ exQ(1,'What is 1/4 of 48?',['12','192','16'],0),
+ exQ(2,'What is 3/4 of 48?',['36','12','144'],0),
+ exQ(3,'What is 1/6 of 72?',['12','432','8'],0),
+ exQ(4,'What is 2/5 of 60?',['24','12','120'],0),
+ exQ(5,'What is 3/4 of £2.40?',['£1.80','£0.60','£1.60'],0),
+ exQ(6,'What is 5/8 of 4 kg, in grams?',['2,500 g','500 g','2,000 g'],0),
+ exQ(7,'A school fair raises £180. 2/3 goes to the library. How much goes to the library?',['£120','£60','£90'],0),
+ exQ(8,'Which is greater: 3/4 of 60 or 2/5 of 60?',['3/4 of 60','2/5 of 60','They are equal'],0),
+ exQ(9,'THINK DEEPER: 1/5 of a number is 7. What is the number?',['35','12','42'],0,'t'),
+ exQ(10,'BOSS LEVEL: 3/4 of a number is 24. What is the number?',['32','18','48'],0,'b')])}`;
+
+
+
+/* ---------- STEP 4 : Multiply a mixed number by an integer ---------- */
+const P5_FB4 = `
+${asHeader('FB4','Step 4 — Multiply a Mixed Number by an Integer','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Whole Lots AND Fraction Lots</div>
+  ${asWarm('A mixed number like <strong>1 1/3</strong> is two things at once: one whole and one third. When we multiply it by an integer, we multiply <em>both</em> parts and add the results — or we turn it into an improper fraction first and multiply once. This lesson builds the skill behind your school task <strong>1 1/3 × 2</strong>.')}
+
+  ${asMixedSplit(1,1,3)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method A — Partition</div><div class="s-body" style="color:#633806;">Split the mixed number into <em>whole</em> + <em>fraction</em>. Multiply each by the integer separately. Add the answers. Example: 2 × 1 1/3 = (2 × 1) + (2 × 1/3) = 2 + 2/3 = <strong>2 2/3</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method B — Improper first</div><div class="s-body" style="color:#085041;">Turn 1 1/3 into 4/3. Multiply: 2 × 4/3 = 8/3. Convert back: 8/3 = <strong>2 2/3</strong>. Same answer, one fewer step to remember.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Multiply only the fraction</div><div class="s-body" style="color:#712B13;">2 × 1 1/3 is NOT 1 2/3. The whole number 1 is also being multiplied — two whole ones give 2, not 1.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Forget to carry</div><div class="s-body" style="color:#712B13;">After multiplying the fraction part, if the new numerator is ≥ the denominator, you must convert to a mixed number and ADD the extra whole to the whole-number part. Example: 3 × 2 2/3 = 6 + 6/3 = 6 + 2 = 8, NOT 6 6/3.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — The simplest case: 2 × 1 1/3 (your school task!)</div>
+  ${asWarm('Two groups of "one and one third". How much altogether?')}
+  ${asMixedJumps(0,2,1,1,3,'2 jumps of 1 1/3 on a number line')}
+  ${asMixedSplit(1,1,3)}
+  ${steps([['Partition','1 1/3 = 1 + 1/3','split into whole + fraction'],['Multiply whole','2 × 1','= 2'],['Multiply fraction','2 × 1/3','= 2/3'],['Add','2 + 2/3',`= ${mx(2,2,3)}`],['ANSWER',`2 × ${mx(1,1,3)} = ${mx(2,2,3)}`,'Alternative: 2 × 4/3 = 8/3 = 2 2/3 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Same idea, Method B first: 3 × 1 1/4</div>
+  ${asWarm('Turn the mixed number into an improper fraction FIRST, then multiply once.')}
+  ${asMixedJumps(0,3,1,1,4,'3 jumps of 1 1/4')}
+  ${steps([['Mixed → improper','1 1/4 = 5/4','whole × den + num over den'],['Multiply','3 × 5/4','= 15/4'],['Improper → mixed','15 ÷ 4 = 3 r 3',`= ${mx(3,3,4)}`],['ANSWER',`3 × ${mx(1,1,4)} = ${mx(3,3,4)}`,'']])}
+  <div class="card-body" style="margin-top:6px;">✅ <strong>Check with Method A:</strong> (3 × 1) + (3 × 1/4) = 3 + 3/4 = 3 3/4 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — When the fraction part overflows: 3 × 2 2/3</div>
+  ${asWarm('Watch out — the fraction part can make an extra whole!')}
+  ${asMixedJumps(0,3,2,2,3,'3 jumps of 2 2/3')}
+  ${steps([['Partition','2 2/3 = 2 + 2/3',''],['Whole part','3 × 2','= 6'],['Fraction part','3 × 2/3','= 6/3 = 2'],['Add','6 + 2','= 8'],['ANSWER',`3 × ${mx(2,2,3)} = 8`,'']])}
+  ${asImpToMixed(24,3)}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Method B check:</strong> 2 2/3 = 8/3, then 3 × 8/3 = 24/3 = 8 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Bigger fractions and simplifying: 5 × 2 1/2</div>
+  ${asWarm('Multiply, then tidy up. Can the fraction part be simplified?')}
+  ${steps([['Partition','2 1/2 = 2 + 1/2',''],['Whole part','5 × 2','= 10'],['Fraction part','5 × 1/2','= 5/2'],['Convert fraction','5/2','= 2 1/2'],['Add','10 + 2 1/2',`= ${mx(12,1,2)}`],['ANSWER',`5 × ${mx(2,1,2)} = ${mx(12,1,2)}`,'']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Method B check:</strong> 2 1/2 = 5/2, then 5 × 5/2 = 25/2 = 12 1/2 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Integer on the right: 1 1/5 × 4</div>
+  ${asWarm('Multiplication is commutative — 1 1/5 × 4 gives the same answer as 4 × 1 1/5.')}
+  ${steps([['Mixed → improper','1 1/5 = 6/5',''],['Multiply','4 × 6/5','= 24/5'],['Mixed → improper','24 ÷ 5 = 4 r 4',`= ${mx(4,4,5)}`],['ANSWER',`${mx(1,1,5)} × 4 = ${mx(4,4,5)}`,'']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔁 Order does not matter</div><div class="s-body" style="color:#4C1D95;">Always put the integer on the left when you multiply — it is the number of <em>groups</em>. So "1 1/3 × 2" means "2 groups of 1 1/3" = 2 × 1 1/3.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life: a baker's trays</div>
+  ${asWarm('A baker uses <strong>2 1/4 kg</strong> of flour for one batch of bread. How much flour is needed for <strong>4 batches</strong>?')}
+  ${steps([['Set up','4 × 2 1/4','four lots of 2 1/4'],['Partition','2 1/4 = 2 + 1/4',''],['Whole part','4 × 2','= 8'],['Fraction part','4 × 1/4','= 1'],['Add','8 + 1','= 9'],['ANSWER','9 kg','Method B: 9/4 × 4 = 36/4 = 9 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Reasonableness:</strong> 2 1/4 is just over 2, so 4 batches should be just over 8 — 9 kg makes sense.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life with units: a runner's week</div>
+  ${asWarm('A runner runs <strong>3 1/2 km</strong> each day for <strong>5 days</strong>. How far in total?')}
+  ${asWholeOf(5,2,1,'','','5 × 3 1/2 km')}
+  ${steps([['Set up','5 × 3 1/2',''],['Whole part','5 × 3','= 15'],['Fraction part','5 × 1/2','= 5/2'],['Convert','5/2','= 2 1/2'],['Add','15 + 2 1/2',`= ${mx(17,1,2)} km`],['ANSWER','17 1/2 km','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and missing numbers</div>
+  ${asWarm('Which is greater: <strong>2 × 1 3/4</strong> or <strong>3 × 1 1/2</strong>? Work both out and compare.')}
+  ${steps([['2 × 1 3/4','(2 × 1) + (2 × 3/4) = 2 + 6/4','= 2 + 1 1/2 = 3 1/2'],['3 × 1 1/2','(3 × 1) + (3 × 1/2) = 3 + 3/2','= 3 + 1 1/2 = 4 1/2'],['Compare','4 1/2 &gt; 3 1/2','3 × 1 1/2 is greater']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> ▢ × 1 1/4 = 2 1/2. What goes in the box?</div>
+  ${steps([['Improper','1 1/4 = 5/4, 2 1/2 = 5/2',''],['Think','▢ × 5/4 = 5/2','multiply both sides by 4: ▢ × 5 = 10'],['Divide','10 ÷ 5','= 2'],['ANSWER',`2 × ${mx(1,1,4)} = ${mx(2,1,2)} ✓`,'']])}
+</div>
+
+${asExCard(4,[
+ exQ(1,'2 × 1 1/3 = ?',['2 2/3','1 2/3','2 1/3'],0),
+ exQ(2,'3 × 1 1/4 = ?',['3 3/4','3 1/4','4 1/4'],0),
+ exQ(3,'3 × 2 2/3 = ?',['8','6 2/3','6 6/3'],0),
+ exQ(4,'5 × 2 1/2 = ?',['12 1/2','10 1/2','12'],0),
+ exQ(5,'1 1/5 × 4 = ?',['4 4/5','4 1/5','5 4/5'],0),
+ exQ(6,'A baker uses 2 1/4 kg of flour per batch. How much for 4 batches?',['9 kg','8 1/4 kg','8 kg'],0),
+ exQ(7,'A runner runs 3 1/2 km a day for 5 days. What is the total distance?',['17 1/2 km','15 1/2 km','17 km'],0),
+ exQ(8,'Which is greater: 2 × 1 3/4 or 3 × 1 1/2?',['3 × 1 1/2','2 × 1 3/4','They are equal'],0),
+ exQ(9,'THINK DEEPER: ▢ × 1 1/4 = 2 1/2. What number goes in the box?',['2','3','4'],0,'t'),
+ exQ(10,'BOSS LEVEL: Each bottle holds 1 1/3 litres. A shop sells 6 bottles. How many litres is that?',['8 L','6 1/3 L','7 2/3 L'],0,'b')])}`;
+
+
+
+
+
+
+/* Fraction ÷ integer as a bar being cut into equal pieces.
+   asDivBars(den, num, divisor, title, foot)
+   e.g. asDivBars(4,3,2,'3/4 ÷ 2','each half of 3/4 is 3/8') */
+function asDivBars(den,num,divisor,title,foot){
+  const W=620,H=190,x0=10,bw=600,cw=bw/den;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||('The shaded ' + num + '/' + den + ' cut into ' + divisor + ' equal pieces')}</text>`;
+  // Top bar: whole cut into den parts, num shaded
+  s+=`<rect x="${x0}" y="30" width="${bw}" height="42" fill="#fff" stroke="#333" stroke-width="2"/>`;
+  for(let i=0;i<num;i++){
+    s+=`<rect x="${x0+i*cw}" y="30" width="${cw}" height="42" fill="#FCD34D" stroke="#B45309" stroke-width="2"/>`;
+  }
+  for(let k=1;k<den;k++){
+    s+=`<line x1="${x0+k*cw}" y1="30" x2="${x0+k*cw}" y2="72" stroke="#333" stroke-width="1"/>`;
+  }
+  for(let i=0;i<den;i++){
+    s+=`<text x="${x0+i*cw+cw/2}" y="56" text-anchor="middle" font-size="11" font-weight="700" fill="${i<num?'#92400E':'#555'}">1/${den}</text>`;
+  }
+  // Arrow down
+  s+=`<line x1="${W/2}" y1="78" x2="${W/2}" y2="102" stroke="#6D28D9" stroke-width="3"/>`;
+  s+=`<polygon points="${W/2},102 ${W/2-6},92 ${W/2+6},92" fill="#6D28D9"/>`;
+  s+=`<text x="${W/2+80}" y="94" font-size="11" font-weight="700" fill="#6D28D9">each ${1}/${den} cut into ${divisor}</text>`;
+  // Bottom bar: the SAME bar but with a vertical divider inside each part
+  s+=`<rect x="${x0}" y="110" width="${bw}" height="42" fill="#fff" stroke="#333" stroke-width="2"/>`;
+  for(let i=0;i<den;i++){
+    const on=i<num;
+    s+=`<rect x="${x0+i*cw}" y="110" width="${cw}" height="42" fill="${on?'#A7F3D0':'#fff'}" stroke="#0F766E" stroke-width="${on?1.5:1}"/>`;
+    // subdivide each part into `divisor` equal slices
+    for(let d=1; d<divisor; d++){
+      s+=`<line x1="${x0+i*cw+d*(cw/divisor)}" y1="110" x2="${x0+i*cw+d*(cw/divisor)}" y2="152" stroke="#0F766E" stroke-width="1" stroke-dasharray="3 2"/>`;
+    }
+  }
+  s+=`<text x="${W/2}" y="180" text-anchor="middle" font-size="13" font-weight="800" fill="#085041">${foot||('each piece = 1/' + (den*divisor))}</text>`;
+  return s+'</svg>';
+}
+
+/* Number line showing division by an integer as jumps into equal pieces.
+   asDivLine(0,1,6,5,3) — not used here but available for future lessons */
+function asDivLine(start,end,den,num,divisor,title){
+  const W=660,H=130,pad=50,y=70;
+  const maxV=end;
+  const X=v=>pad+(v/maxV)*(W-2*pad);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||''}</text>`;
+  s+=`<line x1="${pad-14}" y1="${y}" x2="${W-pad+14}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  s+=`<polygon points="${W-pad+14},${y} ${W-pad+2},${y-6} ${W-pad+2},${y+6}" fill="#444"/>`;
+  for(let i=0;i<=den;i++){
+    const v=i/den;
+    const x=X(v);
+    s+=`<line x1="${x}" y1="${y-6}" x2="${x}" y2="${y+6}" stroke="#888" stroke-width="1.5"/>`;
+    s+=`<text x="${x}" y="${y+24}" text-anchor="middle" font-size="11" font-weight="600" fill="#555">${i===0?'0':i+'/'+den}</text>`;
+  }
+  // shade from 0 to num/den
+  s+=`<line x1="${X(0)}" y1="${y-22}" x2="${X(num/den)}" y2="${y-22}" stroke="#FCD34D" stroke-width="8" stroke-linecap="round"/>`;
+  s+=`<text x="${(X(0)+X(num/den))/2}" y="${y-30}" text-anchor="middle" font-size="12" font-weight="800" fill="#92400E">${num}/${den}</text>`;
+  // divisor ticks
+  for(let d=0; d<=divisor; d++){
+    const v=num/den*d/divisor;
+    const x=X(v);
+    s+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y-14}" stroke="#0F766E" stroke-width="2"/>`;
+    s+=`<text x="${x}" y="${y+42}" text-anchor="middle" font-size="10" font-weight="700" fill="#0F766E">${d===0?'0':(num*d)+'/'+(den*divisor)}</text>`;
+  }
+  return s+'</svg>';
+}
+
+/* "Find the whole" bar model: given a fraction bar shaded to show the known
+   part, with "?" marks on the unshaded parts.
+   asFindWhole(den,num,partValue,title) */
+function asFindWhole(den,num,partValue,title){
+  const W=620,x0=10,bw=600,cw=bw/den;
+  const H=170;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||('If ' + num + '/' + den + ' is ' + partValue + ', what is the whole?')}</text>`;
+  for(let i=0;i<den;i++){
+    const known=i<num;
+    s+=`<rect x="${x0+i*cw}" y="30" width="${cw}" height="50" fill="${known?'#A7F3D0':'#F3F4F6'}" stroke="#0F766E" stroke-width="2" ${known?'':'stroke-dasharray="4 3"'}/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="52" text-anchor="middle" font-size="10" font-weight="700" fill="${known?'#065F46':'#6B7280'}">1/${den}</text>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="70" text-anchor="middle" font-size="13" font-weight="800" fill="${known?'#065F46':'#9CA3AF'}">${known?('?'):'?'}</text>`;
+  }
+  // label bracket under the known part
+  s+=`<line x1="${x0}" y1="92" x2="${x0+num*cw}" y2="92" stroke="#D85A30" stroke-width="3"/>`;
+  s+=`<text x="${x0+num*cw/2}" y="112" text-anchor="middle" font-size="13" font-weight="800" fill="#D85A30">${num}/${den} = ${partValue}</text>`;
+  // total bracket under everything
+  s+=`<line x1="${x0}" y1="128" x2="${x0+bw}" y2="128" stroke="#5B21B6" stroke-width="3"/>`;
+  s+=`<text x="${x0+bw/2}" y="150" text-anchor="middle" font-size="14" font-weight="900" fill="#4C1D95">whole = ?</text>`;
+  return s+'</svg>';
+}
+
+/* "Working backwards" machine: part → unit fraction → whole.
+   asWorkBackward(num,den,partValue) */
+function asWorkBackward(num,den,partValue){
+  const W=620,H=140;
+  const unit = partValue/num;
+  const whole = unit*den;
+  const fmt=v=>(Number.isInteger(v)?v.toLocaleString('en-GB'):v.toFixed(2));
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">Working backwards — find one part, then find the whole</text>`;
+  // box 1
+  s+=`<rect x="15" y="35" width="170" height="80" rx="12" fill="#FAEEDA" stroke="#B45309" stroke-width="2"/>`;
+  s+=`<text x="100" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#92400E">WE KNOW</text>`;
+  s+=`<text x="100" y="78" text-anchor="middle" font-size="14" font-weight="800" fill="#633806">${num}/${den} = ${fmt(partValue)}</text>`;
+  s+=`<text x="100" y="100" text-anchor="middle" font-size="11" fill="#92400E">(${num} parts)</text>`;
+  // arrow ÷num
+  s+=`<line x1="190" y1="75" x2="245" y2="75" stroke="#6D28D9" stroke-width="3"/>`;
+  s+=`<polygon points="245,75 235,69 235,81" fill="#6D28D9"/>`;
+  s+=`<text x="217" y="62" text-anchor="middle" font-size="11" font-weight="800" fill="#6D28D9">÷ ${num}</text>`;
+  // box 2
+  s+=`<rect x="250" y="35" width="150" height="80" rx="12" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2"/>`;
+  s+=`<text x="325" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#4C1D95">ONE PART</text>`;
+  s+=`<text x="325" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#4C1D95">1/${den} = ${fmt(unit)}</text>`;
+  s+=`<text x="325" y="100" text-anchor="middle" font-size="11" fill="#4C1D95">(1 part)</text>`;
+  // arrow ×den
+  s+=`<line x1="405" y1="75" x2="460" y2="75" stroke="#6D28D9" stroke-width="3"/>`;
+  s+=`<polygon points="460,75 450,69 450,81" fill="#6D28D9"/>`;
+  s+=`<text x="432" y="62" text-anchor="middle" font-size="11" font-weight="800" fill="#6D28D9">× ${den}</text>`;
+  // box 3
+  s+=`<rect x="465" y="35" width="140" height="80" rx="12" fill="#E1F5EE" stroke="#0F766E" stroke-width="2"/>`;
+  s+=`<text x="535" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#085041">WHOLE</text>`;
+  s+=`<text x="535" y="80" text-anchor="middle" font-size="14" font-weight="800" fill="#085041">= ${fmt(whole)}</text>`;
+  s+=`<text x="535" y="100" text-anchor="middle" font-size="11" fill="#085041">(${den} parts)</text>`;
+  return s+'</svg>';
+}
+
+
+
+
+
+/* ---------- STEP 5 : Divide fractions by integers ---------- */
+const P5_FB5 = `
+${asHeader('FB5','Step 5 — Divide Fractions by Integers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Sharing a Fraction into Equal Pieces</div>
+  ${asWarm('In Step 1 we <strong>multiplied</strong> fractions by integers (repeated addition — the fraction got bigger). Today we do the opposite: we <strong>divide</strong> a fraction by an integer, which means <em>sharing the fraction into equal smaller pieces</em>. The fraction gets smaller — but each piece is a new, smaller fraction.')}
+
+  <div class="card-body"><strong>Concrete:</strong> Take <strong>3/4 of a pizza</strong>. Share it equally between <strong>2 people</strong>. How much does each person get?</div>
+  ${asDivBars(4,3,2,'3/4 cut into 2 equal shares','each share is 3/8')}
+  ${asWarm('Each of the two shares is the same size. 3/4 was cut into 2 equal pieces, and each piece is <strong>3/8</strong> of the original pizza.')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;">To divide a fraction by an integer, <strong>multiply the DENOMINATOR by the integer</strong> and <strong>keep the numerator</strong>. So 3/4 ÷ 2 = 3/(4×2) = 3/8.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Why does it work?</div><div class="s-body" style="color:#085041;">Cutting every 1/4 into 2 equal pieces gives eighths. Cutting a 1/4 into 3 equal pieces gives twelfths. In general, cutting each part into <em>n</em> pieces turns 1/<em>d</em> into 1/(<em>d</em>×<em>n</em>).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Divide the numerator</div><div class="s-body" style="color:#712B13;">3/4 ÷ 2 is <strong>not</strong> 1.5/4 (or 1.5 ÷ 4). Fractions should keep <em>whole-number</em> numerators and denominators. Only the denominator changes.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Divide by the wrong number</div><div class="s-body" style="color:#712B13;">"Divide 2/3 by 4" means <em>share</em> 2/3 into 4 pieces, so the answer is 2/(3×4) = 2/12 = 1/6. It does <strong>not</strong> mean 4 ÷ 2/3 — that is a Year 6 problem.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — The simplest case: 3/4 ÷ 2</div>
+  ${asWarm('Share 3 quarters equally between 2 people. How much does each get?')}
+  ${asDivBars(4,3,2,'3/4 shared between 2','each share is 3/8')}
+  ${steps([['Set up','3/4 ÷ 2','share 3/4 into 2 equal parts'],['Rule: multiply the denominator','3/(4 × 2)','= 3/8'],['ANSWER','3/4 ÷ 2 = 3/8','each person gets 3/8 of the pizza']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 3/8 is smaller than 3/4 ✓ — dividing by 2 halves the fraction. Also, 2 × 3/8 = 6/8 = 3/4 ✓ — the two shares add back to the original.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — A unit fraction divided by 2: 1/2 ÷ 2</div>
+  ${asWarm('Half a bar of chocolate shared between 2 people.')}
+  ${asDivBars(2,1,2,'1/2 shared between 2','each share is 1/4')}
+  ${steps([['Set up','1/2 ÷ 2',''],['Rule','1/(2 × 2)','= 1/4'],['ANSWER','1/2 ÷ 2 = 1/4','each person gets a quarter of the whole bar']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Pattern:</strong> 1/2 of 1/2 is a quarter. That is the same as <em>multiplying</em> by 1/2 — and this link matters in Year 6!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Dividing by 3: 3/5 ÷ 3</div>
+  ${asWarm('Three fifths shared into 3 equal pieces.')}
+  ${asDivBars(5,3,3,'3/5 shared into 3','each share is 3/15 = 1/5')}
+  ${steps([['Set up','3/5 ÷ 3',''],['Rule','3/(5 × 3) = 3/15',''],['Simplify','3/15 ÷ 3','= 1/5'],['ANSWER','3/5 ÷ 3 = 1/5','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Shortcut:</strong> when the numerator and the divisor are the same, the fraction cancels: 3/5 ÷ 3 = 1/5. This is a useful pattern — but only when it is true!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Bigger fractions and simplification: 4/9 ÷ 2</div>
+  ${asWarm('Apply the rule first, then simplify if you can.')}
+  ${asDivBars(9,4,2,'4/9 shared between 2','each share is 4/18 = 2/9')}
+  ${steps([['Set up','4/9 ÷ 2',''],['Rule','4/(9 × 2) = 4/18',''],['Simplify','÷ 2 on top and bottom','= 2/9'],['ANSWER','4/9 ÷ 2 = 2/9','']])}
+  ${asEquivBars([[4,18,'4/18'],[2,9,'2/9']],'4/18 and 2/9 are the same amount')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Dividing an improper fraction: 5/4 ÷ 2</div>
+  ${asWarm('Improper fractions follow exactly the same rule. Then tidy up at the end.')}
+  ${steps([['Set up','5/4 ÷ 2',''],['Rule','5/(4 × 2) = 5/8',''],['ANSWER','5/4 ÷ 2 = 5/8','5/8 is less than 1, so no mixed number needed']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Check:</strong> 2 × 5/8 = 10/8 = 5/4 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life: sharing a jug of juice</div>
+  ${asWarm('A jug contains <strong>2/3 of a litre</strong> of juice. It is poured equally into <strong>4 glasses</strong>. How much juice is in each glass?')}
+  ${asDivBars(3,2,4,'2/3 shared into 4 glasses','each glass has 2/12 = 1/6 of a litre')}
+  ${steps([['Set up','2/3 ÷ 4',''],['Rule','2/(3 × 4) = 2/12',''],['Simplify','÷ 2','= 1/6'],['ANSWER','each glass has 1/6 of a litre','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 2/3 L is about 667 ml, shared among 4 → about 167 ml per glass. And 1/6 L = 167 ml ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Non-unit fractions and reasoning: 6/7 ÷ 3 vs 6/7 ÷ 2</div>
+  ${asWarm('Same fraction, different divisors. Which gives the bigger share?')}
+  ${steps([['6/7 ÷ 3','6/(7 × 3) = 6/21','= 2/7'],['6/7 ÷ 2','6/(7 × 2) = 6/14','= 3/7'],['Compare','3/7 &gt; 2/7','dividing by 2 gives bigger shares than dividing by 3 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 Key idea</div><div class="s-body" style="color:#4C1D95;">The <strong>smaller the divisor, the bigger each share</strong>. Dividing by 2 always gives bigger pieces than dividing by 3 — because fewer people are sharing.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and missing numbers</div>
+  ${asWarm('Use the inverse to check and to solve missing-number problems.')}
+  <div class="card-body"><strong>Check:</strong> 5/6 ÷ 5 = 5/30 = 1/6. Verify by multiplying back: 5 × 1/6 = 5/6 ✓</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> 4/5 ÷ ▢ = 2/5. What is the divisor?</div>
+  ${steps([['Set up','4/(5 × ▢) = 2/5','cross-multiply: 4 × 5 = 2 × (5 × ▢) → 20 = 10 × ▢'],['Divide','20 ÷ 10','= 2'],['ANSWER','4/5 ÷ 2 = 2/5 ✓','']])}
+</div>
+
+${asExCard(5,[
+ exQ(1,'3/4 ÷ 2 = ?',['3/8','1.5/4','1/8'],0),
+ exQ(2,'1/2 ÷ 2 = ?',['1/4','1/2','1/3'],0),
+ exQ(3,'3/5 ÷ 3 = ? Give the answer in its simplest form.',['1/5','3/15','3/8'],0),
+ exQ(4,'4/9 ÷ 2 = ? Give the answer in its simplest form.',['2/9','4/18','1/9'],0),
+ exQ(5,'5/4 ÷ 2 = ?',['5/8','5/2','2/5'],0),
+ exQ(6,'A jug holds 2/3 of a litre of juice, poured equally into 4 glasses. How much is in each glass?',['1/6 L','2/12 L','1/3 L'],0),
+ exQ(7,'Which gives the bigger share: 6/7 ÷ 2 or 6/7 ÷ 3?',['6/7 ÷ 2','6/7 ÷ 3','They are equal'],0),
+ exQ(8,'Which statement is true?',['Dividing by a smaller integer gives a bigger share','Dividing by a smaller integer gives a smaller share','The divisor does not affect the size of the share'],0),
+ exQ(9,'THINK DEEPER: 5/6 ÷ 5 = ? Give the answer in its simplest form.',['1/6','5/30','1/5'],0,'t'),
+ exQ(10,'BOSS LEVEL: 4/5 ÷ ▢ = 2/5. What is the missing divisor?',['2','4','5'],0,'b')])}`;
+
+
+
+/* ---------- STEP 6 : Find the whole from a fraction ---------- */
+const P5_FB6 = `
+${asHeader('FB6','Step 6 — Find the Whole from a Fraction','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Working Backwards from a Part</div>
+  ${asWarm('In Steps 2 and 3 you were given the <strong>whole</strong> and asked for a fraction of it. Today we reverse the question: we know a <em>fraction of the whole</em>, and we must find the <strong>whole</strong>. The trick is always the same — find <strong>ONE part</strong> first, then multiply.')}
+
+  ${asFindWhole(4,3,15,'We know 3/4 of a bar = 15. What is the whole bar?')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 2-step rule</div><div class="s-body" style="color:#633806;">1) <strong>Divide</strong> the known part by the numerator → this is <em>one part</em> (the unit fraction). 2) <strong>Multiply</strong> by the denominator → this is the whole.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Why it works</div><div class="s-body" style="color:#085041;">If 3 parts are worth 15, then 1 part is 15 ÷ 3 = 5. The whole has 4 parts, so the whole is 4 × 5 = 20. Always check: 3/4 of 20 = 15 ✓</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Just multiply by the denominator</div><div class="s-body" style="color:#712B13;">If 3/4 of a bar is 15, the whole is <strong>not</strong> 4 × 15 = 60. That would be the whole if <em>1/4</em> were 15. The numerator tells you how many parts you already have.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Dividing by the denominator</div><div class="s-body" style="color:#712B13;">The whole is not 15 ÷ 4. You must FIRST find one part (÷ numerator), THEN scale up (× denominator). Order matters!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — The simplest case: 3/4 of a number is 15</div>
+  ${asWarm('We know 3 parts are worth 15. What is 1 part? What is the whole (4 parts)?')}
+  ${asFindWhole(4,3,15,'3/4 of the whole = 15')}
+  ${asWorkBackward(3,4,15)}
+  ${steps([['We have 3 parts = 15','so 1 part = 15 ÷ 3','= 5'],['Whole = 4 parts','4 × 5','= 20'],['ANSWER','the whole is 20','check: 3/4 of 20 = 15 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — With a unit fraction given: 1/5 of a number is 7</div>
+  ${asWarm('If ONE part is 7, the whole is just 5 of those parts.')}
+  ${asFindWhole(5,1,7,'1/5 of the whole = 7')}
+  ${steps([['We have 1 part = 7','so 1 part = 7','already known'],['Whole = 5 parts','5 × 7','= 35'],['ANSWER','the whole is 35','check: 1/5 of 35 = 7 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 When the numerator is 1, step 1 is already done — just multiply by the denominator.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Larger numbers: 2/5 of a number is 18</div>
+  ${asWarm('Two fifths is 18. Find one fifth, then the whole.')}
+  ${asFindWhole(5,2,18,'2/5 of the whole = 18')}
+  ${asWorkBackward(2,5,18)}
+  ${steps([['2 parts = 18','1 part = 18 ÷ 2','= 9'],['Whole = 5 parts','5 × 9','= 45'],['ANSWER','the whole is 45','check: 2/5 of 45 = 18 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Fraction where the numerator and denominator are close: 5/6 of a number is 40</div>
+  ${asWarm('Five sixths is 40. Find one sixth first, then all six.')}
+  ${asFindWhole(6,5,40,'5/6 of the whole = 40')}
+  ${asWorkBackward(5,6,40)}
+  ${steps([['5 parts = 40','1 part = 40 ÷ 5','= 8'],['Whole = 6 parts','6 × 8','= 48'],['ANSWER','the whole is 48','check: 5/6 of 48 = 40 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Money and measures: 3/4 of a sum of money is £18 and 2/3 of a length is 90 cm</div>
+  ${asWarm('The method is the same with money and units. Always find one part first.')}
+  ${asFindWhole(4,3,18,'3/4 of £? = £18')}
+  ${steps([['3 parts = £18','1 part = £18 ÷ 3','= £6'],['Whole = 4 parts','4 × £6','= £24'],['ANSWER','the whole is £24','check: 3/4 of £24 = £18 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>2/3 of a length is 90 cm. What is the full length?</strong></div>
+  ${steps([['2 parts = 90 cm','1 part = 90 ÷ 2','= 45 cm'],['Whole = 3 parts','3 × 45','= 135 cm'],['ANSWER','the whole is 135 cm (or 1.35 m)','check: 2/3 of 135 = 90 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life, capacity: a water tank</div>
+  ${asWarm('A tank is <strong>3/8 full</strong>. It contains <strong>45 litres</strong>. How much does the tank hold when it is completely full?')}
+  ${asFindWhole(8,3,45,'3/8 of the tank = 45 litres')}
+  ${asWorkBackward(3,8,45)}
+  ${steps([['3 parts = 45 litres','1 part = 45 ÷ 3','= 15 litres'],['Whole = 8 parts','8 × 15','= 120 litres'],['ANSWER','the tank holds 120 litres when full','check: 3/8 of 120 = 45 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 45 litres is less than half of 120 litres, and 3/8 is indeed less than 1/2 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life, money: a charity target</div>
+  ${asWarm('A charity has raised <strong>£240</strong>, which is <strong>4/5</strong> of its target. What is the target?')}
+  ${asFindWhole(5,4,240,'4/5 of the target = £240')}
+  ${asWorkBackward(4,5,240)}
+  ${steps([['4 parts = £240','1 part = £240 ÷ 4','= £60'],['Whole = 5 parts','5 × £60','= £300'],['ANSWER','the target is £300','check: 4/5 of £300 = £240 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 Two-direction reasoning</div><div class="s-body" style="color:#4C1D95;">Given the whole → find a fraction (multiply by the numerator after dividing by the denominator). Given the fraction → find the whole (divide by the numerator, then multiply by the denominator). One road there, one road back.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning with mixed numbers and "more than the whole"</div>
+  ${asWarm('<strong>5/4 of a number is 30.</strong> What is the number? The fraction is bigger than one whole — so the number must be <em>smaller</em> than 30.')}
+  ${asFindWhole(4,5,30,'5/4 of the whole = 30')}
+  ${asWorkBackward(5,4,30)}
+  ${steps([['5 parts = 30','1 part = 30 ÷ 5','= 6'],['Whole = 4 parts','4 × 6','= 24'],['ANSWER','the whole is 24','check: 5/4 of 24 = 30 ✓ (and 24 &lt; 30, as expected)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing-number puzzle:</strong> ▢ is the whole. <strong>7/10 of ▢ = 56.</strong> What is ▢?</div>
+  ${steps([['7 parts = 56','1 part = 56 ÷ 7','= 8'],['Whole = 10 parts','10 × 8','= 80'],['ANSWER','the whole is 80','check: 7/10 of 80 = 56 ✓']])}
+  <div class="card-body" style="margin-top:8px;">💡 <strong>Rule to remember:</strong> if the given fraction is greater than 1, the whole is <em>smaller</em> than the given part. If it is less than 1, the whole is <em>bigger</em>. Use this as your instant sense check.</div>
+</div>
+
+${asExCard(6,[
+ exQ(1,'3/4 of a number is 15. What is the number?',['20','60','12'],0),
+ exQ(2,'1/5 of a number is 7. What is the number?',['35','12','42'],0),
+ exQ(3,'2/5 of a number is 18. What is the number?',['45','9','90'],0),
+ exQ(4,'5/6 of a number is 40. What is the number?',['48','8','50'],0),
+ exQ(5,'3/4 of a sum of money is £18. What is the sum?',['£24','£13.50','£72'],0),
+ exQ(6,'A water tank is 3/8 full and contains 45 litres. How much does it hold when full?',['120 L','15 L','360 L'],0),
+ exQ(7,'A charity has raised £240, which is 4/5 of its target. What is the target?',['£300','£192','£60'],0),
+ exQ(8,'5/4 of a number is 30. What is the number?',['24','37.5','6'],0),
+ exQ(9,'THINK DEEPER: 7/10 of a number is 56. What is the number?',['80','8','70'],0,'t'),
+ exQ(10,'BOSS LEVEL: 2/3 of a journey is 84 km. How long is the whole journey?',['126 km','56 km','168 km'],0,'b')])}`;
+
+
+
+
+
+/* Fractions-as-division diagram: shows a ÷ b = a/b.
+   asDivFrac(a,b,'title')  e.g. asDivFrac(3,4) → 3 ÷ 4 = 3/4 */
+function asDivFrac(a,b,title){
+  const W=620,H=140;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||(a+' shared between '+b+' = '+a+' ÷ '+b)}</text>`;
+  // left: a ÷ b
+  s+=`<rect x="30" y="40" width="150" height="70" rx="12" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="2"/>`;
+  s+=`<text x="105" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#1E40AF">DIVISION</text>`;
+  s+=`<text x="105" y="94" text-anchor="middle" font-size="26" font-weight="900" fill="#1E40AF">${a} ÷ ${b}</text>`;
+  // equals
+  s+=`<text x="230" y="90" text-anchor="middle" font-size="30" font-weight="800" fill="#333">=</text>`;
+  // right: a/b as a fraction
+  s+=`<rect x="280" y="40" width="310" height="70" rx="12" fill="#FCE7F3" stroke="#BE185D" stroke-width="2"/>`;
+  s+=`<text x="435" y="62" text-anchor="middle" font-size="12" font-weight="700" fill="#9D174D">FRACTION</text>`;
+  s+=`<text x="435" y="98" text-anchor="middle" font-size="30" font-weight="900" fill="#9D174D">${a}/${b}</text>`;
+  // bottom message
+  s+=`<rect x="${W/2-200}" y="118" width="400" height="20" rx="10" fill="#9D174D"/>`;
+  s+=`<text x="${W/2}" y="133" text-anchor="middle" font-size="13" font-weight="800" fill="white">every fraction IS a division!</text>`;
+  return s+'</svg>';
+}
+
+/* Whole-number-as-fraction diagram: 4 ÷ 1 = 4, 4 ÷ 2 = 2, 4 ÷ 4 = 1.
+   asDivWholeRow(items, title) where items = [[a,b], ...] */
+function asDivWholeRow(items,title){
+  const W=620,H=150;
+  const n=items.length, cw=(W-40)/n;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="18" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||'Whole-number division can also be written as a fraction'}</text>`;
+  items.forEach((it,i)=>{
+    const a=it[0], b=it[1], val=(a/b);
+    const x=20+i*cw, cx=x+cw/2;
+    s+=`<rect x="${x+8}" y="34" width="${cw-16}" height="100" rx="12" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2"/>`;
+    s+=`<text x="${cx}" y="58" text-anchor="middle" font-size="13" font-weight="800" fill="#4C1D95">${a} ÷ ${b}</text>`;
+    s+=`<text x="${cx}" y="78" text-anchor="middle" font-size="11" font-weight="700" fill="#5B21B6">=</text>`;
+    s+=`<text x="${cx}" y="102" text-anchor="middle" font-size="20" font-weight="900" fill="#4C1D95">${a}/${b}</text>`;
+    s+=`<text x="${cx}" y="124" text-anchor="middle" font-size="11" font-weight="700" fill="#5B21B6">= ${Number.isInteger(val)?val:val.toFixed(2)}</text>`;
+  });
+  return s+'</svg>';
+}
+
+/* Common-denominator bars: two fractions on separate bars, then relaid on a common
+   denominator, then added. asCommonBars(3,4,1,6,...) → 3/4 + 1/6 */
+function asCommonBars(d1,n1,d2,n2,lcd,newN1,newN2){
+  const W=620,H=280,x0=10,bw=600;
+  const c1=bw/d1, c2=bw/d2, cc=bw/lcd;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  // Row 1: first fraction
+  s+=`<text x="${x0}" y="16" font-size="11" font-weight="700" fill="#555">${n1}/${d1}</text>`;
+  for(let i=0;i<d1;i++){
+    const on=i<n1;
+    s+=`<rect x="${x0+i*c1}" y="22" width="${c1}" height="34" fill="${on?'#FCD34D':'#fff'}" stroke="#B45309" stroke-width="1.5"/>`;
+  }
+  // Row 2: second fraction
+  s+=`<text x="${x0}" y="76" font-size="11" font-weight="700" fill="#555">${n2}/${d2}</text>`;
+  for(let i=0;i<d2;i++){
+    const on=i<n2;
+    s+=`<rect x="${x0+i*c2}" y="82" width="${c2}" height="34" fill="${on?'#A7F3D0':'#fff'}" stroke="#0F766E" stroke-width="1.5"/>`;
+  }
+  // Row 3: first fraction relaid on LCD
+  s+=`<text x="${x0}" y="136" font-size="11" font-weight="700" fill="#555">${n1}/${d1} = ${newN1}/${lcd}</text>`;
+  for(let i=0;i<lcd;i++){
+    const on=i<newN1;
+    s+=`<rect x="${x0+i*cc}" y="142" width="${cc}" height="34" fill="${on?'#FCD34D':'#fff'}" stroke="#B45309" stroke-width="1.5"/>`;
+  }
+  // Row 4: second fraction relaid on LCD
+  s+=`<text x="${x0}" y="196" font-size="11" font-weight="700" fill="#555">${n2}/${d2} = ${newN2}/${lcd}</text>`;
+  for(let i=0;i<lcd;i++){
+    const on=i<newN2;
+    s+=`<rect x="${x0+i*cc}" y="202" width="${cc}" height="34" fill="${on?'#A7F3D0':'#fff'}" stroke="#0F766E" stroke-width="1.5"/>`;
+  }
+  // Answer
+  s+=`<rect x="${x0}" y="248" width="${bw}" height="26" rx="10" fill="#9D174D"/>`;
+  s+=`<text x="${x0+bw/2}" y="266" text-anchor="middle" font-size="14" font-weight="800" fill="white">${n1}/${d1} + ${n2}/${d2} = ${newN1}/${lcd} + ${newN2}/${lcd} = ${newN1+newN2}/${lcd}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 7 : Fractions as division ---------- */
+const P5_FB7 = `
+${asHeader('FB7','Step 7 — Fractions as Division','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Every Fraction Is a Division</div>
+  ${asWarm('We have been reading <strong>3/4</strong> as "three quarters" — three parts out of four. Today we meet a <em>deeper</em> meaning: <strong>3/4 also means 3 ÷ 4</strong>. Three things shared equally between four people. Every fraction has a hidden division sign inside it!')}
+
+  <div class="card-body"><strong>Concrete:</strong> share <strong>3 whole pizzas</strong> equally between <strong>4 children</strong>. How much pizza does each child get?</div>
+  ${asDivFrac(3,4,'3 pizzas shared between 4 children')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;">For any numbers <em>a</em> and <em>b</em> (b ≠ 0): <strong>a ÷ b = a/b</strong>. The top of the fraction is the <em>numerator</em> (the dividend); the bottom is the <em>denominator</em> (the divisor).</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Why it works</div><div class="s-body" style="color:#085041;">Each child gets <strong>3 quarters</strong> of one pizza. And 3 quarters = 3 ÷ 4 = 0.75. Same amount, three ways to write it.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Reversing them</div><div class="s-body" style="color:#712B13;">3 ÷ 4 is <strong>not</strong> 4/3. The number being shared (3) is the <em>numerator</em>. Reversing gives the <em>reciprocal</em>, which is a different number entirely — 4/3 = 1.33, not 0.75.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Whole number answers</div><div class="s-body" style="color:#712B13;">Not every division gives a whole. 8 ÷ 2 = 4 ✓ (a whole number), but 3 ÷ 4 = 0.75 or 3/4 (less than 1). Fractions let us <em>keep going</em> when whole-number division has a remainder.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — The founding idea: 3 ÷ 4 = 3/4</div>
+  ${asWarm('Three pizzas shared equally between four children. Draw the picture in your head!')}
+  ${asDivFrac(3,4,'3 pizzas ÷ 4 children')}
+  ${steps([['Set up the division','3 ÷ 4',''],['Write as a fraction','3/4','numerator 3, denominator 4'],['Decimals check','3/4 = 0.75','each child gets 3 quarters of a pizza']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> if one child gets 3/4, four children together get 4 × 3/4 = 12/4 = 3 whole pizzas ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The reverse reading: 4 ÷ 3 = 4/3 = 1 1/3</div>
+  ${asWarm('Now share <strong>4 pizzas</strong> between <strong>3 children</strong>. Each child gets more than one whole pizza!')}
+  ${asDivFrac(4,3,'4 pizzas ÷ 3 children')}
+  ${steps([['Set up','4 ÷ 3',''],['As a fraction','4/3','top bigger than bottom → improper'],['As a mixed number','4 ÷ 3 = 1 remainder 1','= 1 1/3'],['Decimal check','4/3 = 1.333…','each child gets one and one third pizzas']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Compare with Example 1:</strong> swapping the order gives a different answer. 3 ÷ 4 = 3/4, but 4 ÷ 3 = 4/3. The order matters!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — When the division gives a whole number: 8 ÷ 4 = 8/4 = 2</div>
+  ${asWarm('Every whole-number division is also a fraction. Sometimes the fraction simplifies to a whole number.')}
+  ${asDivWholeRow([[8,4],[12,3],[15,5],[20,4]],'Whole-number division written as a fraction')}
+  ${steps([['8 ÷ 4','= 8/4',''],['Simplify','8/4 = 2','whole-number answer'],['Same idea','12 ÷ 3 = 12/3 = 4','15 ÷ 5 = 15/5 = 3']])}
+  <div class="card-body" style="margin-top:6px;">💡 Every integer <em>n</em> can be written as n/1. So 8 ÷ 4 = 8/4, and 8/4 simplifies to 2/1 = 2.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Fraction of a whole number: 3/4 of 3</div>
+  ${asWarm('We met "3/4 of an amount" in Step 3. Now link it back to division: 3/4 of 3 means 3 ÷ 4 × 3.')}
+  ${asFracOf(3,4,3,'','3/4 of 3 — three-quarters of three wholes')}
+  ${steps([['Read as division','3/4 of 3 = (3 ÷ 4) × 3',''],['Do the division','3 ÷ 4','= 0.75'],['Multiply','0.75 × 3','= 2.25 = 9/4'],['Mixed number','9/4','= 2 1/4'],['ANSWER','3/4 of 3 = 2 1/4','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Shortcut:</strong> 3/4 of 3 = (3 × 3)/4 = 9/4 = 2 1/4. Multiply the numerator by the whole number, then divide.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Real-life sharing: 5 litres between 8 bottles</div>
+  ${asWarm('A chef has <strong>5 litres</strong> of soup and wants to fill <strong>8 identical bottles</strong>. How much soup in each bottle?')}
+  ${asDivFrac(5,8,'5 litres ÷ 8 bottles')}
+  ${steps([['Set up','5 ÷ 8',''],['As a fraction','5/8','litres in each bottle'],['Decimal check','5 ÷ 8','= 0.625 litres = 625 ml']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Answer in three forms:</strong> 5/8 L = 0.625 L = 625 ml. All correct — pick the one the question asks for.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real-life with a remainder: 7 cakes between 4 tables</div>
+  ${asWarm('A baker has <strong>7 identical cakes</strong> to share equally between <strong>4 tables</strong>. How much does each table get?')}
+  ${asDivFrac(7,4,'7 cakes ÷ 4 tables')}
+  ${steps([['Set up','7 ÷ 4',''],['As a fraction','7/4','improper fraction'],['As a mixed number','7 ÷ 4 = 1 remainder 3','= 1 3/4'],['ANSWER','1 3/4 cakes per table','or 7/4 = 1.75 cakes']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Why fractions are better than remainders:</strong> we could say "1 cake each with 3 left over", but 3 cakes still need to be shared. 1 3/4 is the <em>exact</em> answer; a remainder is only a stopping point.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Fractions in the answer to a real measurement</div>
+  ${asWarm('A ribbon is <strong>9 metres</strong> long. It is cut into <strong>4 equal pieces</strong>. How long is each piece?')}
+  ${asDivFrac(9,4,'9 metres ÷ 4 pieces')}
+  ${steps([['Set up','9 ÷ 4',''],['As a fraction','9/4 metres',''],['Mixed number','9 ÷ 4 = 2 remainder 1','= 2 1/4 metres'],['Decimal check','9/4 = 2.25 m','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Word of warning:</strong> the fraction 9/4 <em>looks</em> wrong because we expect lengths to be less than the whole. But each piece is over 2 metres because we are cutting a long ribbon — it's fine!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: reading fractions as division in reverse</div>
+  ${asWarm('Which is bigger: <strong>5 ÷ 8</strong> or <strong>5/8 of 1</strong>? What about <strong>8 ÷ 5</strong>?')}
+  ${steps([['5 ÷ 8','= 5/8','= 0.625'],['5/8 of 1','= 5/8 of 1','= 0.625 (same!)'],['8 ÷ 5','= 8/5','= 1.6'],['Compare','8 ÷ 5 &gt; 5 ÷ 8','as expected — swapping the numbers changes the value']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing-number puzzle:</strong> ▢ ÷ 6 = 7/6. What is the box?</div>
+  ${steps([['Write as fraction','▢/6 = 7/6',''],['Match numerators','▢ = 7',''],['ANSWER','7 ÷ 6 = 7/6 ✓','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Another:</strong> 3 ÷ ▢ = 3/5. What is the box?</div>
+  ${steps([['Write as fraction','3/▢ = 3/5',''],['Match denominators','▢ = 5',''],['ANSWER','3 ÷ 5 = 3/5 ✓','']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 Key idea</div><div class="s-body" style="color:#4C1D95;">Every fraction is a division waiting to be performed. When you <em>see</em> 3/4, you can read it as "three-quarters" or as "3 ÷ 4" — both are correct, and the second one gives you the decimal (0.75) instantly.</div></div>
+  </div>
+</div>
+
+${asExCard(7,[
+ exQ(1,'Write 3 ÷ 5 as a fraction.',['3/5','5/3','3/8'],0),
+ exQ(2,'What is 8 ÷ 4 written as a fraction in its simplest form?',['2','8/4','4/8'],0),
+ exQ(3,'Write 7 ÷ 4 as a mixed number.',['1 3/4','7/4','3/4'],0),
+ exQ(4,'5 litres of juice shared between 8 bottles. How much per bottle?',['5/8 L','8/5 L','5/8 ml'],0),
+ exQ(5,'9 metres of ribbon cut into 4 equal pieces. How long is each piece?',['2 1/4 m','9/4 m','1 1/4 m'],0),
+ exQ(6,'What is 4 ÷ 3 as a mixed number?',['1 1/3','4/3','3/4'],0),
+ exQ(7,'Which is bigger: 5 ÷ 8 or 8 ÷ 5?',['8 ÷ 5','5 ÷ 8','They are equal'],0),
+ exQ(8,'Which of these is NOT the same as 3/4?',['4 ÷ 3','3 ÷ 4','0.75'],0),
+ exQ(9,'THINK DEEPER: ▢ ÷ 6 = 7/6. What is the missing number?',['7','6','13'],0,'t'),
+ exQ(10,'BOSS LEVEL: A baker has 7 cakes to share equally between 4 tables. How much does each table get?',['1 3/4 cakes','7/4 cakes','1 cake each with 3 left over'],0,'b')])}`;
+
+
+
+/* ---------- STEP 8 : Add fractions with different denominators ---------- */
+const P5_FB8 = `
+${asHeader('FB8','Step 8 — Add Fractions with Different Denominators','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Same Size Pieces Before We Add</div>
+  ${asWarm('In Fractions A you added fractions with the <strong>same denominator</strong> — 1/5 + 2/5 = 3/5, because the pieces were the same size. Today the denominators are <strong>different</strong> (like 3/4 + 1/6). The rule is: <em>do not add until the pieces are the same size</em>. We find a <strong>common denominator</strong> first, then add.')}
+
+  <div class="card-body"><strong>Concrete:</strong> a bar of chocolate is cut into 4 pieces for one person and 6 pieces for another. Adding 1 piece of each is meaningless until we re-cut both bars the same way.</div>
+  ${asCommonBars(3,4,1,6,12,9,2)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 3-step rule</div><div class="s-body" style="color:#633806;">1) Find a <strong>common denominator</strong> (usually the LCM). 2) <strong>Convert</strong> each fraction into an equivalent fraction with that denominator. 3) <strong>Add</strong> the numerators; keep the denominator the same. Simplify if you can.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Choosing the LCD</div><div class="s-body" style="color:#085041;">You <em>can</em> use any common multiple (e.g. d₁ × d₂), but the <strong>lowest</strong> common multiple (LCM) keeps the numbers small. For 3/4 + 1/6, the LCM of 4 and 6 is 12, so use twelfths.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Add the tops AND the bottoms</div><div class="s-body" style="color:#712B13;">3/4 + 1/6 is <strong>not</strong> 4/10! Adding the denominators gives a completely different (and wrong) size for the pieces. Only the numerators get added.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Converting only one side</div><div class="s-body" style="color:#712B13;">You must convert <em>both</em> fractions to the same denominator. Converting 3/4 to 9/12 and then adding 1/6 unchanged would mix twelfths and sixths — that does not work.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — One denominator is a multiple of the other: 1/2 + 1/4</div>
+  ${asWarm('4 is a multiple of 2, so we only need to change ONE fraction.')}
+  ${asCommonBars(1,2,1,4,4,2,1)}
+  ${steps([['Choose the LCD','LCM(2, 4) = 4',''],['Convert','1/2 = 2/4','keep the same value, smaller pieces'],['Add','2/4 + 1/4','= 3/4'],['ANSWER','1/2 + 1/4 = 3/4','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 1/2 is a half. Adding a quarter gives three-quarters — which is indeed half plus a quarter ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Neither denominator divides the other: 1/3 + 1/4</div>
+  ${asWarm('3 and 4 share no factors, so the LCM is 3 × 4 = 12.')}
+  ${asCommonBars(1,3,1,4,12,4,3)}
+  ${steps([['LCM of 3 and 4','12',''],['Convert 1/3','1/3 = 4/12','multiply top and bottom by 4'],['Convert 1/4','1/4 = 3/12','multiply top and bottom by 3'],['Add','4/12 + 3/12','= 7/12'],['ANSWER','1/3 + 1/4 = 7/12','already in simplest form']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Simplify check:</strong> 7 and 12 share no common factors other than 1, so 7/12 is already simplest.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Sharing a common factor: 3/4 + 1/6</div>
+  ${asWarm('4 and 6 both divide evenly into 12. Always choose the LCM, not the product (24).')}
+  ${asCommonBars(3,4,1,6,12,9,2)}
+  ${steps([['LCM of 4 and 6','12','(not 24 — that is bigger than needed)'],['Convert 3/4','3/4 = 9/12','multiply top and bottom by 3'],['Convert 1/6','1/6 = 2/12','multiply top and bottom by 2'],['Add','9/12 + 2/12','= 11/12'],['ANSWER','3/4 + 1/6 = 11/12','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 3/4 = 0.75 and 1/6 ≈ 0.167, so the sum is ≈ 0.917 = 11/12 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Improper fraction answer: 3/4 + 5/8</div>
+  ${asWarm('8 is a multiple of 4, so only 3/4 needs changing. Then simplify at the end.')}
+  ${asCommonBars(3,4,5,8,8,6,5)}
+  ${steps([['LCM of 4 and 8','8',''],['Convert 3/4','3/4 = 6/8','multiply top and bottom by 2'],['Add','6/8 + 5/8','= 11/8'],['Improper to mixed','11 ÷ 8 = 1 remainder 3','= 1 3/8'],['ANSWER','3/4 + 5/8 = 1 3/8','']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Sense check:</strong> 3/4 = 0.75, 5/8 = 0.625, sum = 1.375 = 1 3/8 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Three fractions: 1/2 + 1/3 + 1/6</div>
+  ${asWarm('When there are three fractions, still find one common denominator for all three.')}
+  ${steps([['LCM of 2, 3 and 6','6',''],['Convert 1/2','1/2 = 3/6','× 3'],['Convert 1/3','1/3 = 2/6','× 2'],['Keep 1/6','1/6 = 1/6','already sixths'],['Add','3/6 + 2/6 + 1/6','= 6/6 = 1'],['ANSWER','1/2 + 1/3 + 1/6 = 1','the three fractions together make one whole!']])}
+  ${asCommonBars(1,2,1,3,6,3,2)}
+  <div class="card-body" style="margin-top:6px;">💡 When the answer is exactly 1, the fractions are called a <em>complementary set</em> — they fill the whole. 1/2 + 1/3 + 1/6 = 1 is a very useful fact to remember.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real-life money: two purchases</div>
+  ${asWarm('Amara spends <strong>2/5</strong> of her pocket money on a book and <strong>1/4</strong> on a magazine. What fraction does she spend altogether?')}
+  ${asCommonBars(2,5,1,4,20,8,5)}
+  ${steps([['LCM of 5 and 4','20',''],['Convert 2/5','2/5 = 8/20','× 4'],['Convert 1/4','1/4 = 5/20','× 5'],['Add','8/20 + 5/20','= 13/20'],['ANSWER','she spends 13/20 of her pocket money','she has 7/20 left over']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Bonus question:</strong> how much does she have left? The whole is 20/20, so the remainder is 20/20 − 13/20 = 7/20.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real-life measures: two lengths of ribbon</div>
+  ${asWarm('A tailor uses <strong>3/8 of a metre</strong> of ribbon for one hat and <strong>1/6 of a metre</strong> for another. How much ribbon altogether?')}
+  ${asCommonBars(3,8,1,6,24,9,4)}
+  ${steps([['LCM of 8 and 6','24',''],['Convert 3/8','3/8 = 9/24','× 3'],['Convert 1/6','1/6 = 4/24','× 4'],['Add','9/24 + 4/24','= 13/24'],['ANSWER','13/24 of a metre','≈ 0.542 m = 54.2 cm']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Decimal check:</strong> 3/8 = 0.375 and 1/6 ≈ 0.167, sum ≈ 0.542. And 13/24 ≈ 0.542 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning, missing numbers and word problems</div>
+  ${asWarm('Use everything you know to solve a slightly harder puzzle.')}
+  <div class="card-body"><strong>1/2 + 1/5 = ?</strong> Think about the LCM of 2 and 5 first.</div>
+  ${steps([['LCM of 2 and 5','10',''],['Convert 1/2','1/2 = 5/10','× 5'],['Convert 1/5','1/5 = 2/10','× 2'],['Add','5/10 + 2/10','= 7/10'],['ANSWER','1/2 + 1/5 = 7/10','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing-number puzzle:</strong> 1/3 + 1/4 = ▢/12. What is the numerator?</div>
+  ${steps([['LCM of 3 and 4','12',''],['Convert 1/3','1/3 = 4/12',''],['Convert 1/4','1/4 = 3/12',''],['Add','4/12 + 3/12','= 7/12'],['ANSWER','the missing numerator is 7','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Word problem, three shares:</strong> a class spends <strong>1/2</strong> of a day on maths, <strong>1/4</strong> on English and <strong>1/8</strong> on science. What fraction of the day is used altogether?</div>
+  ${steps([['LCM of 2, 4 and 8','8',''],['Convert 1/2','1/2 = 4/8',''],['Convert 1/4','1/4 = 2/8',''],['Keep 1/8','1/8 = 1/8',''],['Add','4/8 + 2/8 + 1/8','= 7/8'],['ANSWER','7/8 of the day','the remaining 1/8 is for other subjects']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 Two checks to run every time</div><div class="s-body" style="color:#4C1D95;">1) <strong>Sense check:</strong> convert to decimals and estimate. 2) <strong>Simplify check:</strong> can the answer be divided by a common factor? If yes, simplify. If not, you are done.</div></div>
+  </div>
+</div>
+
+${asExCard(8,[
+ exQ(1,'1/2 + 1/4 = ?',['3/4','2/6','2/4'],0),
+ exQ(2,'1/3 + 1/4 = ?',['7/12','2/7','1/12'],0),
+ exQ(3,'3/4 + 1/6 = ?',['11/12','4/10','4/12'],0),
+ exQ(4,'3/4 + 5/8 = ? Give the answer as a mixed number.',['1 3/8','8/12','1 5/8'],0),
+ exQ(5,'1/2 + 1/3 + 1/6 = ?',['1','3/11','3/6'],0),
+ exQ(6,'Amara spends 2/5 of her pocket money on a book and 1/4 on a magazine. What fraction does she spend altogether?',['13/20','3/9','3/20'],0),
+ exQ(7,'A tailor uses 3/8 m of ribbon for one hat and 1/6 m for another. How much ribbon altogether?',['13/24 m','4/14 m','13/48 m'],0),
+ exQ(8,'1/2 + 1/5 = ?',['7/10','2/7','1/10'],0),
+ exQ(9,'THINK DEEPER: 1/3 + 1/4 = ▢/12. What is the missing numerator?',['7','2','1'],0,'t'),
+ exQ(10,'BOSS LEVEL: A class spends 1/2 of a day on maths, 1/4 on English and 1/8 on science. What fraction of the day is used altogether?',['7/8','3/14','6/8'],0,'b')])}`;
+
+ 
+
+
+
+
+
+
+/* Subtraction bars: two fractions on separate bars, then relaid on the LCD, then subtracted.
+   asSubBars(d1,n1,d2,n2,lcd,newN1,newN2)  e.g. asSubBars(3,4,1,6,12,9,2) → 3/4 − 1/6 */
+function asSubBars(d1,n1,d2,n2,lcd,newN1,newN2){
+  const W=620,H=290,x0=10,bw=600;
+  const c1=bw/d1, c2=bw/d2, cc=bw/lcd;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  // Row 1: first fraction (minuend)
+  s+=`<text x="${x0}" y="16" font-size="11" font-weight="700" fill="#555">${n1}/${d1} &nbsp; (the amount we start with)</text>`;
+  for(let i=0;i<d1;i++){
+    const on=i<n1;
+    s+=`<rect x="${x0+i*c1}" y="22" width="${c1}" height="34" fill="${on?'#FCD34D':'#fff'}" stroke="#B45309" stroke-width="1.5"/>`;
+  }
+  // Row 2: second fraction (subtrahend)
+  s+=`<text x="${x0}" y="76" font-size="11" font-weight="700" fill="#555">${n2}/${d2} &nbsp; (the amount we take away)</text>`;
+  for(let i=0;i<d2;i++){
+    const on=i<n2;
+    s+=`<rect x="${x0+i*c2}" y="82" width="${c2}" height="34" fill="${on?'#FCA5A5':'#fff'}" stroke="#B91C1C" stroke-width="1.5"/>`;
+  }
+  // Row 3: first fraction relaid on LCD
+  s+=`<text x="${x0}" y="136" font-size="11" font-weight="700" fill="#555">${n1}/${d1} = ${newN1}/${lcd}</text>`;
+  for(let i=0;i<lcd;i++){
+    const on=i<newN1;
+    s+=`<rect x="${x0+i*cc}" y="142" width="${cc}" height="34" fill="${on?'#FCD34D':'#fff'}" stroke="#B45309" stroke-width="1.5"/>`;
+  }
+  // Row 4: second fraction relaid on LCD
+  s+=`<text x="${x0}" y="196" font-size="11" font-weight="700" fill="#555">${n2}/${d2} = ${newN2}/${lcd}</text>`;
+  for(let i=0;i<lcd;i++){
+    const on=i<newN2;
+    s+=`<rect x="${x0+i*cc}" y="202" width="${cc}" height="34" fill="${on?'#FCA5A5':'#fff'}" stroke="#B91C1C" stroke-width="1.5"/>`;
+  }
+  // Answer strip: keep the first LCD count, but mark the second as crossed out
+  const res=newN1-newN2;
+  s+=`<rect x="${x0}" y="248" width="${bw}" height="26" rx="10" fill="#9D174D"/>`;
+  s+=`<text x="${x0+bw/2}" y="266" text-anchor="middle" font-size="14" font-weight="800" fill="white">${n1}/${d1} − ${n2}/${d2} = ${newN1}/${lcd} − ${newN2}/${lcd} = ${res}/${lcd}</text>`;
+  return s+'</svg>';
+}
+
+/* Multi-step "think frame" — 4 numbered boxes to structure word problems.
+   asThinkFrame(['Read','Plan','Solve','Check'], 'title') */
+function asThinkFrame(labels, title){
+  const W=620,H=140;
+  const n=labels.length, cw=(W-40)/n;
+  const cols=['#378ADD','#BA7517','#1D9E75','#7F77DD'];
+  const fills=['#E6F1FB','#FAEEDA','#E1F5EE','#EEEDFE'];
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||'The 4-step thinking frame for word problems'}</text>`;
+  labels.forEach((lab,i)=>{
+    const x=20+i*cw, cx=x+cw/2;
+    s+=`<rect x="${x+8}" y="30" width="${cw-16}" height="100" rx="12" fill="${fills[i]}" stroke="${cols[i]}" stroke-width="2"/>`;
+    s+=`<circle cx="${cx}" cy="52" r="14" fill="${cols[i]}"/>`;
+    s+=`<text x="${cx}" y="58" text-anchor="middle" font-size="14" font-weight="900" fill="white">${i+1}</text>`;
+    s+=`<text x="${cx}" y="88" text-anchor="middle" font-size="12" font-weight="800" fill="${cols[i]}">${lab}</text>`;
+    s+=`<text x="${cx}" y="112" text-anchor="middle" font-size="10" fill="${cols[i]}">step ${i+1}</text>`;
+  });
+  return s+'</svg>';
+}
+
+/* Three-fraction "chain" for multi-step problems.
+   asChain([['1/2','+1/3'],['5/6','+1/6'],['1','−1/4'],['3/4','']], 'title') */
+function asChain(items, title){
+  const W=620,H=140;
+  const n=items.length, cw=(W-40)/n;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||'A chain of operations'}</text>`;
+  items.forEach((it,i)=>{
+    const x=20+i*cw, cx=x+cw/2;
+    s+=`<rect x="${x+8}" y="34" width="${cw-16}" height="80" rx="12" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2"/>`;
+    s+=`<text x="${cx}" y="72" text-anchor="middle" font-size="20" font-weight="900" fill="#4C1D95">${it[0]}</text>`;
+    if(it[1]) s+=`<text x="${cx}" y="100" text-anchor="middle" font-size="12" font-weight="700" fill="#7C3AED">${it[1]}</text>`;
+    if(i<n-1){
+      const nx=x+cw+cw/2-4;
+      s+=`<line x1="${x+cw-6}" y1="74" x2="${x+cw+2}" y2="74" stroke="#6D28D9" stroke-width="3"/>`;
+      s+=`<polygon points="${x+cw+8},74 ${x+cw-2},68 ${x+cw-2},80" fill="#6D28D9"/>`;
+    }
+  });
+  return s+'</svg>';
+}
+
+
+
+
+/* ---------- STEP 9 : Subtract fractions with different denominators ---------- */
+const P5_FB9 = `
+${asHeader('FB9','Step 9 — Subtract Fractions with Different Denominators','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Same Size Pieces, Then Take Away</div>
+  ${asWarm('Subtracting fractions with different denominators uses the <strong>same machinery</strong> as adding (Step 8). The only change is that instead of adding the numerators, we <em>take away</em>. Find a common denominator, convert both fractions, then subtract. Nothing else changes!')}
+
+  <div class="card-body"><strong>Concrete:</strong> you have 3/4 of a chocolate bar. You eat 1/6 of a bar. How much is left?</div>
+  ${asSubBars(3,4,1,6,12,9,2)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 3-step rule</div><div class="s-body" style="color:#633806;">1) Find a <strong>common denominator</strong> (usually the LCM). 2) <strong>Convert</strong> each fraction. 3) <strong>Subtract</strong> the numerators; keep the denominator the same. Simplify if you can.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Same idea, opposite operation</div><div class="s-body" style="color:#085041;">Everything from Step 8 applies: the LCM keeps numbers small, both fractions must be converted, and only the numerators get combined. The single difference is the minus sign in the middle.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 1 — Subtract the denominators too</div><div class="s-body" style="color:#712B13;">3/4 − 1/6 is <strong>not</strong> 2/2 (or 2/&minus;2). The denominators name the size of the pieces; they must be the same before subtracting, and they stay the same afterwards.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception 2 — Get the order wrong</div><div class="s-body" style="color:#712B13;">Unlike addition, subtraction is <em>not</em> commutative. 1/2 − 1/3 = 1/6, but 1/3 − 1/2 = &minus;1/6 (a negative number, outside Year 5). Always keep the smaller fraction on the right.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — One denominator is a multiple of the other: 3/4 − 1/2</div>
+  ${asWarm('4 is a multiple of 2, so only 1/2 needs converting.')}
+  ${asSubBars(4,3,2,1,4,3,2)}
+  ${steps([['Choose the LCD','LCM(4, 2) = 4',''],['Convert 1/2','1/2 = 2/4','multiply top and bottom by 2'],['Subtract','3/4 − 2/4','= 1/4'],['ANSWER','3/4 − 1/2 = 1/4','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 3/4 = 0.75 and 1/2 = 0.5, so the difference is 0.25 = 1/4 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Neither denominator divides the other: 3/4 − 1/3</div>
+  ${asWarm('4 and 3 share no factors other than 1, so the LCM is 4 × 3 = 12.')}
+  ${asSubBars(4,3,3,1,12,9,4)}
+  ${steps([['LCM of 4 and 3','12',''],['Convert 3/4','3/4 = 9/12','× 3'],['Convert 1/3','1/3 = 4/12','× 4'],['Subtract','9/12 − 4/12','= 5/12'],['ANSWER','3/4 − 1/3 = 5/12','already in simplest form']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Simplify check:</strong> 5 and 12 share no common factors, so 5/12 is simplest.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Sharing a common factor: 5/6 − 1/4</div>
+  ${asWarm('6 and 4 share the factor 2, so the LCM is 12, not 24.')}
+  ${asSubBars(6,5,4,1,12,10,3)}
+  ${steps([['LCM of 6 and 4','12','(not 24)'],['Convert 5/6','5/6 = 10/12','× 2'],['Convert 1/4','1/4 = 3/12','× 3'],['Subtract','10/12 − 3/12','= 7/12'],['ANSWER','5/6 − 1/4 = 7/12','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 5/6 ≈ 0.833, 1/4 = 0.25, difference ≈ 0.583 = 7/12 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Subtract from a whole: 1 − 3/8</div>
+  ${asWarm('Write the whole number 1 as a fraction with the same denominator.')}
+  ${asSubBars(8,8,8,3,8,8,3)}
+  ${steps([['Rewrite the whole','1 = 8/8','use the same denominator as the fraction'],['Subtract','8/8 − 3/8','= 5/8'],['ANSWER','1 − 3/8 = 5/8','']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Sense check:</strong> 3/8 = 0.375, so 1 − 0.375 = 0.625 = 5/8 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Subtract from a mixed number: 2 1/4 − 3/4</div>
+  ${asWarm('Two and one quarter, take away three quarters. What do we do when the fraction part is too small?')}
+  ${steps([['Partition the mixed number','2 1/4 = 1 + 1 1/4','borrow one whole'],['Rewrite the whole as quarters','1 = 4/4',''],['Combine','1 1/4 = 4/4 + 1/4','= 5/4'],['Now subtract','5/4 − 3/4','= 2/4'],['Simplify','2/4','= 1/2'],['ANSWER','2 1/4 − 3/4 = 1 1/2','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Alternative:</strong> 2 1/4 = 9/4, and 9/4 − 3/4 = 6/4 = 1 1/2 ✓ Same answer.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life, money: a sale price</div>
+  ${asWarm('A coat costs <strong>£40</strong>. In a sale, <strong>2/5</strong> of the price is taken off. How much is taken off, and what is the new price?')}
+  ${asWholeOf(40,5,2,'£','2/5 of £40 = discount')}
+  ${steps([['2/5 of £40','40 ÷ 5 = 8, then 2 × 8','= £16 off'],['New price','£40 − £16','= £24'],['ANSWER','the sale price is £24','']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Bonus:</strong> what fraction of £40 is £24? £24 ÷ £40 = 24/40 = 3/5. So the new price is 3/5 of the original — the missing 2/5 is the discount ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life, capacity: the leaking bucket</div>
+  ${asWarm('A bucket holds <strong>3/4 of a litre</strong> of water. After a small leak, it has <strong>1/6 of a litre</strong> less. How much water is left?')}
+  ${asSubBars(4,3,6,1,12,9,2)}
+  ${steps([['LCM of 4 and 6','12',''],['Convert 3/4','3/4 = 9/12','× 3'],['Convert 1/6','1/6 = 2/12','× 2'],['Subtract','9/12 − 2/12','= 7/12'],['ANSWER','7/12 of a litre is left','≈ 0.583 L = 583 ml']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning, comparing and missing numbers</div>
+  ${asWarm('Which is bigger: 5/6 − 1/4 or 3/4 − 1/6? Work both out and compare.')}
+  ${steps([['5/6 − 1/4','10/12 − 3/12','= 7/12'],['3/4 − 1/6','9/12 − 2/12','= 7/12'],['Compare','7/12 = 7/12','they are equal!']])}
+  <div class="card-body" style="margin-top:8px;">💡 <strong>Why are they equal?</strong> 5/6 = 1 − 1/6 and 3/4 = 1 − 1/4. Rearranging shows both expressions equal 1 − (1/6 + 1/4) = 1 − 5/12 = 7/12.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Missing-number puzzle:</strong> 7/8 − ▢/8 = 3/8. What is the missing numerator?</div>
+  ${steps([['Same denominator','7/8 − ▢/8 = 3/8','so 7 − ▢ = 3'],['Solve','▢ = 7 − 3','= 4'],['ANSWER','7/8 − 4/8 = 3/8 ✓','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Harder puzzle:</strong> 1/2 − ▢ = 1/3. What fraction goes in the box?</div>
+  ${steps([['Rearrange','▢ = 1/2 − 1/3',''],['LCM of 2 and 3','6',''],['Convert','1/2 = 3/6, 1/3 = 2/6',''],['Subtract','3/6 − 2/6','= 1/6'],['ANSWER','▢ = 1/6','']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 Two checks to run every time</div><div class="s-body" style="color:#4C1D95;">1) <strong>Sense check:</strong> convert to decimals and estimate — the answer must be smaller than the starting fraction. 2) <strong>Simplify check:</strong> can the answer be divided by a common factor?</div></div>
+  </div>
+</div>
+
+${asExCard(9,[
+ exQ(1,'3/4 − 1/2 = ?',['1/4','2/2','1/2'],0),
+ exQ(2,'3/4 − 1/3 = ?',['5/12','2/1','2/12'],0),
+ exQ(3,'5/6 − 1/4 = ?',['7/12','4/2','4/12'],0),
+ exQ(4,'1 − 3/8 = ?',['5/8','2/8','3/8'],0),
+ exQ(5,'2 1/4 − 3/4 = ?',['1 1/2','2 1/2','1 1/4'],0),
+ exQ(6,'A coat costs £40. In a sale, 2/5 of the price is taken off. What is the sale price?',['£24','£16','£32'],0),
+ exQ(7,'A bucket holds 3/4 L of water. After a leak it has 1/6 L less. How much is left?',['7/12 L','2/12 L','5/12 L'],0),
+ exQ(8,'Which is greater: 5/6 − 1/4 or 3/4 − 1/6?',['They are equal','5/6 − 1/4','3/4 − 1/6'],0),
+ exQ(9,'THINK DEEPER: 7/8 − ▢/8 = 3/8. What is the missing numerator?',['4','3','10'],0,'t'),
+ exQ(10,'BOSS LEVEL: 1/2 − ▢ = 1/3. What fraction goes in the box?',['1/6','1/3','2/6'],0,'b')])}`;
+
+
+
+ /* ---------- STEP 10 : Solve multi-step fraction problems ---------- */
+const P5_FB10 = `
+${asHeader('FB10','Step 10 — Solve Multi-Step Fraction Problems','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Putting Every Skill Together</div>
+  ${asWarm('This final lesson brings together <strong>every skill from Fractions B</strong>: multiply (FB1), find a fraction of a quantity (FB2/FB3), multiply a mixed number (FB4), divide fractions (FB5), find the whole (FB6), read fractions as division (FB7), add (FB8) and subtract (FB9). Real problems rarely use just one skill — you must decide which to apply, and in what order.')}
+
+  ${asThinkFrame(['Read','Plan','Solve','Check'],'Use this 4-step frame for every word problem')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">1. READ</div><div class="s-body" style="color:#0C447C;">Read the problem twice. Underline the numbers and the fractions. What is the question actually asking you to find?</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">2. PLAN</div><div class="s-body" style="color:#633806;">Which operation(s) do you need? Fraction OF a quantity → multiply. Sharing equally → divide. Combining pieces → add. Taking away → subtract. Sometimes more than one.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">3. SOLVE</div><div class="s-body" style="color:#085041;">Do the calculation step by step. Write down each stage so you can retrace your working if you get stuck.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">4. CHECK</div><div class="s-body" style="color:#3C3489;">Convert to decimals and estimate. Is the answer the right size? Does it match the units the question asked for? If the question asks for a fraction, keep it as a fraction.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Two-step problem with fractions OF a quantity: the class trip</div>
+  ${asWarm('A class of <strong>32 pupils</strong> goes on a trip. <strong>3/8</strong> travel by coach and the rest go by minibus. How many pupils go by minibus?')}
+  ${asWholeOf(32,8,3,'','3/8 of 32 by coach')}
+  ${steps([['3/8 of 32','32 ÷ 8 = 4, then 3 × 4','= 12 pupils by coach'],['The rest by minibus','32 − 12','= 20 pupils'],['ANSWER','20 pupils travel by minibus','check: 5/8 of 32 = 20 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Shortcut:</strong> if 3/8 go by coach, the remaining 5/8 go by minibus. So 5/8 of 32 = 5 × 4 = 20 directly.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Adding two fractions of the same whole: the fruit bowl</div>
+  ${asWarm('A fruit bowl contains <strong>36 pieces of fruit</strong>. <strong>1/4</strong> are apples and <strong>1/3</strong> are bananas. How many pieces of fruit are apples or bananas?')}
+  ${asCommonBars(1,4,1,3,12,3,4)}
+  ${steps([['Add the fractions','1/4 + 1/3','LCM 12 → 3/12 + 4/12 = 7/12'],['7/12 of 36','36 ÷ 12 = 3, then 7 × 3','= 21 pieces'],['ANSWER','21 pieces are apples or bananas','check: 1/4 of 36 = 9 apples, 1/3 of 36 = 12 bananas, 9 + 12 = 21 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Subtracting a fraction from the whole: the remainder</div>
+  ${asWarm('A bakery bakes <strong>60 cakes</strong>. On Saturday it sells <strong>2/5</strong> of them and gives away <strong>1/6</strong> to charity. How many cakes are left?')}
+  ${steps([['2/5 sold','60 ÷ 5 = 12, then 2 × 12','= 24 cakes sold'],['1/6 given away','60 ÷ 6','= 10 cakes given'],['Total out','24 + 10','= 34 cakes'],['Remaining','60 − 34','= 26 cakes'],['ANSWER','26 cakes are left','check via fractions: 2/5 + 1/6 = 12/30 + 5/30 = 17/30, so 13/30 of 60 = 26 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Find the whole from a fraction, then operate: the water tank</div>
+  ${asWarm('A water tank is <strong>2/3 full</strong>, which is <strong>120 litres</strong>. Then <strong>1/4 of the full capacity</strong> is used. How much water is left?')}
+  ${asFindWhole(3,2,120,'2/3 of the tank = 120 litres')}
+  ${steps([['2/3 = 120 L','1/3 = 120 ÷ 2','= 60 L'],['Full tank = 3/3','3 × 60','= 180 L'],['1/4 of 180 L used','180 ÷ 4','= 45 L used'],['Remaining','120 − 45','= 75 L'],['ANSWER','75 litres are left','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Read carefully:</strong> 1/4 of the <em>full capacity</em>, not 1/4 of the current water. Two very different problems!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Multiply a mixed number in a real context: the recipe</div>
+  ${asWarm('A recipe uses <strong>1 1/4 cups</strong> of flour per cake. If <strong>3 cakes</strong> are baked, how much flour is used?')}
+  ${asMixedJumps(0,3,1,1,4,'3 jumps of 1 1/4 cups')}
+  ${steps([['Set up','3 × 1 1/4',''],['Whole part','3 × 1','= 3'],['Fraction part','3 × 1/4','= 3/4'],['Add','3 + 3/4',`= ${mx(3,3,4)}`],['ANSWER','3 3/4 cups of flour','check via Method B: 3 × 5/4 = 15/4 = 3 3/4 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Fractions as division in context: sharing a length</div>
+  ${asWarm('<strong>5 metres</strong> of ribbon are cut into <strong>4 equal pieces</strong>. Then <strong>1/2 of one piece</strong> is used for a bow. How long is the piece used for the bow?')}
+  ${asDivFrac(5,4,'5 metres ÷ 4 pieces')}
+  ${steps([['One piece','5 ÷ 4','= 5/4 m = 1 1/4 m'],['Half of one piece','1/2 × 5/4','= 5/8 m'],['ANSWER','the piece for the bow is 5/8 m','≈ 0.625 m = 62.5 cm']])}
+  <div class="card-body" style="margin-top:6px;">🔎 <strong>Two-step check:</strong> 5/4 = 1.25 m per piece, and 1.25 ÷ 2 = 0.625 m = 5/8 m ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Multi-step with a missing amount: the shopping trip</div>
+  ${asWarm('Amir spends <strong>1/3</strong> of his money on a book and <strong>1/4</strong> on lunch. He has <strong>£10 left</strong>. How much money did he start with?')}
+  ${steps([['Fraction spent','1/3 + 1/4','LCM 12 → 4/12 + 3/12 = 7/12'],['Fraction left','1 − 7/12','= 5/12'],['5/12 of the money = £10','1/12 = £10 ÷ 5','= £2'],['Whole = 12/12','12 × £2','= £24'],['ANSWER','Amir started with £24','check: 1/3 of £24 = £8, 1/4 = £6, total £14 spent, £24 − £14 = £10 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 This is the same "find the whole" idea as FB6, but the "fraction" is <em>the leftover part</em> — 5/12, not a straightforward unit fraction.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Full multi-step reasoning: the running club</div>
+  ${asWarm('A running club has <strong>48 members</strong>. <strong>1/4</strong> run only at weekends and <strong>5/12</strong> run only on weekdays. The rest run on both. How many run on both?')}
+  ${asChain([['1/4',"weekend"],['5/12',"weekdays"],['remaining',"both"]],'Fractions of the club membership')}
+  ${steps([['Weekend only','1/4 of 48 = 48 ÷ 4','= 12 members'],['Weekdays only','5/12 of 48 = 48 ÷ 12 = 4, then 5 × 4','= 20 members'],['Both','48 − 12 − 20','= 16 members'],['ANSWER','16 members run on both days',''],['Check via fractions','1/4 + 5/12 = 3/12 + 5/12 = 8/12 = 2/3','so 1/3 of 48 = 16 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#CECBF6;"><div class="s-title" style="color:#4C1D95;">🔑 The meta-skill of this lesson</div><div class="s-body" style="color:#4C1D95;">You now have eight fraction tools. A multi-step problem is your chance to <em>choose</em> which tools to use. Ask: is this a fraction OF something (multiply), a sharing (divide), a combining (add), a taking-away (subtract), or an unknown whole (work backwards)?</div></div>
+  </div>
+</div>
+
+${asExCard(10,[
+ exQ(1,'A class of 32 pupils goes on a trip. 3/8 travel by coach. How many travel by coach?',['12','8','24'],0),
+ exQ(2,'A fruit bowl has 36 pieces of fruit. 1/4 are apples and 1/3 are bananas. How many pieces are apples or bananas altogether?',['21','9','15'],0),
+ exQ(3,'A bakery bakes 60 cakes. 2/5 are sold and 1/6 are given away. How many cakes remain?',['26','34','18'],0),
+ exQ(4,'A water tank is 2/3 full, which is 120 litres. How much does it hold when full?',['180 L','80 L','360 L'],0),
+ exQ(5,'A recipe uses 1 1/4 cups of flour per cake. How much flour is used for 3 cakes?',['3 3/4 cups','3 1/4 cups','4 1/4 cups'],0),
+ exQ(6,'5 metres of ribbon are cut into 4 equal pieces. How long is one piece?',['1 1/4 m','5/4 m','1 1/2 m'],0),
+ exQ(7,'Amir spends 1/3 of his money on a book and 1/4 on lunch. He has £10 left. How much did he start with?',['£24','£14','£20'],0),
+ exQ(8,'A running club has 48 members. 1/4 run only at weekends and 5/12 run only on weekdays. How many run on both days?',['16','12','20'],0),
+ exQ(9,'THINK DEEPER: 5/6 of a number is 40. What is 3/4 of the same number?',['36','48','30'],0,'t'),
+ exQ(10,'BOSS LEVEL: A shop has 90 T-shirts. 2/5 are sold on Friday, 1/3 of the remainder on Saturday. How many T-shirts remain?',['36','30','54'],0,'b')])}`;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* ============================================================
    PRIMARY 5 — SPRING — DECIMALS & PERCENTAGES (topic id 'decperc')
    LESSONS 1 AND 2  +  PLACEHOLDERS 3–12  +  SCHEME BLOCK
@@ -5343,279 +6832,7 @@ ${asExCard(12,[
  exQ(10,'BOSS LEVEL: A school has 240 pupils. 35% walk and 25% come by bus. The rest come by car. How many come by car?',['96','84','144'],0,'b')])}`;
 
 
- /* ============================================================
-   PRIMARY 5 — SPRING — FRACTIONS B (topic id 'fractionsB')
-   LESSONS 1 AND 2  +  PLACEHOLDERS 3–10  +  SCHEME BLOCK
-   8 worked examples + 10 exercises per lesson.
-   HOW TO INSTALL
-   1. Paste SECTION A (helpers), B (lessons) and C (placeholders)
-      ABOVE `const SCHEME_P5` in index.html.
-   2. In SCHEME_P5 → Spring Term, replace the old one-line
-        { id:'fractionsB', label:'Fractions B', ... },
-      with SECTION D.
-   Needs (already installed): asHeader, asWarm, asBar, asJump,
-   asEquivBars, asExCard, steps(), exQ().
-   NOTE: the pupil's school task 1⅓ × 2 is Step 4 of this topic
-   ("Multiply a mixed number by an integer"). Steps 1–2 build the
-   skills it depends on.
-   ============================================================ */
-
-
-/* ================= SECTION A — HELPERS ================= */
-
-/* Stacked fraction for inline HTML:  ${fr(2,5)}  → 2 over 5.  ${mx(1,1,3)} → 1 and 1/3 */
-function fr(n,d){
-  return `<span style="display:inline-block;vertical-align:middle;text-align:center;line-height:1.15;margin:0 2px;font-weight:800;"><span style="display:block;padding:0 4px;border-bottom:2px solid currentColor;">${n}</span><span style="display:block;padding:0 4px;">${d}</span></span>`;
-}
-function mx(w,n,d){ return `<span style="font-weight:800;">${w}</span>${fr(n,d)}`; }
-
-/* Rows of equal fraction bars. counts = number of parts shaded in each bar.
-   asFracBars(5,[2,2,2],'title','foot text') */
-function asFracBars(den,counts,title,foot){
-  const rowH=34,gap=10,x0=10,bw=360,cw=bw/den;
-  const H=34+counts.length*(rowH+gap)+(foot?32:6);
-  const cols=['#2DD4BF','#F472B6','#A78BFA','#FBBF24'];
-  let s=`<svg viewBox="0 0 520 ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
-  if(title) s+=`<text x="260" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
-  counts.forEach((n,i)=>{
-    const y=28+i*(rowH+gap), c=cols[i%cols.length];
-    s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${rowH}" fill="#fff" stroke="#333" stroke-width="2"/>`;
-    s+=`<rect x="${x0}" y="${y}" width="${cw*n}" height="${rowH}" fill="${c}" stroke="#333" stroke-width="2"/>`;
-    for(let k=1;k<den;k++) s+=`<line x1="${x0+k*cw}" y1="${y}" x2="${x0+k*cw}" y2="${y+rowH}" stroke="#333" stroke-width="1"/>`;
-    s+=`<text x="${x0+bw+16}" y="${y+22}" font-size="15" font-weight="800" fill="#333">${n}/${den}</text>`;
-  });
-  if(foot) s+=`<text x="260" y="${H-10}" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
-  return s+'</svg>';
-}
-
-/* Bar model for a fraction OF a quantity.
-   asFracOf(20,4,3,'','3/4 of 20') — whole cut into `den` equal parts, `num` shaded, each part's value shown. */
-function asFracOf(whole,den,num,prefix,title){
-  prefix=prefix||'';
-  const W=620,x0=10,bw=600,cw=bw/den,part=whole/den;
-  const fmt=v=>prefix+(Number.isInteger(v)?v.toLocaleString('en-GB'):v.toFixed(2));
-  let s=`<svg viewBox="0 0 ${W} 126" class="shape-svg" style="max-width:100%;height:auto;">`;
-  s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title||('Whole = '+fmt(whole))}</text>`;
-  for(let i=0;i<den;i++){
-    const on=i<num;
-    s+=`<rect x="${x0+i*cw}" y="28" width="${cw}" height="46" fill="${on?'#FCD34D':'#fff'}" stroke="#B45309" stroke-width="2"/>`;
-    s+=`<text x="${x0+i*cw+cw/2}" y="47" text-anchor="middle" font-size="10" font-weight="700" fill="#92400E">1/${den}</text>`;
-    s+=`<text x="${x0+i*cw+cw/2}" y="64" text-anchor="middle" font-size="12" font-weight="800" fill="#92400E">${fmt(part)}</text>`;
-  }
-  if(num>0){
-    s+=`<line x1="${x0}" y1="86" x2="${x0+num*cw}" y2="86" stroke="#D85A30" stroke-width="3"/>`;
-    s+=`<text x="${x0+num*cw/2}" y="108" text-anchor="middle" font-size="13" font-weight="800" fill="#D85A30">${num}/${den} of ${fmt(whole)} = ${fmt(num*part)}</text>`;
-  }
-  return s+'</svg>';
-}
-
-
-/* ================= SECTION B — LESSONS ================= */
-
-/* ---------- STEP 1 : Multiply fractions by integers ---------- */
-const P5_FB1 = `
-${asHeader('FB1','Step 1 — Multiply Fractions by Integers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
-
-<div class="card" style="border-color:#BA7517;">
-  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Groups of Fractions</div>
-  ${asWarm('If you have <strong>3 bags</strong> and each bag holds <strong>2 apples</strong>, you have 3 × 2 = 6 apples. Now change the apples into <strong>fifths</strong>! If each bag holds 2 <em>fifths</em>, then 3 bags hold 3 × 2 = <strong>6 fifths</strong>. The unit (fifths) stays the same; we just count more of them.')}
-
-  <div class="card-body"><strong>Concrete:</strong> use three identical fraction strips, each cut into 5 equal parts with 2 parts shaded. Put them together and count the shaded fifths.</div>
-  ${asFracBars(5,[2,2,2],'3 × 2/5 → three strips, each with 2 fifths shaded','2 fifths + 2 fifths + 2 fifths = 6 fifths')}
-  <div class="card-body" style="margin-top:6px;"><strong>Regroup:</strong> 5 fifths make one whole, so 6 fifths is <strong>1 whole and 1 fifth</strong>:</div>
-  ${asFracBars(5,[5,1],'6 fifths = one full strip + 1 more fifth','6/5 = 1 1/5')}
-
-  <div class="strategy-grid" style="margin-top:12px;">
-    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;">${'Multiply the <strong>numerator</strong> (top) by the integer. <strong>Keep the denominator</strong> (bottom) the same.'} &nbsp; 3 × ${fr(2,5)} = ${fr('3 × 2',5)} = ${fr(6,5)}</div></div>
-    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Then tidy up</div><div class="s-body" style="color:#085041;">If the answer is an <strong>improper fraction</strong> (top ≥ bottom), change it to a <strong>mixed number</strong>: divide the top by the bottom. The quotient is the whole number; the remainder is the new top. Simplify if you can.</div></div>
-    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying both numbers</div><div class="s-body" style="color:#712B13;">3 × ${fr(2,5)} is NOT ${fr(6,15)}! The denominator names the SIZE of the pieces; multiplying it would change the pieces. Only the number of pieces is multiplied.</div></div>
-    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Stopping at the improper fraction</div><div class="s-body" style="color:#712B13;">${fr(6,5)} is correct but it may not be &ldquo;finished&rdquo;. Questions often ask for a mixed number or the simplest form — read the question!</div></div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-title">Example 1 — A unit fraction times an integer: 4 × 1/5</div>
-  ${asWarm('1 fifth, four times. How many fifths altogether?')}
-  ${asFracBars(5,[1,1,1,1],'Four strips, each with 1 fifth shaded','1 + 1 + 1 + 1 = 4 fifths')}
-  ${steps([['Repeated addition',`${fr(1,5)} + ${fr(1,5)} + ${fr(1,5)} + ${fr(1,5)}`,'= 4 fifths'],['Multiply the top','4 × 1 = 4','keep the 5'],['ANSWER',`4 × ${fr(1,5)} = ${fr(4,5)}`,'less than 1 whole, so no change needed']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 2 — Making an improper fraction: 3 × 2/5</div>
-  ${asWarm('We met this in the concrete stage. Now follow the number line jumps: three jumps of 2 fifths.')}
-  ${asJump(['0','2/5','4/5','1 1/5'],['+2/5','+2/5','+2/5'],'Three jumps of 2/5 — we pass 1 whole (5/5) on the way!')}
-  ${steps([['Multiply the top','3 × 2 = 6','keep the denominator 5'],['Improper fraction',`${fr(6,5)}`,'top is bigger than bottom'],['Divide','6 ÷ 5 = 1 remainder 1','1 whole and 1 fifth'],['ANSWER',`3 × ${fr(2,5)} = ${mx(1,1,5)}`,'']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 3 — Simplifying the answer: 2 × 3/8</div>
-  ${asWarm('Multiply first. Then ask: can this fraction be made simpler?')}
-  ${asFracBars(8,[3,3],'Two strips of 3 eighths','3/8 + 3/8 = 6/8')}
-  ${steps([['Multiply the top','2 × 3 = 6',`so ${fr(6,8)}`],['Simplify','÷ 2 on top and bottom',`${fr(6,8)} = ${fr(3,4)}`],['ANSWER',`2 × ${fr(3,8)} = ${fr(3,4)}`,'the biggest number that divides 6 and 8 is 2']])}
-  ${asEquivBars([[6,8,'6/8'],[3,4,'3/4']],'6/8 and 3/4 are the same amount')}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 4 — Improper fraction to mixed number: 5 × 3/4</div>
-  ${asWarm('5 groups of 3 quarters. That is a lot of quarters! How many whole ones can we make?')}
-  ${asFracBars(4,[4,4,4,3],'15 quarters packed into bars of 4: three full bars and 3 quarters','15/4 = 3 3/4')}
-  ${steps([['Multiply the top','5 × 3 = 15',`${fr(15,4)}`],['Divide','15 ÷ 4 = 3 remainder 3','3 wholes with 3 quarters left'],['ANSWER',`5 × ${fr(3,4)} = ${mx(3,3,4)}`,'check: 3 × 4 = 12, 12 + 3 = 15 ✓']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 5 — The integer can go first or second: 4 × 2/9 and 2/9 × 4</div>
-  ${asWarm('Does the order matter in multiplication? 4 × 2 = 2 × 4. What about with fractions?')}
-  ${asFracBars(9,[2,2,2,2],'Four strips of 2 ninths','2/9 + 2/9 + 2/9 + 2/9 = 8/9')}
-  ${steps([['4 × 2/9','4 × 2 = 8',`= ${fr(8,9)}`],['2/9 × 4','2 × 4 = 8',`= ${fr(8,9)} — same answer!`],['Rule','multiplication works in any order','the integer can be written before or after the fraction']])}
-  <div class="card-body" style="margin-top:6px;">⚠️ <strong>Sense check:</strong> if someone says 4 × ${fr(2,9)} = ${fr(8,36)}, notice ${fr(8,36)} = ${fr(2,9)} — it did NOT get bigger, but four lots of anything must be bigger than one lot!</div>
-</div>
-
-<div class="card">
-  <div class="card-title">Example 6 — Bigger numerators: 4 × 5/6 and 6 × 5/12</div>
-  ${asWarm('Do both steps: multiply, then convert and simplify.')}
-  <div class="card-body"><strong>4 × 5/6</strong></div>
-  ${steps([['Multiply the top','4 × 5 = 20',`${fr(20,6)}`],['Mixed number','20 ÷ 6 = 3 remainder 2',`${mx(3,2,6)}`],['Simplify the fraction part','÷ 2 on top and bottom',`${mx(3,2,6)} = ${mx(3,1,3)}`]])}
-  <div class="card-body" style="margin-top:8px;"><strong>6 × 5/12</strong></div>
-  ${steps([['Multiply the top','6 × 5 = 30',`${fr(30,12)}`],['Mixed number','30 ÷ 12 = 2 remainder 6',`${mx(2,6,12)}`],['Simplify','÷ 6',`${mx(2,6,12)} = ${mx(2,1,2)}`]])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 7 — Real life: milk and running</div>
-  ${asWarm('Four pupils each drink <strong>2/3 of a litre</strong> of milk. How much milk is that altogether?')}
-  ${asFracBars(3,[2,2,2,2],'Four pupils, each with 2 thirds of a litre','8/3 L = 2 2/3 L')}
-  ${steps([['Multiply','4 × 2 = 8',`${fr(8,3)} L`],['Mixed number','8 ÷ 3 = 2 remainder 2',`${mx(2,2,3)} L`]])}
-  <div class="card-body" style="margin-top:8px;"><strong>A runner runs 3/5 km each day for 4 days.</strong></div>
-  ${steps([['Multiply','4 × 3 = 12',`${fr(12,5)} km`],['Mixed number','12 ÷ 5 = 2 remainder 2',`${mx(2,2,5)} km`]])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 8 — Reasoning and missing numbers</div>
-  ${asWarm('Which is greater: <strong>4 × 3/8</strong> or <strong>2 × 5/8</strong>? Both are measured in eighths, so just compare the number of eighths!')}
-  ${steps([['4 × 3/8','12 eighths',`${fr(12,8)} = ${mx(1,1,2)}`],['2 × 5/8','10 eighths',`${fr(10,8)} = ${mx(1,1,4)}`],['Compare','12 eighths &gt; 10 eighths','4 × 3/8 is greater']])}
-  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> ▢ × ${fr(2,7)} = ${fr(10,7)}. What goes in the box?</div>
-  ${steps([['Think in sevenths','▢ × 2 sevenths = 10 sevenths','▢ × 2 = 10'],['Divide','10 ÷ 2','= 5'],['ANSWER',`5 × ${fr(2,7)} = ${fr(10,7)} ✓`,'']])}
-</div>
-
-${asExCard(1,[
- exQ(1,'4 × 1/5 = ?',['4/5','4/20','1/20'],0),
- exQ(2,'3 × 2/5 = ?',['6/5','6/15','5/6'],0),
- exQ(3,'2 × 3/8 = ? Give the answer in its simplest form.',['3/4','6/8','6/16'],0),
- exQ(4,'5 × 3/4 = ? Give the answer as a mixed number.',['3 3/4','15/20','2 3/4'],0),
- exQ(5,'4 × 2/9 = ?',['8/9','8/36','2/36'],0),
- exQ(6,'4 × 5/6 = ? Give the answer as a mixed number in its simplest form.',['3 1/3','3 2/3','20/24'],0),
- exQ(7,'Four pupils each drink 2/3 of a litre of milk. How much milk altogether?',['2 2/3 L','8/12 L','2 1/3 L'],0),
- exQ(8,'Which statement is true?',['4 × 3/8 is greater than 2 × 5/8','2 × 5/8 is greater than 4 × 3/8','They are equal'],0),
- exQ(9,'THINK DEEPER: ▢ × 2/7 = 10/7. What number goes in the box?',['5','10','20'],0,'t'),
- exQ(10,'BOSS LEVEL: Each bottle holds 3/4 of a litre. A shop sells 7 bottles. How many litres is that?',['5 1/4 L','21/28 L','4 1/4 L'],0,'b')])}`;
-
-
-/* ---------- STEP 2 : Find fractions of quantities ---------- */
-const P5_FB2 = `
-${asHeader('FB2','Step 2 — Find Fractions of Quantities','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
-
-<div class="card" style="border-color:#BA7517;">
-  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Sharing into Equal Parts</div>
-  ${asWarm('Finding <strong>a fraction OF an amount</strong> means: cut the amount into equal parts (the <em>denominator</em> tells you how many), then take some of the parts (the <em>numerator</em> tells you how many). It is sharing — then collecting!')}
-
-  <div class="card-body"><strong>Concrete:</strong> 20 counters shared equally into 4 groups. Each group is 1/4 of 20.</div>
-  ${asFracOf(20,4,1,'','1/4 of 20 = 20 ÷ 4 = 5')}
-  <div class="card-body" style="margin-top:6px;"><strong>Take 3 groups</strong> for 3/4:</div>
-  ${asFracOf(20,4,3,'','3/4 of 20')}
-
-  <div class="strategy-grid" style="margin-top:12px;">
-    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The 2-step method</div><div class="s-body" style="color:#633806;">1) <strong>Divide</strong> the amount by the <strong>denominator</strong> → this is one part (the unit fraction). 2) <strong>Multiply</strong> by the <strong>numerator</strong> → this is the part(s) you want.</div></div>
-    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 1</div><div class="s-body" style="color:#085041;">3/5 of 20 = 3 × (20 ÷ 5) = 3 × 4 = 12. It is the same as 20 × ${fr(3,5)} = ${fr(60,5)} = 12. Two roads, one answer!</div></div>
-    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying by the denominator</div><div class="s-body" style="color:#712B13;">1/4 of 20 is NOT 20 × 4. A fraction OF an amount is a part of it — so the answer is SMALLER than the amount (for fractions less than 1).</div></div>
-    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting the numerator</div><div class="s-body" style="color:#712B13;">Finding ONE part (1/5) is only step 1. For 3/5, you must take THREE of those parts. Always finish with the multiplication!</div></div>
-  </div>
-</div>
-
-<div class="card">
-  <div class="card-title">Example 1 — Unit fraction of an amount: 1/4 of 20</div>
-  ${asWarm('1/4 means one of four equal parts.')}
-  ${asFracOf(20,4,1,'','1/4 of 20: cut 20 into 4 equal parts')}
-  ${steps([['Denominator','4','cut into 4 equal parts'],['Divide','20 ÷ 4','= 5 in each part'],['ANSWER',`${fr(1,4)} of 20 = 5`,'check: 4 × 5 = 20 ✓']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 2 — Another unit fraction: 1/8 of 56</div>
-  ${asWarm('Does a bigger denominator make the part bigger or smaller?')}
-  ${asFracOf(56,8,1,'','1/8 of 56: cut 56 into 8 equal parts')}
-  ${steps([['Divide','56 ÷ 8','= 7'],['ANSWER',`${fr(1,8)} of 56 = 7`,'check: 8 × 7 = 56 ✓']])}
-  <div class="card-body" style="margin-top:6px;">💡 <strong>Pattern:</strong> 1/4 of 20 = 5, but 1/8 of 56 = 7. A bigger denominator means MORE parts, each one smaller.</div>
-</div>
-
-<div class="card">
-  <div class="card-title">Example 3 — A non-unit fraction: 3/4 of 20</div>
-  ${asWarm('We already know one quarter of 20 is 5. How many quarters do we want?')}
-  ${asFracOf(20,4,3,'','3/4 of 20 = 3 parts of 5')}
-  ${steps([['Divide by the denominator','20 ÷ 4','= 5 (one part)'],['Multiply by the numerator','3 × 5','= 15'],['ANSWER',`${fr(3,4)} of 20 = 15`,'the quarter that is NOT taken is 5 → 15 + 5 = 20 ✓']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 4 — 2/5 of 35 (two ways)</div>
-  ${asWarm('Method A: share into fifths and take 2. Method B: multiply 35 by the fraction.')}
-  ${asFracOf(35,5,2,'','2/5 of 35: each fifth is 7')}
-  ${steps([['Method A: divide','35 ÷ 5','= 7'],['Method A: multiply','2 × 7','= 14'],['Method B','35 × '+fr(2,5)+' = '+fr(70,5),'70 ÷ 5 = 14 ✓'],['ANSWER',`${fr(2,5)} of 35 = 14`,'both ways agree']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 5 — Bigger amounts and money: 3/8 of 64 and 3/5 of £250</div>
-  ${asWarm('The method does not change when the numbers get big!')}
-  ${asFracOf(64,8,3,'','3/8 of 64: each eighth is 8')}
-  ${steps([['3/8 of 64','64 ÷ 8 = 8','then 3 × 8 = 24']])}
-  ${asFracOf(250,5,3,'£','3/5 of £250: each fifth is £50')}
-  ${steps([['3/5 of £250','£250 ÷ 5 = £50','then 3 × £50 = £150'],['Check','£150 is a bit more than half of £250 (£125)','60% is more than 50% ✓']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 6 — Fractions of measures: 3/4 of 2 m and 2/5 of 1 L</div>
-  ${asWarm('Change the amount into a smaller unit first so the division works out nicely.')}
-  ${steps([['2 m','= 200 cm','1 m = 100 cm'],['1/4 of 200 cm','200 ÷ 4','= 50 cm'],['3/4 of 200 cm','3 × 50','= 150 cm = 1.5 m']])}
-  ${asFracOf(1000,5,2,'','2/5 of 1 L = 2/5 of 1,000 ml')}
-  ${steps([['1 L','= 1,000 ml','1 L = 1,000 ml'],['1/5 of 1,000','1,000 ÷ 5','= 200 ml'],['2/5 of 1,000','2 × 200','= 400 ml']])}
-</div>
-
-<div class="card">
-  <div class="card-title">Example 7 — Real life, more than one fraction: the class journey</div>
-  ${asWarm('There are <strong>30 pupils</strong> in a class. <strong>2/5</strong> walk to school, <strong>1/3</strong> come by bus and the rest come by car. How many come by car?')}
-  ${asFracOf(30,5,2,'','2/5 of 30 walk')}
-  ${steps([['Walk','30 ÷ 5 = 6, then 2 × 6','= 12 pupils'],['Bus','30 ÷ 3','= 10 pupils'],['Walk + bus','12 + 10','= 22 pupils'],['Car','30 − 22','= 8 pupils']])}
-  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with fractions:</strong> 2/5 + 1/3 = 6/15 + 5/15 = 11/15, so the rest is 4/15 of 30 = 2 × 4 = 8 ✓ (we will master this adding in Step 8!).</div>
-</div>
-
-<div class="card">
-  <div class="card-title">Example 8 — Reasoning: improper fractions and comparing</div>
-  ${asWarm('Can a fraction of an amount be BIGGER than the amount? What about 5/4 of 20?')}
-  ${steps([['One quarter','20 ÷ 4','= 5'],['Five quarters','5 × 5','= 25'],['ANSWER',`${fr(5,4)} of 20 = 25`,'5/4 is more than one whole, so the answer is bigger than 20']])}
-  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: 3/4 of 24 or 2/3 of 30?</strong></div>
-  ${steps([['3/4 of 24','24 ÷ 4 = 6, then 3 × 6','= 18'],['2/3 of 30','30 ÷ 3 = 10, then 2 × 10','= 20'],['Compare','20 &gt; 18','2/3 of 30 is greater']])}
-  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">A bigger fraction of a SMALLER amount can lose to a smaller fraction of a BIGGER amount. Always calculate before comparing!</div></div></div>
-</div>
-
-${asExCard(2,[
- exQ(1,'What is 1/4 of 20?',['5','80','16'],0),
- exQ(2,'What is 1/8 of 56?',['7','448','48'],0),
- exQ(3,'What is 3/4 of 20?',['15','5','60'],0),
- exQ(4,'What is 2/5 of 35?',['14','7','70'],0),
- exQ(5,'What is 3/8 of 64?',['24','8','192'],0),
- exQ(6,'What is 3/5 of £250?',['£150','£50','£750'],0),
- exQ(7,'What is 3/4 of 2 m, in centimetres?',['150 cm','50 cm','75 cm'],0),
- exQ(8,'A class has 30 pupils. 2/5 of them walk to school. How many walk?',['12','10','15'],0),
- exQ(9,'THINK DEEPER: What is 5/4 of 20?',['25','4','16'],0,'t'),
- exQ(10,'BOSS LEVEL: A class has 30 pupils. 2/5 walk and 1/3 come by bus. The rest come by car. How many come by car?',['8','12','18'],0,'b')])}`;
-
-
-/* ================= SECTION C — PLACEHOLDERS (steps 3–10) ================= */
-const P5_FB3  = null; // Find fractions of amounts
-const P5_FB4  = null; // Multiply a mixed number by an integer   ← the pupil's 1⅓ × 2 task
-const P5_FB5  = null; // Divide fractions by integers
-const P5_FB6  = null; // Find the whole from a fraction
-const P5_FB7  = null; // Fractions as division
-const P5_FB8  = null; // Add fractions with different denominators
-const P5_FB9  = null; // Subtract fractions with different denominators
-const P5_FB10 = null; // Solve multi-step fraction problems
-
+ 
 
 
 
