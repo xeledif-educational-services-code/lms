@@ -3935,6 +3935,373 @@ const P5_AS14 = null; // Reasoning with addition and subtraction
 
 
 
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A (topic id 'multdivA')
+   LESSONS 1 AND 2  +  PLACEHOLDERS 3–16  +  SCHEME BLOCK
+   8 worked examples + 10 exercises per lesson.
+ 
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers), B (lessons) and C (placeholders)
+      ABOVE `const SCHEME_P5` in index.html.
+   2. In SCHEME_P5 → Autumn Term, replace the old one-line
+        { id:'multdivA', label:'Multiplication & Division A', ... },
+      with SECTION D.
+   Needs (already in your app): dayHeader(), steps(), exQ(), exCard(),
+   numLine(), mcqBlock().  Nothing else is required.
+   All new helpers start with "md" so they cannot clash with others.
+ 
+   HOW TO ADD LESSON 3 LATER
+   Write your lesson as  const P5_MDA3 = `...`;  and delete the matching
+   "const P5_MDA3 = null;" line in SECTION C. Nothing else changes.
+   ============================================================ */
+ 
+ 
+/* ================= SECTION A — HELPERS ================= */
+ 
+/* Purple warm-up box */
+function mdWarm(t){
+  return `<div class="warmup" style="background:#EDE9FE;color:#5B21B6;">🧠 <strong>Warm-up:</strong> ${t}</div>`;
+}
+ 
+/* Row of "times table" boxes:  mdTimesRow(4,6) → 1×4=4, 2×4=8 … 6×4=24 */
+function mdTimesRow(n,count){
+  let s='<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;justify-content:center;">';
+  for(let i=1;i<=count;i++){
+    s+=`<div style="text-align:center;background:#EDE9FE;border:1.5px solid #6D28D9;border-radius:8px;padding:5px 8px;min-width:58px;"><div style="font-size:10px;color:#5B21B6;">${i} × ${n}</div><div style="font-size:16px;font-weight:800;color:#4C1D95;">${n*i}</div></div>`;
+  }
+  return s+'</div>';
+}
+ 
+/* Boxes of counters: g groups of n counters, running total under each box.
+   mdGroups(3,6,'title') */
+function mdGroups(n,g,title){
+  const cols=n<=3?n:Math.ceil(n/2), rows=Math.ceil(n/cols), d=18;
+  const bw=cols*d+14, bh=rows*d+14, gap=14, W=Math.max(320,g*(bw+gap)+gap), H=bh+80;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let i=0;i<g;i++){
+    const x=gap+i*(bw+gap), c=i%2?'#BE185D':'#6D28D9';
+    s+=`<rect x="${x}" y="30" width="${bw}" height="${bh}" rx="8" fill="#F5F3FF" stroke="${c}" stroke-width="2"/>`;
+    for(let k=0;k<n;k++){
+      s+=`<circle cx="${x+7+(k%cols)*d+d/2}" cy="${37+Math.floor(k/cols)*d+d/2}" r="6" fill="${c}"/>`;
+    }
+    s+=`<text x="${x+bw/2}" y="${30+bh+22}" text-anchor="middle" font-size="15" font-weight="800" fill="#4C1D95">${n*(i+1)}</text>`;
+    s+=`<text x="${x+bw/2}" y="${30+bh+38}" text-anchor="middle" font-size="9" fill="#666">${i+1} group${i?'s':''}</text>`;
+  }
+  return s+'</svg>';
+}
+ 
+/* Skip-counting number line with arcs: mdJumps(4,6,'title') jumps 0→4→8…→24 */
+function mdJumps(step,count,title){
+  const W=640,pad=36,y=84,max=step*count;
+  const X=v=>pad+v/max*(W-2*pad);
+  let s=`<svg viewBox="0 0 ${W} 130" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="${pad-16}" y1="${y}" x2="${W-pad+16}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  s+=`<polygon points="${W-pad+16},${y} ${W-pad+4},${y-6} ${W-pad+4},${y+6}" fill="#444"/>`;
+  for(let i=0;i<=count;i++){
+    const v=step*i, x=X(v), c=i%2?'#BE185D':'#6D28D9';
+    s+=`<line x1="${x}" y1="${y-7}" x2="${x}" y2="${y+7}" stroke="#444" stroke-width="2"/>`;
+    s+=`<text x="${x}" y="${y+26}" text-anchor="middle" font-size="12" font-weight="800" fill="#333">${v.toLocaleString('en-GB')}</text>`;
+    if(i<count){
+      const x2=X(step*(i+1)), cc=i%2?'#BE185D':'#6D28D9';
+      s+=`<path d="M${x} ${y-4} Q${(x+x2)/2} ${y-58} ${x2} ${y-4}" fill="none" stroke="${cc}" stroke-width="2.5"/>`;
+      s+=`<text x="${(x+x2)/2}" y="${y-38}" text-anchor="middle" font-size="11" font-weight="800" fill="${cc}">+${step}</text>`;
+    }
+    if(i>0) s+=`<circle cx="${x}" cy="${y}" r="5" fill="${c}"/>`;
+  }
+  return s+'</svg>';
+}
+ 
+/* 1–100 square. a/b = {step, color}. b may be null.
+   Cells in BOTH sets turn deep purple (common multiples). */
+function mdHundredSquare(a,b,title){
+  const cs=34,x0=24,y0=30,W=x0*2+cs*10,H=y0+cs*10+44;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let n=1;n<=100;n++){
+    const r=Math.floor((n-1)/10), c=(n-1)%10;
+    const inA=n%a.step===0, inB=!!b && n%b.step===0;
+    let fill='#fff', txt='#777', fw=500;
+    if(inA&&inB){fill='#7C3AED';txt='#fff';fw=800;}
+    else if(inA){fill=a.color;txt='#1a1a1a';fw=800;}
+    else if(inB){fill=b.color;txt='#1a1a1a';fw=800;}
+    s+=`<rect x="${x0+c*cs}" y="${y0+r*cs}" width="${cs}" height="${cs}" fill="${fill}" stroke="#bbb" stroke-width="1"/>`;
+    s+=`<text x="${x0+c*cs+cs/2}" y="${y0+r*cs+cs/2+4}" text-anchor="middle" font-size="12" font-weight="${fw}" fill="${txt}">${n}</text>`;
+  }
+  const ly=y0+cs*10+24;
+  s+=`<rect x="${x0}" y="${ly-10}" width="13" height="13" fill="${a.color}" stroke="#555"/><text x="${x0+19}" y="${ly}" font-size="11" font-weight="700" fill="#333">Multiples of ${a.step}</text>`;
+  if(b){
+    s+=`<rect x="${x0+120}" y="${ly-10}" width="13" height="13" fill="${b.color}" stroke="#555"/><text x="${x0+139}" y="${ly}" font-size="11" font-weight="700" fill="#333">Multiples of ${b.step}</text>`;
+    s+=`<rect x="${x0+240}" y="${ly-10}" width="13" height="13" fill="#7C3AED" stroke="#555"/><text x="${x0+259}" y="${ly}" font-size="11" font-weight="700" fill="#333">BOTH (common)</text>`;
+  }
+  return s+'</svg>';
+}
+ 
+/* Two-circle Venn diagram of multiples.
+   mdVenn('Multiples of 3',[...],'Multiples of 4',[...],[common],'title','footer') */
+function mdItems(items,cx,cy,per,lh,cw,color,size){
+  const rows=[];
+  for(let i=0;i<items.length;i+=per) rows.push(items.slice(i,i+per));
+  const y0=cy-(rows.length-1)*lh/2;
+  let s='';
+  rows.forEach((r,ri)=>{
+    r.forEach((it,ci)=>{
+      const x=cx+(ci-(r.length-1)/2)*cw;
+      s+=`<text x="${x}" y="${y0+ri*lh+5}" text-anchor="middle" font-size="${size}" font-weight="700" fill="${color}">${it}</text>`;
+    });
+  });
+  return s;
+}
+function mdVenn(aLab,aIt,bLab,bIt,common,title,foot){
+  let s=`<svg viewBox="0 0 540 262" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="270" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<circle cx="205" cy="130" r="100" fill="#FCD34D" fill-opacity=".35" stroke="#B45309" stroke-width="2"/>`;
+  s+=`<circle cx="335" cy="130" r="100" fill="#5EEAD4" fill-opacity=".35" stroke="#0F766E" stroke-width="2"/>`;
+  s+=`<text x="165" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#92400E">${aLab}</text>`;
+  s+=`<text x="375" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#115E59">${bLab}</text>`;
+  s+=`<text x="270" y="76" text-anchor="middle" font-size="10" font-weight="800" fill="#5B21B6">BOTH</text>`;
+  s+=mdItems(aIt,165,140,3,24,32,'#92400E',13);
+  s+=mdItems(common,270,140,1,24,0,'#5B21B6',15);
+  s+=mdItems(bIt,375,140,3,24,32,'#115E59',13);
+  if(foot) s+=`<text x="270" y="252" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
+  return s+'</svg>';
+}
+
+
+
+/* ================= SECTION B — LESSONS ================= */
+ 
+/* ---------- STEP 1 : Multiples ---------- */
+const P5_MDA1 = `
+${dayHeader('MD1','Step 1 — Multiples','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Growing Groups</div>
+  ${mdWarm('You already know your times tables! Say the <strong>3 times table</strong> out loud: 3, 6, 9, 12, 15… Every number you just said has a special name. It is a <strong>multiple of 3</strong>.')}
+ 
+  <div class="card-body"><strong>Concrete:</strong> take counters and make equal groups of 3. After each new group, count ALL the counters. Each running total is a multiple of 3.</div>
+  ${mdGroups(3,6,'Six groups of 3 counters — the totals 3, 6, 9, 12, 15, 18 are multiples of 3')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> the same idea as equal jumps on a number line. Start at 0 and keep adding 3 — this is <strong>skip counting</strong>:</div>
+  ${mdJumps(3,6,'Skip counting in 3s: every landing point is a multiple of 3')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 What is a multiple?</div><div class="s-body" style="color:#4C1D95;">A <strong>multiple</strong> of a number is the answer you get when you <strong>multiply</strong> that number by a whole number (1, 2, 3, 4…). The multiples of 3 are 3 × 1, 3 × 2, 3 × 3… = <strong>3, 6, 9, 12…</strong></div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">♾️ They never stop!</div><div class="s-body" style="color:#085041;">There is always another multiple — just add the number once more. A number has <strong>infinitely many</strong> multiples. The <strong>first multiple</strong> of any number is the number itself (n × 1).</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Two ways to find them</div><div class="s-body" style="color:#633806;">1) <strong>Multiply:</strong> 4 × 1, 4 × 2, 4 × 3… 2) <strong>Skip count:</strong> start at the number and keep adding it: 4, 8, 12, 16…</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiples vs Factors</div><div class="s-body" style="color:#712B13;">Multiples <strong>grow bigger</strong> (6, 12, 18, 24…). Factors are the <strong>small numbers that fit INTO</strong> a number (1, 2, 3, 6 are factors of 6). Multiples are in the times table; factors are what divides.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Multiples start after the number&rdquo;</div><div class="s-body" style="color:#712B13;">The number <strong>itself</strong> is its own first multiple: 7 is a multiple of 7. A multiple is never smaller than the number (we do not count 0 in Year 5).</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — The first six multiples of 4</div>
+  ${mdWarm('Start at 0 and jump 4 each time. Where do you land?')}
+  ${mdJumps(4,6,'Six jumps of 4')}
+  ${mdTimesRow(4,6)}
+  ${steps([['Skip count','4, 8, 12, 16, 20, 24','add 4 each time'],['Multiply','4 × 6 = 24','the 6th multiple'],['ANSWER','4, 8, 12, 16, 20, 24','the first six multiples of 4']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Spotting multiples of 7 on a hundred square</div>
+  ${mdWarm('Shade every 7th number on a 1–100 square. What shape do the shaded numbers make?')}
+  ${mdHundredSquare({step:7,color:'#FCD34D'},null,'The multiples of 7 up to 100')}
+  ${steps([['List them','7, 14, 21, 28, 35, 42, 49','7 × 1 up to 7 × 7'],['Keep going','56, 63, 70, 77, 84, 91, 98','7 × 8 up to 7 × 14'],['How many?','14 multiples','7 × 14 = 98 is the last one under 100']])}
+  <div class="card-body" style="margin-top:6px;">💡 Notice the diagonal pattern, and that 98 + 7 = 105 would be the next multiple — beyond the grid, but it exists!</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Is it a multiple? Test with a times-table fact or division</div>
+  ${mdWarm('Is 56 a multiple of 8? Is 52 a multiple of 6? Ask: &ldquo;Can I get this number by multiplying?&rdquo;')}
+  <div class="card-body"><strong>Is 56 a multiple of 8?</strong></div>
+  ${steps([['Recall','8 × 7 = 56','a times-table fact'],['Or divide','56 ÷ 8 = 7','no remainder'],['ANSWER','YES ✓','56 is a multiple of 8']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 52 a multiple of 6?</strong></div>
+  ${steps([['Nearby multiples','6 × 8 = 48','and 6 × 9 = 54'],['Divide','52 ÷ 6 = 8 remainder 4','a remainder!'],['ANSWER','NO ✗','52 falls between 48 and 54']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Rule:</strong> if the division leaves <em>no remainder</em>, it is a multiple.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Patterns in multiples (last digits and digit sums)</div>
+  ${mdWarm('Multiples have secret patterns. Look at the multiples of 5 and 10 together.')}
+  ${mdHundredSquare({step:5,color:'#FCD34D'},{step:10,color:'#5EEAD4'},'Multiples of 5 and 10 — which column holds all the 10s?')}
+  ${steps([['Multiples of 10','end in 0','10, 20, 30, 40…'],['Multiples of 5','end in 0 or 5','5, 10, 15, 20…'],['Multiples of 2','end in 0, 2, 4, 6 or 8','all the EVEN numbers']])}
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✨ The 9 trick</div><div class="s-body" style="color:#27500A;">Add the digits of a multiple of 9 and you get 9 (or a multiple of 9): 27 → 2 + 7 = 9 · 63 → 6 + 3 = 9 · 108 → 1 + 0 + 8 = 9</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✨ The 3 trick</div><div class="s-body" style="color:#27500A;">If the digit sum of a number is a multiple of 3, the number is a multiple of 3: 72 → 7 + 2 = 9 ✓ · 85 → 8 + 5 = 13 ✗</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Bigger multiples using known facts: 12th multiple of 25</div>
+  ${mdWarm('You do not have to count all twelve jumps! Build it from facts you know.')}
+  ${steps([['10th multiple','10 × 25 = 250','times 10 is easy'],['Two more','2 × 25 = 50','double 25'],['Add','250 + 50','= 300'],['ANSWER','12 × 25 = 300','the 12th multiple of 25']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 144 a multiple of 12?</strong> Use 12 × 12 = 144 ✓ — yes it is!</div>
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Strategy:</strong> use ×10 then add or subtract small steps. E.g. 9th multiple of 8 = 10 × 8 − 8 = 80 − 8 = <strong>72</strong>.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Multiples of 9 between 40 and 80</div>
+  ${mdWarm('You are given a range. Find the first multiple inside it, then keep adding 9.')}
+  ${numLine(40,80,5,[[45,'45'],[54,'54'],[63,'63'],[72,'72']])}
+  ${steps([['Just below 40','9 × 4 = 36','too small'],['First inside','9 × 5 = 45','start here ✓'],['Keep adding 9','54, 63, 72','all inside the range'],['Next one','9 × 9 = 81','too big — stop!']])}
+  <div class="card-body" style="margin-top:6px;"><strong>ANSWER:</strong> 45, 54, 63 and 72.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life: eggs and buses</div>
+  ${mdWarm('Eggs are sold in boxes of 6. Can you buy exactly 42 eggs? What about 46?')}
+  ${steps([['42 ÷ 6','= 7','no remainder → YES, 7 boxes'],['46 ÷ 6','= 7 remainder 4','NO — not a multiple of 6']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A bus leaves every 12 minutes. The first bus leaves at 8:12 am. What time does the 7th bus leave?</strong></div>
+  ${mdJumps(12,7,'The 7th bus leaves after 7 lots of 12 minutes')}
+  ${steps([['Multiply','7 × 12 = 84 minutes','the 7th multiple of 12'],['Convert','84 min = 1 h 24 min','60 + 24'],['Add to 8:00 am','8:00 + 1 h 24 min','= 9:24 am'],['ANSWER','9:24 am','check: 8:12, 8:24, 8:36, 8:48, 9:00, 9:12, 9:24 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: always, sometimes, never</div>
+  ${mdWarm('Is every multiple of 8 also a multiple of 4? Think: 8 = 4 × 2.')}
+  ${steps([['Multiples of 8','8, 16, 24, 32, 40','each is 8 × something'],['Rewrite','8 × n = 4 × 2 × n = 4 × (2n)','so it is a multiple of 4'],['ANSWER','ALWAYS TRUE ✓','every multiple of 8 is a multiple of 4']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Odd one out:</strong> 24, 36, 42, 50, 54 are described as multiples of 6. Which does NOT belong?</div>
+  ${steps([['Check the others','24 = 6 × 4 · 36 = 6 × 6','42 = 6 × 7 · 54 = 6 × 9 — all fit'],['Check 50','6 × 8 = 48 and 6 × 9 = 54','50 lies between them'],['ANSWER','50','50 ÷ 6 = 8 remainder 2 — not a multiple']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">To prove a number is NOT a multiple, find the multiples either side of it, or show a remainder. To prove it IS, show the multiplication.</div></div></div>
+</div>
+ 
+${exCard(1,[
+ exQ(1,'Which of these is a multiple of 7?',['42','46','52'],0),
+ exQ(2,'What is the 5th multiple of 6?',['30','36','11'],0),
+ exQ(3,'What is the first multiple of 9?',['9','1','0'],0),
+ exQ(4,'Which number is NOT a multiple of 8?',['44','48','56'],0),
+ exQ(5,'Which list shows all the multiples of 9 between 30 and 60?',['36, 45, 54','27, 36, 45','36, 45, 54, 63'],0),
+ exQ(6,'What is the 12th multiple of 5?',['60','17','65'],0),
+ exQ(7,'Eggs are sold in boxes of 6. Which number of eggs can be bought with no eggs left over?',['42','46','50'],0),
+ exQ(8,'Which statement is true?',['Every multiple of 8 is a multiple of 4','Every multiple of 4 is a multiple of 8','Every multiple of 5 is even'],0),
+ exQ(9,'THINK DEEPER: I am a multiple of 7 and I am between 50 and 60. What number am I?',['56','49','63'],0,'t'),
+ exQ(10,'BOSS LEVEL: A bus leaves every 12 minutes. The first bus leaves at 8:12 am. What time does the 7th bus leave?',['9:24 am','9:12 am','9:00 am'],0,'b')])}`;
+ 
+ 
+/* ---------- STEP 2 : Common multiples ---------- */
+const P5_MDA2 = `
+${dayHeader('MD2','Step 2 — Common Multiples','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — When Two Lists Meet</div>
+  ${mdWarm('Bus A stops at the school every <strong>3 minutes</strong> and Bus B every <strong>4 minutes</strong>. They both stop at 9:00. When will they next be at the school together? Let us list the multiples of each and look for a number in BOTH lists!')}
+ 
+  <div class="card-body"><strong>Pictorial:</strong> write the multiples of 3 and of 4 (up to 36) and place them in a Venn diagram. The numbers in the middle belong to <strong>both</strong> lists.</div>
+  ${mdVenn('Multiples of 3',[3,6,9,15,18,21,27,30,33],'Multiples of 4',[4,8,16,20,28,32],[12,24,36],'Multiples of 3 and 4 up to 36','12, 24 and 36 are common multiples')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Common multiple</div><div class="s-body" style="color:#4C1D95;">A <strong>common multiple</strong> of two (or more) numbers is a number that is a multiple of <strong>all</strong> of them. The <strong>lowest common multiple</strong> (LCM) is the smallest one.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method 1 — List and match</div><div class="s-body" style="color:#633806;">Write the first multiples of each number. Circle the ones that appear in both lists. The first match is the LCM.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method 2 — Start with the BIGGER number</div><div class="s-body" style="color:#085041;">List the multiples of the larger number only, and test each one: &ldquo;Is it also a multiple of the smaller number?&rdquo; This is quicker!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying is not always lowest</div><div class="s-body" style="color:#712B13;">4 × 6 = 24 IS a common multiple of 4 and 6, but it is NOT the lowest — 12 is. Multiplying the two numbers always gives <em>a</em> common multiple, not always the <em>lowest</em>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Common multiples vs common factors</div><div class="s-body" style="color:#712B13;">Common <strong>multiples</strong> are bigger than (or equal to) both numbers: 12, 24, 36 for 3 and 4. Common <strong>factors</strong> are smaller: 1, 2 for 4 and 6. Do not mix them up!</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Common multiples of 3 and 4</div>
+  ${mdWarm('Back to our buses. List both and circle the matches.')}
+  ${steps([['Multiples of 3','3, 6, 9, <u>12</u>, 15, 18, 21, <u>24</u>, 27, 30, 33, <u>36</u>','count up in 3s'],['Multiples of 4','4, 8, <u>12</u>, 16, 20, <u>24</u>, 28, 32, <u>36</u>','count up in 4s'],['In both lists','12, 24, 36','common multiples']])}
+  <div class="card-body" style="margin-top:8px;"><strong>The lowest common multiple of 3 and 4 is 12.</strong> The buses are next together at <strong>9:12</strong>. Notice 24 and 36 are also multiples of 12!</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Seeing common multiples on a hundred square: 4 and 6</div>
+  ${mdWarm('Shade multiples of 4 in yellow, multiples of 6 in teal. Squares that are BOTH turn deep purple.')}
+  ${mdHundredSquare({step:4,color:'#FCD34D'},{step:6,color:'#5EEAD4'},'Common multiples of 4 and 6 up to 100')}
+  ${steps([['Purple squares','12, 24, 36, 48, 60, 72, 84, 96','the common multiples'],['Lowest','12','the first purple square'],['Pattern','all are multiples of 12','12, 24, 36… add 12 each time']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Big idea:</strong> once you know the lowest common multiple, ALL the other common multiples are just its multiples.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Start with the bigger number: 6 and 9</div>
+  ${mdWarm('List multiples of 9 (the bigger one) and test each against 6.')}
+  ${mdJumps(9,4,'Multiples of 9: 9, 18, 27, 36')}
+  ${steps([['9','9 ÷ 6','= 1 r 3 ✗'],['18','18 ÷ 6','= 3 ✓ — FOUND!'],['LCM','18','lowest common multiple of 6 and 9']])}
+  <div class="card-body" style="margin-top:6px;"><strong>More common multiples:</strong> 36, 54, 72, 90… (multiples of 18). Check: 36 = 6 × 6 = 9 × 4 ✓</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Special cases</div>
+  ${mdWarm('Does the LCM always need a long search? Look for shortcuts!')}
+  <div class="strategy-grid">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">One is a multiple of the other</div><div class="s-body" style="color:#27500A;">5 and 10 → LCM = <strong>10</strong> · 3 and 12 → LCM = <strong>12</strong>. The bigger number is already a multiple of the smaller!</div></div>
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">No shared times-table link</div><div class="s-body" style="color:#4C1D95;">4 and 9 → LCM = 4 × 9 = <strong>36</strong> · 5 and 7 → LCM = 5 × 7 = <strong>35</strong>. When two numbers share nothing but 1, multiply them.</div></div>
+  </div>
+  ${steps([['5 and 10','10 ÷ 5 = 2','10 is a multiple of 5'],['4 and 9','4, 8, 12 … 36','first 4-multiple that is also a 9-multiple'],['Test','36 ÷ 9 = 4 ✓','LCM = 36']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Three numbers: 2, 3 and 5</div>
+  ${mdWarm('Same idea — it just needs to be in all three lists. Start with the biggest!')}
+  ${steps([['Multiples of 5','5, 10, 15, 20, 25, 30','start with the biggest'],['Test each','5, 15, 25 are odd ✗ · 10, 20 not ÷ 3 ✗','10 ÷ 3 and 20 ÷ 3 leave remainders'],['Test 30','30 ÷ 2 = 15 ✓ · 30 ÷ 3 = 10 ✓','30 works!'],['ANSWER','30','LCM of 2, 3 and 5']])}
+  <div class="card-body" style="margin-top:6px;">🔍 Check: 15 fails for 2 (it is odd) and 20 fails for 3 (20 ÷ 3 = 6 r 2). The first multiple of 5 that survives both tests is 30.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Common multiples below a limit: 6 and 8 under 100</div>
+  ${mdWarm('First find the LCM, then keep adding it until you reach the limit.')}
+  ${steps([['Multiples of 8','8, 16, <u>24</u>','24 ÷ 6 = 4 ✓'],['LCM','24','first match']])}
+  ${mdJumps(24,4,'Keep adding the LCM: 24, 48, 72, 96')}
+  ${steps([['Add 24 each time','24, 48, 72, 96','stop before 100'],['Next','96 + 24 = 120','over 100 ✗'],['ANSWER','24, 48, 72, 96','common multiples of 6 and 8 below 100']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life: lights, buses and packs</div>
+  ${mdWarm('Two lights start flashing together. One flashes every <strong>4 seconds</strong>, the other every <strong>6 seconds</strong>. When do they next flash together?')}
+  ${steps([['Multiples of 4','4, 8, 12, 16…','light 1'],['Multiples of 6','6, 12, 18…','light 2'],['First match','12','LCM of 4 and 6'],['ANSWER','after 12 seconds','then again at 24, 36…']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Hot dogs come in packs of 10 and buns in packs of 8. What is the smallest number of each you can buy so there are none left over?</strong></div>
+  ${steps([['Multiples of 10','10, 20, 30, 40','packs of hot dogs'],['Multiples of 8','8, 16, 24, 32, 40','packs of buns'],['LCM','40','40 hot dogs and 40 buns'],['Packs needed','40 ÷ 10 = 4 · 40 ÷ 8 = 5','4 packs of hot dogs, 5 packs of buns']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: true or false?</div>
+  ${mdWarm('Tom says: &ldquo;24 is the lowest common multiple of 4 and 6 because 4 × 6 = 24.&rdquo; Is he right?')}
+  ${steps([['Test 12','12 ÷ 4 = 3 ✓ · 12 ÷ 6 = 2 ✓','12 is a common multiple'],['Compare','12 &lt; 24','a lower one exists'],['ANSWER','Tom is WRONG','the LCM is 12; 24 is just another common multiple']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 36 a common multiple of 4 and 6?</strong></div>
+  ${steps([['36 ÷ 4','= 9','no remainder ✓'],['36 ÷ 6','= 6','no remainder ✓'],['ANSWER','YES','also a multiple of the LCM 12 (12 × 3)']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Check the answer works for EVERY number. Then ask: is there a smaller one? The lowest common multiple must be the very first match.</div></div></div>
+</div>
+ 
+${exCard(2,[
+ exQ(1,'Which number is a common multiple of 3 and 4?',['12','14','16'],0),
+ exQ(2,'What is the lowest common multiple of 4 and 6?',['12','24','2'],0),
+ exQ(3,'What is the lowest common multiple of 6 and 9?',['18','54','3'],0),
+ exQ(4,'Which number is a multiple of both 5 and 10?',['30','25','15'],0),
+ exQ(5,'Which two numbers are BOTH common multiples of 6 and 8?',['24 and 48','12 and 24','16 and 32'],0),
+ exQ(6,'What is the lowest common multiple of 5 and 7?',['35','12','70'],0),
+ exQ(7,'Two lights flash every 4 seconds and every 6 seconds. They start together. After how many seconds do they next flash together?',['12','24','10'],0),
+ exQ(8,'What is the lowest common multiple of 2, 3 and 5?',['30','10','15'],0),
+ exQ(9,'THINK DEEPER: Which list shows ALL the common multiples of 4 and 6 that are less than 50?',['12, 24, 36, 48','24, 48','12, 24, 36'],0,'t'),
+ exQ(10,'BOSS LEVEL: Hot dogs come in packs of 10 and buns in packs of 8. You want exactly the same number of each, with none left over, using the fewest packs. How many packs of buns do you buy?',['5','4','40'],0,'b')])}`;
+ 
+ 
+/* ================= SECTION C — PLACEHOLDERS (steps 3–16) ================= */
+const P5_MDA3  = null; // Factors
+const P5_MDA4  = null; // Factor pairs
+const P5_MDA5  = null; // Common factors
+const P5_MDA6  = null; // Prime numbers
+const P5_MDA7  = null; // Prime factors
+const P5_MDA8  = null; // Composite numbers
+const P5_MDA9  = null; // Square numbers
+const P5_MDA10 = null; // Cube numbers
+const P5_MDA11 = null; // Squared notation (²)
+const P5_MDA12 = null; // Cubed notation (³)
+const P5_MDA13 = null; // Recognise divisibility patterns
+const P5_MDA14 = null; // Multiplication facts and related division facts
+const P5_MDA15 = null; // Mental multiplication strategies
+const P5_MDA16 = null; // Mental division strategies
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ============================================================
@@ -6888,7 +7255,24 @@ const SCHEME_P5 = [
           { label:'Reasoning with addition and subtraction', content: P5_AS14 }
         ]},
       { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],
-        steps: ['Multiples','Common multiples','Factors','Factor pairs','Common factors','Prime numbers','Prime factors','Composite numbers','Square numbers','Cube numbers','Squared notation (²)','Cubed notation (³)','Recognise divisibility patterns','Multiplication facts and related division facts','Mental multiplication strategies','Mental division strategies'].map(s=>({label:s, content:null}))},
+        steps: [
+          { label:'Multiples', content: P5_MDA1 },
+          { label:'Common multiples', content: P5_MDA2 },
+          { label:'Factors', content: P5_MDA3 },
+          { label:'Factor pairs', content: P5_MDA4 },
+          { label:'Common factors', content: P5_MDA5 },
+          { label:'Prime numbers', content: P5_MDA6 },
+          { label:'Prime factors', content: P5_MDA7 },
+          { label:'Composite numbers', content: P5_MDA8 },
+          { label:'Square numbers', content: P5_MDA9 },
+          { label:'Cube numbers', content: P5_MDA10 },
+          { label:'Squared notation (²)', content: P5_MDA11 },
+          { label:'Cubed notation (³)', content: P5_MDA12 },
+          { label:'Recognise divisibility patterns', content: P5_MDA13 },
+          { label:'Multiplication facts and related division facts', content: P5_MDA14 },
+          { label:'Mental multiplication strategies', content: P5_MDA15 },
+          { label:'Mental division strategies', content: P5_MDA16 }
+        ]},
       { id:'fractionsA', label:'Fractions A', col: TOPIC_PALETTE[2],
         steps: ['What is a fraction?','Equivalent fractions','Simplifying fractions','Improper fractions','Mixed numbers','Convert improper fractions to mixed numbers','Convert mixed numbers to improper fractions','Compare fractions','Order fractions','Fractions on a number line','Fractions greater than one','Add fractions with the same denominator','Add fractions with related denominators','Subtract fractions with the same denominator','Subtract fractions with related denominators','Add mixed numbers','Subtract mixed numbers','Fraction problem-solving'].map(s=>({label:s, content:null}))},
     ]
