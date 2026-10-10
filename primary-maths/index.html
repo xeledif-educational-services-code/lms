@@ -5156,8 +5156,350 @@ ${exCard(8,[
  exQ(10,'BOSS LEVEL: Look at the numbers from 1 to 20 (including 1 and 20). How many are prime and how many are composite?',['8 prime and 11 composite','8 prime and 12 composite','9 prime and 11 composite'],0,'b')])}`;
 
 
-const P5_MDA9  = null; // Square numbers
-const P5_MDA10 = null; // Cube numbers
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A
+   LESSONS 9 AND 10  (Square numbers · Cube numbers)
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste SECTION A (new helpers) and SECTION B (lessons) ABOVE
+      `const SCHEME_P5` in index.html, below your lessons 1–8 code.
+      (Section A must come BEFORE Section B.)
+   2. DELETE these two lines from your placeholders:
+          const P5_MDA9  = null; // Square numbers
+          const P5_MDA10 = null; // Cube numbers
+   3. Do NOT change SCHEME_P5 — it already points to P5_MDA9 / P5_MDA10.
+
+   Needs (already in your app from lessons 1–8): mdWarm(), mdRainbow(),
+   mdTree(), dayHeader(), steps(), exQ(), exCard().
+   Copy from the downloaded .js file, not from the chat preview.
+   NOTE: the ² and ³ notation is taught in Steps 11 and 12, so these two
+   lessons use "n × n" and "n × n × n" and only hint at the notation.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* n × n grid of tiles.  mode: 'plain' (default) | 'checker' | 'L'
+   'L' colours each L-shaped layer differently (1, 3, 5, 7… tiles). */
+function mdSquareGrid(n,title,mode){
+  mode=mode||'plain';
+  const s=Math.min(34,Math.floor(300/n)), W=Math.max(340,n*s+120), H=n*s+90;
+  const x0=(W-n*s)/2, y0=36;
+  const pal=['#FBBF24','#A78BFA','#F472B6','#2DD4BF','#60A5FA','#FB923C','#34D399','#F87171'];
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+    let fill='#A78BFA';
+    if(mode==='checker') fill=((r+c)%2)?'#374151':'#F3F4F6';
+    if(mode==='L') fill=pal[Math.max(r,c)%pal.length];
+    svg+=`<rect x="${x0+c*s}" y="${y0+r*s}" width="${s}" height="${s}" fill="${fill}" stroke="#5B21B6" stroke-width="1"/>`;
+  }
+  svg+=`<text x="${x0+n*s/2}" y="${y0-6}" text-anchor="middle" font-size="12" font-weight="800" fill="#4C1D95">${n}</text>`;
+  svg+=`<text x="${x0-8}" y="${y0+n*s/2+4}" text-anchor="end" font-size="12" font-weight="800" fill="#4C1D95">${n}</text>`;
+  svg+=`<text x="${W/2}" y="${y0+n*s+24}" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${n} × ${n} = ${n*n}</text>`;
+  return svg+'</svg>';
+}
+
+/* Squares 1×1 … k×k side by side; the newly added L-shape is orange. */
+function mdSquareSeq(k,title){
+  const s=16, gap=22;
+  let total=0; for(let i=1;i<=k;i++) total+=i*s;
+  const contentW=total+gap*(k-1);
+  const W=Math.max(360,contentW+30), H=34+k*s+54;
+  let x=(W-contentW)/2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let i=1;i<=k;i++){
+    for(let r=0;r<i;r++) for(let c=0;c<i;c++){
+      const isNew=i>1&&(r===i-1||c===i-1);
+      svg+=`<rect x="${x+c*s}" y="${30+r*s}" width="${s}" height="${s}" fill="${isNew?'#FBBF24':'#A78BFA'}" stroke="#5B21B6" stroke-width="0.8"/>`;
+    }
+    svg+=`<text x="${x+i*s/2}" y="${30+k*s+16}" text-anchor="middle" font-size="11" font-weight="800" fill="#4C1D95">${i} × ${i} = ${i*i}</text>`;
+    if(i>1) svg+=`<text x="${x+i*s/2}" y="${30+k*s+32}" text-anchor="middle" font-size="10" font-weight="800" fill="#B45309">+${2*i-1}</text>`;
+    x+=i*s+gap;
+  }
+  return svg+'</svg>';
+}
+
+/* Isometric cube made of n × n × n small cubes (n = 1 to 5). */
+function mdCube(n,title){
+  const s=n<=2?34:n===3?30:n===4?26:22;
+  const c=s*0.866, h=s*0.5;
+  const W=Math.max(300,2*n*c+60), ox=W/2, oy=34+n*s, H=34+2*n*s+50;
+  const P=(x,y,z)=>[ox+(x-y)*c, oy+(x+y)*h-z*s];
+  const poly=(pts,fill)=>`<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="${fill}" stroke="#4C1D95" stroke-width="1.2" stroke-linejoin="round"/>`;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let z=0;z<n;z++) for(let x=0;x<n;x++) for(let y=0;y<n;y++){
+    svg+=poly([P(x,y,z+1),P(x+1,y,z+1),P(x+1,y+1,z+1),P(x,y+1,z+1)],'#DDD6FE');
+    svg+=poly([P(x,y+1,z),P(x+1,y+1,z),P(x+1,y+1,z+1),P(x,y+1,z+1)],'#A78BFA');
+    svg+=poly([P(x+1,y,z),P(x+1,y+1,z),P(x+1,y+1,z+1),P(x+1,y,z+1)],'#7C3AED');
+  }
+  svg+=`<text x="${W/2}" y="${H-14}" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${n} × ${n} × ${n} = ${n*n*n}</text>`;
+  return svg+'</svg>';
+}
+
+/* A cube split into its n layers, each layer an n × n square (n = 2 to 5). */
+function mdLayers(n,title){
+  const s=n<=3?22:n===4?18:15, gap=26;
+  const gw=n*s, contentW=n*gw+(n-1)*gap;
+  const W=Math.max(340,contentW+30), H=34+n*s+50;
+  let x=(W-contentW)/2;
+  const cols=['#DDD6FE','#C4B5FD','#A78BFA','#8B5CF6','#7C3AED'];
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let i=1;i<=n;i++){
+    for(let r=0;r<n;r++) for(let c=0;c<n;c++){
+      svg+=`<rect x="${x+c*s}" y="${30+r*s}" width="${s}" height="${s}" fill="${cols[(i-1)%5]}" stroke="#4C1D95" stroke-width="0.8"/>`;
+    }
+    svg+=`<text x="${x+gw/2}" y="${30+n*s+16}" text-anchor="middle" font-size="11" font-weight="800" fill="#4C1D95">layer ${i}: ${n*n}</text>`;
+    svg+=`<text x="${x+gw/2}" y="${30+n*s+32}" text-anchor="middle" font-size="10" font-weight="800" fill="#B45309">total ${i*n*n}</text>`;
+    x+=gw+gap;
+  }
+  return svg+'</svg>';
+}
+
+/* Row of power boxes: mdPowRow(1,12,2) → 1×1=1, 2×2=4 …
+   pow = 2 (squares) or 3 (cubes). */
+function mdPowRow(from,to,pow){
+  let s='<div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;justify-content:center;">';
+  for(let n=from;n<=to;n++){
+    const label=pow===2?`${n} × ${n}`:`${n} × ${n} × ${n}`;
+    s+=`<div style="text-align:center;background:${pow===2?'#FEF3C7':'#EDE9FE'};border:1.5px solid ${pow===2?'#B45309':'#6D28D9'};border-radius:8px;padding:5px 8px;min-width:${pow===2?64:92}px;"><div style="font-size:10px;color:${pow===2?'#92400E':'#5B21B6'};">${label}</div><div style="font-size:16px;font-weight:800;color:${pow===2?'#78350F':'#4C1D95'};">${Math.pow(n,pow)}</div></div>`;
+  }
+  return s+'</div>';
+}
+
+/* 1–100 square showing squares (amber). mode 'both' also shows cubes (teal);
+   numbers that are BOTH (1 and 64) turn deep purple. */
+function mdHundredPow(mode,title){
+  const cs=34,x0=24,y0=30,W=x0*2+cs*10,H=y0+cs*10+44;
+  const sq=new Set([1,4,9,16,25,36,49,64,81,100]), cu=new Set([1,8,27,64]);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let n=1;n<=100;n++){
+    const r=Math.floor((n-1)/10), c=(n-1)%10;
+    const inS=sq.has(n), inC=mode==='both'&&cu.has(n);
+    let fill='#fff', txt='#777', fw=500;
+    if(inS&&inC){fill='#7C3AED';txt='#fff';fw=800;}
+    else if(inS){fill='#FCD34D';txt='#1a1a1a';fw=800;}
+    else if(inC){fill='#5EEAD4';txt='#1a1a1a';fw=800;}
+    s+=`<rect x="${x0+c*cs}" y="${y0+r*cs}" width="${cs}" height="${cs}" fill="${fill}" stroke="#bbb" stroke-width="1"/>`;
+    s+=`<text x="${x0+c*cs+cs/2}" y="${y0+r*cs+cs/2+4}" text-anchor="middle" font-size="12" font-weight="${fw}" fill="${txt}">${n}</text>`;
+  }
+  const ly=y0+cs*10+24;
+  s+=`<rect x="${x0}" y="${ly-10}" width="13" height="13" fill="#FCD34D" stroke="#555"/><text x="${x0+19}" y="${ly}" font-size="11" font-weight="700" fill="#333">Square numbers</text>`;
+  if(mode==='both'){
+    s+=`<rect x="${x0+120}" y="${ly-10}" width="13" height="13" fill="#5EEAD4" stroke="#555"/><text x="${x0+139}" y="${ly}" font-size="11" font-weight="700" fill="#333">Cube numbers</text>`;
+    s+=`<rect x="${x0+240}" y="${ly-10}" width="13" height="13" fill="#7C3AED" stroke="#555"/><text x="${x0+259}" y="${ly}" font-size="11" font-weight="700" fill="#333">BOTH (1 and 64)</text>`;
+  }
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 9 : Square numbers ---------- */
+const P5_MDA9 = `
+${dayHeader('MD9','Step 9 — Square Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Building Perfect Squares</div>
+  ${mdWarm('Take square tiles and build the <strong>biggest perfect square</strong> you can with 1, then 4, then 9 tiles. How many tiles do you need for a square with sides of 5?')}
+
+  <div class="card-body"><strong>Concrete:</strong> a 3 by 3 square uses 3 rows of 3 tiles. A square needs the <strong>same number of tiles along each side</strong>.</div>
+  ${mdSquareGrid(3,'A 3 × 3 square: 3 rows of 3 tiles')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> keep growing the square. The orange L-shape is the new tiles added each time:</div>
+  ${mdSquareSeq(5,'The first five square numbers')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Square number</div><div class="s-body" style="color:#4C1D95;">A <strong>square number</strong> is what you get when you multiply a whole number <strong>by itself</strong>: 4 × 4 = 16. It is the number of tiles in a perfect square. (We write this 4² and say &ldquo;4 squared&rdquo; — Step 11.)</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 The first twelve</div><div class="s-body" style="color:#633806;"><strong>1, 4, 9, 16, 25, 36, 49, 64, 81, 100, 121, 144</strong> — these are 1 × 1 up to 12 × 12. Learn them!</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">✨ The odd-number pattern</div><div class="s-body" style="color:#085041;">Each square is the one before PLUS the next odd number: 1 + 3 = 4, 4 + 5 = 9, 9 + 7 = 16, 16 + 9 = 25…</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Squaring is not doubling</div><div class="s-body" style="color:#712B13;">The square of 6 is 6 × 6 = <strong>36</strong>, NOT 6 × 2 = 12. Multiply the number by ITSELF.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Any even-sided pattern is a square&rdquo;</div><div class="s-body" style="color:#712B13;">8 counters make a 2 × 4 rectangle, not a square. Only numbers like 4, 9, 16… make a <strong>perfect</strong> square. Remember <strong>1</strong> is a square too (1 × 1)!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Building squares with tiles: 3 × 3 and 4 × 4</div>
+  ${mdWarm('How many tiles are in each square? Count rows, then multiply.')}
+  ${mdSquareGrid(4,'A 4 × 4 square')}
+  ${steps([['3 rows of 3','3 × 3','= 9 tiles'],['4 rows of 4','4 × 4','= 16 tiles'],['5 rows of 5','5 × 5','= 25 tiles']])}
+  <div class="card-body" style="margin-top:6px;">💡 Squares are named after the SHAPE: 9, 16 and 25 are square numbers because that many tiles make a square.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The odd-number pattern</div>
+  ${mdWarm('Look at how each square grows. What shape is added each time?')}
+  ${mdSquareSeq(5,'Each new square adds an L-shape of tiles')}
+  ${steps([['1','1 × 1','= 1'],['Add 3','1 + 3','= 4 = 2 × 2'],['Add 5','4 + 5','= 9 = 3 × 3'],['Add 7','9 + 7','= 16 = 4 × 4'],['Add 9','16 + 9','= 25 = 5 × 5']])}
+  <div class="card-body" style="margin-top:6px;">🔎 The differences between square numbers are the odd numbers 3, 5, 7, 9, 11, 13… They keep growing by 2.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Learning the squares up to 12 × 12</div>
+  ${mdWarm('Say them out loud. Which ones do you already know from your times tables?')}
+  ${mdPowRow(1,12,2)}
+  ${steps([['Easy ones','1, 4, 9, 25, 100','1 × 1, 2 × 2, 3 × 3, 5 × 5, 10 × 10'],['Memory tips','11 × 11 = 121','a pattern of 1 – 2 – 1'],['Memory tips','12 × 12 = 144','10 × 12 + 2 × 12 = 120 + 24'],['Check','7 × 7 = 49','7 × 7 = 7 × 5 + 7 × 2 = 35 + 14']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Where are the squares on a hundred square?</div>
+  ${mdWarm('Square numbers are shaded. Do they stay evenly spaced like multiples?')}
+  ${mdHundredPow('sq','Square numbers up to 100')}
+  ${steps([['Gaps','3, 5, 7, 9, 11, 13, 15, 17, 19','the odd numbers again!'],['Is 50 a square?','49 = 7 × 7 and 64 = 8 × 8','50 is between them → NO ✗'],['Is 81 a square?','9 × 9 = 81','YES ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>How to test:</strong> find the two square numbers either side. If the number is not one of them, it is not a square.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Square numbers and factors (link to Steps 4 and 7)</div>
+  ${mdWarm('Squares have a very special factor rainbow: the middle factor pairs with ITSELF.')}
+  ${mdRainbow(16,'Factors of 16: the middle factor is 4 (4 × 4)')}
+  ${steps([['Factors of 16','1, 2, 4, 8, 16','5 factors — an ODD number'],['Factors of 36','1, 2, 3, 4, 6, 9, 12, 18, 36','9 factors — an ODD number'],['Why?','4 × 4 and 6 × 6','one factor is used twice']])}
+  ${mdTree([36,[4,2,2],[9,3,3]],'Prime factors of 36: each prime appears an EVEN number of times')}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Two tests for a square:</strong> an odd number of factors, and every prime factor appears an even number of times (36 = 2 × 2 × 3 × 3; 100 = 2 × 2 × 5 × 5). But 12 = 2 × 2 × 3 has a single 3, so it is not a square.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life: boards and floors</div>
+  ${mdWarm('A chessboard is a perfect square of small squares. How many small squares does it have?')}
+  ${mdSquareGrid(8,'A chessboard: 8 × 8','checker')}
+  ${steps([['Chessboard','8 × 8','= 64 squares'],['A square floor of 81 tiles','which number times itself is 81?','9 × 9 → 9 tiles on each side'],['A square with 144 stamps','12 × 12 = 144','12 rows of 12']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Adding odd numbers makes squares</div>
+  ${mdWarm('Each coloured L-shape holds an odd number of tiles. Add them up!')}
+  ${mdSquareGrid(6,'6 × 6 built from L-shapes: 1 + 3 + 5 + 7 + 9 + 11','L')}
+  ${steps([['1 + 3','= 4','2 × 2'],['1 + 3 + 5','= 9','3 × 3'],['1 + 3 + 5 + 7','= 16','4 × 4'],['First six odd numbers','1 + 3 + 5 + 7 + 9 + 11','= 36 = 6 × 6']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Pattern:</strong> the sum of the first <em>n</em> odd numbers is always the square number <em>n</em> × <em>n</em>.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${mdWarm('Mo says: &ldquo;6 squared is 12 because 6 + 6 = 12.&rdquo; What is his mistake?')}
+  ${steps([['Mo did','6 + 6 or 6 × 2','that is doubling'],['Squaring is','6 × 6','= 36'],['ANSWER','36','multiply the number by itself']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Last-digit test.</strong> A square number can only end in 0, 1, 4, 5, 6 or 9 (look at 1, 4, 9, 16, 25, 36, 49, 64, 81, 100). So <strong>5,327</strong> cannot be a square — it ends in 7!</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Odd one out:</strong> 16, 25, 36, 45, 49. → <strong>45</strong> (6 × 6 = 36 and 7 × 7 = 49, so 45 is in between).</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Which two square numbers add to 25?</strong> 9 + 16 = 25 (3 × 3 and 4 × 4) ✓</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">To square a number, multiply it by itself. To test for a square, find the squares on either side of it.</div></div></div>
+</div>
+
+${exCard(9,[
+ exQ(1,'Which of these is a square number?',['25','24','26'],0),
+ exQ(2,'What is the 8th square number?',['64','16','56'],0),
+ exQ(3,'Which list contains ONLY square numbers?',['1, 4, 9, 16','1, 4, 8, 16','2, 4, 9, 16'],0),
+ exQ(4,'What is 12 × 12?',['144','24','122'],0),
+ exQ(5,'Which number is NOT a square number?',['50','49','81'],0),
+ exQ(6,'What is the next square number after 36?',['49','42','48'],0),
+ exQ(7,'A pattern has 9 rows with 9 tiles in each row. How many tiles are there?',['81','18','72'],0),
+ exQ(8,'Which statement is true?',['Square numbers have an odd number of factors','Square numbers have an even number of factors','All square numbers are even'],0),
+ exQ(9,'THINK DEEPER: Between which two square numbers does 70 lie?',['64 and 81','49 and 64','81 and 100'],0,'t'),
+ exQ(10,'BOSS LEVEL: Two different square numbers add up to 41. What are they?',['16 and 25','9 and 32','4 and 37'],0,'b')])}`;
+
+
+/* ---------- STEP 10 : Cube numbers ---------- */
+const P5_MDA10 = `
+${dayHeader('MD10','Step 10 — Cube Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Building Big Cubes</div>
+  ${mdWarm('You made squares from flat tiles. Now take small <strong>building cubes</strong> and make bigger CUBES. How many small cubes are in a cube that is 2 cubes wide, 2 deep and 2 high?')}
+
+  <div class="card-body"><strong>Concrete:</strong> build a 2 by 2 by 2 cube. There are 2 layers; each layer is a 2 × 2 square of 4 cubes.</div>
+  ${mdCube(2,'A cube with sides of 2 small cubes')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> a 3 by 3 by 3 cube — three layers, each 3 × 3:</div>
+  ${mdCube(3,'A cube with sides of 3 small cubes')}
+  ${mdLayers(3,'Split into layers: 9 + 9 + 9 = 27')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Cube number</div><div class="s-body" style="color:#4C1D95;">A <strong>cube number</strong> is what you get when you multiply a whole number by itself <strong>three times</strong>: 3 × 3 × 3 = 27. It is the number of small cubes in a big cube. (We write this 3³ and say &ldquo;3 cubed&rdquo; — Step 12.)</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 The first ten cubes</div><div class="s-body" style="color:#633806;"><strong>1, 8, 27, 64, 125, 216, 343, 512, 729, 1,000</strong> — these are 1 × 1 × 1 up to 10 × 10 × 10. Aim to know the first five (1, 8, 27, 64, 125) by heart.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 9</div><div class="s-body" style="color:#085041;">A cube number is a square number <strong>times the number again</strong>: 4 × 4 = 16, then 16 × 4 = 64. One layer × the number of layers.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Cubing is not × 3</div><div class="s-body" style="color:#712B13;">The cube of 4 is 4 × 4 × 4 = <strong>64</strong>, NOT 4 × 3 = 12. Multiply the number by itself, three times.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Mixing squares and cubes</div><div class="s-body" style="color:#712B13;">3 × 3 = 9 is a SQUARE number (flat). 3 × 3 × 3 = 27 is a CUBE number (solid). Count how many times you multiply!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Building the first cubes</div>
+  ${mdWarm('Count the small cubes in each big cube.')}
+  ${mdCube(2,'2 × 2 × 2')}
+  ${steps([['1 × 1 × 1','1 small cube','= 1'],['2 × 2 × 2','2 layers of 4','= 8'],['3 × 3 × 3','3 layers of 9','= 27']])}
+  <div class="card-body" style="margin-top:6px;">💡 A single cube (1 × 1 × 1 = 1) counts as a cube number too.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Layer by layer: 4 × 4 × 4</div>
+  ${mdWarm('Find the number in one layer first. Then count the layers.')}
+  ${mdLayers(4,'4 layers, each 4 × 4 = 16')}
+  ${steps([['One layer','4 × 4','= 16 cubes'],['Four layers','16 × 4','= 64 cubes'],['ANSWER','4 × 4 × 4 = 64','the fourth cube number']])}
+  ${mdCube(4,'The complete 4 × 4 × 4 cube')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — The first ten cube numbers</div>
+  ${mdWarm('Look for patterns in this list. How fast do cubes grow compared with squares?')}
+  ${mdPowRow(1,10,3)}
+  ${steps([['Fast growth','5 × 5 × 5 = 125','vs 5 × 5 = 25 for squares'],['Memory tip','10 × 10 × 10 = 1,000','1 followed by three zeros'],['Neat fact','2 × 2 × 2 = 8 and 3 × 3 × 3 = 27','8 and 27 are the first two cubes after 1']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Calculating a cube in two steps</div>
+  ${mdWarm('Do the first multiplication, then multiply the answer by the number again.')}
+  ${steps([['4 × 4 × 4','4 × 4 = 16, then 16 × 4','= 64'],['5 × 5 × 5','5 × 5 = 25, then 25 × 5','= 125'],['6 × 6 × 6','6 × 6 = 36, then 36 × 6','= 216'],['7 × 7 × 7','7 × 7 = 49, then 49 × 7','= 343']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Handy check:</strong> 25 × 5 = 125 can be done as half of 250. And 36 × 6 = 30 × 6 + 6 × 6 = 180 + 36 = 216.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Squares and cubes together</div>
+  ${mdWarm('Which numbers up to 100 are squares? Which are cubes? Are any BOTH?')}
+  ${mdHundredPow('both','Squares and cubes up to 100')}
+  ${steps([['Squares','1, 4, 9, 16, 25, 36, 49, 64, 81, 100','10 of them'],['Cubes','1, 8, 27, 64','4 of them'],['Both','1 and 64','64 = 8 × 8 = 4 × 4 × 4']])}
+  <div class="card-body" style="margin-top:6px;">⭐ <strong>Special:</strong> 64 is both a square number AND a cube number. The next one is 729 (27 × 27 = 9 × 9 × 9).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Is it a cube number?</div>
+  ${mdWarm('Is 125 a cube number? Is 100? Find the cube numbers on either side.')}
+  ${steps([['125','5 × 5 × 5 = 125','YES ✓'],['216','6 × 6 × 6 = 216','YES ✓'],['100','between 64 (4³) and 125 (5³)','NO ✗'],['60','between 27 and 64','NO ✗']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which cube numbers are between 100 and 600?</strong></div>
+  ${steps([['Too small','4 × 4 × 4 = 64','under 100'],['Inside','125, 216, 343, 512','5³ to 8³'],['Too big','9 × 9 × 9 = 729','over 600']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: sugar cubes and growing a cube</div>
+  ${mdWarm('A box holds sugar cubes in <strong>4 layers</strong>, each with <strong>4 rows of 4</strong>. How many sugar cubes?')}
+  ${steps([['One layer','4 × 4','= 16'],['Four layers','16 × 4','= 64 sugar cubes']])}
+  <div class="card-body" style="margin-top:8px;"><strong>A 3 × 3 × 3 cube of blocks is grown into a 4 × 4 × 4 cube. How many extra blocks are needed?</strong></div>
+  ${steps([['Big cube','4 × 4 × 4','= 64'],['Small cube','3 × 3 × 3','= 27'],['Extra blocks','64 − 27','= 37']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${mdWarm('Sam says: &ldquo;2 cubed is 6 because 2 × 3 = 6.&rdquo; What is his mistake?')}
+  ${steps([['Sam did','2 × 3','that multiplies by 3'],['Cubing is','2 × 2 × 2','= 8'],['ANSWER','8','2 is multiplied by itself three times']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: 4 × 4 or 3 × 3 × 3?</strong> 4 × 4 = 16 and 3 × 3 × 3 = 27, so <strong>3 × 3 × 3</strong> is greater.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Odd and even cubes:</strong> 3 × 3 × 3 = 27 (odd) and 4 × 4 × 4 = 64 (even). A cube of an odd number is always odd; a cube of an even number is always even.</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Cube = multiply the number by itself THREE times (one layer × number of layers). Check by finding the cubes either side of your number.</div></div></div>
+</div>
+
+${exCard(10,[
+ exQ(1,'Which of these is a cube number?',['27','28','26'],0),
+ exQ(2,'What is 3 × 3 × 3?',['27','9','18'],0),
+ exQ(3,'What is 4 × 4 × 4?',['64','48','16'],0),
+ exQ(4,'Which list contains ONLY cube numbers?',['1, 8, 27, 64','1, 4, 9, 16','1, 8, 18, 64'],0),
+ exQ(5,'What is the 5th cube number?',['125','25','15'],0),
+ exQ(6,'Which number is NOT a cube number?',['100','125','216'],0),
+ exQ(7,'A box holds sugar cubes in 4 layers. Each layer has 4 rows of 4. How many sugar cubes are in the box?',['64','16','48'],0),
+ exQ(8,'Which statement is true?',['64 is both a square number and a cube number','27 is a square number','8 is a square number'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 4 × 4 or 3 × 3 × 3?',['3 × 3 × 3 (27)','4 × 4 (16)','They are equal'],0,'t'),
+ exQ(10,'BOSS LEVEL: A 3 × 3 × 3 cube of small blocks is made into a 4 × 4 × 4 cube by adding more blocks. How many extra blocks are needed?',['37','27','64'],0,'b')])}`;
+
+
+
 const P5_MDA11 = null; // Squared notation (²)
 const P5_MDA12 = null; // Cubed notation (³)
 const P5_MDA13 = null; // Recognise divisibility patterns
