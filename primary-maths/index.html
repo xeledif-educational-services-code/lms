@@ -4277,8 +4277,308 @@ ${exCard(2,[
  
  
 /* ================= SECTION C — PLACEHOLDERS (steps 3–16) ================= */
-const P5_MDA3  = null; // Factors
-const P5_MDA4  = null; // Factor pairs
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A
+   LESSONS 3 AND 4  (Factors · Factor pairs)
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste SECTION A (new helpers) and SECTION B (lessons) ABOVE
+      `const SCHEME_P5` in index.html, below your lessons 1–2 code.
+      (Section A must come BEFORE Section B.)
+   2. DELETE these two lines from your placeholders, because the
+      lessons below replace them:
+          const P5_MDA3 = null; // Factors
+          const P5_MDA4 = null; // Factor pairs
+   3. Do NOT change SCHEME_P5 — it already points to P5_MDA3 / P5_MDA4.
+
+   Needs (already in your app from lessons 1–2): mdWarm(), dayHeader(),
+   steps(), exQ(), exCard().
+   Copy from the downloaded .js file, not from the chat preview.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* Rectangle arrays for every factor pair of n (n up to about 40).
+   mdArrays(12,'title') → 1×12, 2×6, 3×4 */
+function mdArrays(n,title){
+  const pairs=[];
+  for(let a=1;a*a<=n;a++) if(n%a===0) pairs.push([a,n/a]);
+  const gap=18, totalCols=pairs.reduce((s,p)=>s+p[1],0);
+  const s=Math.max(6,Math.min(22,Math.floor((560-gap*(pairs.length-1))/totalCols)));
+  const maxRows=pairs.reduce((m,p)=>Math.max(m,p[0]),1);
+  const contentW=totalCols*s+gap*(pairs.length-1);
+  const W=Math.max(contentW+24,340), H=34+maxRows*s+34;
+  const cols=['#A78BFA','#F472B6','#FBBF24','#2DD4BF'];
+  let x=(W-contentW)/2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  pairs.forEach((p,pi)=>{
+    const a=p[0], b=p[1];
+    for(let r=0;r<a;r++) for(let c=0;c<b;c++){
+      svg+=`<rect x="${x+c*s}" y="${30+r*s}" width="${s-2}" height="${s-2}" rx="3" fill="${cols[pi%4]}" stroke="#5B21B6" stroke-width="0.8"/>`;
+    }
+    svg+=`<text x="${x+b*s/2}" y="${30+maxRows*s+20}" text-anchor="middle" font-size="12" font-weight="800" fill="#4C1D95">${a} × ${b}</text>`;
+    x+=b*s+gap;
+  });
+  return svg+'</svg>';
+}
+
+/* Factor rainbow: factors of n in a row, an arc joins each factor pair.
+   mdRainbow(12,'title') */
+function mdRainbow(n,title){
+  const f=[];
+  for(let i=1;i<=n;i++) if(n%i===0) f.push(i);
+  const k=f.length, W=640, pad=40;
+  const gx=k>1?(W-2*pad)/(k-1):0;
+  const X=i=>pad+i*gx;
+  const span=X(k-1)-X(0);
+  const maxPeak=Math.max(30,span*0.18);
+  const ya=34+maxPeak+14;
+  const H=ya+4+30+30;
+  const cols=['#6D28D9','#BE185D','#B45309','#0F766E','#1D4ED8','#C2410C'];
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  const half=Math.floor(k/2);
+  for(let i=0;i<half;i++){
+    const j=k-1-i, x1=X(i), x2=X(j), c=cols[i%cols.length];
+    const dy=(x2-x1)*0.36;
+    s+=`<path d="M${x1} ${ya} Q${(x1+x2)/2} ${ya-dy} ${x2} ${ya}" fill="none" stroke="${c}" stroke-width="2.5"/>`;
+    s+=`<text x="${(x1+x2)/2}" y="${ya-dy/2-6}" text-anchor="middle" font-size="11" font-weight="800" fill="${c}">${f[i]} × ${f[j]}</text>`;
+  }
+  const mid=(k%2===1)?half:-1;
+  f.forEach((v,i)=>{
+    const isMid=i===mid;
+    const bw=String(v).length>2?42:34;
+    s+=`<rect x="${X(i)-bw/2}" y="${ya+4}" width="${bw}" height="30" rx="8" fill="${isMid?'#FEF3C7':'#EDE9FE'}" stroke="${isMid?'#B45309':'#6D28D9'}" stroke-width="2"/>`;
+    s+=`<text x="${X(i)}" y="${ya+24}" text-anchor="middle" font-size="14" font-weight="800" fill="${isMid?'#92400E':'#4C1D95'}">${v}</text>`;
+  });
+  if(mid>=0) s+=`<text x="${X(mid)}" y="${ya+52}" text-anchor="middle" font-size="11" font-weight="800" fill="#92400E">${f[mid]} × ${f[mid]} — pairs with itself</text>`;
+  return s+'</svg>';
+}
+
+/* "Try each number" table: tests 1, 2, 3 … up to the square root of n.
+   Green row = factor pair found. Red row = remainder, not a factor. */
+function mdPairTable(n){
+  const lim=Math.floor(Math.sqrt(n));
+  const th='padding:6px 8px;font-size:12px;font-weight:700;color:#4C1D95;text-align:center;border-bottom:1.5px solid #6D28D9;';
+  let rows='';
+  for(let i=1;i<=lim;i++){
+    const ok=n%i===0, q=Math.floor(n/i), r=n%i;
+    const td='padding:6px 8px;font-size:13px;text-align:center;border-bottom:0.5px solid #ddd;';
+    rows+=`<tr style="background:${ok?'#EAF3DE':'#FAECE7'};"><td style="${td}font-weight:800;">${i}</td><td style="${td}">${n} ÷ ${i}</td><td style="${td}">${ok?q:q+' remainder '+r}</td><td style="${td}font-weight:700;color:${ok?'#27500A':'#712B13'};">${ok?'✓ '+i+' × '+q+' = '+n:'✗ not a factor'}</td></tr>`;
+  }
+  return `<div style="overflow-x:auto;margin:8px 0;"><table style="border-collapse:collapse;width:100%;max-width:560px;margin:0 auto;"><thead><tr style="background:#EDE9FE;"><th style="${th}">Try</th><th style="${th}">Divide</th><th style="${th}">Result</th><th style="${th}">Factor pair?</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 3 : Factors ---------- */
+const P5_MDA3 = `
+${dayHeader('MD3','Step 3 — Factors','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Sharing Equally</div>
+  ${mdWarm('You have <strong>12 cupcakes</strong>. You can arrange them in equal rows to make a rectangle. How many different rectangles can you make? Try it with 12 counters!')}
+
+  <div class="card-body"><strong>Concrete:</strong> use 12 counters or squares and build every rectangle you can. Each rectangle has equal rows, with nothing left over.</div>
+  ${mdArrays(12,'All the equal-row arrangements of 12')}
+  <div class="card-body" style="margin-top:6px;">Look at the sides of the rectangles: <strong>1, 12, 2, 6, 3 and 4</strong>. These are the <strong>factors</strong> of 12. Each one divides 12 exactly.</div>
+
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> a <strong>factor rainbow</strong> joins the factors that multiply to give 12:</div>
+  ${mdRainbow(12,'The factors of 12 — each arc is a pair that multiplies to make 12')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 What is a factor?</div><div class="s-body" style="color:#4C1D95;">A <strong>factor</strong> of a number is a whole number that <strong>divides it exactly</strong> (no remainder). Factors are the numbers that multiply together to make it. Factors of 12: <strong>1, 2, 3, 4, 6, 12</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 1 — Multiples</div><div class="s-body" style="color:#085041;">If 12 is a <strong>multiple</strong> of 3 (3 × 4 = 12), then 3 is a <strong>factor</strong> of 12. Multiples go UP the times table; factors come back DOWN.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Two factors every number has</div><div class="s-body" style="color:#633806;"><strong>1</strong> and <strong>the number itself</strong> are always factors (1 × n = n). A number has a <strong>limited</strong> list of factors — unlike multiples, which never stop.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Forgetting 1 and the number</div><div class="s-body" style="color:#712B13;">Many pupils list 2, 3, 4, 6 for 12 and stop. Always include <strong>1</strong> and <strong>12</strong> too — they are factors!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Factors vs Multiples</div><div class="s-body" style="color:#712B13;">Factors of 12 are <strong>never bigger than 12</strong>. If a number is bigger than 12 (like 24 or 36), it is a multiple, not a factor.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Factors of 12 using arrays</div>
+  ${mdWarm('Each rectangle is one way to share 12 equally. The side lengths are factors.')}
+  ${mdArrays(12,'1 × 12, 2 × 6 and 3 × 4 all equal 12')}
+  ${steps([['Array 1','1 × 12 = 12','factors 1 and 12'],['Array 2','2 × 6 = 12','factors 2 and 6'],['Array 3','3 × 4 = 12','factors 3 and 4'],['ANSWER','1, 2, 3, 4, 6, 12','six factors of 12']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Is it a factor? Test with multiplication or division</div>
+  ${mdWarm('Is 7 a factor of 42? Is 8 a factor of 42? Ask: &ldquo;Does it divide exactly?&rdquo;')}
+  <div class="card-body"><strong>Is 7 a factor of 42?</strong></div>
+  ${steps([['Recall','7 × 6 = 42','a times-table fact'],['Or divide','42 ÷ 7 = 6','no remainder'],['ANSWER','YES ✓','7 is a factor of 42 (and 42 is a multiple of 7)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 8 a factor of 42?</strong></div>
+  ${steps([['Nearby facts','8 × 5 = 40','and 8 × 6 = 48'],['Divide','42 ÷ 8 = 5 remainder 2','a remainder!'],['ANSWER','NO ✗','42 sits between 40 and 48']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A systematic method: factors of 18</div>
+  ${mdWarm('Do not guess! Test 1, 2, 3, 4… in order and keep every pair you find.')}
+  ${mdPairTable(18)}
+  ${steps([['Pairs found','1 × 18 · 2 × 9 · 3 × 6','from the green rows'],['Stop at 4','next test would be 5 — bigger than 4.24…','all partners are already found'],['ANSWER','1, 2, 3, 6, 9, 18','six factors of 18']])}
+  <div class="card-body" style="margin-top:6px;">💡 Why stop early? Once the number you test is bigger than its partner would be, you have already found that pair.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A number with only two factors: 13</div>
+  ${mdWarm('Can 13 counters make more than one kind of rectangle?')}
+  ${mdArrays(13,'13 can only make one rectangle: 1 × 13')}
+  ${steps([['Test 2','13 ÷ 2 = 6 remainder 1','✗'],['Test 3','13 ÷ 3 = 4 remainder 1','✗'],['ANSWER','1 and 13','only TWO factors']])}
+  <div class="card-body" style="margin-top:6px;">🔎 Numbers with exactly two factors are special — you will meet them as <strong>prime numbers</strong> in Step 6. Note: the number <strong>1</strong> has just ONE factor (itself).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — A bigger number: factors of 48</div>
+  ${mdWarm('48 has lots of factors! Find the pairs, then read them in order.')}
+  ${mdRainbow(48,'The factor rainbow of 48 — five pairs, ten factors')}
+  ${steps([['Pairs','1 × 48 · 2 × 24 · 3 × 16 · 4 × 12 · 6 × 8','5 pairs'],['Check','5 × 9 = 45 and 5 × 10 = 50','5 is not a factor'],['ANSWER','1, 2, 3, 4, 6, 8, 12, 16, 24, 48','ten factors of 48']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Quick tests: is 2, 3, 5, 9 or 10 a factor of 84?</div>
+  ${mdWarm('Some factors can be spotted quickly from the digits. Let us test 84.')}
+  ${steps([['2','84 is even','✓ factor'],['3','8 + 4 = 12, and 12 is in the 3 times table','✓ factor'],['5','84 does not end in 0 or 5','✗ not a factor'],['9','digit sum 12 is not a multiple of 9','✗ not a factor'],['10','84 does not end in 0','✗ not a factor']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 4 a factor?</strong> 84 ÷ 4 = 21 ✓ — yes.</div>
+  <div class="card-body" style="margin-top:6px;">💡 We will learn all the divisibility rules in Step 13.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: chairs and teams</div>
+  ${mdWarm('A hall has <strong>24 chairs</strong> to put in equal rows. How many different numbers of rows are possible?')}
+  ${mdArrays(24,'24 chairs: four different rectangles')}
+  ${steps([['Factors of 24','1, 2, 3, 4, 6, 8, 12, 24','8 factors'],['ANSWER','8 possible numbers of rows','e.g. 3 rows of 8, or 8 rows of 3']])}
+  <div class="card-body" style="margin-top:8px;"><strong>30 pupils are put into equal teams with nobody left out. Could each team have 4 pupils?</strong></div>
+  ${steps([['Factors of 30','1, 2, 3, 5, 6, 10, 15, 30','from the pairs 1×30, 2×15, 3×10, 5×6'],['Test 4','30 ÷ 4 = 7 remainder 2','2 pupils left over'],['ANSWER','NO ✗','4 is not a factor of 30']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: true, false or always?</div>
+  ${mdWarm('Mia says: &ldquo;24 is a factor of 12 because 24 and 12 are both in the 12 times table.&rdquo; Is she right?')}
+  ${steps([['Divide','12 ÷ 24','does not give a whole number'],['Rule','a factor is never bigger than the number','24 is bigger than 12'],['ANSWER','Mia is WRONG','24 is a multiple of 12, not a factor']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 2 always a factor of an even number?</strong></div>
+  ${steps([['Even numbers','2, 4, 6, 8, 10…','all are 2 × something'],['ANSWER','ALWAYS TRUE ✓','2 is a factor of every even number']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Challenge:</strong> factors of 16 are 1, 2, 4, 8, 16 — that is FIVE factors (an odd number). Most numbers have an even count. Why is 16 different? Because 4 × 4 = 16 — the factor 4 pairs with itself. We will explore this in Step 4!</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Factors divide INTO a number; multiples come OUT of it. Always check: does it divide with no remainder?</div></div></div>
+</div>
+
+${exCard(3,[
+ exQ(1,'Which of these is a factor of 20?',['4','8','40'],0),
+ exQ(2,'How many factors does 12 have?',['6','4','3'],0),
+ exQ(3,'Which list shows ALL the factors of 18?',['1, 2, 3, 6, 9, 18','1, 2, 3, 9, 18','2, 3, 6, 9'],0),
+ exQ(4,'Is 7 a factor of 56?',['Yes — 7 × 8 = 56','No — 56 ÷ 7 has a remainder','No — 7 is odd'],0),
+ exQ(5,'Which number is NOT a factor of 30?',['4','5','6'],0),
+ exQ(6,'Which number is a factor of EVERY number?',['1','2','0'],0),
+ exQ(7,'24 chairs are put in equal rows. Which number of rows is NOT possible?',['5','4','6'],0),
+ exQ(8,'Which statement is true?',['A factor of a number is never bigger than the number','A factor of a number is always bigger than the number','12 is a factor of 6'],0),
+ exQ(9,'THINK DEEPER: I am a factor of 36. I am even, more than 5 and less than 10. What number am I?',['6','8','9'],0,'t'),
+ exQ(10,'BOSS LEVEL: A teacher has 40 pupils and wants equal teams with nobody left out. Each team must have more than 3 and fewer than 10 pupils. Which team sizes work?',['4, 5 or 8','4, 5, 8 or 10','5, 6 or 8'],0,'b')])}`;
+
+
+/* ---------- STEP 4 : Factor pairs ---------- */
+const P5_MDA4 = `
+${dayHeader('MD4','Step 4 — Factor Pairs','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Pairs that Make a Number</div>
+  ${mdWarm('Every rectangle of 12 squares has two side lengths. Those two numbers are a <strong>factor pair</strong>: they multiply to make 12. How many pairs can you find?')}
+
+  <div class="card-body"><strong>Concrete:</strong> build each rectangle of 12 squares. Write its two sides as a multiplication.</div>
+  ${mdArrays(12,'Each rectangle is one factor pair of 12')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> the factor rainbow shows each pair as one arc — the biggest arc is 1 × 12.</div>
+  ${mdRainbow(12,'Three arcs = three factor pairs of 12')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Factor pair</div><div class="s-body" style="color:#4C1D95;">A <strong>factor pair</strong> is two whole numbers that <strong>multiply to give</strong> the number. Factor pairs of 12: <strong>1 × 12, 2 × 6, 3 × 4</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The systematic method</div><div class="s-body" style="color:#085041;">Test 1, 2, 3, 4… in order. Every time a number divides exactly, write down the pair. <strong>Stop</strong> when the next number to test is already in a pair you found.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Same pair, different order</div><div class="s-body" style="color:#633806;">3 × 4 and 4 × 3 are the <strong>same</strong> pair. List each pair once, smallest number first.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Forgetting the partner</div><div class="s-body" style="color:#712B13;">Finding that 3 is a factor of 12 is only half the job. The <strong>partner</strong> is 12 ÷ 3 = 4. Always write both numbers.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Counting a pair twice</div><div class="s-body" style="color:#712B13;">2 × 6 and 6 × 2 are ONE pair, not two. And a pair like 6 × 6 uses the number twice — but 6 is only ONE factor.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — All the factor pairs of 12</div>
+  ${mdWarm('Find each pair, then read the factors off in order.')}
+  ${mdRainbow(12,'1 × 12 · 2 × 6 · 3 × 4')}
+  ${steps([['Pair 1','1 × 12 = 12','always the first pair'],['Pair 2','2 × 6 = 12','12 ÷ 2 = 6'],['Pair 3','3 × 4 = 12','12 ÷ 3 = 4'],['Stop','next test is 4','4 is already used']])}
+  <div class="card-body" style="margin-top:6px;"><strong>Factors in order:</strong> 1, 2, 3, 4, 6, 12.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Being systematic: factor pairs of 30</div>
+  ${mdWarm('Test every number from 1 up. When does it make sense to stop?')}
+  ${mdPairTable(30)}
+  ${steps([['Green rows','1 × 30 · 2 × 15 · 3 × 10 · 5 × 6','4 pairs'],['Red row','4: 30 ÷ 4 = 7 remainder 2','4 is not a factor'],['Stop','next test is 6','6 is already the partner of 5']])}
+  <div class="card-body" style="margin-top:6px;"><strong>Factors of 30:</strong> 1, 2, 3, 5, 6, 10, 15, 30.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A square number: factor pairs of 36</div>
+  ${mdWarm('36 has a pair that uses the SAME number twice. Can you spot it?')}
+  ${mdRainbow(36,'36 has a middle factor that pairs with itself: 6 × 6')}
+  ${mdPairTable(36)}
+  ${steps([['Pairs','1 × 36 · 2 × 18 · 3 × 12 · 4 × 9 · 6 × 6','5 pairs'],['Count the factors','1, 2, 3, 4, 6, 9, 12, 18, 36','9 factors — an ODD number!'],['Why odd?','6 × 6 uses one factor twice','so it is only counted once']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Pattern:</strong> square numbers (4, 9, 16, 25, 36…) always have an odd number of factors. You will study these in Step 9.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Listing factors in order from the pairs: 40</div>
+  ${mdWarm('Test 1 up to 6 (because 6 × 6 = 36 is just under 40 and 7 × 7 = 49 is over).')}
+  ${mdPairTable(40)}
+  ${steps([['Pairs','1 × 40 · 2 × 20 · 4 × 10 · 5 × 8','4 pairs'],['Small factors','1, 2, 4, 5','the left-hand numbers'],['Big factors','8, 10, 20, 40','the partners, reversed'],['ANSWER','1, 2, 4, 5, 8, 10, 20, 40','8 factors']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Only one factor pair: 13 (and the number 1)</div>
+  ${mdWarm('Is there any rectangle of 13 squares other than a single line?')}
+  ${mdArrays(13,'13 has only ONE factor pair: 1 × 13')}
+  ${steps([['Test 2 and 3','13 ÷ 2 and 13 ÷ 3','both leave remainder 1'],['ANSWER','1 × 13','the only pair'],['Same for 17','1 × 17','17 also has just one pair']])}
+  <div class="card-body" style="margin-top:6px;">🔎 Numbers with <strong>exactly one factor pair</strong> (1 × the number) are the prime numbers — Step 6! The number 1 itself has just 1 × 1.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Factor pairs as rectangles: area 24 cm²</div>
+  ${mdWarm('A rectangle has an area of 24 cm² and whole-number sides. What could its sides be? Which has the smallest perimeter?')}
+  ${mdArrays(24,'Each factor pair of 24 is one possible rectangle')}
+  ${steps([['1 × 24','perimeter = 2 × (1 + 24)','= 50 cm'],['2 × 12','perimeter = 2 × (2 + 12)','= 28 cm'],['3 × 8','perimeter = 2 × (3 + 8)','= 22 cm'],['4 × 6','perimeter = 2 × (4 + 6)','= 20 cm']])}
+  <div class="card-body" style="margin-top:6px;"><strong>ANSWER:</strong> the 4 cm by 6 cm rectangle has the smallest perimeter (20 cm). 💡 The closer the two sides are, the smaller the perimeter. (We will meet area and perimeter in the Spring term.)</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: packing buns, and missing factors</div>
+  ${mdWarm('A baker packs <strong>48 buns</strong> into equal trays with none left over. What tray sizes are possible?')}
+  ${mdRainbow(48,'The five factor pairs of 48 are the five ways to pack')}
+  ${steps([['1 × 48','48 trays of 1, or 1 tray of 48',''],['2 × 24','24 trays of 2, or 2 trays of 24',''],['3 × 16','16 trays of 3, or 3 trays of 16',''],['4 × 12 · 6 × 8','12 trays of 4 · 8 trays of 6',''],['ANSWER','10 tray sizes','1, 2, 3, 4, 6, 8, 12, 16, 24, 48']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing factor:</strong> ▢ × 7 = 56. Use the pair: 56 ÷ 7 = <strong>8</strong>. So 7 and 8 are a factor pair of 56.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and find a number</div>
+  ${mdWarm('Ravi writes the factor pairs of 20 as 1 × 20, 2 × 10, 4 × 5, 5 × 4. What is wrong?')}
+  ${steps([['Look closely','4 × 5 and 5 × 4','the same pair, written twice'],['Correct list','1 × 20 · 2 × 10 · 4 × 5','3 pairs'],['ANSWER','Ravi counted 4 × 5 twice','each pair is listed once']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Find a number less than 20 that has exactly THREE factor pairs.</strong></div>
+  ${steps([['Try 12','1 × 12 · 2 × 6 · 3 × 4','3 pairs ✓'],['Try 18','1 × 18 · 2 × 9 · 3 × 6','3 pairs ✓'],['ANSWER','12 or 18','both work']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Be systematic: test 1, 2, 3… in order, write BOTH numbers of each pair, and stop when you reach a partner you already have.</div></div></div>
+</div>
+
+${exCard(4,[
+ exQ(1,'Which is a factor pair of 24?',['3 and 8','4 and 8','5 and 5'],0),
+ exQ(2,'Complete the factor pairs of 20: 1 × 20, 2 × 10 and ▢ × 5. What goes in the box?',['4','3','10'],0),
+ exQ(3,'How many factor pairs does 30 have?',['4','8','6'],0),
+ exQ(4,'Which list shows ALL the factors of 40 in order?',['1, 2, 4, 5, 8, 10, 20, 40','1, 2, 4, 5, 10, 20, 40','1, 2, 5, 8, 10, 40'],0),
+ exQ(5,'7 and ▢ are a factor pair of 56. What is the missing number?',['8','9','49'],0),
+ exQ(6,'36 has the factor pair 6 × 6. How many different factors does 36 have?',['9','10','8'],0),
+ exQ(7,'A rectangle has an area of 24 cm² and whole-number sides. Which sides give the SMALLEST perimeter?',['4 cm and 6 cm','3 cm and 8 cm','2 cm and 12 cm'],0),
+ exQ(8,'Ravi lists the factor pairs of 20 as 1 × 20, 2 × 10, 4 × 5, 5 × 4. What is his mistake?',['5 × 4 is the same pair as 4 × 5','2 × 10 is not a factor pair','20 has no factor pairs'],0),
+ exQ(9,'THINK DEEPER: Which of these numbers has an ODD number of factors?',['49','48','50'],0,'t'),
+ exQ(10,'BOSS LEVEL: A baker packs 48 buns into equal trays with none left over. Each tray holds more than 5 and fewer than 20 buns. How many different tray sizes are possible?',['4','3','5'],0,'b')])}`;
+
+
+
 const P5_MDA5  = null; // Common factors
 const P5_MDA6  = null; // Prime numbers
 const P5_MDA7  = null; // Prime factors
