@@ -4579,10 +4579,583 @@ ${exCard(4,[
 
 
 
-const P5_MDA5  = null; // Common factors
-const P5_MDA6  = null; // Prime numbers
-const P5_MDA7  = null; // Prime factors
-const P5_MDA8  = null; // Composite numbers
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A
+   LESSONS 5 AND 6  (Common factors · Prime numbers)
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste SECTION A (new helpers) and SECTION B (lessons) ABOVE
+      `const SCHEME_P5` in index.html, below your lessons 1–4 code.
+      (Section A must come BEFORE Section B.)
+   2. DELETE these two lines from your placeholders:
+          const P5_MDA5 = null; // Common factors
+          const P5_MDA6 = null; // Prime numbers
+   3. Do NOT change SCHEME_P5 — it already points to P5_MDA5 / P5_MDA6.
+
+   Needs (already in your app from lessons 1–4): mdWarm(), mdGroups(),
+   mdArrays(), mdRainbow(), mdPairTable(), mdItems(), dayHeader(),
+   steps(), exQ(), exCard(), numLine().
+   Copy from the downloaded .js file, not from the chat preview.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* Venn diagram that adapts its line spacing when there are many common items.
+   Same arguments as mdVenn(). Use it for common FACTORS. */
+function mdVenn2(aLab,aIt,bLab,bIt,common,title,foot){
+  const lh=common.length>5?19:24;
+  const lhs=Math.max(aIt.length,bIt.length)>9?19:24;
+  let s=`<svg viewBox="0 0 540 262" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="270" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<circle cx="205" cy="130" r="100" fill="#FCD34D" fill-opacity=".35" stroke="#B45309" stroke-width="2"/>`;
+  s+=`<circle cx="335" cy="130" r="100" fill="#5EEAD4" fill-opacity=".35" stroke="#0F766E" stroke-width="2"/>`;
+  s+=`<text x="165" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#92400E">${aLab}</text>`;
+  s+=`<text x="375" y="52" text-anchor="middle" font-size="11" font-weight="800" fill="#115E59">${bLab}</text>`;
+  s+=`<text x="270" y="76" text-anchor="middle" font-size="10" font-weight="800" fill="#5B21B6">BOTH</text>`;
+  s+=mdItems(aIt,165,142,3,lhs,32,'#92400E',13);
+  s+=mdItems(common,270,142,1,lh,0,'#5B21B6',15);
+  s+=mdItems(bIt,375,142,3,lhs,32,'#115E59',13);
+  if(foot) s+=`<text x="270" y="252" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
+  return s+'</svg>';
+}
+
+/* Sieve of Eratosthenes on a 1–100 square.
+   used  = primes whose multiples are already crossed out, e.g. [2,3]
+   final = true shades every number left (the primes) green. */
+function mdSieve(used,title,final){
+  const cs=34,x0=24,y0=30;
+  const pal={2:'#FCA5A5',3:'#FCD34D',5:'#93C5FD',7:'#C4B5FD'};
+  const W=x0*2+cs*10;
+  const legend=[];
+  used.forEach(p=>legend.push([pal[p]||'#ddd','Multiples of '+p]));
+  legend.push(['#16A34A','Prime (kept)']);
+  if(final) legend.push(['#86EFAC','Prime (left over)']);
+  legend.push(['#E5E7EB','1 (not prime)']);
+  const rows=Math.ceil(legend.length/3);
+  const H=y0+cs*10+16+rows*18+8;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="17" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let n=1;n<=100;n++){
+    const r=Math.floor((n-1)/10), c=(n-1)%10, x=x0+c*cs, y=y0+r*cs;
+    let fill='#fff', txt='#333', fw=500, cross=false;
+    if(n===1){fill='#E5E7EB';txt='#888';cross=true;}
+    else if(used.includes(n)){fill='#16A34A';txt='#fff';fw=800;}
+    else {
+      const p=used.find(q=>q<n && n%q===0);
+      if(p){fill=pal[p]||'#ddd';txt='#777';cross=true;}
+      else if(final){fill='#86EFAC';txt='#14532D';fw=800;}
+    }
+    s+=`<rect x="${x}" y="${y}" width="${cs}" height="${cs}" fill="${fill}" stroke="#bbb" stroke-width="1"/>`;
+    s+=`<text x="${x+cs/2}" y="${y+cs/2+4}" text-anchor="middle" font-size="12" font-weight="${fw}" fill="${txt}">${n}</text>`;
+    if(cross) s+=`<line x1="${x+4}" y1="${y+4}" x2="${x+cs-4}" y2="${y+cs-4}" stroke="#777" stroke-width="1.2"/><line x1="${x+cs-4}" y1="${y+4}" x2="${x+4}" y2="${y+cs-4}" stroke="#777" stroke-width="1.2"/>`;
+  }
+  legend.forEach((it,i)=>{
+    const lx=x0+(i%3)*115, ly=y0+cs*10+30+Math.floor(i/3)*18;
+    s+=`<rect x="${lx}" y="${ly-10}" width="12" height="12" fill="${it[0]}" stroke="#555"/><text x="${lx+17}" y="${ly}" font-size="10" font-weight="700" fill="#333">${it[1]}</text>`;
+  });
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 5 : Common factors ---------- */
+const P5_MDA5 = `
+${dayHeader('MD5','Step 5 — Common Factors','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Identical Party Bags</div>
+  ${mdWarm('You have <strong>12 sweets</strong> and <strong>18 chocolates</strong>. You want to make identical party bags, sharing both equally with nothing left over. How many bags could you make? Let us find the numbers that work for BOTH!')}
+
+  <div class="card-body"><strong>Concrete:</strong> try 6 bags. Share 12 sweets into 6 bags, then 18 chocolates into 6 bags:</div>
+  ${mdGroups(2,6,'12 sweets in 6 bags: 2 in each bag — it divides exactly ✓')}
+  ${mdGroups(3,6,'18 chocolates in 6 bags: 3 in each bag — it divides exactly ✓')}
+  <div class="card-body" style="margin-top:6px;">6 works for both, so <strong>6 is a common factor of 12 and 18</strong>. Which other numbers work? Put the factors in a Venn diagram:</div>
+  ${mdVenn2('Factors of 12',[4,12],'Factors of 18',[9,18],[1,2,3,6],'Factors of 12 and 18','Common factors: 1, 2, 3 and 6')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Common factor</div><div class="s-body" style="color:#4C1D95;">A <strong>common factor</strong> of two (or more) numbers is a number that is a <strong>factor of all of them</strong>. The biggest one is the <strong>highest common factor (HCF)</strong>. For 12 and 18 the HCF is <strong>6</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method 1 — List and match</div><div class="s-body" style="color:#633806;">List ALL the factors of each number (use factor pairs!). Circle the ones that appear in both lists.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method 2 — Start with the SMALLER number</div><div class="s-body" style="color:#085041;">List the factors of the smaller number only, then test each one on the bigger number. Quicker, and you never miss one!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Common factors vs common multiples</div><div class="s-body" style="color:#712B13;">Common <strong>factors</strong> are SMALL and never bigger than the smaller number (1, 2, 3, 6 for 12 and 18). Common <strong>multiples</strong> are BIG (36, 72…). Do not mix them up!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Stopping at one match</div><div class="s-body" style="color:#712B13;">Finding 3 is not enough — list ALL the common factors, and remember <strong>1</strong> is always one of them!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Common factors of 12 and 18</div>
+  ${mdWarm('First find every factor pair of each number from Step 4.')}
+  ${steps([['Factors of 12','1, 2, 3, 4, 6, 12','from 1×12, 2×6, 3×4'],['Factors of 18','1, 2, 3, 6, 9, 18','from 1×18, 2×9, 3×6'],['In BOTH lists','1, 2, 3, 6','common factors'],['Highest','6','the HCF of 12 and 18']])}
+  ${mdVenn2('Factors of 12',[4,12],'Factors of 18',[9,18],[1,2,3,6],'Only the middle belongs to both','HCF = 6')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — List and match: 20 and 30</div>
+  ${mdWarm('Build both factor lists using pairs, then look for numbers in both.')}
+  ${steps([['Factors of 20','1, 2, 4, 5, 10, 20','1×20, 2×10, 4×5'],['Factors of 30','1, 2, 3, 5, 6, 10, 15, 30','1×30, 2×15, 3×10, 5×6'],['Match','1, 2, 5, 10','in both lists'],['HCF','10','the highest']])}
+  ${mdVenn2('Factors of 20',[4,20],'Factors of 30',[3,6,15,30],[1,2,5,10],'Common factors of 20 and 30','HCF = 10')}
+  <div class="card-body" style="margin-top:6px;">🔍 Notice 4 is a factor of 20 but NOT of 30 (30 ÷ 4 = 7 remainder 2), so it stays on the left.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Start with the smaller number: 16 and 40</div>
+  ${mdWarm('List the factors of 16 only. Then test each one on 40.')}
+  ${steps([['Factors of 16','1, 2, 4, 8, 16','the smaller number'],['1 → 40','40 ÷ 1 = 40','✓'],['2 → 40','40 ÷ 2 = 20','✓'],['4 → 40','40 ÷ 4 = 10','✓'],['8 → 40','40 ÷ 8 = 5','✓'],['16 → 40','40 ÷ 16 = 2 remainder 8','✗']])}
+  <div class="card-body" style="margin-top:8px;"><strong>ANSWER:</strong> common factors 1, 2, 4, 8 — highest common factor <strong>8</strong>.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Special cases</div>
+  ${mdWarm('What if one number is a factor of the other? What if the numbers share nothing?')}
+  <div class="strategy-grid">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">One is a factor of the other</div><div class="s-body" style="color:#27500A;">7 and 21: factors of 7 are 1, 7 — both divide 21 ✓. Common factors: 1 and 7. HCF = <strong>7</strong> (the smaller number itself!)</div></div>
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">Only 1 in common</div><div class="s-body" style="color:#4C1D95;">8 and 15 share no factor except 1. HCF = <strong>1</strong>. Numbers like this are called <strong>coprime</strong> (or &ldquo;relatively prime&rdquo;).</div></div>
+  </div>
+  ${mdVenn2('Factors of 8',[2,4,8],'Factors of 15',[3,5,15],[1],'8 and 15: only one common factor','Common factor: 1 only')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Three numbers: 12, 18 and 30</div>
+  ${mdWarm('Same idea — a factor must work for ALL three numbers.')}
+  ${steps([['Factors of 12','1, 2, 3, 4, 6, 12','the smallest, so start here'],['Test on 18','1 ✓ 2 ✓ 3 ✓ 4 ✗ 6 ✓ 12 ✗','keep 1, 2, 3, 6'],['Test on 30','30 ÷ 1, 2, 3, 6','all ✓ (6 × 5 = 30)'],['ANSWER','1, 2, 3, 6','HCF = 6']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life: counters in identical bags</div>
+  ${mdWarm('There are <strong>24 red</strong> and <strong>36 blue</strong> counters. They are shared into identical bags with none left over. What is the GREATEST number of bags?')}
+  ${mdVenn2('Factors of 24',[8,24],'Factors of 36',[9,18,36],[1,2,3,4,6,12],'Common factors of 24 and 36','HCF = 12')}
+  ${steps([['Common factors','1, 2, 3, 4, 6, 12','possible numbers of bags'],['Greatest','12 bags','the HCF'],['In each bag','24 ÷ 12 = 2 red · 36 ÷ 12 = 3 blue','2 red and 3 blue']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Using the HCF to simplify a fraction</div>
+  ${mdWarm('Can we simplify 12/18? Divide the top and bottom by a common factor — the best one is the HCF!')}
+  ${steps([['Common factors of 12 and 18','1, 2, 3, 6','HCF = 6'],['Divide by 6','12 ÷ 6 = 2','18 ÷ 6 = 3'],['ANSWER','12/18 = 2/3','simplest form: HCF of 2 and 3 is 1']])}
+  <div class="card-body" style="margin-top:6px;">💡 If you divide by a smaller common factor (like 2) you get 6/9, which can still be simplified. Using the <strong>highest</strong> common factor simplifies in ONE step.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${mdWarm('Sam says: &ldquo;The highest common factor of 12 and 18 is 36.&rdquo; Is that right?')}
+  ${steps([['What is 36?','a common MULTIPLE of 12 and 18','12 × 3 = 36, 18 × 2 = 36'],['Rule','a common factor can never be bigger than the smaller number','36 is bigger than 12'],['ANSWER','Sam is WRONG','HCF = 6; 36 is the lowest common MULTIPLE']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 12 a common factor of 6 and 18?</strong> No — 12 is bigger than 6, and 6 ÷ 12 is not a whole number.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;1 is a common factor of two numbers.&rdquo; → <strong>ALWAYS</strong> ✓ (1 divides every whole number).</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Common FACTORS are small and found by dividing. Common MULTIPLES are big and found by multiplying. The HCF is the biggest factor that works for all the numbers.</div></div></div>
+</div>
+
+${exCard(5,[
+ exQ(1,'Which of these is a common factor of 12 and 18?',['6','4','9'],0),
+ exQ(2,'What are ALL the common factors of 20 and 30?',['1, 2, 5, 10','1, 2, 4, 5, 10','1, 5, 10'],0),
+ exQ(3,'What is the highest common factor of 16 and 40?',['8','4','16'],0),
+ exQ(4,'Which number is a common factor of EVERY pair of whole numbers?',['1','2','10'],0),
+ exQ(5,'What are the common factors of 8 and 15?',['1 only','1 and 3','1 and 5'],0),
+ exQ(6,'What is the highest common factor of 7 and 21?',['7','21','3'],0),
+ exQ(7,'There are 24 red and 36 blue counters. They are shared into identical bags with none left over. What is the greatest number of bags?',['12','6','72'],0),
+ exQ(8,'Which statement is true?',['A common factor is never bigger than the smaller number','A common factor is always bigger than both numbers','12 is a common factor of 6 and 18'],0),
+ exQ(9,'THINK DEEPER: I am a common factor of 24 and 36. I am even, more than 4 and less than 12. What number am I?',['6','8','10'],0,'t'),
+ exQ(10,'BOSS LEVEL: Use the highest common factor of 18 and 30 to write 18/30 in its simplest form.',['3/5','9/15','6/10'],0,'b')])}`;
+
+
+/* ---------- STEP 6 : Prime numbers ---------- */
+const P5_MDA6 = `
+${dayHeader('MD6','Step 6 — Prime Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Numbers with Only Two Factors</div>
+  ${mdWarm('Take 7 counters and try to make rectangles. Then try 8 counters. What is different?')}
+
+  <div class="card-body"><strong>Concrete:</strong> 7 counters make only ONE rectangle. 8 counters can make two different ones.</div>
+  ${mdArrays(7,'7 can only be arranged as 1 × 7')}
+  ${mdArrays(8,'8 can be arranged as 1 × 8 and 2 × 4')}
+  <div class="card-body" style="margin-top:6px;">7 has just <strong>two factors</strong> (1 and 7). 8 has four factors (1, 2, 4, 8). Numbers like 7 are <strong>prime numbers</strong>.</div>
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Prime number</div><div class="s-body" style="color:#4C1D95;">A <strong>prime number</strong> has <strong>exactly two factors</strong>: 1 and itself. The first primes: <strong>2, 3, 5, 7, 11, 13, 17, 19…</strong> A number with more than two factors is called <strong>composite</strong> (Step 8).</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Two special numbers</div><div class="s-body" style="color:#633806;"><strong>1 is NOT prime</strong> — it has only one factor. <strong>2 IS prime</strong> — it is the <em>only even</em> prime number.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 4</div><div class="s-body" style="color:#085041;">A prime number has just <strong>one factor pair</strong>: 1 × the number. Composite numbers have two or more factor pairs.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;All odd numbers are prime&rdquo;</div><div class="s-body" style="color:#712B13;">9 (3 × 3), 15 (3 × 5), 21 (3 × 7) and 25 (5 × 5) are all odd but NOT prime. Odd is not enough!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;1 is prime&rdquo;</div><div class="s-body" style="color:#712B13;">A prime needs TWO different factors. 1 has only one (itself), so it is neither prime nor composite.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Prime or not? 7, 9 and 12</div>
+  ${mdWarm('Count the factors. Exactly two means prime.')}
+  ${steps([['7','1, 7','2 factors → PRIME ✓'],['9','1, 3, 9','3 factors → not prime ✗'],['12','1, 2, 3, 4, 6, 12','6 factors → not prime ✗']])}
+  ${mdArrays(9,'9 can be arranged as 1 × 9 and 3 × 3 — so it is NOT prime')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The Sieve of Eratosthenes: finding all the primes to 100</div>
+  ${mdWarm('A Greek mathematician, Eratosthenes, found a clever way to catch all the primes: cross out the numbers that are NOT prime, and what is left must be prime!')}
+  <div class="card-body"><strong>Step A:</strong> cross out 1. Keep 2, then cross out all other multiples of 2.</div>
+  ${mdSieve([2],'After 2: all the even numbers (except 2) are gone',false)}
+  <div class="card-body" style="margin-top:6px;"><strong>Step B:</strong> keep 3, cross out its multiples. Then keep 5 and 7 and do the same.</div>
+  ${mdSieve([2,3],'After 3: the multiples of 3 are crossed out too',false)}
+  <div class="card-body" style="margin-top:6px;"><strong>Step C:</strong> after 2, 3, 5 and 7 every composite number up to 100 has been crossed out. The numbers left are the <strong>25 primes under 100</strong>:</div>
+  ${mdSieve([2,3,5,7],'The primes under 100 (green)',true)}
+  ${steps([['Primes to 20','2, 3, 5, 7, 11, 13, 17, 19','8 primes'],['Primes to 50','2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47','15 primes'],['Primes to 100','25 primes','the last one is 97']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Two special numbers: 1 and 2</div>
+  ${mdWarm('Why is 1 not prime, and why is 2 the only even prime?')}
+  ${steps([['Factors of 1','just 1','ONE factor → not prime'],['Factors of 2','1 and 2','TWO factors → PRIME ✓'],['Every other even number','has 2 as a factor','so it has at least 3 factors (1, 2 and itself)']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Result:</strong> 2 is the only even prime. Every other prime is odd (but not every odd number is prime!).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Tricky numbers: is 51 prime? Is 91 prime?</div>
+  ${mdWarm('Some numbers LOOK prime but are not. Test them with the quick rules.')}
+  <div class="card-body"><strong>51:</strong> it is odd and ends in 1, so it looks prime…</div>
+  ${steps([['Digit sum','5 + 1 = 6','6 is in the 3 times table'],['Check','51 ÷ 3 = 17','3 × 17 = 51'],['ANSWER','NOT prime ✗','factors: 1, 3, 17, 51']])}
+  <div class="card-body" style="margin-top:8px;"><strong>91:</strong> not even, does not end in 0 or 5, digit sum 10 (not a multiple of 3). Test 7:</div>
+  ${steps([['Try 7','7 × 13 = 91','91 ÷ 7 = 13'],['ANSWER','NOT prime ✗','factors: 1, 7, 13, 91']])}
+  <div class="card-body" style="margin-top:6px;">⚠️ <strong>Watch out:</strong> 51 and 91 are the most famous &ldquo;imposters&rdquo; — they look prime but are not!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — How to test a bigger number: is 53 prime?</div>
+  ${mdWarm('Test whole numbers from 2 upwards. When do we stop?')}
+  ${mdPairTable(53)}
+  ${steps([['Test 2, 3, 4, 5, 6, 7','all give a remainder','no pair found except 1 × 53'],['Stop','next test is 8, and 8 × 8 = 64','more than 53 — no need to go on'],['ANSWER','53 is PRIME ✓','factors: 1 and 53 only']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Rule:</strong> keep testing until the number you test, multiplied by itself, is bigger than your number. If nothing divides exactly, it is prime.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Real life: chairs in equal rows</div>
+  ${mdWarm('You must arrange chairs in equal rows with more than 1 row and more than 1 chair in each row. Can you do it with 17 chairs? What about 18?')}
+  ${mdArrays(17,'17 chairs: only one line of 17 — no real rows possible')}
+  ${mdArrays(18,'18 chairs: 2 rows of 9, 3 rows of 6 — possible!')}
+  ${steps([['17','prime — only 1 × 17','NOT possible'],['18','2 × 9 and 3 × 6','possible ✓ (it is composite)']])}
+  <div class="card-body" style="margin-top:6px;">💡 Prime numbers can never be shared into equal groups (other than groups of 1 or all of them).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Finding primes in a range: between 20 and 50</div>
+  ${mdWarm('Test each number, or use the sieve picture. Which ones survive?')}
+  ${numLine(20,50,5,[[23,'23'],[29,'29'],[31,'31'],[37,'37'],[41,'41'],[43,'43'],[47,'47']])}
+  ${steps([['20–30','23, 29','2 primes'],['30–40','31, 37','2 primes'],['40–50','41, 43, 47','3 primes'],['ANSWER','7 primes between 20 and 50','23, 29, 31, 37, 41, 43, 47']])}
+  <div class="card-body" style="margin-top:6px;">👯 <strong>Twin primes</strong> are primes that differ by 2: (3, 5), (5, 7), (11, 13), (17, 19), (29, 31), (41, 43). You can see (29, 31) and (41, 43) above!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: odd does not mean prime</div>
+  ${mdWarm('Kai says: &ldquo;All odd numbers are prime.&rdquo; Can you prove him wrong?')}
+  ${steps([['Counter-example 1','9 = 3 × 3','odd but not prime'],['Counter-example 2','15 = 3 × 5','odd but not prime'],['ANSWER','Kai is WRONG','one counter-example is enough to disprove a claim']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which of 21, 23, 27, 29, 33 are prime?</strong> 21 = 3 × 7 ✗ · 23 ✓ · 27 = 3 × 9 ✗ · 29 ✓ · 33 = 3 × 11 ✗ → <strong>23 and 29</strong>.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Find two prime numbers that add up to 20.</strong></div>
+  ${steps([['Try 3 + 17','3 and 17 are both prime','= 20 ✓'],['Try 7 + 13','7 and 13 are both prime','= 20 ✓'],['ANSWER','3 + 17 or 7 + 13','two different answers']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">To prove a number is prime, show it has no factor pair except 1 × itself. To prove it is NOT prime, find just one extra factor.</div></div></div>
+</div>
+
+${exCard(6,[
+ exQ(1,'Which of these is a prime number?',['17','15','21'],0),
+ exQ(2,'How many factors does a prime number have?',['2','1','3'],0),
+ exQ(3,'Which number is NOT prime?',['27','29','31'],0),
+ exQ(4,'What is the only even prime number?',['2','4','6'],0),
+ exQ(5,'Is 1 a prime number?',['No — it has only one factor','Yes — it has two factors','Yes — it is odd'],0),
+ exQ(6,'Which list contains ONLY prime numbers?',['2, 3, 5, 7','3, 5, 7, 9','2, 4, 6, 8'],0),
+ exQ(7,'How many prime numbers are there between 20 and 30?',['2','3','1'],0),
+ exQ(8,'Which statement is true?',['Every prime number except 2 is odd','Every odd number is prime','Every prime number is odd'],0),
+ exQ(9,'THINK DEEPER: I am a prime number between 40 and 50. My digits add up to 7. What number am I?',['43','47','41'],0,'t'),
+ exQ(10,'BOSS LEVEL: Two prime numbers add up to 24. One is 14 more than the other. What are the two numbers?',['5 and 19','7 and 17','11 and 13'],0,'b')])}`;
+
+
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A
+   LESSONS 7 AND 8  (Prime factors · Composite numbers)
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste SECTION A (new helpers) and SECTION B (lessons) ABOVE
+      `const SCHEME_P5` in index.html, below your lessons 1–6 code.
+      (Section A must come BEFORE Section B.)
+   2. DELETE these two lines from your placeholders:
+          const P5_MDA7 = null; // Prime factors
+          const P5_MDA8 = null; // Composite numbers
+   3. Do NOT change SCHEME_P5 — it already points to P5_MDA7 / P5_MDA8.
+
+   Needs (already in your app from lessons 1–6): mdWarm(), mdArrays(),
+   mdPairTable(), mdVenn2(), mdSieve(), mdItems(), dayHeader(),
+   steps(), exQ(), exCard(), numLine().
+   Copy from the downloaded .js file, not from the chat preview.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* Factor tree. A node is either a plain number (a PRIME leaf) or
+   [value, leftNode, rightNode] (a composite that keeps splitting).
+   mdTree([12,[4,2,2],3],'title')  →  12 = 2 × 2 × 3 */
+function mdTree(root,title){
+  let leaves=0, maxD=0;
+  const leafVals=[];
+  function lay(nd,d){
+    maxD=Math.max(maxD,d);
+    if(!Array.isArray(nd)){ leafVals.push(nd); return {v:nd,d,x:leaves++,leaf:true}; }
+    const l=lay(nd[1],d+1), r=lay(nd[2],d+1);
+    return {v:nd[0],d,x:(l.x+r.x)/2,l,r,leaf:false};
+  }
+  const t=lay(root,0);
+  const sx=62, sy=56, y0=44;
+  const contentW=Math.max(0,(leaves-1)*sx);
+  const W=Math.max(340,contentW+80), ox=(W-contentW)/2;
+  const H=y0+maxD*sy+66;
+  const px=n=>ox+n.x*sx, py=n=>y0+n.d*sy;
+  let lines='', nodes='';
+  (function draw(n){
+    if(!n.leaf){
+      [n.l,n.r].forEach(c=>{
+        lines+=`<line x1="${px(n)}" y1="${py(n)+18}" x2="${px(c)}" y2="${py(c)-18}" stroke="#6D28D9" stroke-width="2"/>`;
+        draw(c);
+      });
+    }
+    nodes+=`<circle cx="${px(n)}" cy="${py(n)}" r="18" fill="${n.leaf?'#DCFCE7':'#EDE9FE'}" stroke="${n.leaf?'#16A34A':'#6D28D9'}" stroke-width="2.5"/>`;
+    nodes+=`<text x="${px(n)}" y="${py(n)+5}" text-anchor="middle" font-size="${String(n.v).length>2?12:15}" font-weight="800" fill="${n.leaf?'#14532D':'#4C1D95'}">${n.v}</text>`;
+  })(t);
+  const sorted=[...leafVals].sort((a,b)=>a-b);
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=lines+nodes;
+  s+=`<text x="${W/2}" y="${H-32}" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${t.v} = ${sorted.join(' × ')}</text>`;
+  s+=`<text x="${W/2}" y="${H-10}" text-anchor="middle" font-size="10" fill="#666">green circle = prime (stop) · purple circle = not prime (keep splitting)</text>`;
+  return s+'</svg>';
+}
+
+/* Division ladder: divide by the smallest prime that fits, again and again,
+   until you reach 1.  mdLadder(60) */
+function mdLadder(n){
+  const rows=[], pr=[];
+  let m=n, p=2;
+  while(m>1){
+    if(m%p===0){ rows.push([p,m]); pr.push(p); m=m/p; } else p++;
+  }
+  let t='';
+  rows.forEach(r=>{
+    t+=`<tr><td style="padding:3px 12px;font-weight:800;color:#16A34A;font-size:17px;text-align:right;border-right:3px solid #6D28D9;">${r[0]}</td><td style="padding:3px 14px;font-size:17px;font-weight:700;color:#4C1D95;text-align:left;">${r[1]}</td></tr>`;
+  });
+  t+=`<tr><td style="padding:3px 12px;border-right:3px solid #6D28D9;"></td><td style="padding:3px 14px;font-size:17px;font-weight:800;color:#92400E;text-align:left;">1</td></tr>`;
+  return `<div style="text-align:center;margin:8px 0;"><table style="display:inline-table;border-collapse:collapse;">${t}</table><div style="font-size:15px;font-weight:800;color:#5B21B6;margin-top:6px;">${n} = ${pr.join(' × ')}</div></div>`;
+}
+
+/* Cards that classify numbers: prime / composite / neither.
+   mdFactorCards([1,7,12]) works out the factors for you. */
+function mdFactorCards(nums){
+  let s='<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:8px 0;">';
+  nums.forEach(n=>{
+    const f=[];
+    for(let i=1;i<=n;i++) if(n%i===0) f.push(i);
+    const type=n===1?'NEITHER':(f.length===2?'PRIME':'COMPOSITE');
+    const c=type==='PRIME'?['#EAF3DE','#16A34A','#14532D']:type==='COMPOSITE'?['#EDE9FE','#6D28D9','#4C1D95']:['#FEF3C7','#B45309','#92400E'];
+    s+=`<div style="background:${c[0]};border:2px solid ${c[1]};border-radius:10px;padding:8px 10px;min-width:104px;max-width:150px;text-align:center;"><div style="font-size:20px;font-weight:800;color:${c[2]};">${n}</div><div style="font-size:11px;color:#444;line-height:1.4;margin:2px 0;">${f.join(', ')}</div><div style="font-size:11px;font-weight:700;color:#555;">${f.length} factor${f.length===1?'':'s'}</div><div style="display:inline-block;margin-top:4px;font-size:10px;font-weight:800;padding:2px 8px;border-radius:10px;background:${c[1]};color:#fff;">${type}</div></div>`;
+  });
+  return s+'</div>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 7 : Prime factors ---------- */
+const P5_MDA7 = `
+${dayHeader('MD7','Step 7 — Prime Factors','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — The Building Blocks of Numbers</div>
+  ${mdWarm('Every LEGO model is built from small bricks. Every whole number (bigger than 1) is built from <strong>prime numbers</strong> multiplied together! They are the number&rsquo;s building blocks. Let us break 12 into its blocks.')}
+
+  <div class="card-body"><strong>Pictorial:</strong> a <strong>factor tree</strong> keeps splitting a number into two factors until every branch ends in a <strong>prime</strong>:</div>
+  ${mdTree([12,[4,2,2],3],'Factor tree of 12')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Prime factor</div><div class="s-body" style="color:#4C1D95;">A <strong>prime factor</strong> is a factor that is also a <strong>prime number</strong>. The prime factors of 12 are <strong>2 and 3</strong> (4 and 6 are factors, but not prime).</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📖 Prime factorisation</div><div class="s-body" style="color:#085041;">Writing a number as a <strong>product of primes</strong>: 12 = <strong>2 × 2 × 3</strong>. Every number has just ONE prime factorisation, whatever order you find the factors in.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Two methods</div><div class="s-body" style="color:#633806;">1) <strong>Factor tree:</strong> split into any two factors; keep splitting until all are prime. 2) <strong>Division ladder:</strong> divide by the smallest prime that fits, again and again, until you reach 1.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Stopping too early</div><div class="s-body" style="color:#712B13;">12 = 3 × 4 is NOT finished — 4 is not prime. Keep splitting until EVERY number in the product is prime.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Factors vs Prime factors</div><div class="s-body" style="color:#712B13;">Factors of 12: 1, 2, 3, 4, 6, 12. <strong>Prime</strong> factors: only 2 and 3. And 1 is never a prime factor. In a product, a prime can appear <strong>more than once</strong> (2 × 2 × 3).</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Prime factors of 12</div>
+  ${mdWarm('List all the factors of 12 first, then pick out the primes.')}
+  ${steps([['Factors of 12','1, 2, 3, 4, 6, 12','from the pairs 1×12, 2×6, 3×4'],['Which are prime?','2 and 3','4 = 2 × 2 and 6 = 2 × 3 are not prime'],['Prime factors','2 and 3','the building blocks'],['Prime factorisation','12 = 2 × 2 × 3','2 appears twice']])}
+  ${mdTree([12,[4,2,2],3],'12 = 2 × 2 × 3')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Different trees, same answer: 24</div>
+  ${mdWarm('Does it matter how you split? Build two different trees for 24 and see!')}
+  ${mdTree([24,[4,2,2],[6,2,3]],'Tree A: 24 = 4 × 6')}
+  ${mdTree([24,2,[12,2,[6,2,3]]],'Tree B: 24 = 2 × 12')}
+  ${steps([['Tree A','2 × 2 × 2 × 3','split 24 into 4 × 6'],['Tree B','2 × 2 × 2 × 3','split 24 into 2 × 12'],['ANSWER','24 = 2 × 2 × 2 × 3','always the same prime factors']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Big idea:</strong> every number has exactly one prime factorisation. Write the primes from smallest to largest to keep it tidy.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Repeated prime factors: 36</div>
+  ${mdWarm('Split 36 into 4 × 9. Are 4 and 9 prime?')}
+  ${mdTree([36,[4,2,2],[9,3,3]],'Factor tree of 36')}
+  ${steps([['Split','36 = 4 × 9','neither is prime'],['Split again','4 = 2 × 2 and 9 = 3 × 3','all branches end in primes'],['ANSWER','36 = 2 × 2 × 3 × 3','each prime appears twice']])}
+  <div class="card-body" style="margin-top:6px;">💡 When a prime repeats there is a shorthand using powers (2 × 2 × 3 × 3 = 2² × 3²). You will learn this in Step 11!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — The division ladder: 60</div>
+  ${mdWarm('Divide by the smallest prime that fits. Keep going until you reach 1.')}
+  ${mdLadder(60)}
+  ${steps([['÷ 2','60 ÷ 2 = 30','60 is even'],['÷ 2','30 ÷ 2 = 15','30 is even'],['÷ 3','15 ÷ 3 = 5','digit sum 6'],['÷ 5','5 ÷ 5 = 1','reached 1!']])}
+  <div class="card-body" style="margin-top:6px;"><strong>ANSWER:</strong> 60 = 2 × 2 × 3 × 5. The prime factors of 60 are <strong>2, 3 and 5</strong>.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Bigger numbers: 100 and 84 (and a prime!)</div>
+  ${mdWarm('The method never changes, however big the number. Use your divisibility tests to choose the primes.')}
+  ${mdTree([100,[10,2,5],[10,2,5]],'100 = 10 × 10, and each 10 = 2 × 5')}
+  ${steps([['Sorted','2, 2, 5, 5','from smallest to largest'],['ANSWER','100 = 2 × 2 × 5 × 5','prime factors 2 and 5']])}
+  ${mdLadder(84)}
+  <div class="card-body" style="margin-top:6px;"><strong>84 = 2 × 2 × 3 × 7.</strong> And what about a prime number such as 13? It is already a building block: <strong>13 = 13</strong> — its tree has no branches!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Prime factors find the HCF (link to Step 5)</div>
+  ${mdWarm('Write 12 and 18 as products of primes. The primes they SHARE multiply to give the highest common factor.')}
+  ${mdVenn2('12 = 2×2×3',[2],'18 = 2×3×3',[3],[2,3],'Prime factors of 12 and 18','Shared primes: 2 × 3 = 6')}
+  ${steps([['12','2 × 2 × 3','prime factorisation'],['18','2 × 3 × 3','prime factorisation'],['Shared','2 and 3','in both lists'],['HCF','2 × 3 = 6','matches Step 5 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 For the <strong>lowest common multiple</strong> use every prime that appears, as many times as the most it appears: 2 × 2 × 3 × 3 = <strong>36</strong> (matches Step 2!).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Working backwards and checking</div>
+  ${mdWarm('If you are given the prime factors, multiply them to find the number. This also lets you CHECK any factor tree.')}
+  ${steps([['2 × 2 × 5 × 7','4 × 5 × 7 = 20 × 7','= 140'],['2 × 3 × 7','6 × 7','= 42'],['Check 60','2 × 2 × 3 × 5 = 4 × 15','= 60 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which number between 20 and 30 has prime factors 2 and 7 only?</strong> 2 × 2 × 7 = <strong>28</strong> ✓ (2 × 7 = 14 is too small, 2 × 2 × 2 × 7 = 56 too big).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${mdWarm('Jo says: &ldquo;The prime factors of 18 are 1, 2, 3, 6, 9 and 18.&rdquo; What is wrong?')}
+  ${steps([['Check','1, 6, 9 and 18 are NOT prime','1 has one factor; 6, 9, 18 have more than two'],['Correct','18 = 2 × 3 × 3','prime factors 2 and 3'],['ANSWER','Jo listed ALL the factors','not just the prime ones']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is the prime factorisation of 30: 2 × 15, 2 × 3 × 5, or 5 × 6?</strong> Only <strong>2 × 3 × 5</strong> — in the others, 15 and 6 are not prime.</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">A prime factorisation is finished only when EVERY number in the product is prime. Multiply them back to check you get the original number.</div></div></div>
+</div>
+
+${exCard(7,[
+ exQ(1,'Which of these is a prime factor of 12?',['3','4','6'],0),
+ exQ(2,'Which shows 12 as a product of prime factors?',['2 × 2 × 3','3 × 4','2 × 6'],0),
+ exQ(3,'Which shows 36 as a product of prime factors?',['2 × 2 × 3 × 3','6 × 6','2 × 3 × 6'],0),
+ exQ(4,'What number is 2 × 2 × 5 × 7?',['140','70','280'],0),
+ exQ(5,'What are the different prime factors of 60?',['2, 3 and 5','2, 3, 5 and 6','1, 2, 3 and 5'],0),
+ exQ(6,'Which shows 100 as a product of prime factors?',['2 × 2 × 5 × 5','10 × 10','2 × 5 × 10'],0),
+ exQ(7,'Is 7 a prime factor of 84?',['Yes — 84 = 2 × 2 × 3 × 7','No — 7 is too small','No — 84 is even'],0),
+ exQ(8,'Which is the correct prime factorisation of 30?',['2 × 3 × 5','2 × 15','5 × 6'],0),
+ exQ(9,'THINK DEEPER: 12 = 2 × 2 × 3 and 18 = 2 × 3 × 3. Multiply the prime factors they share. What is the highest common factor of 12 and 18?',['6','36','2'],0,'t'),
+ exQ(10,'BOSS LEVEL: I am a number between 40 and 50. My only prime factors are 2 and 3. What number am I?',['48','42','45'],0,'b')])}`;
+
+
+/* ---------- STEP 8 : Composite numbers ---------- */
+const P5_MDA8 = `
+${dayHeader('MD8','Step 8 — Composite Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Primes, Composites and the Odd One Out</div>
+  ${mdWarm('You know a prime number has exactly <strong>two</strong> factors. What do we call numbers that have <strong>more than two</strong>? Let us sort the numbers 1 to 9 by counting their factors.')}
+
+  ${mdFactorCards([1,2,3,4,5,6,7,8,9])}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Composite number</div><div class="s-body" style="color:#4C1D95;">A <strong>composite number</strong> has <strong>more than two factors</strong>. It can be made by multiplying two smaller numbers (not counting 1): 12 = 3 × 4. The smallest composite number is <strong>4</strong>.</div></div>
+    <div class="strategy-card" style="background:#FEF3C7;border-color:#FCD34D;"><div class="s-title" style="color:#B45309;">🔑 Three kinds of number</div><div class="s-body" style="color:#92400E;"><strong>Prime</strong> = exactly 2 factors. <strong>Composite</strong> = more than 2 factors. <strong>1</strong> = just one factor, so it is <strong>neither</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 7</div><div class="s-body" style="color:#085041;">A composite number can always be broken into a product of primes (its prime factorisation). A prime cannot be broken any further.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Not prime means composite&rdquo;</div><div class="s-body" style="color:#712B13;">Almost true — but <strong>1</strong> is not prime AND not composite. It is in a group of its own.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Composite means even&rdquo;</div><div class="s-body" style="color:#712B13;">Many composites are <strong>odd</strong>: 9, 15, 21, 25, 27. And not every even number is composite — 2 is prime!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Prime or composite? Count the factors</div>
+  ${mdWarm('List the factors. Two = prime, more than two = composite.')}
+  ${mdFactorCards([11,12,13,14,15,16])}
+  ${steps([['11 and 13','2 factors each','PRIME'],['12, 14, 15, 16','6, 4, 4 and 5 factors','COMPOSITE'],['Check','14 = 2 × 7 · 15 = 3 × 5','each is a product of smaller numbers']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Composite numbers on the hundred square</div>
+  ${mdWarm('In the sieve every crossed-out number is composite. The colour tells you its SMALLEST prime factor.')}
+  ${mdSieve([2,3,5,7],'Crossed out = composite · green = prime · grey = 1',true)}
+  ${steps([['Numbers 2 to 100','99 numbers','1 is left out'],['Primes','25','the green squares'],['Composites','99 − 25 = 74','all the crossed squares']])}
+  <div class="card-body" style="margin-top:6px;">💡 There are <strong>74</strong> composite numbers up to 100, <strong>25</strong> primes, and the number <strong>1</strong>: 74 + 25 + 1 = 100 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Tricky ones: 57, 59, 87 and 91</div>
+  ${mdWarm('Odd numbers can fool you. Use the divisibility tests, then check with a factor.')}
+  ${mdFactorCards([57,59,87,91])}
+  ${steps([['57','digit sum 5 + 7 = 12 → 3 is a factor','57 = 3 × 19 → composite'],['59','not divisible by 2, 3, 5 or 7','PRIME'],['87','digit sum 15 → 3 is a factor','87 = 3 × 29 → composite'],['91','91 ÷ 7 = 13','91 = 7 × 13 → composite']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — The composite numbers to 20 on a number line</div>
+  ${mdWarm('Mark every composite number from 4 to 20. The gaps are the primes (and 1).')}
+  ${numLine(0,20,5,[[4,'4'],[6,'6'],[8,'8'],[9,'9'],[10,'10'],[12,'12'],[14,'14'],[15,'15'],[16,'16'],[18,'18'],[20,'20']])}
+  ${steps([['Composites 1–20','4, 6, 8, 9, 10, 12, 14, 15, 16, 18, 20','11 numbers'],['Primes 1–20','2, 3, 5, 7, 11, 13, 17, 19','8 numbers'],['Neither','1','just one number']])}
+  <div class="card-body" style="margin-top:6px;">✔ Check: 11 + 8 + 1 = 20 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Odd does not mean prime (Venn diagram)</div>
+  ${mdWarm('Sort the numbers 1 to 20 into &ldquo;prime&rdquo; and &ldquo;odd&rdquo;. What goes in the overlap? What is outside both?')}
+  ${mdVenn2('Prime numbers',[2],'Odd numbers',[1,9,15],[3,5,7,11,13,17,19],'Numbers 1–20','Outside both: 4, 6, 8, 10, 12, 14, 16, 18, 20')}
+  ${steps([['Prime but not odd','2','the only even prime'],['Odd but not prime','1, 9, 15','1 is neither; 9 and 15 are composite'],['Outside both','4, 6, 8, 10…','even composite numbers']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Every composite is a product of primes</div>
+  ${mdWarm('Break 18 and 45 into primes. A composite always has branches in its factor tree!')}
+  ${mdTree([18,2,[9,3,3]],'18 = 2 × 3 × 3')}
+  ${mdTree([45,[9,3,3],5],'45 = 3 × 3 × 5')}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Test:</strong> if a number&rsquo;s factor tree has branches, the number is composite. If it cannot be split (like 13), it is prime.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: sharing equally</div>
+  ${mdWarm('A pack has <strong>15 biscuits</strong> and another has <strong>17</strong>. Which pack can be shared equally between 3 or 5 friends?')}
+  ${mdArrays(15,'15 is composite: 1 × 15 and 3 × 5')}
+  ${steps([['15','composite: factors 1, 3, 5, 15','can be shared by 3 or 5 friends'],['17','prime: factors 1 and 17','only 1 friend or 17 friends']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Can 28 pupils make equal teams (more than 1 team, more than 1 pupil in each)?</strong></div>
+  ${mdArrays(28,'28 is composite: 1 × 28, 2 × 14 and 4 × 7')}
+  ${steps([['28','composite','teams of 2, 4, 7 or 14'],['29','prime','NO equal teams possible']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: always, sometimes, never</div>
+  ${mdWarm('Think carefully about each statement. One counter-example is enough to say &ldquo;not always&rdquo;.')}
+  <div class="strategy-grid">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">&ldquo;A composite number has at least 3 factors.&rdquo;</div><div class="s-body" style="color:#27500A;"><strong>ALWAYS</strong> ✓ — that is the definition.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">&ldquo;A number that is not prime is composite.&rdquo;</div><div class="s-body" style="color:#633806;"><strong>SOMETIMES</strong> — true for 4, 9, 15… but 1 is neither.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">&ldquo;The product of two prime numbers is composite.&rdquo;</div><div class="s-body" style="color:#27500A;"><strong>ALWAYS</strong> ✓ — e.g. 3 × 5 = 15 has factors 1, 3, 5, 15.</div></div>
+  </div>
+  <div class="card-body" style="margin-top:8px;"><strong>Which odd number between 20 and 30 is a multiple of 5 and composite?</strong> 25 = 5 × 5 ✓ (21 and 27 are multiples of 3, 23 and 29 are prime).</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Count the factors: 1 factor → neither, 2 factors → prime, more than 2 → composite. Always test before you decide!</div></div></div>
+</div>
+
+${exCard(8,[
+ exQ(1,'Which of these numbers is composite?',['15','13','11'],0),
+ exQ(2,'What is the smallest composite number?',['4','2','1'],0),
+ exQ(3,'Which statement about the number 1 is true?',['It is neither prime nor composite','It is prime','It is composite'],0),
+ exQ(4,'How many factors does a composite number have?',['More than 2','Exactly 2','Exactly 1'],0),
+ exQ(5,'Which list contains ONLY composite numbers?',['4, 6, 9, 15','2, 4, 6, 9','9, 15, 17, 21'],0),
+ exQ(6,'Which of these odd numbers is composite?',['27','29','31'],0),
+ exQ(7,'The number 57 looks prime. What is it really?',['Composite: 3 × 19','Prime','Composite: 5 × 11'],0),
+ exQ(8,'Which statement is always true?',['The product of two prime numbers is composite','The sum of two prime numbers is prime','Every odd number is composite'],0),
+ exQ(9,'THINK DEEPER: I am a composite number between 20 and 30. I am odd and a multiple of 5. What number am I?',['25','27','21'],0,'t'),
+ exQ(10,'BOSS LEVEL: Look at the numbers from 1 to 20 (including 1 and 20). How many are prime and how many are composite?',['8 prime and 11 composite','8 prime and 12 composite','9 prime and 11 composite'],0,'b')])}`;
+
+
 const P5_MDA9  = null; // Square numbers
 const P5_MDA10 = null; // Cube numbers
 const P5_MDA11 = null; // Squared notation (²)
@@ -7512,7 +8085,7 @@ ${asExCard(12,[
 const SCHEME_P5 = [
   {
     id:'autumn', emoji:'🍂', label:'Autumn Term', meta:'September – December 2026',
-    col: TERM_COLORS.autumn, open: false,
+    col: TERM_COLORS.autumn, open: true,
     topics: [
       { id:'placevalue', label:'Place Value', col: TOPIC_PALETTE[0],
         steps: [
@@ -7537,7 +8110,7 @@ const SCHEME_P5 = [
           { label:'Count forwards and backwards through zero', content: P5_PV19 },
           { label:'Number sequences involving large numbers', content: P5_PV20 }
         ]},
-      { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],
+      { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],open: true,
         steps: [
           { label:'Mental addition and subtraction strategies', content: P5_AS1 },
           { label:'Add and subtract multiples of 10, 100 and 1,000', content: P5_AS2 },
@@ -7554,7 +8127,7 @@ const SCHEME_P5 = [
           { label:'Problems involving addition and subtraction', content: P5_AS13 },
           { label:'Reasoning with addition and subtraction', content: P5_AS14 }
         ]},
-      { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],
+      { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],open: false,
         steps: [
           { label:'Multiples', content: P5_MDA1 },
           { label:'Common multiples', content: P5_MDA2 },
@@ -7577,7 +8150,7 @@ const SCHEME_P5 = [
         steps: ['What is a fraction?','Equivalent fractions','Simplifying fractions','Improper fractions','Mixed numbers','Convert improper fractions to mixed numbers','Convert mixed numbers to improper fractions','Compare fractions','Order fractions','Fractions on a number line','Fractions greater than one','Add fractions with the same denominator','Add fractions with related denominators','Subtract fractions with the same denominator','Subtract fractions with related denominators','Add mixed numbers','Subtract mixed numbers','Fraction problem-solving'].map(s=>({label:s, content:null}))},
     ]
   },
-  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:true,
+  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:false,
     topics: [
       { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
       { id:'fractionsB', label:'Fractions B', col: TOPIC_PALETTE[2],
@@ -7593,7 +8166,7 @@ const SCHEME_P5 = [
           { label:'Subtract fractions with different denominators', content: P5_FB9 },
           { label:'Solve multi-step fraction problems', content: P5_FB10 }
         ]},
-      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3], open: true,
+      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],
         steps: [
           { label:'Decimal place value', content: P5_DP1 },
           { label:'Thousandths', content: P5_DP2 },
