@@ -5500,10 +5500,690 @@ ${exCard(10,[
 
 
 
-const P5_MDA11 = null; // Squared notation (²)
-const P5_MDA12 = null; // Cubed notation (³)
-const P5_MDA13 = null; // Recognise divisibility patterns
-const P5_MDA14 = null; // Multiplication facts and related division facts
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A
+   LESSONS 11 AND 12  (Squared notation ² · Cubed notation ³)
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste SECTION A (new helpers) and SECTION B (lessons) ABOVE
+      `const SCHEME_P5` in index.html, below your lessons 1–10 code.
+      (Section A must come BEFORE Section B.)
+   2. DELETE these two lines from your placeholders:
+          const P5_MDA11 = null; // Squared notation (²)
+          const P5_MDA12 = null; // Cubed notation (³)
+   3. Do NOT change SCHEME_P5 — it already points to P5_MDA11 / P5_MDA12.
+
+   Needs (already in your app from lessons 1–10): mdWarm(), mdSquareGrid(),
+   mdCube(), dayHeader(), steps(), exQ(), exCard().
+   Copy from the downloaded .js file, not from the chat preview.
+
+   NOTE ON ² AND ³: they are typed as the real characters ² and ³ (not
+   <sup> tags) so they stay correct after a pupil clicks an answer button.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* Anatomy of a power: base, index, what it means, how to read it.
+   mdAnatomy(4,2) → 4²   mdAnatomy(3,3) → 3³ */
+function mdAnatomy(base,pow){
+  const bs=String(base), name=pow===2?'squared':'cubed';
+  const expr=Array(pow).fill(base).join(' × '), val=Math.pow(base,pow);
+  const bw=bs.length*44, x0=40, idxX=x0+bw+4;
+  let s=`<svg viewBox="0 0 540 180" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<rect x="8" y="8" width="524" height="164" rx="14" fill="#FAF5FF" stroke="#C4B5FD" stroke-width="1.5"/>`;
+  s+=`<text x="${x0}" y="118" font-size="78" font-weight="800" fill="#4C1D95">${bs}</text>`;
+  s+=`<text x="${idxX}" y="64" font-size="46" font-weight="800" fill="#B45309">${pow}</text>`;
+  s+=`<text x="${x0+bw/2}" y="140" text-anchor="middle" font-size="12" font-weight="800" fill="#4C1D95">BASE</text>`;
+  s+=`<text x="${x0+bw/2}" y="156" text-anchor="middle" font-size="10" fill="#666">the number we multiply</text>`;
+  s+=`<text x="${idxX+34}" y="40" font-size="12" font-weight="800" fill="#B45309">INDEX</text>`;
+  s+=`<text x="${idxX+34}" y="56" font-size="10" fill="#666">how many times</text>`;
+  s+=`<text x="${idxX+34}" y="69" font-size="10" fill="#666">the base is used</text>`;
+  s+=`<line x1="280" y1="26" x2="280" y2="154" stroke="#C4B5FD" stroke-width="1.5" stroke-dasharray="4 4"/>`;
+  s+=`<text x="300" y="52" font-size="13" fill="#555">read as:</text>`;
+  s+=`<text x="300" y="78" font-size="20" font-weight="800" fill="#4C1D95">&ldquo;${base} ${name}&rdquo;</text>`;
+  s+=`<text x="300" y="112" font-size="13" fill="#555">means:</text>`;
+  s+=`<text x="300" y="138" font-size="20" font-weight="800" fill="#B45309">${expr} = ${val.toLocaleString('en-GB')}</text>`;
+  return s+'</svg>';
+}
+
+/* Table of powers with notation, words, meaning and value.
+   mdPowTable(1,12,2) for squares, mdPowTable(1,10,3) for cubes. */
+function mdPowTable(from,to,pow){
+  const w=['','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve'];
+  const sup=pow===2?'²':'³', name=pow===2?'squared':'cubed';
+  const th='padding:6px 8px;font-size:12px;font-weight:700;color:#4C1D95;text-align:center;border-bottom:1.5px solid #6D28D9;';
+  const td='padding:5px 8px;font-size:13px;text-align:center;border-bottom:0.5px solid #ddd;';
+  let rows='';
+  for(let n=from;n<=to;n++){
+    const meaning=Array(pow).fill(n).join(' × ');
+    rows+=`<tr style="background:${n%2?'#fff':'#F5F3FF'};"><td style="${td}font-weight:800;color:#4C1D95;">${n}${sup}</td><td style="${td}">${w[n]||n} ${name}</td><td style="${td}">${meaning}</td><td style="${td}font-weight:800;color:#B45309;">${Math.pow(n,pow).toLocaleString('en-GB')}</td></tr>`;
+  }
+  return `<div style="overflow-x:auto;margin:8px 0;"><table style="border-collapse:collapse;width:100%;max-width:520px;margin:0 auto;"><thead><tr style="background:#EDE9FE;"><th style="${th}">Notation</th><th style="${th}">Say it</th><th style="${th}">Meaning</th><th style="${th}">Value</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* Squaring versus doubling: n × 2 (two rows) next to n × n (a square). */
+function mdSqVsDouble(n,title){
+  const s=Math.min(22,Math.floor(150/n));
+  const W=440, H=34+n*s+54;
+  const lx=110-n*s/2, rx=330-n*s/2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let r=0;r<2;r++) for(let c=0;c<n;c++)
+    svg+=`<rect x="${lx+c*s}" y="${30+r*s}" width="${s}" height="${s}" fill="#D1D5DB" stroke="#6B7280" stroke-width="1"/>`;
+  for(let r=0;r<n;r++) for(let c=0;c<n;c++)
+    svg+=`<rect x="${rx+c*s}" y="${30+r*s}" width="${s}" height="${s}" fill="#A78BFA" stroke="#5B21B6" stroke-width="1"/>`;
+  svg+=`<text x="110" y="${30+n*s+20}" text-anchor="middle" font-size="14" font-weight="800" fill="#712B13">${n} × 2 = ${2*n}  ✗</text>`;
+  svg+=`<text x="110" y="${30+n*s+38}" text-anchor="middle" font-size="10" fill="#712B13">only 2 rows — doubling</text>`;
+  svg+=`<text x="330" y="${30+n*s+20}" text-anchor="middle" font-size="14" font-weight="800" fill="#27500A">${n}² = ${n} × ${n} = ${n*n}  ✓</text>`;
+  svg+=`<text x="330" y="${30+n*s+38}" text-anchor="middle" font-size="10" fill="#27500A">${n} rows of ${n} — a square</text>`;
+  return svg+'</svg>';
+}
+
+/* Grouped bars for n = 1 to 5: n (grey), n² (amber), n³ (purple). */
+function mdGrowth(title){
+  const W=560, base=190, sc=140/125;
+  let s=`<svg viewBox="0 0 ${W} 222" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="30" y1="${base}" x2="${W-20}" y2="${base}" stroke="#444" stroke-width="2"/>`;
+  const cols=['#9CA3AF','#FBBF24','#7C3AED'];
+  for(let i=1;i<=5;i++){
+    const gx=60+(i-1)*100, vals=[i,i*i,i*i*i];
+    vals.forEach((v,k)=>{
+      const h=Math.max(2,v*sc), x=gx+k*22;
+      s+=`<rect x="${x}" y="${base-h}" width="18" height="${h}" fill="${cols[k]}" stroke="#444" stroke-width="0.8"/>`;
+      s+=`<text x="${x+9}" y="${base-h-4}" text-anchor="middle" font-size="10" font-weight="800" fill="#333">${v}</text>`;
+    });
+    s+=`<text x="${gx+31}" y="${base+18}" text-anchor="middle" font-size="12" font-weight="800" fill="#333">n = ${i}</text>`;
+  }
+  s+=`<rect x="170" y="204" width="11" height="11" fill="#9CA3AF" stroke="#444"/><text x="186" y="213" font-size="10" font-weight="700" fill="#333">n</text>`;
+  s+=`<rect x="230" y="204" width="11" height="11" fill="#FBBF24" stroke="#444"/><text x="246" y="213" font-size="10" font-weight="700" fill="#333">n² (squared)</text>`;
+  s+=`<rect x="340" y="204" width="11" height="11" fill="#7C3AED" stroke="#444"/><text x="356" y="213" font-size="10" font-weight="700" fill="#333">n³ (cubed)</text>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 11 : Squared notation (²) ---------- */
+const P5_MDA11 = `
+${dayHeader('MD11','Step 11 — Squared Notation (²)','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — A Shorthand for Squares</div>
+  ${mdWarm('You know that 4 × 4 = 16 is a square number. Writing &ldquo;4 × 4&rdquo; every time takes space, so mathematicians invented a <strong>shorthand</strong>: write the number once, with a tiny <strong>2</strong> raised above it: <strong>4²</strong>.')}
+
+  <div class="card-body"><strong>Concrete:</strong> build a 4 by 4 square with tiles — there are 16 tiles. We write this as <strong>4²</strong>.</div>
+  ${mdSquareGrid(4,'4 × 4 = 16, which we write as 4²')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> the anatomy of a power — two numbers, two jobs:</div>
+  ${mdAnatomy(4,2)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Squared notation</div><div class="s-body" style="color:#4C1D95;"><strong>n²</strong> means <strong>n × n</strong>. We say &ldquo;n <strong>squared</strong>&rdquo;. The small raised number is called the <strong>index</strong> (or power). The big number is the <strong>base</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Step 9</div><div class="s-body" style="color:#085041;">Square numbers (1, 4, 9, 16, 25…) are exactly the answers to <strong>1², 2², 3², 4², 5²…</strong> The index 2 tells us the base is used <strong>twice</strong> in the multiplication.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Why &ldquo;squared&rdquo;?</div><div class="s-body" style="color:#633806;">Because n × n is the number of tiles in a SQUARE with side n. It is also the <strong>area</strong> of a square with sides of length n.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Squared is not × 2</div><div class="s-body" style="color:#712B13;">4² = 4 × 4 = <strong>16</strong>. It is NOT 4 × 2 = 8. The index says how many TIMES the base is used, not what to multiply by.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Reading it as the number 42</div><div class="s-body" style="color:#712B13;">The small 2 is raised and small — it is NOT a digit next to the 4. 4² is sixteen, not forty-two. Check by saying it aloud: &ldquo;four squared&rdquo;.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Reading and writing: 5²</div>
+  ${mdWarm('Say it, write it as a multiplication, then work it out.')}
+  ${mdAnatomy(5,2)}
+  ${mdSquareGrid(5,'5² = 5 rows of 5 tiles')}
+  ${steps([['Say it','&ldquo;five squared&rdquo;','base 5, index 2'],['Write it out','5 × 5','the base used twice'],['ANSWER','5² = 25','the fifth square number']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Going both ways: notation ↔ multiplication</div>
+  ${mdWarm('Turn each multiplication into squared notation, and each squared number back into a multiplication.')}
+  ${steps([['7 × 7','= 7²','= 49'],['9²','= 9 × 9','= 81'],['12 × 12','= 12²','= 144'],['10²','= 10 × 10','= 100']])}
+  <div class="card-body" style="margin-top:6px;">💡 Always do the multiplication in words first: &ldquo;nine squared is nine times nine.&rdquo;</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — The squares from 1² to 12²</div>
+  ${mdWarm('This table is your toolkit. Notice how the notation, the words and the multiplication all say the same thing.')}
+  ${mdPowTable(1,12,2)}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Memory tip:</strong> 11² = 121 and 12² = 144. If you know 10² = 100, then 11² = 100 + 21 and 12² = 100 + 44.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Squared, doubled, or added? Don&rsquo;t mix them up</div>
+  ${mdWarm('Compare 4², 4 × 2 and 4 + 4. Which are equal?')}
+  ${mdSqVsDouble(4,'Squaring makes a square; doubling makes only 2 rows')}
+  ${steps([['4²','4 × 4','= 16'],['4 × 2','four lots of 2','= 8'],['4 + 4','add the 4 again','= 8'],['Spot it','only 4² = 16','the others are doubling']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Squaring multiples of 10 (a clever pattern)</div>
+  ${mdWarm('Use a known square, then adjust the zeros: 20 × 20 is (2 × 10) × (2 × 10).')}
+  ${steps([['2² = 4','20² = 20 × 20','= 400 (4 × 100)'],['3² = 9','30² = 30 × 30','= 900 (9 × 100)'],['5² = 25','50² = 50 × 50','= 2,500 (25 × 100)'],['2² = 4','200² = 200 × 200','= 40,000 (4 × 10,000)']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Rule:</strong> to square a multiple of 10, square the digit, then add TWO zeros (because ×10 × 10 = ×100).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Adding and subtracting squares</div>
+  ${mdWarm('Work out each square FIRST, then add or subtract.')}
+  ${steps([['3² + 4²','9 + 16','= 25 (= 5²!)'],['10² − 6²','100 − 36','= 64 (= 8²!)'],['5² + 12²','25 + 144','= 169 (= 13²!)']])}
+  <div class="card-body" style="margin-top:6px;">⭐ <strong>Interesting:</strong> in each case the answer is itself a square number. These are famous &ldquo;square triples&rdquo; (3, 4, 5), (6, 8, 10) and (5, 12, 13) — you will meet them again with right-angled triangles later in school.</div>
+  <div class="card-body" style="margin-top:8px;">⚠️ Notice: 3² + 4² is NOT 7² — the answer to 7² is 49 and the sum is only 25.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: areas of squares</div>
+  ${mdWarm('The <strong>area</strong> of a square is side × side — which is exactly side²!')}
+  ${mdSquareGrid(6,'A 6 cm square has area 6² = 36 square centimetres')}
+  ${steps([['Square of side 9 cm','9² = 9 × 9','= 81 square cm'],['Garden of side 15 m','15² = 15 × 15','= 225 square m'],['Mosaic of 144 tiles in a square','▢² = 144 → 12² = 144','12 tiles on each side']])}
+  <div class="card-body" style="margin-top:6px;">💡 You will see units like cm² ( &ldquo;square centimetres&rdquo; ) when we study area. The little 2 means the same thing there!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${mdWarm('Ali says: &ldquo;8² = 16 because 8 × 2 = 16.&rdquo; What is his mistake?')}
+  ${steps([['Ali did','8 × 2','multiplied by the index'],['Squaring is','8 × 8','= 64'],['ANSWER','8² = 64','the base is used twice']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing numbers:</strong> ▢² = 81 → ▢ = <strong>9</strong> · ▢² = 144 → ▢ = <strong>12</strong> · ▢² = 25 → ▢ = <strong>5</strong>.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: 9² or 10 × 8?</strong> 9² = 81 and 10 × 8 = 80, so <strong>9²</strong> is greater (just!).</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Order from smallest to largest:</strong> 3², 2 × 5, 4², 15 → 9, 10, 16, 15 → <strong>3², 2 × 5, 15, 4²</strong>.</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">n² means n × n. Read it as &ldquo;n squared&rdquo;. The index tells you how many times to USE the base — never what to multiply by.</div></div></div>
+</div>
+
+${exCard(11,[
+ exQ(1,'What is 5²?',['25','10','55'],0),
+ exQ(2,'Which shows 9 × 9 in squared notation?',['9²','9 × 2','9 + 9'],0),
+ exQ(3,'What is 8²?',['64','16','88'],0),
+ exQ(4,'What does 7² mean?',['7 × 7','7 × 2','7 + 7'],0),
+ exQ(5,'What is 12²?',['144','24','122'],0),
+ exQ(6,'Which of these is equal to 4²?',['16','8','42'],0),
+ exQ(7,'What is 3² + 4²?',['25','49','14'],0),
+ exQ(8,'Which statement is true?',['10² = 100','10² = 20','10² = 1,000'],0),
+ exQ(9,'THINK DEEPER: ▢² = 81. What number goes in the box?',['9','162','18'],0,'t'),
+ exQ(10,'BOSS LEVEL: What is 11² + 7² − 5²?',['145','195','95'],0,'b')])}`;
+
+
+/* ---------- STEP 12 : Cubed notation (³) ---------- */
+const P5_MDA12 = `
+${dayHeader('MD12','Step 12 — Cubed Notation (³)','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — A Shorthand for Cubes</div>
+  ${mdWarm('You know 3 × 3 × 3 = 27 is a cube number. The shorthand is the same trick as before — but with a tiny <strong>3</strong> raised above the base: <strong>3³</strong>. It means the base is used <strong>three</strong> times.')}
+
+  <div class="card-body"><strong>Concrete:</strong> a cube made of 3 layers, each 3 by 3, has 27 small cubes. We write this as <strong>3³</strong>.</div>
+  ${mdCube(3,'3 × 3 × 3 = 27, which we write as 3³')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> the anatomy of a cubed number:</div>
+  ${mdAnatomy(3,3)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Cubed notation</div><div class="s-body" style="color:#4C1D95;"><strong>n³</strong> means <strong>n × n × n</strong>. We say &ldquo;n <strong>cubed</strong>&rdquo;. The index 3 tells us the base is used <strong>three times</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Link to Steps 10 and 11</div><div class="s-body" style="color:#085041;">Cube numbers (1, 8, 27, 64, 125…) are the answers to <strong>1³, 2³, 3³, 4³, 5³…</strong> And n³ = n² × n: the square, then once more.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Why &ldquo;cubed&rdquo;?</div><div class="s-body" style="color:#633806;">n × n × n is the number of small cubes in a big cube with side n. Later you will see it as the <strong>volume</strong> of a cube.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Cubed is not × 3</div><div class="s-body" style="color:#712B13;">4³ = 4 × 4 × 4 = <strong>64</strong>. It is NOT 4 × 3 = 12. The index tells you how many TIMES the base appears.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Mixing ² and ³</div><div class="s-body" style="color:#712B13;">4² = 4 × 4 = 16 but 4³ = 4 × 4 × 4 = 64. Look at the little number: 2 → two fours, 3 → three fours.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Reading and writing: 3³</div>
+  ${mdWarm('Say it, write it as a multiplication, then work it out in two steps.')}
+  ${steps([['Say it','&ldquo;three cubed&rdquo;','base 3, index 3'],['Write it out','3 × 3 × 3','the base used three times'],['Two steps','3 × 3 = 9, then 9 × 3','= 27'],['ANSWER','3³ = 27','the third cube number']])}
+  ${mdCube(3,'3³ = 27 small cubes')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Going both ways: notation ↔ multiplication</div>
+  ${mdWarm('Turn each multiplication into cubed notation, and each cubed number back into a multiplication.')}
+  ${steps([['5 × 5 × 5','= 5³','= 125'],['2³','= 2 × 2 × 2','= 8'],['10 × 10 × 10','= 10³','= 1,000'],['6³','= 6 × 6 × 6','= 216']])}
+  <div class="card-body" style="margin-top:6px;">💡 Count the number of times the base is written. Three times? Index 3!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — The cubes from 1³ to 10³</div>
+  ${mdWarm('Another toolkit table. The values grow VERY quickly!')}
+  ${mdPowTable(1,10,3)}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Know by heart:</strong> 1³ = 1, 2³ = 8, 3³ = 27, 4³ = 64, 5³ = 125 and 10³ = 1,000.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — n, n² and n³ compared</div>
+  ${mdWarm('Same base, three different powers. Watch how fast the purple bars climb!')}
+  ${mdGrowth('Comparing n, n² and n³ for n = 1 to 5')}
+  ${steps([['4 × 3','four lots of 3','= 12'],['4²','4 × 4','= 16'],['4³','4 × 4 × 4','= 64']])}
+  <div class="card-body" style="margin-top:6px;">🔎 When n = 1 all three are the same (1). When n is 2 or more, cubes grow much faster than squares.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Calculating cubes, including multiples of 10</div>
+  ${mdWarm('Do it in two steps: n × n first, then × n again.')}
+  ${steps([['6³','6 × 6 = 36, then 36 × 6','= 216'],['7³','7 × 7 = 49, then 49 × 7','= 343'],['2³ = 8','20³ = 20 × 20 × 20','= 8,000 (8 × 1,000)'],['3³ = 27','30³ = 30 × 30 × 30','= 27,000 (27 × 1,000)']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Rule:</strong> to cube a multiple of 10, cube the digit, then add THREE zeros (because ×10 × 10 × 10 = ×1,000).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Mixing squares and cubes</div>
+  ${mdWarm('Work out each power FIRST, then add or subtract.')}
+  ${steps([['2² + 2³','4 + 8','= 12'],['3³ − 3²','27 − 9','= 18'],['4³ − 4²','64 − 16','= 48'],['2³ and 3²','8 and 9','3² is the greater!']])}
+  <div class="card-body" style="margin-top:6px;">⚠️ Careful: 2³ = 8 but 3² = 9. A bigger index does not always mean a bigger answer — it depends on the base!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: cubes in boxes</div>
+  ${mdWarm('A cube-shaped box has sides of 4 cm. How many 1 cm cubes fit inside?')}
+  ${mdCube(4,'A 4 cm cube holds 4³ = 64 small cubes')}
+  ${steps([['Notation','4³','= 4 × 4 × 4'],['Calculate','16 × 4','= 64'],['ANSWER','64 cubic centimetres','the volume of the box']])}
+  <div class="card-body" style="margin-top:6px;">💡 Units like cm³ ( &ldquo;cubic centimetres&rdquo; ) use the same little 3. You will meet this when we study volume in the Summer term.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and a famous pattern</div>
+  ${mdWarm('Tia says: &ldquo;5³ = 15 because 5 × 3 = 15.&rdquo; What is her mistake?')}
+  ${steps([['Tia did','5 × 3','multiplied by the index'],['Cubing is','5 × 5 × 5','= 125'],['ANSWER','5³ = 125','the base used three times']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing numbers:</strong> ▢³ = 27 → ▢ = <strong>3</strong> · ▢³ = 64 → ▢ = <strong>4</strong> · ▢³ = 1,000 → ▢ = <strong>10</strong>.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>⭐ Challenge pattern:</strong> add up the first few cubes:</div>
+  ${steps([['1³ + 2³','1 + 8','= 9 = 3²'],['1³ + 2³ + 3³','1 + 8 + 27','= 36 = 6²'],['1³ + 2³ + 3³ + 4³','1 + 8 + 27 + 64','= 100 = 10²']])}
+  <div class="card-body" style="margin-top:6px;">🔎 The totals 9, 36 and 100 are all square numbers! (3 = 1 + 2, 6 = 1 + 2 + 3 and 10 = 1 + 2 + 3 + 4.)</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">n³ means n × n × n. Read it as &ldquo;n cubed&rdquo;. The index counts how many times the base is written — not what you multiply by.</div></div></div>
+</div>
+
+${exCard(12,[
+ exQ(1,'What is 2³?',['8','6','9'],0),
+ exQ(2,'What is 3³?',['27','9','6'],0),
+ exQ(3,'Which shows 5 × 5 × 5 in cubed notation?',['5³','5 × 3','5²'],0),
+ exQ(4,'What does 4³ mean?',['4 × 4 × 4','4 × 3','4 + 4 + 4'],0),
+ exQ(5,'What is 4³?',['64','12','16'],0),
+ exQ(6,'What is 10³?',['1,000','30','100'],0),
+ exQ(7,'What is 2³ + 3²?',['17','13','15'],0),
+ exQ(8,'Which is greater: 2³ or 3²?',['3² (it is 9)','2³ (it is 8)','They are equal'],0),
+ exQ(9,'THINK DEEPER: ▢³ = 125. What number goes in the box?',['5','25','40'],0,'t'),
+ exQ(10,'BOSS LEVEL: What is 1³ + 2³ + 3³?',['36','14','27'],0,'b')])}`;
+
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — MULTIPLICATION & DIVISION A
+   LESSONS 13 AND 14  (Divisibility patterns · Multiplication facts
+   and related division facts)
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste SECTION A (new helpers) and SECTION B (lessons) ABOVE
+      `const SCHEME_P5` in index.html, below your lessons 1–12 code.
+      (Section A must come BEFORE Section B.)
+   2. DELETE these two lines from your placeholders:
+          const P5_MDA13 = null; // Recognise divisibility patterns
+          const P5_MDA14 = null; // Multiplication facts and related division facts
+   3. Do NOT change SCHEME_P5 — it already points to P5_MDA13 / P5_MDA14.
+
+   Needs (already in your app from lessons 1–12): mdWarm(), mdTimesRow(),
+   mdJumps(), mdHundredSquare(), dayHeader(), steps(), exQ(), exCard().
+   Copy from the downloaded .js file, not from the chat preview.
+   ============================================================ */
+
+
+/* ================= SECTION A — NEW HELPERS ================= */
+
+/* Digit boxes + sum, with the ÷3 and ÷9 verdicts.  mdDigitSum(5832) */
+function mdDigitSum(n){
+  const str=String(n).replace(/,/g,'');
+  const ds=str.split('').map(Number), sum=ds.reduce((a,b)=>a+b,0);
+  const box='display:inline-block;min-width:34px;padding:6px 8px;border-radius:8px;background:#EDE9FE;border:1.5px solid #6D28D9;font-size:18px;font-weight:800;color:#4C1D95;text-align:center;';
+  let s='<div style="text-align:center;margin:10px 0;"><div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center;">';
+  ds.forEach((d,i)=>{ s+=`<span style="${box}">${d}</span>`; if(i<ds.length-1) s+='<span style="font-size:18px;font-weight:800;color:#6D28D9;">+</span>'; });
+  s+=`<span style="font-size:18px;font-weight:800;color:#6D28D9;">=</span><span style="${box}background:#FEF3C7;border-color:#B45309;color:#78350F;">${sum}</span></div>`;
+  s+=`<div style="margin-top:8px;font-size:13px;font-weight:700;color:#333;">Digit sum of ${Number(str).toLocaleString('en-GB')} is ${sum} &nbsp;→&nbsp; divisible by 3? <span style="color:${sum%3===0?'#27500A':'#712B13'};">${sum%3===0?'✓ yes':'✗ no'}</span> &nbsp;·&nbsp; divisible by 9? <span style="color:${sum%9===0?'#27500A':'#712B13'};">${sum%9===0?'✓ yes':'✗ no'}</span></div></div>`;
+  return s;
+}
+
+/* Number in boxes with the last k digits highlighted, then ÷ d tested.
+   mdSplitNumber(5128,3,8) */
+function mdSplitNumber(n,k,d){
+  const str=String(n).replace(/,/g,'');
+  const last=parseInt(str.slice(-k),10), q=Math.floor(last/d), r=last%d;
+  const box='display:inline-block;min-width:32px;padding:6px 8px;border-radius:8px;font-size:18px;font-weight:800;text-align:center;';
+  let s='<div style="text-align:center;margin:10px 0;"><div style="display:flex;gap:5px;justify-content:center;">';
+  str.split('').forEach((ch,i)=>{
+    const hot=i>=str.length-k;
+    s+=`<span style="${box}background:${hot?'#FEF3C7':'#F3F4F6'};border:1.5px solid ${hot?'#B45309':'#D1D5DB'};color:${hot?'#78350F':'#6B7280'};">${ch}</span>`;
+  });
+  s+=`</div><div style="margin-top:8px;font-size:13px;font-weight:700;color:#333;">Look at the last ${k===1?'digit':k+' digits'}: <strong>${last}</strong> &nbsp;→&nbsp; ${last} ÷ ${d} = ${q}${r?' remainder '+r:''} &nbsp; <span style="color:${r?'#712B13':'#27500A'};">${r?'✗ not divisible by '+d:'✓ divisible by '+d}</span></div></div>`;
+  return s;
+}
+
+/* Runs every test on a number and shows the evidence.
+   mdDivTable(7128,[2,3,4,5,6,8,9,10]) */
+function mdDivTable(n,divs){
+  const str=String(n), ds=str.split('').map(Number), sum=ds.reduce((a,b)=>a+b,0);
+  const l1=Number(str.slice(-1)), l2=Number(str.slice(-2)), l3=Number(str.slice(-3));
+  const rule={
+    2:['last digit is even','last digit '+l1,l1%2===0],
+    3:['digit sum is in the 3 times table','digit sum '+sum,sum%3===0],
+    4:['last two digits divisible by 4','last two digits '+l2,l2%4===0],
+    5:['last digit is 0 or 5','last digit '+l1,l1%5===0],
+    6:['divisible by BOTH 2 and 3','2: '+(l1%2===0?'✓':'✗')+' · 3: '+(sum%3===0?'✓':'✗'),l1%2===0&&sum%3===0],
+    8:['last three digits divisible by 8','last three digits '+l3,l3%8===0],
+    9:['digit sum is in the 9 times table','digit sum '+sum,sum%9===0],
+    10:['last digit is 0','last digit '+l1,l1===0]
+  };
+  const th='padding:6px 8px;font-size:12px;font-weight:700;color:#4C1D95;text-align:center;border-bottom:1.5px solid #6D28D9;';
+  const td='padding:6px 8px;font-size:12.5px;text-align:center;border-bottom:0.5px solid #ddd;';
+  let rows='';
+  divs.forEach(d=>{
+    const r=rule[d], ok=r[2];
+    rows+=`<tr style="background:${ok?'#EAF3DE':'#FAECE7'};"><td style="${td}font-weight:800;">÷ ${d}</td><td style="${td}">${r[0]}</td><td style="${td}">${r[1]}</td><td style="${td}font-weight:800;color:${ok?'#27500A':'#712B13'};">${ok?'✓ YES':'✗ NO'}</td></tr>`;
+  });
+  return `<div style="overflow-x:auto;margin:8px 0;"><div style="text-align:center;font-size:13px;font-weight:800;color:#5B21B6;margin-bottom:4px;">Testing ${Number(n).toLocaleString('en-GB')}</div><table style="border-collapse:collapse;width:100%;max-width:560px;margin:0 auto;"><thead><tr style="background:#EDE9FE;"><th style="${th}">Test</th><th style="${th}">Rule</th><th style="${th}">Evidence</th><th style="${th}">Divisible?</th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+/* Reference chart of all the rules. */
+function mdRuleChart(){
+  const rows=[
+    ['2','the last digit is even (0, 2, 4, 6 or 8)','3,478'],
+    ['3','the digit sum is divisible by 3','2,145 → 2+1+4+5 = 12'],
+    ['4','the last two digits are divisible by 4','5,316 → 16'],
+    ['5','the last digit is 0 or 5','3,465'],
+    ['6','it is divisible by BOTH 2 and 3','348 → even, 3+4+8 = 15'],
+    ['8','the last three digits are divisible by 8','5,128 → 128'],
+    ['9','the digit sum is divisible by 9','7,128 → 7+1+2+8 = 18'],
+    ['10','the last digit is 0','2,340'],
+    ['25','the last two digits are 00, 25, 50 or 75','3,675 → 75'],
+    ['100','the last two digits are 00','4,500']
+  ];
+  const th='padding:6px 8px;font-size:12px;font-weight:700;color:#4C1D95;text-align:left;border-bottom:1.5px solid #6D28D9;';
+  const td='padding:5px 8px;font-size:12.5px;text-align:left;border-bottom:0.5px solid #ddd;';
+  let t='';
+  rows.forEach((r,i)=>{ t+=`<tr style="background:${i%2?'#F5F3FF':'#fff'};"><td style="${td}font-weight:800;color:#B45309;font-size:14px;">${r[0]}</td><td style="${td}">${r[1]}</td><td style="${td}color:#555;">${r[2]}</td></tr>`; });
+  return `<div style="overflow-x:auto;margin:8px 0;"><table style="border-collapse:collapse;width:100%;max-width:560px;margin:0 auto;"><thead><tr style="background:#EDE9FE;"><th style="${th}">Divisible by</th><th style="${th}">The test</th><th style="${th}">Example</th></tr></thead><tbody>${t}</tbody></table></div>`;
+}
+
+/* Fact-family triangle with all the related facts.  mdFactTriangle(7,8,56) */
+function mdFactTriangle(a,b,c,title){
+  const all=[[`${a} × ${b} = ${c}`,'m'],[`${b} × ${a} = ${c}`,'m'],[`${c} ÷ ${a} = ${b}`,'d'],[`${c} ÷ ${b} = ${a}`,'d']];
+  const seen=new Set(), facts=[];
+  all.forEach(f=>{ if(!seen.has(f[0])){ seen.add(f[0]); facts.push(f); } });
+  const H=224;
+  let s=`<svg viewBox="0 0 540 ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="270" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<polygon points="110,56 44,160 176,160" fill="#FAF5FF" stroke="#6D28D9" stroke-width="2.5"/>`;
+  s+=`<circle cx="110" cy="56" r="27" fill="#FEF3C7" stroke="#B45309" stroke-width="2.5"/><text x="110" y="63" text-anchor="middle" font-size="19" font-weight="800" fill="#78350F">${c}</text>`;
+  s+=`<circle cx="44" cy="160" r="27" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2.5"/><text x="44" y="167" text-anchor="middle" font-size="19" font-weight="800" fill="#4C1D95">${a}</text>`;
+  s+=`<circle cx="176" cy="160" r="27" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2.5"/><text x="176" y="167" text-anchor="middle" font-size="19" font-weight="800" fill="#4C1D95">${b}</text>`;
+  s+=`<text x="110" y="204" text-anchor="middle" font-size="10" fill="#666">× the bottom two = the top</text>`;
+  s+=`<text x="110" y="218" text-anchor="middle" font-size="10" fill="#666">÷ the top by one bottom = the other</text>`;
+  const y0=34+(4-facts.length)*22;
+  facts.forEach((f,i)=>{
+    const y=y0+i*44, m=f[1]==='m';
+    s+=`<rect x="250" y="${y}" width="270" height="36" rx="10" fill="${m?'#EAF3DE':'#FFEDD5'}" stroke="${m?'#16A34A':'#EA580C'}" stroke-width="1.8"/>`;
+    s+=`<text x="385" y="${y+24}" text-anchor="middle" font-size="19" font-weight="800" fill="${m?'#14532D':'#9A3412'}">${f[0]}</text>`;
+  });
+  return s+'</svg>';
+}
+
+/* Array of dots: r rows of c.  mdArray(3,4,'title') */
+function mdArray(r,c,title){
+  const s=Math.min(28,Math.floor(300/c)), W=Math.max(340,c*s+80), H=r*s+86;
+  const x0=(W-c*s)/2;
+  let svg=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) svg+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let i=0;i<r;i++) for(let j=0;j<c;j++){
+    svg+=`<circle cx="${x0+j*s+s/2}" cy="${34+i*s+s/2}" r="${s*0.36}" fill="${i%2?'#F472B6':'#7C3AED'}"/>`;
+  }
+  svg+=`<text x="${W/2}" y="${34+r*s+22}" text-anchor="middle" font-size="14" font-weight="800" fill="#B45309">${r} rows of ${c} → ${r} × ${c} = ${r*c}</text>`;
+  svg+=`<text x="${W/2}" y="${34+r*s+42}" text-anchor="middle" font-size="11" fill="#666">turn it round: ${c} rows of ${r} → ${c} × ${r} = ${r*c}</text>`;
+  return svg+'</svg>';
+}
+
+/* Multiplication grid up to upTo × upTo.  hl = {row, col} highlights a fact
+   and its mirror.  mdTimesGrid(12,{row:7,col:8}) */
+function mdTimesGrid(upTo,hl,title){
+  const cs=26, n=upTo, W=(n+1)*cs+24, H=(n+1)*cs+40;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  const ox=12, oy=26;
+  for(let r=0;r<=n;r++) for(let c=0;c<=n;c++){
+    const x=ox+c*cs, y=oy+r*cs;
+    let fill='#fff', txt='#333', fw=500, val='';
+    if(r===0&&c===0){ fill='#4C1D95'; val='×'; txt='#fff'; fw=800; }
+    else if(r===0){ fill='#6D28D9'; val=c; txt='#fff'; fw=800; }
+    else if(c===0){ fill='#6D28D9'; val=r; txt='#fff'; fw=800; }
+    else {
+      val=r*c;
+      if(r===c) fill='#EDE9FE';
+      if(hl && (r===hl.row||c===hl.col||r===hl.col||c===hl.row)) fill='#FEF9C3';
+      if(hl && ((r===hl.row&&c===hl.col)||(r===hl.col&&c===hl.row))){ fill='#FBBF24'; fw=800; }
+    }
+    s+=`<rect x="${x}" y="${y}" width="${cs}" height="${cs}" fill="${fill}" stroke="#bbb" stroke-width="0.8"/>`;
+    s+=`<text x="${x+cs/2}" y="${y+cs/2+3.5}" text-anchor="middle" font-size="${String(val).length>2?8.5:10}" font-weight="${fw}" fill="${txt}">${val}</text>`;
+  }
+  return s+'</svg>';
+}
+
+/* Bar model: whole bar split into equal parts.  mdBar(56,7,'title') */
+function mdBar(total,parts,title){
+  const W=600, x0=20, bw=560, cw=bw/parts, each=total/parts;
+  let s=`<svg viewBox="0 0 ${W} 124" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="${x0}" y1="34" x2="${x0+bw}" y2="34" stroke="#B45309" stroke-width="2"/><line x1="${x0}" y1="28" x2="${x0}" y2="40" stroke="#B45309" stroke-width="2"/><line x1="${x0+bw}" y1="28" x2="${x0+bw}" y2="40" stroke="#B45309" stroke-width="2"/>`;
+  s+=`<text x="${W/2}" y="30" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309" style="paint-order:stroke;stroke:#fff;stroke-width:5px;">${total}</text>`;
+  for(let i=0;i<parts;i++){
+    s+=`<rect x="${x0+i*cw}" y="46" width="${cw}" height="44" fill="${i%2?'#DDD6FE':'#C4B5FD'}" stroke="#4C1D95" stroke-width="1.5"/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="74" text-anchor="middle" font-size="16" font-weight="800" fill="#4C1D95">${each}</text>`;
+  }
+  s+=`<text x="${W/2}" y="112" text-anchor="middle" font-size="14" font-weight="800" fill="#5B21B6">${total} ÷ ${parts} = ${each}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 13 : Recognise divisibility patterns ---------- */
+const P5_MDA13 = `
+${dayHeader('MD13','Step 13 — Recognise Divisibility Patterns','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — Number Detective Tests</div>
+  ${mdWarm('Is <strong>5,832</strong> in the 9 times table? You could divide… but a number detective can tell in seconds just by LOOKING at the digits! Today we learn quick tests, called <strong>divisibility rules</strong>.')}
+
+  <div class="card-body"><strong>Divisible by</strong> means &ldquo;divides exactly, with no remainder&rdquo;. It is the same as saying the number is a <strong>multiple</strong> (Step 1) and the divisor is a <strong>factor</strong> (Step 3).</div>
+  ${mdRuleChart()}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">🔎 Why do the tests work?</div><div class="s-body" style="color:#4C1D95;">100 is a multiple of 2, 4, 5, 10, 25 and 100, so the hundreds, thousands… never matter for those — only the END of the number does. And every 10 = 9 + 1, so for 3 and 9 each digit leaves a remainder equal to itself: just add the digits.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔑 Combine tests</div><div class="s-body" style="color:#085041;">6 = 2 × 3, so a number is divisible by 6 only if it passes BOTH the 2 test and the 3 test.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;The last digit tells me everything&rdquo;</div><div class="s-body" style="color:#712B13;">The last digit is enough for 2, 5 and 10 ONLY. For 3 and 9 you must add ALL the digits. For 4 and 8 you need the last TWO or THREE digits.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Even means divisible by 4 or 6&rdquo;</div><div class="s-body" style="color:#712B13;">Even numbers are divisible by 2 — nothing more! 14 is even but not divisible by 4. And 6 needs 2 AND 3: 452 is even but 4 + 5 + 2 = 11 fails the 3 test.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Divisible by 2, 5 and 10: look at the last digit</div>
+  ${mdWarm('Shade multiples of 2 and 5. Where do both colours land together?')}
+  ${mdHundredSquare({step:2,color:'#FCD34D'},{step:5,color:'#5EEAD4'},'Multiples of 2 and 5 — the purple squares are the multiples of 10')}
+  ${steps([['÷ 2','3,478 ends in 8 (even)','✓ divisible by 2'],['÷ 5','8,365 ends in 5','✓ divisible by 5'],['÷ 10','2,340 ends in 0','✓ divisible by 10 (and by 2 and 5)'],['✗ Check','3,477 ends in 7','not divisible by 2, 5 or 10']])}
+  <div class="card-body" style="margin-top:6px;">💡 Every multiple of 10 is also a multiple of 2 and of 5 (because 10 = 2 × 5).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Divisible by 3 and 9: add the digits</div>
+  ${mdWarm('Add up ALL the digits. Is the digit sum in the 3 times table? In the 9 times table?')}
+  ${mdDigitSum(4251)}
+  ${steps([['Digit sum','4 + 2 + 5 + 1','= 12'],['÷ 3','12 is in the 3 times table','✓ 4,251 ÷ 3 = 1,417'],['÷ 9','12 is not in the 9 times table','✗ not divisible by 9']])}
+  ${mdDigitSum(5832)}
+  ${steps([['Digit sum','5 + 8 + 3 + 2','= 18'],['÷ 3 and ÷ 9','18 is in both tables','✓✓ 5,832 ÷ 9 = 648']])}
+  ${mdHundredSquare({step:3,color:'#FCD34D'},{step:9,color:'#5EEAD4'},'Multiples of 3 and 9 — every multiple of 9 is also a multiple of 3')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Divisible by 4 and 8: last two or three digits</div>
+  ${mdWarm('100 is a multiple of 4, and 1,000 is a multiple of 8. So we can ignore the front of the number!')}
+  <div class="card-body"><strong>Is 3,516 divisible by 4?</strong> Look at the last TWO digits:</div>
+  ${mdSplitNumber(3516,2,4)}
+  <div class="card-body"><strong>Is 7,314 divisible by 4?</strong></div>
+  ${mdSplitNumber(7314,2,4)}
+  <div class="card-body" style="margin-top:8px;"><strong>Is 5,128 divisible by 8?</strong> Look at the last THREE digits:</div>
+  ${mdSplitNumber(5128,3,8)}
+  <div class="card-body"><strong>Is 5,124 divisible by 8?</strong></div>
+  ${mdSplitNumber(5124,3,8)}
+  <div class="card-body" style="margin-top:6px;">🔑 5,124 is divisible by 4 (its last two digits 24 ÷ 4 = 6) but NOT by 8. Every multiple of 8 is a multiple of 4, but not the other way round.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Divisible by 6: two tests together</div>
+  ${mdWarm('A number is divisible by 6 if it is divisible by BOTH 2 and 3. On the hundred square, the purple squares (both) are the multiples of 6.')}
+  ${mdHundredSquare({step:2,color:'#FCD34D'},{step:3,color:'#5EEAD4'},'Multiples of 2 and 3 — purple = multiples of 6')}
+  ${steps([['348','even ✓ · 3+4+8 = 15 ✓','divisible by 6 (348 ÷ 6 = 58)'],['452','even ✓ · 4+5+2 = 11 ✗','NOT divisible by 6'],['735','odd ✗ · 7+3+5 = 15 ✓','NOT divisible by 6']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Divisible by 25 and 100</div>
+  ${mdWarm('Look at the last two digits. Quarters of 100 are 25, 50, 75 and 00!')}
+  ${steps([['3,675','last two digits 75','✓ divisible by 25 (3,675 ÷ 25 = 147)'],['2,850','last two digits 50','✓ by 25, ✗ by 100'],['4,500','last two digits 00','✓ by 25 AND ✓ by 100'],['4,215','last two digits 15','✗ not divisible by 25']])}
+  <div class="card-body" style="margin-top:6px;">💡 Think money: a number is divisible by 25 if it can be paid exactly in 25p coins!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Using every test on one number: 7,128</div>
+  ${mdWarm('Run each test and keep a record. Which divisors work?')}
+  ${mdDivTable(7128,[2,3,4,5,6,8,9,10])}
+  ${steps([['Passes','2, 3, 4, 6, 8 and 9','7,128 = 8 × 891 = 9 × 792'],['Fails','5 and 10','it does not end in 0 or 5']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: teams and sharing money</div>
+  ${mdWarm('252 pupils are split into equal teams. Which team sizes work?')}
+  ${mdDivTable(252,[2,3,4,6,8,9])}
+  ${steps([['Teams of 4','252 ÷ 4','= 63 teams'],['Teams of 6','252 ÷ 6','= 42 teams'],['Teams of 9','252 ÷ 9','= 28 teams'],['Teams of 8','not divisible','✗ 4 pupils left over']])}
+  <div class="card-body" style="margin-top:8px;"><strong>£4,350 shared equally between 5, 10 or 25 people?</strong> It ends in 50, so it passes ÷ 5, ÷ 10 and ÷ 25: £870, £435 or £174 each.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning, missing digits and a stretch rule</div>
+  ${mdWarm('The number 4,5▢2 is divisible by 9. What is the missing digit?')}
+  ${steps([['Known digits','4 + 5 + 2','= 11'],['Next multiple of 9','18','11 + ▢ = 18'],['ANSWER','▢ = 7','4,572 ÷ 9 = 508 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>What is the smallest number you can add to 2,000 to make it divisible by 3?</strong> Digit sum 2 → need 3 → add <strong>1</strong> (2,001 ÷ 3 = 667 ✓).</div>
+  <div class="card-body" style="margin-top:8px;"><strong>True or false:</strong> &ldquo;Every number divisible by 4 is divisible by 2.&rdquo; <strong>TRUE</strong> ✓ (4 = 2 × 2). &ldquo;Every number divisible by 2 and 4 is divisible by 8.&rdquo; <strong>FALSE</strong> ✗ — 12 is divisible by 2 and 4 but not by 8.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>⭐ Stretch: the rule for 11.</strong> Take the digits and alternate − and +, starting from the left. If the result is 0 (or a multiple of 11), it is divisible by 11.</div>
+  ${steps([['2,376','2 − 3 + 7 − 6','= 0 ✓ → 2,376 = 11 × 216'],['4,213','4 − 2 + 1 − 3','= 0 ✓ → 4,213 = 11 × 383'],['5,431','5 − 4 + 3 − 1','= 3 ✗ not divisible by 11']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Match the test to the divisor: end digits for 2, 5, 10, 4, 8, 25 and 100; digit sum for 3 and 9; combine tests for 6.</div></div></div>
+</div>
+
+${exCard(13,[
+ exQ(1,'Which number is divisible by 5?',['3,465','3,462','3,468'],0),
+ exQ(2,'Which number is divisible by 3?',['2,145','2,146','2,147'],0),
+ exQ(3,'Is 7,128 divisible by 9?',['Yes — its digit sum is 18','No — it ends in 8','No — its digit sum is not in the 9 times table'],0),
+ exQ(4,'Which number is divisible by 4?',['5,316','5,314','5,318'],0),
+ exQ(5,'Which number is divisible by 6?',['348','452','735'],0),
+ exQ(6,'Which number is divisible by 8?',['5,128','5,124','5,126'],0),
+ exQ(7,'Which number is divisible by 25?',['3,675','3,672','3,677'],0),
+ exQ(8,'Which statement is true?',['Every number divisible by 4 is also divisible by 2','Every number divisible by 2 is also divisible by 4','Every number ending in 5 is divisible by 10'],0),
+ exQ(9,'THINK DEEPER: The number 4,5▢2 is divisible by 9. Which digit goes in the box?',['7','2','9'],0,'t'),
+ exQ(10,'BOSS LEVEL: Which of these numbers is divisible by 2, 3, 4, 5 AND 6?',['1,260','1,350','1,240'],0,'b')])}`;
+
+
+/* ---------- STEP 14 : Multiplication facts and related division facts ---------- */
+const P5_MDA14 = `
+${dayHeader('MD14','Step 14 — Multiplication Facts and Related Division Facts','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#6D28D9;">
+  <div class="card-title" style="color:#5B21B6;">1. Concrete &amp; Pictorial Stage — One Array, Four Facts</div>
+  ${mdWarm('A theatre has <strong>3 rows</strong> with <strong>4 seats</strong> in each row. How many seats? Now turn the picture round — what do you notice? One picture tells FOUR number stories!')}
+
+  <div class="card-body"><strong>Concrete:</strong> arrange 12 counters in 3 rows of 4. Rotate the array and it becomes 4 rows of 3.</div>
+  ${mdArray(3,4,'3 rows of 4 counters')}
+  <div class="card-body" style="margin-top:6px;"><strong>Pictorial:</strong> the <strong>fact family triangle</strong> shows the three numbers that belong together and the four facts they make:</div>
+  ${mdFactTriangle(3,4,12,'Fact family of 3, 4 and 12')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#5B21B6;">📖 Fact family</div><div class="s-body" style="color:#4C1D95;">Three numbers that belong together make a <strong>fact family</strong>: two multiplications and two divisions (for example 3 × 4 = 12, 4 × 3 = 12, 12 ÷ 3 = 4, 12 ÷ 4 = 3).</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔄 Inverse operations</div><div class="s-body" style="color:#085041;">Division <strong>undoes</strong> multiplication. If you know 7 × 8 = 56, you instantly know 56 ÷ 7 = 8 and 56 ÷ 8 = 7. Learn each times-table fact AND its division partners together!</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Know up to 12 × 12</div><div class="s-body" style="color:#633806;">Fast recall of the multiplication facts to 12 × 12 — and the matching division facts — makes every later topic (fractions, long multiplication, short division) much easier.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Division has an order</div><div class="s-body" style="color:#712B13;">3 × 4 = 4 × 3, but 12 ÷ 3 is NOT the same as 3 ÷ 12. In division the <strong>biggest number (the product) goes first</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Using a near-miss fact</div><div class="s-body" style="color:#712B13;">54 ÷ 6 = 8 is WRONG because 6 × 8 = 48. Always check by multiplying back: 6 × 9 = 54, so 54 ÷ 6 = <strong>9</strong>.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — The fact family of 3, 4 and 12</div>
+  ${mdWarm('Write all four facts from one array.')}
+  ${mdFactTriangle(3,4,12,'3 × 4 = 12 gives four facts')}
+  ${steps([['Multiply','3 × 4 = 12','3 rows of 4'],['Turn it round','4 × 3 = 12','4 rows of 3'],['Divide','12 ÷ 3 = 4','share 12 into 3 rows'],['Divide again','12 ÷ 4 = 3','share 12 into 4 rows']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The fact family of 7, 8 and 56 (and the times-table grid)</div>
+  ${mdWarm('The yellow squares show 7 × 8 and its mirror 8 × 7 — they land on the SAME product!')}
+  ${mdTimesGrid(12,{row:7,col:8},'The multiplication grid: 7 × 8 and 8 × 7 are both 56')}
+  ${mdFactTriangle(7,8,56,'7 × 8 = 56')}
+  <div class="card-body" style="margin-top:6px;">⭐ The purple squares on the diagonal are the <strong>square numbers</strong> (1, 4, 9, 16… from Step 9). Because a × a uses the same number twice, a square-number fact family has only <strong>two</strong> facts: 6 × 6 = 36 and 36 ÷ 6 = 6.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Division as sharing and as grouping: 56 ÷ 7</div>
+  ${mdWarm('Two ways to think about 56 ÷ 7 — both give 8!')}
+  <div class="card-body"><strong>Sharing:</strong> share 56 equally into 7 groups. How many in each?</div>
+  ${mdBar(56,7,'56 shared into 7 equal parts: 8 in each')}
+  <div class="card-body" style="margin-top:6px;"><strong>Grouping:</strong> how many groups of 7 are there in 56? Count the jumps:</div>
+  ${mdJumps(7,8,'8 jumps of 7 reach 56')}
+  ${steps([['Sharing','56 ÷ 7','= 8 in each group'],['Grouping','56 ÷ 7','= 8 groups of 7'],['Check','8 × 7','= 56 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Missing numbers: use the inverse</div>
+  ${mdWarm('Turn a missing-number problem into a division (or multiplication) you know.')}
+  ${steps([['▢ × 6 = 54','54 ÷ 6','▢ = 9  (check: 9 × 6 = 54 ✓)'],['72 ÷ ▢ = 9','72 ÷ 9','▢ = 8  (check: 72 ÷ 8 = 9 ✓)'],['▢ ÷ 8 = 7','7 × 8','▢ = 56  (check: 56 ÷ 8 = 7 ✓)'],['9 × ▢ = 108','108 ÷ 9','▢ = 12  (check: 9 × 12 = 108 ✓)']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Rule:</strong> to find a missing factor, DIVIDE the product by the factor you know. To find a missing amount that was divided, MULTIPLY.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Scaling facts by 10 and 100</div>
+  ${mdWarm('You know 6 × 7 = 42. What if the numbers get 10 or 100 times bigger?')}
+  ${steps([['6 × 7','= 42','the known fact'],['60 × 7','= 420','6 tens × 7'],['6 × 70','= 420','same: 6 × 7 tens'],['600 × 7','= 4,200','6 hundreds × 7']])}
+  <div class="card-body" style="margin-top:8px;"><strong>The division facts scale too:</strong></div>
+  ${steps([['420 ÷ 7','= 60','42 ÷ 7 = 6, then × 10'],['4,200 ÷ 70','= 60','42 ÷ 7 = 6, then × 10'],['4,200 ÷ 6','= 700','42 ÷ 6 = 7, then × 100']])}
+  <div class="card-body" style="margin-top:6px;">🔑 Use the basic fact, then put the zeros back using place value (Place Value topic).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Working out facts you cannot remember</div>
+  ${mdWarm('Not sure of a fact? Build it from one you DO know.')}
+  ${steps([['4 × 7','double 2 × 7 = 14, then double','= 28'],['5 × 8','half of 10 × 8 = 80','= 40'],['9 × 6','10 × 6 − 6 = 60 − 6','= 54'],['12 × 7','10 × 7 + 2 × 7 = 70 + 14','= 84'],['11 × 8','10 × 8 + 8 = 80 + 8','= 88']])}
+  ${mdTimesRow(9,12)}
+  <div class="card-body" style="margin-top:6px;">⭐ <strong>9 times table pattern:</strong> the tens digit goes UP by one and the ones digit goes DOWN by one (18, 27, 36, 45…), and the digits always add up to 9 — just like the divisibility test in Step 13!</div>
+  <div class="card-body" style="margin-top:6px;"><strong>Derived division:</strong> 12 × 7 = 84, so 84 ÷ 12 = 7 and 84 ÷ 7 = 12.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: word problems</div>
+  ${mdWarm('Decide: is it a multiplication or a division? Then use the fact family to check.')}
+  ${steps([['Tickets cost £9. £108 is collected.','108 ÷ 9','= 12 tickets  (9 × 12 = 108 ✓)'],['A baker makes 72 buns and packs 8 in a bag.','72 ÷ 8','= 9 bags  (8 × 9 = 72 ✓)'],['7 boxes hold 8 pencils each.','7 × 8','= 56 pencils']])}
+  ${mdBar(72,8,'72 ÷ 8 = 9: eight equal parts of 9 (or 9 bags of 8)')}
+  <div class="card-body" style="margin-top:6px;">💡 Notice the bar shows 72 ÷ 8 = 9 either way: 8 groups of 9, or 9 groups of 8. The fact family 8, 9 and 72 tells us both!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${mdWarm('Sana says: &ldquo;72 ÷ 8 = 7 because 7 × 8 = 56.&rdquo; What went wrong?')}
+  ${steps([['Check','7 × 8 = 56, not 72','she used the wrong family'],['Correct fact','9 × 8 = 72','so 72 ÷ 8 = 9'],['ANSWER','9','the family of 8, 9 and 72']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Using one fact to find others:</strong> 13 × 4 = 52. Then 4 × 13 = 52, 52 ÷ 4 = 13, 52 ÷ 13 = 4, and <strong>26 × 4 = 104</strong> (26 is double 13, so the answer doubles).</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Division is not commutative:</strong> 56 ÷ 7 = 8, but 7 ÷ 56 is NOT 8 — it is less than 1. Multiplication can go in any order; division cannot.</div>
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Lesson</div><div class="s-body" style="color:#27500A;">Every multiplication fact comes with division partners. To check any division, multiply the answer by the divisor and see if you get the number you started with.</div></div></div>
+</div>
+
+${exCard(14,[
+ exQ(1,'Which fact is in the same family as 3 × 4 = 12?',['12 ÷ 3 = 4','12 ÷ 4 = 4','3 + 4 = 12'],0),
+ exQ(2,'7 × 8 = 56. What is 56 ÷ 8?',['7','8','48'],0),
+ exQ(3,'What number goes in the box? ▢ × 6 = 54',['9','8','10'],0),
+ exQ(4,'What number goes in the box? 72 ÷ ▢ = 9',['8','81','7'],0),
+ exQ(5,'6 × 7 = 42. What is 60 × 7?',['420','4,200','42'],0),
+ exQ(6,'Which division fact is correct?',['63 ÷ 7 = 9','63 ÷ 7 = 8','63 ÷ 9 = 8'],0),
+ exQ(7,'Tickets cost £9 each. £108 is collected. How many tickets were sold?',['12','11','13'],0),
+ exQ(8,'Which statement is true?',['Multiplication can be done in any order, but division cannot','Division can be done in any order','Multiplication and division always make a number bigger'],0),
+ exQ(9,'THINK DEEPER: 13 × 4 = 52. What is 26 × 4?',['104','56','78'],0,'t'),
+ exQ(10,'BOSS LEVEL: 42 ÷ 7 = 6. Use this to work out 4,200 ÷ 70.',['60','600','6'],0,'b')])}`;
+
+
+
 const P5_MDA15 = null; // Mental multiplication strategies
 const P5_MDA16 = null; // Mental division strategies
 
