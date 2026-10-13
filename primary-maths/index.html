@@ -6895,11 +6895,513 @@ ${asExCard(2,[
 
 
 
- /* ================= SECTION C — PLACEHOLDERS (steps 3–18) ================= */
-const P5_FA3  = null; // Simplifying fractions
-const P5_FA4  = null; // Improper fractions
-const P5_FA5  = null; // Mixed numbers
-const P5_FA6  = null; // Convert improper fractions to mixed numbers
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 3 AND 4
+   Step 3: Simplifying fractions
+   Step 4: Improper fractions
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–2 file (it re-uses faWall, faCircle, faSet, faLine
+      and faTwoLines from that file).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA3 = null;
+        const P5_FA4 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPERS ================= */
+
+/* Several bars of the same denominator, filled one after another.
+   faMulti(4,7,'title','footer')  → 7 quarters = one full bar + 3 quarters */
+function faMulti(den,total,title,foot,col){
+  col=col||'#FCD34D';
+  const bars=Math.ceil(total/den), bw=300, x0=10, rowH=30, gap=8, cw=bw/den;
+  const H=34+bars*(rowH+gap)+(foot?30:6);
+  let s=`<svg viewBox="0 0 520 ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="260" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let b=0;b<bars;b++){
+    const y=28+b*(rowH+gap), filled=Math.min(den,Math.max(0,total-b*den));
+    s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${rowH}" fill="#fff" stroke="#333" stroke-width="2"/>`;
+    s+=`<rect x="${x0}" y="${y}" width="${(cw*filled).toFixed(1)}" height="${rowH}" fill="${filled===den?'#34D399':col}" stroke="#333" stroke-width="2"/>`;
+    for(let k=1;k<den;k++) s+=`<line x1="${(x0+k*cw).toFixed(1)}" y1="${y}" x2="${(x0+k*cw).toFixed(1)}" y2="${y+rowH}" stroke="#333" stroke-width="1"/>`;
+    s+=`<text x="${x0+bw+16}" y="${y+21}" font-size="14" font-weight="800" fill="#333">${filled}/${den}${filled===den?'  = 1 whole':''}</text>`;
+  }
+  if(foot) s+=`<text x="260" y="${H-10}" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
+  return s+'</svg>';
+}
+
+/* Number line from 0 to `max` (a whole number) cut into steps of 1/den.
+   marks = array of numerators (over den) to highlight.
+   faLineTo(2,4,[5,7],'title') */
+function faLineTo(max,den,marks,title){
+  const W=560,pad=40,y=66,N=max*den;
+  const X=k=>pad+k/N*(W-2*pad);
+  let s=`<svg viewBox="0 0 ${W} 120" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="${pad-14}" y1="${y}" x2="${W-pad+14}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  for(let k=0;k<=N;k++){
+    const x=X(k), whole=(k%den===0);
+    s+=`<line x1="${x.toFixed(1)}" y1="${y-(whole?10:7)}" x2="${x.toFixed(1)}" y2="${y+(whole?10:7)}" stroke="#444" stroke-width="${whole?3:2}"/>`;
+    const lbl=whole?String(k/den):(N<=12?k+'/'+den:'');
+    if(lbl) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="${whole?13:11}" font-weight="${whole?800:600}" fill="${whole?'#1D4ED8':'#333'}">${lbl}</text>`;
+  }
+  (marks||[]).forEach(k=>{
+    const x=X(k).toFixed(1);
+    s+=`<circle cx="${x}" cy="${y}" r="7" fill="#6D28D9"/>`;
+    s+=`<text x="${x}" y="${y-16}" text-anchor="middle" font-size="13" font-weight="800" fill="#6D28D9">${k}/${den}</text>`;
+  });
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 3 : Simplifying fractions ---------- */
+const P5_FA3 = `
+${asHeader('FA3','Step 3 — Simplifying Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Fewer, Bigger Pieces</div>
+  ${asWarm('In Step 2 we <em>multiplied</em> to make fractions with smaller pieces. <strong>Simplifying</strong> goes the other way: we <strong>divide</strong> top and bottom by the same number to get the <em>same amount</em> using fewer, bigger pieces. A fraction is in its <strong>simplest form</strong> when no number except 1 divides both the numerator and the denominator.')}
+
+  <div class="card-body"><strong>Concrete:</strong> take 6/8 of a fraction strip. Now swap the 8 small pieces for bigger ones — pair them up. Every 2 eighths make 1 quarter.</div>
+  ${faWall([[6,8],[3,4]],'6/8 and 3/4 cover exactly the same length','6/8 = 3/4 — fewer, bigger pieces',true)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The method</div><div class="s-body" style="color:#633806;">1) Find a <strong>common factor</strong> of the numerator and the denominator. 2) <strong>Divide both</strong> by it. 3) Repeat until only 1 divides both. ${fr(6,8)} = ${fr('6 ÷ 2','8 ÷ 2')} = ${fr(3,4)}</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">⚡ The shortcut — HCF</div><div class="s-body" style="color:#085041;">The <strong>highest common factor (HCF)</strong> is the biggest number that divides both. Divide by the HCF and you finish in <strong>one step</strong>.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Link to Step 2</div><div class="s-body" style="color:#3C3489;">Simplifying finds the <strong>oldest relative</strong> in the equivalent-fraction family. ${fr(6,8)}, ${fr(9,12)}, ${fr(12,16)} and ${fr(15,20)} all simplify to the same ${fr(3,4)}.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Subtracting</div><div class="s-body" style="color:#712B13;">${fr(12,18)} is NOT ${fr(6,12)}! Taking 6 off the top and bottom changes the amount. You must <strong>divide</strong>, never subtract.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Stopping too early</div><div class="s-body" style="color:#712B13;">${fr(6,12)} is correct but NOT finished: 6 and 12 still share the factor 6. Always check whether another common factor exists.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Seeing it: simplify 4/12</div>
+  ${asWarm('Group the 12 small pieces into bigger pieces. What is the biggest group size that works for the shaded parts <em>and</em> the whole?')}
+  ${faWall([[4,12],[2,6],[1,3]],'4/12 → 2/6 → 1/3','Each time we group the pieces, the amount stays the same',true)}
+  ${steps([['÷ 2',`${fr(4,12)} = ${fr(2,6)}`,'groups of 2'],['÷ 2 again',`${fr(2,6)} = ${fr(1,3)}`,'only 1 divides 1 and 3'],['ANSWER',`${fr(4,12)} = ${fr(1,3)}`,'or ÷ 4 straight away!']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Divide by a common factor: 10/15</div>
+  ${asWarm('List the factors of 10 and of 15. Which numbers appear in <em>both</em> lists?')}
+  ${steps([['Factors of 10','1, 2, 5, 10',''],['Factors of 15','1, 3, 5, 15',''],['Common factors','1 and 5','HCF = 5'],['Divide both by 5',`${fr('10 ÷ 5','15 ÷ 5')}`,`= ${fr(2,3)}`]])}
+  ${faWall([[10,15],[2,3]],'10/15 and 2/3 are the same amount','10/15 = 2/3',true)}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — One step with the HCF: 18/24</div>
+  ${asWarm('Find the HCF of 18 and 24 and simplify in a single step.')}
+  ${steps([['Factors of 18','1, 2, 3, 6, 9, 18',''],['Factors of 24','1, 2, 3, 4, 6, 8, 12, 24',''],['Common factors','1, 2, 3, 6','HCF = 6'],['Divide by 6',`${fr('18 ÷ 6','24 ÷ 6')}`,`= ${fr(3,4)}`]])}
+  ${faWall([[18,24],[3,4]],'18/24 = 3/4','Divide by the HCF — done in one step',true)}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Small steps get there too: 24/36</div>
+  ${asWarm('Cannot spot the HCF? No problem — keep dividing by any common factor until you cannot go further. Both routes reach the <strong>same answer</strong>.')}
+  ${steps([['÷ 2',`${fr(24,36)} = ${fr(12,18)}`,'both even'],['÷ 3',`${fr(12,18)} = ${fr(4,6)}`,'digits of 12 and 18 add to a multiple of 3'],['÷ 2',`${fr(4,6)} = ${fr(2,3)}`,'both even again'],['STOP','2 and 3','only 1 divides both']])}
+  ${steps([['Shortcut','HCF of 24 and 36 = 12','12 × 2 = 24, 12 × 3 = 36'],['÷ 12',`${fr('24 ÷ 12','36 ÷ 12')}`,`= ${fr(2,3)} ✓ same answer`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — How do I know it is finished? (simplest form test)</div>
+  ${asWarm('A fraction is in simplest form when the <strong>only</strong> common factor of the top and bottom is 1. Test each fraction below.')}
+  <div class="strategy-grid">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">${fr(7,12)} ✓ finished</div><div class="s-body" style="color:#27500A;">Factors of 7: 1, 7. Factors of 12: 1, 2, 3, 4, 6, 12. Only <strong>1</strong> in common.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">${fr(9,10)} ✓ finished</div><div class="s-body" style="color:#27500A;">Factors of 9: 1, 3, 9. Factors of 10: 1, 2, 5, 10. Only <strong>1</strong> in common.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">${fr(5,15)} ✗ not finished</div><div class="s-body" style="color:#712B13;">5 goes into both! ${fr(5,15)} = ${fr(1,3)}.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">${fr(14,21)} ✗ not finished</div><div class="s-body" style="color:#712B13;">7 goes into both! ${fr(14,21)} = ${fr(2,3)}.</div></div>
+  </div>
+  <div class="card-body" style="margin-top:8px;">💡 <strong>Quick tips:</strong> if the numerator is 1, it is always finished. If both numbers are even, you can always ÷ 2. If the denominator is a prime number (like 7, 11 or 13) and the numerator is smaller, it is finished.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Simplifying on a number line: 8/12</div>
+  ${asWarm('Simplified fractions sit on the same spot of the number line as the original. Show that ${fr(8,12)} = ${fr(2,3)}.')}
+  ${faTwoLines([[12,8],[3,2]],'Twelfths (top) and thirds (bottom): the same point!')}
+  ${steps([['HCF of 8 and 12','4','4 × 2 = 8, 4 × 3 = 12'],['Divide both by 4',`${fr('8 ÷ 4','12 ÷ 4')}`,`= ${fr(2,3)}`],['ANSWER',`${fr(8,12)} = ${fr(2,3)}`,'same point on the line ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: measures and money</div>
+  ${asWarm('Fractions in real life often start out un-simplified. Write each as a fraction in <strong>simplest form</strong>.')}
+  <div class="card-body"><strong>(a) Obi uses 250 g of sugar from a 1,000 g bag.</strong></div>
+  ${steps([['Fraction used',`${fr(250,1000)}`,'250 out of 1,000'],['HCF of 250 and 1,000','250','1,000 = 4 × 250'],['ANSWER',`${fr(1,4)}`,'a quarter of the bag']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) Funmi studies for 40 minutes of the hour.</strong></div>
+  ${steps([['Fraction of an hour',`${fr(40,60)}`,'60 minutes = 1 hour'],['HCF of 40 and 60','20','40 = 2 × 20, 60 = 3 × 20'],['ANSWER',`${fr(2,3)}`,'two thirds of an hour']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(c) 30p out of £1 (100p).</strong> ${fr(30,100)} = ${fr(3,10)} (÷ 10).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and decide</div>
+  ${asWarm('Ada simplifies ${fr(12,18)}. She subtracts 6 from the top and the bottom and writes ${fr(6,12)}. Is she correct?')}
+  ${faWall([[12,18],[6,12],[2,3]],'12/18 vs 6/12 vs 2/3','6/12 is only half — it does not match 12/18!')}
+  ${steps([['Ada&#39;s method','12 − 6, 18 − 6','SUBTRACTED — wrong ✗'],['Correct method','HCF = 6, divide both',`${fr('12 ÷ 6','18 ÷ 6')}`],['ANSWER',`${fr(12,18)} = ${fr(2,3)}`,'divide, never subtract']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which fraction does NOT simplify to 3/4?</strong> ${fr(6,8)}, ${fr(9,12)}, ${fr(12,20)}, ${fr(15,20)}</div>
+  ${steps([['6/8','÷ 2',`${fr(3,4)} ✓`],['9/12','÷ 3',`${fr(3,4)} ✓`],['12/20','÷ 4',`${fr(3,5)} ✗`],['15/20','÷ 5',`${fr(3,4)} ✓`]])}
+</div>
+
+${asExCard(3,[
+ exQ(1,'Simplify 4/10.',['2/5','4/5','1/5'],0),
+ exQ(2,'Simplify 15/20.',['3/4','5/4','15/4'],0),
+ exQ(3,'Write 18/30 in its simplest form.',['3/5','9/15','6/10'],0),
+ exQ(4,'What is the highest common factor (HCF) of 12 and 18?',['6','3','9'],0),
+ exQ(5,'Which of these fractions is already in its simplest form?',['7/12','6/9','10/15'],0),
+ exQ(6,'Write 40/100 in its simplest form.',['2/5','4/10','1/4'],0),
+ exQ(7,'In a class of 30 pupils, 20 are girls. What fraction are girls, in simplest form?',['2/3','20/30','1/3'],0),
+ exQ(8,'Tolu simplifies 12/18 by subtracting 6 from the top and bottom to get 6/12. Is he right?',['No — you must divide both numbers by a common factor','Yes — taking the same away keeps it equal','Yes — but only for even numbers'],0),
+ exQ(9,'THINK DEEPER: Which of these fractions simplifies to 3/7?',['12/28','9/14','6/21'],0,'t'),
+ exQ(10,'BOSS LEVEL: Write 72/96 in its simplest form.',['3/4','9/12','6/8'],0,'b')])}`;
+
+
+/* ---------- STEP 4 : Improper fractions ---------- */
+const P5_FA4 = `
+${asHeader('FA4','Step 4 — Improper Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — More Than One Whole</div>
+  ${asWarm('Can you have <strong>more than 1</strong> of something cut into equal parts? Yes! If a pizza is cut into 4 slices and the family eats <strong>7 slices</strong>, they ate more than one whole pizza. That is <strong>7 quarters</strong>, written ${fr(7,4)}. A fraction like this — where the numerator is <strong>bigger than or equal to</strong> the denominator — is called an <strong>improper fraction</strong> (sometimes called a &ldquo;top-heavy&rdquo; fraction).')}
+
+  <div class="card-body"><strong>Concrete:</strong> use fraction strips. One full strip of quarters is 4/4 = 1 whole. Keep adding quarters, and when the first strip is full, start a new one.</div>
+  ${faMulti(4,7,'7/4 — seven quarters fill one whole bar and 3 quarters of a second','7/4 = 4/4 + 3/4 = 1 whole and 3 quarters')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">Proper fraction</div><div class="s-body" style="color:#27500A;">Numerator <strong>smaller</strong> than the denominator. Less than 1 whole. ${fr(3,4)}, ${fr(2,9)}, ${fr(7,8)}</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">Improper fraction</div><div class="s-body" style="color:#633806;">Numerator <strong>bigger than or equal to</strong> the denominator. 1 whole or more. ${fr(5,4)}, ${fr(9,5)}, ${fr(8,8)}</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Looking ahead</div><div class="s-body" style="color:#3C3489;">Step 5 writes numbers like ${fr(7,4)} as a <strong>mixed number</strong> ${mx(1,3,4)}. Same amount, different clothes — just like equivalent fractions!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;You cannot have more parts than the whole&rdquo;</div><div class="s-body" style="color:#712B13;">The denominator says how many parts make <em>one</em> whole — not the most parts you may have. 7 quarters is perfectly fine!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Equal top and bottom</div><div class="s-body" style="color:#712B13;">${fr(4,4)} is improper too — it equals <strong>exactly 1</strong>. So an improper fraction is 1 or more, never less than 1.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Proper or improper? Look at the bars</div>
+  ${asWarm('Compare 3/4 and 5/4. One fits inside a single bar; the other spills into a second bar.')}
+  ${faMulti(4,3,'3/4 — fits inside ONE bar → proper','3 &lt; 4, less than 1 whole')}
+  ${faMulti(4,5,'5/4 — spills into a SECOND bar → improper','5 &gt; 4, more than 1 whole')}
+  ${steps([['3/4','3 &lt; 4','PROPER — less than 1'],['4/4','4 = 4','IMPROPER — exactly 1'],['5/4','5 &gt; 4','IMPROPER — more than 1']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Building an improper fraction: 7/4</div>
+  ${asWarm('Count quarters one at a time. After 4 quarters the first bar is full. How many bars do we need for 7 quarters?')}
+  ${faMulti(4,7,'Seven quarters shaded','')}
+  ${steps([['Quarters in 1 whole','4','denominator'],['Full bars','1','4 quarters make 4/4'],['Left over','3 quarters','3 more parts in the next bar'],['ANSWER',`${fr(7,4)} = ${fr(4,4)} + ${fr(3,4)}`,'more than 1 whole']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Pictures with circles: 5/3 of a pizza</div>
+  ${asWarm('Funke orders pizzas cut into 3 equal slices each. The family eats 5 slices. How much pizza is that?')}
+  <div style="display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(3,3,'3/3 = 1 whole','#34D399')}
+    <div style="font-size:26px;font-weight:800;color:#555;">+</div>
+    ${faCircle(3,2,'2/3 of a pizza','#FCD34D')}
+  </div>
+  ${steps([['Slices eaten','5','numerator'],['Slices in 1 pizza','3','denominator'],['ANSWER',`${fr(5,3)} = ${fr(3,3)} + ${fr(2,3)}`,'one whole pizza and 2 more slices']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Improper fractions on a number line</div>
+  ${asWarm('Fractions do not stop at 1! On a number line we keep going past 1, counting the same size steps.')}
+  ${faLineTo(2,4,[5,7],'Counting in quarters past 1: 5/4 and 7/4')}
+  ${steps([['Quarters','4 steps','make each whole (0 → 1, 1 → 2)'],['5/4','5 steps from 0','1 step past 1'],['7/4','7 steps from 0','3 steps past 1'],['RULE','Improper fractions live to the right of 1','proper ones live between 0 and 1']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Whole numbers as improper fractions</div>
+  ${asWarm('Any whole number can be written as an improper fraction. How many quarters are in 3 wholes?')}
+  ${faMulti(4,12,'3 wholes = 12 quarters','3 = 12/4')}
+  ${steps([['Quarters in 1 whole','4',`1 = ${fr(4,4)}`],['Quarters in 3 wholes','3 × 4','= 12'],['ANSWER',`3 = ${fr(12,4)}`,'also: 5 = 25/5, 2 = 14/7']])}
+  <div class="card-body" style="margin-top:6px;">🔑 <strong>Rule:</strong> whole number × denominator = numerator. 4 = ${fr('4 × 3','3')} = ${fr(12,3)}.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Bigger or smaller than a whole number?</div>
+  ${asWarm('Is ${fr(9,5)} greater or less than 2? Change 2 into fifths and compare the numerators.')}
+  ${faLineTo(2,5,[9],'9/5 sits just before 2')}
+  ${steps([['Write 2 in fifths','2 × 5 = 10',`2 = ${fr(10,5)}`],['Compare','9 &lt; 10',`${fr(9,5)} &lt; ${fr(10,5)}`],['ANSWER',`${fr(9,5)} &lt; 2`,'it is a bit less than 2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life</div>
+  ${asWarm('A pizza is cut into 8 slices. Emeka&#39;s family eats <strong>11 slices</strong>. How many pizzas did they eat? Write it as an improper fraction.')}
+  ${faMulti(8,11,'11 eighths shaded','11/8 of a pizza')}
+  ${steps([['Slices in 1 pizza','8','denominator'],['Slices eaten','11','numerator'],['ANSWER',`${fr(11,8)} of a pizza`,'more than 1 pizza, less than 2']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Jug problem:</strong> a cup holds ${fr(1,4)} L. Tolu pours 9 cups into a bucket.</div>
+  ${steps([['Each cup',`${fr(1,4)} L`,'unit fraction'],['9 cups','9 × 1/4',`${fr(9,4)} L`],['ANSWER',`${fr(9,4)} L`,'more than 2 litres (2 L = 8/4 L)']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: always, sometimes or never?</div>
+  ${asWarm('Ada says: &ldquo;An improper fraction is always greater than 1.&rdquo; Test her with examples.')}
+  ${steps([['Try 9/5','9 &gt; 5','1.8… &gt; 1 ✓'],['Try 12/7','12 &gt; 7','&gt; 1 ✓'],['Try 6/6','6 = 6','exactly 1 — NOT greater!'],['VERDICT','Sometimes','it is 1 OR MORE']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which fraction is greatest: 7/4, 5/3 or 9/6?</strong> Compare how far each is above 1 whole:</div>
+  ${steps([['7/4',`${fr(4,4)} + ${fr(3,4)}`,'1 and 3 quarters'],['5/3',`${fr(3,3)} + ${fr(2,3)}`,'1 and 2 thirds'],['9/6',`${fr(6,6)} + ${fr(3,6)}`,'1 and 3 sixths = 1½'],['Best','7/4','3/4 is bigger than 2/3 and 1/2']])}
+</div>
+
+${asExCard(4,[
+ exQ(1,'Which of these is an improper fraction?',['9/5','5/9','3/10'],0),
+ exQ(2,'Seven quarters are shaded. Write this as an improper fraction.',['7/4','4/7','3/4'],0),
+ exQ(3,'In 11/4 (eleven quarters), how many whole bars are completely full?',['2','3','11'],0),
+ exQ(4,'Write 3 as an improper fraction with a denominator of 5.',['15/5','3/5','5/3'],0),
+ exQ(5,'Which fraction is exactly equal to 1 whole?',['8/8','1/8','8/1'],0),
+ exQ(6,'Is 9/5 greater than 2, less than 2, or equal to 2?',['Less than 2','Greater than 2','Equal to 2'],0),
+ exQ(7,'A jug holds 1/4 L. Emeka pours in 9 jugs. How much is that?',['9/4 L','4/9 L','9 L'],0),
+ exQ(8,'Which of these fractions is greater than 1?',['11/10','10/11','10/10'],0),
+ exQ(9,'THINK DEEPER: Ada says "every improper fraction is greater than 1." Is she right?',['No — if the numerator equals the denominator it is exactly 1','Yes — always greater than 1','No — improper fractions are less than 1'],0,'t'),
+ exQ(10,'BOSS LEVEL: Chef Bola cuts each cake into 6 slices. She sells 17 slices. Write the amount sold as an improper fraction of a cake. How many whole cakes were completely sold?',['17/6 of a cake; 2 whole cakes','17/4 of a cake; 4 whole cakes','6/17 of a cake; 0 whole cakes'],0,'b')])}`;
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 5 AND 6
+   Step 5: Mixed numbers
+   Step 6: Convert improper fractions to mixed numbers
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–4 files (re-uses faWall, faCircle, faMulti,
+      faLineTo, faTwoLines, fr, mx, steps, exQ, asHeader,
+      asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA5 = null;
+        const P5_FA6 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* Number line from 0 to `max`, steps of 1/den, points labelled as MIXED numbers.
+   marks = numerators over den (e.g. 9 with den 4 = 2 1/4).
+   faLineMixed(3,4,[9,11],'title') */
+function faLineMixed(max,den,marks,title){
+  const W=560,pad=40,y=66,N=max*den;
+  const X=k=>pad+k/N*(W-2*pad);
+  const mixedLabel=k=>{
+    const w=Math.floor(k/den), r=k%den;
+    if(r===0) return String(w);
+    return (w>0?w+' ':'')+r+'/'+den;
+  };
+  let s=`<svg viewBox="0 0 ${W} 120" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="${pad-14}" y1="${y}" x2="${W-pad+14}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  for(let k=0;k<=N;k++){
+    const x=X(k), whole=(k%den===0);
+    s+=`<line x1="${x.toFixed(1)}" y1="${y-(whole?10:7)}" x2="${x.toFixed(1)}" y2="${y+(whole?10:7)}" stroke="#444" stroke-width="${whole?3:2}"/>`;
+    if(whole) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="13" font-weight="800" fill="#1D4ED8">${k/den}</text>`;
+    else if(N<=14) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="10" font-weight="600" fill="#333">${mixedLabel(k)}</text>`;
+  }
+  (marks||[]).forEach(k=>{
+    const x=X(k).toFixed(1);
+    s+=`<circle cx="${x}" cy="${y}" r="7" fill="#6D28D9"/>`;
+    s+=`<text x="${x}" y="${y-16}" text-anchor="middle" font-size="13" font-weight="800" fill="#6D28D9">${mixedLabel(k)}</text>`;
+  });
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 5 : Mixed numbers ---------- */
+const P5_FA5 = `
+${asHeader('FA5','Step 5 — Mixed Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Wholes AND Parts Together</div>
+  ${asWarm(`Ngozi has <strong>2 whole</strong> bars of chocolate and <strong>3 fifths</strong> of a third bar. She does not say &ldquo;thirteen fifths&rdquo; — she says &ldquo;two and three fifths&rdquo;! A number made of a <strong>whole number</strong> and a <strong>proper fraction</strong> together is called a <strong>mixed number</strong>. We write it ${mx(2,3,5)}.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take 3 fraction strips, each cut into fifths. Fill two of them completely. Fill 3 parts of the third strip.</div>
+  ${faMulti(5,13,'2 whole bars + 3/5 of a third bar','2 whole bars and 3 fifths = 2 3/5')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">Whole-number part</div><div class="s-body" style="color:#0C447C;">How many <strong>complete wholes</strong> there are. In ${mx(2,3,5)} the whole-number part is <strong>2</strong>.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">Fraction part</div><div class="s-body" style="color:#3C3489;">What is <strong>left over</strong> — always a <strong>proper</strong> fraction (less than 1). In ${mx(2,3,5)} it is ${fr(3,5)}.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">Partitioning</div><div class="s-body" style="color:#633806;">${mx(2,3,5)} means <strong>2 + ${fr(3,5)}</strong> — an addition, written without the + sign.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">🔗 Link to Step 4</div><div class="s-body" style="color:#27500A;">${mx(2,3,5)} and ${fr(13,5)} are the <strong>same amount</strong> — mixed number and improper fraction are two names for it, just like equivalent fractions.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying</div><div class="s-body" style="color:#712B13;">${mx(2,3,5)} does NOT mean 2 × ${fr(3,5)}. It means 2 <strong>plus</strong> ${fr(3,5)}. Writing a whole number next to a fraction means &ldquo;and&rdquo;.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Fraction part too big</div><div class="s-body" style="color:#712B13;">The fraction part of a mixed number must be <strong>less than 1</strong>. So ${mx(3,5,4)} is not finished — 5 quarters hides another whole!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Reading and writing a mixed number</div>
+  ${asWarm('Three bars are cut into quarters. Two are full and 3 quarters of the third bar are shaded. Write the amount as a mixed number.')}
+  ${faMulti(4,11,'2 full bars and 3/4 of the next','2 and 3 quarters')}
+  ${steps([['Complete wholes','2','whole-number part'],['Parts left over','3 of 4','fraction part'],['ANSWER',`${mx(2,3,4)}`,'read: two and three quarters']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Partitioning a mixed number: 3 2/7</div>
+  ${asWarm(`Split ${mx(3,2,7)} into its whole part and its fraction part.`)}
+  ${faMulti(7,23,'3 full bars + 2/7 of a fourth bar','3 + 2/7')}
+  ${steps([['Whole part','3','three whole bars'],['Fraction part',`${fr(2,7)}`,'two sevenths'],['ANSWER',`${mx(3,2,7)} = 3 + ${fr(2,7)}`,'partitioned']])}
+  <div class="card-body" style="margin-top:6px;">💡 Partitioning works backwards too: 5 + ${fr(3,8)} = ${mx(5,3,8)}.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Mixed numbers with circles: 1 1/2 pizzas</div>
+  ${asWarm('A family orders pizzas cut into halves. They eat one whole pizza and one half of another. How much pizza is that?')}
+  <div style="display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(2,2,'1 whole pizza','#34D399')}
+    <div style="font-size:26px;font-weight:800;color:#555;">+</div>
+    ${faCircle(2,1,'1/2 pizza','#FCD34D')}
+  </div>
+  ${steps([['Whole pizzas','1','whole-number part'],['Left over',`${fr(1,2)}`,'fraction part'],['ANSWER',`${mx(1,1,2)} pizzas`,'one and a half']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Mixed numbers on a number line</div>
+  ${asWarm('A mixed number sits <strong>between two whole numbers</strong>. The whole-number part tells you where to start; the fraction part tells you how far past it to go.')}
+  ${faLineMixed(3,4,[9,11],'Counting in quarters past 2: 2 1/4 and 2 3/4')}
+  ${steps([['Start at the whole number','2','whole-number part'],['Move on in quarters','1 step / 3 steps','fraction part'],['ANSWER',`${mx(2,1,4)} and ${mx(2,3,4)}`,'both between 2 and 3']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Between which whole numbers?</div>
+  ${asWarm(`Where does ${mx(4,2,3)} live? The whole-number part tells you straight away!`)}
+  ${faLineMixed(5,3,[14],'4 2/3 lies between 4 and 5')}
+  ${steps([['Whole-number part','4','so it is MORE than 4'],['Add the fraction part',`${fr(2,3)} &lt; 1`,'so it is LESS than 5'],['ANSWER',`4 &lt; ${mx(4,2,3)} &lt; 5`,'between 4 and 5']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Counting in fractions (sequences)</div>
+  ${asWarm('Count on in <strong>halves</strong> from 1: 1, 1½, 2, … Every time we pass a whole number the mixed number changes.')}
+  ${faLineMixed(3,2,[3,4,5],'Counting in halves: 1 1/2, 2, 2 1/2')}
+  ${steps([['Start','1','1 = 2/2'],['+ ½',`${mx(1,1,2)}`,''],['+ ½','2','two halves make a whole!'],['+ ½',`${mx(2,1,2)}`,''],['+ ½','3','']])}
+  <div class="card-body" style="margin-top:6px;">🔑 When the fraction part reaches a whole (like ${fr(2,2)}), it joins the whole-number part: ${mx(1,2,2)} becomes 2.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life</div>
+  ${asWarm(`A recipe needs <strong>${'2'}${fr(1,4)}</strong> cups of flour. Tunde has measured out 2 full cups and one quarter-cup scoop. Write the amount as a mixed number and as a sum.`)}
+  ${steps([['Full cups','2','whole-number part'],['Extra scoop',`${fr(1,4)}`,'fraction part'],['ANSWER',`${mx(2,1,4)} = 2 + ${fr(1,4)}`,'cups of flour']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Measures:</strong> Kemi runs ${mx(3,3,4)} km. Between which two whole numbers of km is that, and how far is she from 4 km?</div>
+  ${steps([['Between','3 and 4','whole-number part is 3'],['To reach 4 km',`${fr(4,4)} − ${fr(3,4)}`,`= ${fr(1,4)} km`],['ANSWER',`${mx(3,3,4)} km`,`only ${fr(1,4)} km short of 4 km`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${asWarm(`Kola says &ldquo;${mx(2,3,5)} means 2 × ${fr(3,5)}.&rdquo; Is he right? Test it with numbers.`)}
+  ${steps([['2 × 3/5','= 6/5',`= ${mx(1,1,5)}`],['2 + 3/5','= 2 and 3/5',`= ${mx(2,3,5)}`],['VERDICT','Kola is wrong','a mixed number is WHOLE + FRACTION']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: ${mx(2,1,2)} or ${mx(2,3,4)}?</strong> The whole parts match (both 2), so compare the fraction parts.</div>
+  ${steps([['Fraction parts',`${fr(1,2)} and ${fr(3,4)}`,'change to quarters'],['In quarters',`${fr(2,4)} &lt; ${fr(3,4)}`,'3 quarters is more'],['ANSWER',`${mx(2,1,2)} &lt; ${mx(2,3,4)}`,'']])}
+</div>
+
+${asExCard(5,[
+ exQ(1,'Write "two and three fifths" as a mixed number.',['2 3/5','3 2/5','2/5 3'],0),
+ exQ(2,'In the mixed number 4 5/8, what is the whole-number part?',['4','5','8'],0),
+ exQ(3,'Partition the mixed number 3 2/7.',['3 + 2/7','3 × 2/7','3 + 7/2'],0),
+ exQ(4,'Two full bars of quarters are shaded plus 3 parts of a third bar. What mixed number is shaded?',['2 3/4','3 2/4','2 4/3'],0),
+ exQ(5,'Which mixed number lies between 2 and 3?',['2 1/2','3 1/2','1 1/2'],0),
+ exQ(6,'Count in halves: 1 1/2, 2, 2 1/2, ___ . What comes next?',['3','3 1/2','2 3/4'],0),
+ exQ(7,'Which of these is a properly written mixed number (fraction part less than 1)?',['5 3/8','5 8/3','5 8/8'],0),
+ exQ(8,'Kola says 2 3/5 means 2 × 3/5. Is he right?',['No — it means 2 + 3/5','Yes — whole numbers next to fractions mean multiply','No — it means 2 − 3/5'],0),
+ exQ(9,'THINK DEEPER: Ada has 2 3/4 pizzas. Bola has 2 1/4 pizzas. How many complete pizzas does each have, and who has more?',['Both have 2 whole pizzas; Ada has more','Ada has 3 whole pizzas; Bola has 2','They have the same amount'],0,'t'),
+ exQ(10,'BOSS LEVEL: A rope is 6 7/8 m long. How much more rope is needed to make exactly 7 metres?',['1/8 m','7/8 m','1 m'],0,'b')])}`;
+
+
+/* ---------- STEP 6 : Convert improper fractions to mixed numbers ---------- */
+const P5_FA6 = `
+${asHeader('FA6','Step 6 — Convert Improper Fractions to Mixed Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Packing Parts into Wholes</div>
+  ${asWarm(`An improper fraction like ${fr(7,4)} is a pile of 7 quarters. How many <strong>complete wholes</strong> can we pack? Every <strong>4 quarters</strong> make 1 whole. Pack them up and see what is left!`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take 7 quarter-pieces. Make groups of 4 — each group is a whole. 1 group of 4, and 3 left over.</div>
+  ${faMulti(4,7,'7/4 → one full bar + 3 quarters','7/4 = 1 3/4')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The method</div><div class="s-body" style="color:#633806;"><strong>Divide</strong> the numerator by the denominator. The <strong>quotient</strong> is the whole-number part. The <strong>remainder</strong> is the new numerator. The denominator <strong>stays the same</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 In short</div><div class="s-body" style="color:#085041;">${fr(17,5)} → 17 ÷ 5 = 3 remainder 2 → ${mx(3,2,5)}</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">✅ Always check</div><div class="s-body" style="color:#3C3489;">Convert back: whole × denominator + remainder = numerator. 3 × 5 + 2 = 17 ✓</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Wrong denominator</div><div class="s-body" style="color:#712B13;">${fr(17,5)} = ${mx(3,2,17)}? NO! The pieces are still fifths, so the denominator stays <strong>5</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting the remainder</div><div class="s-body" style="color:#712B13;">The remainder is NOT thrown away. It becomes the numerator of the fraction part.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Using bars: 7/4</div>
+  ${asWarm('Shade 7 quarters, filling one bar at a time. How many bars are full? How many quarters are left?')}
+  ${faMulti(4,7,'Seven quarters shaded','')}
+  ${steps([['Full bars','1','4 quarters make a whole'],['Quarters left over','3','7 − 4 = 3'],['ANSWER',`${fr(7,4)} = ${mx(1,3,4)}`,'one and three quarters']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The division method: 17/5</div>
+  ${asWarm('Bars take a long time for big numbers. Division does the same job: how many 5s fit into 17?')}
+  ${faMulti(5,17,'17 fifths = 3 full bars + 2 fifths','')}
+  ${steps([['Divide','17 ÷ 5','= 3 remainder 2 (5 × 3 = 15)'],['Whole part','3','the quotient'],['Fraction part',`${fr(2,5)}`,'remainder over the SAME denominator'],['ANSWER',`${fr(17,5)} = ${mx(3,2,5)}`,'check: 3 × 5 + 2 = 17 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Pictures with circles: 9/4 pizzas</div>
+  ${asWarm('Chidi eats 9 slices of pizza cut into quarters. How many pizzas is that as a mixed number?')}
+  <div style="display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(4,4,'4/4 = 1','#34D399')}
+    <div style="font-size:24px;font-weight:800;color:#555;">+</div>
+    ${faCircle(4,4,'4/4 = 1','#34D399')}
+    <div style="font-size:24px;font-weight:800;color:#555;">+</div>
+    ${faCircle(4,1,'1/4','#FCD34D')}
+  </div>
+  ${steps([['Divide','9 ÷ 4','= 2 remainder 1'],['Whole pizzas','2','two complete pizzas'],['ANSWER',`${fr(9,4)} = ${mx(2,1,4)}`,'two and a quarter pizzas']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Checking on a number line: 11/4</div>
+  ${asWarm('Count 11 quarter-steps from 0. Which two whole numbers do you land between?')}
+  ${faLineMixed(3,4,[11],'11/4 lands between 2 and 3')}
+  ${steps([['Divide','11 ÷ 4','= 2 remainder 3'],['Lands between','2 and 3','8/4 = 2 and 12/4 = 3'],['ANSWER',`${fr(11,4)} = ${mx(2,3,4)}`,'3 steps past 2']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Estimate first!</strong> Find the multiples of the denominator on either side of the numerator (8 and 12) — the whole-number part is between 2 and 3.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — When the remainder is 0: it is a whole number!</div>
+  ${asWarm('What happens when the numerator divides exactly by the denominator?')}
+  ${faMulti(4,12,'12 quarters = 3 full bars, nothing left','12/4 = 3')}
+  ${steps([['Divide','12 ÷ 4','= 3 remainder 0'],['No parts left over','0','so no fraction part'],['ANSWER',`${fr(12,4)} = 3`,'a whole number — not 3 0/4']])}
+  <div class="card-body" style="margin-top:6px;">🔑 Same idea: ${fr(20,5)} = 4, ${fr(18,6)} = 3, ${fr(9,9)} = 1.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Then simplify the fraction part: 22/8</div>
+  ${asWarm('Sometimes the fraction part can be simplified (Step 3!). Convert first, then check whether it is in simplest form.')}
+  ${steps([['Divide','22 ÷ 8','= 2 remainder 6'],['Convert',`${fr(22,8)} = ${mx(2,6,8)}`,'fraction part is 6/8'],['Simplify the fraction part',`${fr('6 ÷ 2','8 ÷ 2')}`,`= ${fr(3,4)}`],['ANSWER',`${mx(2,3,4)}`,'simplest form ✓']])}
+  ${faWall([[6,8],[3,4]],'The fraction part 6/8 = 3/4','Only the fraction part is simplified — the whole number stays',true)}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life, with a check</div>
+  ${asWarm(`A cup holds ${fr(1,3)} litre. Obi fills the cup 14 times. How many litres is that?`)}
+  ${steps([['Total thirds','14 × 1/3',`${fr(14,3)} L`],['Divide','14 ÷ 3','= 4 remainder 2'],['Convert',`${fr(14,3)}`,`= ${mx(4,2,3)} L`]])}
+  ${steps([['CHECK','4 × 3 = 12','whole × denominator'],['+ remainder','12 + 2 = 14','= the original numerator ✓'],['ANSWER',`${mx(4,2,3)} L`,'a bit over 4½ litres']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm(`Tolu converts ${fr(17,5)} and writes ${mx(3,2,17)}. What went wrong?`)}
+  ${steps([['Tolu&#39;s answer',`${mx(3,2,17)}`,'put the remainder over 17 ✗'],['The pieces','are still FIFTHS','denominator must stay 5'],['FIX',`${mx(3,2,5)}`,'3 × 5 + 2 = 17 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is bigger: ${fr(13,4)} or ${fr(10,3)}?</strong> Convert both to mixed numbers.</div>
+  ${steps([['13/4','13 ÷ 4 = 3 r 1',`${mx(3,1,4)}`],['10/3','10 ÷ 3 = 3 r 1',`${mx(3,1,3)}`],['Compare fraction parts',`${fr(1,4)} &lt; ${fr(1,3)}`,'a third is bigger than a quarter'],['ANSWER',`${fr(10,3)} &gt; ${fr(13,4)}`,'']])}
+</div>
+
+${asExCard(6,[
+ exQ(1,'Convert 9/4 to a mixed number.',['2 1/4','1 2/4','2 4/9'],0),
+ exQ(2,'Convert 17/5 to a mixed number.',['3 2/5','2 3/5','3 2/17'],0),
+ exQ(3,'Write 20/5 as a whole number.',['4','5','20'],0),
+ exQ(4,'Convert 13/6 to a mixed number.',['2 1/6','1 7/6','2 7/6'],0),
+ exQ(5,'Convert 22/8 to a mixed number with the fraction part in simplest form.',['2 3/4','2 6/8','3 1/4'],0),
+ exQ(6,'Between which two whole numbers does 25/6 lie?',['4 and 5','5 and 6','3 and 4'],0),
+ exQ(7,'A cup holds 1/3 litre. Tolu fills it 14 times. How many litres is that?',['4 2/3 L','4 1/3 L','3 2/3 L'],0),
+ exQ(8,'Emeka says 14/3 = 4 2/3. Which calculation checks his answer?',['4 × 3 + 2 = 14','4 + 3 + 2 = 9','14 ÷ 2 = 7'],0),
+ exQ(9,'THINK DEEPER: Ada converts 17/5 and writes 3 2/17. What went wrong?',['She put the remainder over the numerator instead of keeping the denominator 5','She found the wrong whole number','Nothing — she is correct'],0,'t'),
+ exQ(10,'BOSS LEVEL: A bakery cuts every cake into 8 slices. They sell 53 slices. How many cakes is that, as a mixed number?',['6 5/8','5 6/8','6 3/8'],0,'b')])}`;
+
+
+
+
+ 
 const P5_FA7  = null; // Convert mixed numbers to improper fractions
 const P5_FA8  = null; // Compare fractions
 const P5_FA9  = null; // Order fractions
