@@ -7401,9 +7401,220 @@ ${asExCard(6,[
 
 
 
- 
-const P5_FA7  = null; // Convert mixed numbers to improper fractions
-const P5_FA8  = null; // Compare fractions
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 7 AND 8
+   Step 7: Convert mixed numbers to improper fractions
+   Step 8: Compare fractions
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–6 files (re-uses faWall, faCircle, faMulti,
+      faLineMixed, fr, mx, steps, exQ, asHeader, asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA7 = null;
+        const P5_FA8 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ---------- STEP 7 : Convert mixed numbers to improper fractions ---------- */
+const P5_FA7 = `
+${asHeader('FA7','Step 7 — Convert Mixed Numbers to Improper Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Breaking Wholes into Parts</div>
+  ${asWarm(`In Step 6 we packed parts <em>into</em> wholes. Now we do the reverse: we <strong>unpack the wholes into parts</strong>. If a bar is cut into quarters, every whole bar is <strong>4 quarters</strong>. So ${mx(2,3,4)} is 2 wholes (8 quarters) plus 3 more quarters — <strong>11 quarters</strong>!`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take 2 whole strips and 3 quarter-pieces. Swap each whole strip for 4 quarter-pieces, then count every quarter.</div>
+  ${faMulti(4,11,'2 3/4 → every whole becomes 4 quarters, then add 3 more','2 3/4 = 11/4')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The method</div><div class="s-body" style="color:#633806;"><strong>Multiply</strong> the whole number by the denominator, then <strong>add</strong> the numerator. The denominator <strong>stays the same</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 In short</div><div class="s-body" style="color:#085041;">${mx(3,2,5)} → 3 × 5 = 15 → 15 + 2 = 17 → ${fr(17,5)}</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Reverse of Step 6</div><div class="s-body" style="color:#3C3489;">Step 6: ÷ then read off the answer. Step 7: × then +. Each step undoes the other, so you can <strong>check one with the other</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Multiplying the wrong numbers</div><div class="s-body" style="color:#712B13;">${mx(2,3,5)} is NOT ${fr(6,5)} (2 × 3). The whole number multiplies the <strong>denominator</strong>, not the numerator.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting to add</div><div class="s-body" style="color:#712B13;">After 2 × 5 = 10 you must still <strong>add the 3</strong> parts left over: 10 + 3 = 13. Do not stop at 10.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Using bars: 2 3/4</div>
+  ${asWarm('Draw 2 full bars and 3 quarters of a third. Count every quarter.')}
+  ${faMulti(4,11,'2 full bars (8 quarters) + 3 quarters','')}
+  ${steps([['Quarters in 2 wholes','2 × 4','= 8'],['Plus the extra quarters','8 + 3','= 11'],['ANSWER',`${mx(2,3,4)} = ${fr(11,4)}`,'eleven quarters']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The method: 3 2/5</div>
+  ${asWarm(`Convert ${mx(3,2,5)} to an improper fraction. Picture the 3 whole bars being cut into fifths.`)}
+  ${faMulti(5,17,'3 wholes = 15 fifths, plus 2 fifths = 17 fifths','')}
+  ${steps([['Whole × denominator','3 × 5','= 15'],['Add the numerator','15 + 2','= 17'],['Keep the denominator','5','the pieces are still fifths'],['ANSWER',`${mx(3,2,5)} = ${fr(17,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Circles: 1 2/3 pizzas</div>
+  ${asWarm('Funke has one whole pizza and 2 slices of another. All pizzas are cut into thirds. How many third-slices is that?')}
+  <div style="display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(3,3,'1 whole = 3/3','#34D399')}
+    <div style="font-size:26px;font-weight:800;color:#555;">+</div>
+    ${faCircle(3,2,'2/3','#FCD34D')}
+    <div style="font-size:26px;font-weight:800;color:#555;">=</div>
+    <div style="font-size:30px;font-weight:800;color:#6D28D9;">${fr(5,3)}</div>
+  </div>
+  ${steps([['1 × 3','= 3','thirds in the whole pizza'],['3 + 2','= 5','add the extra slices'],['ANSWER',`${mx(1,2,3)} = ${fr(5,3)}`,'five slices']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — On a number line: 2 1/4</div>
+  ${asWarm('The mixed number and the improper fraction sit on the <strong>same point</strong>. Count quarter-steps from 0.')}
+  ${faLineMixed(3,4,[9],'2 1/4 is the 9th quarter-step from 0')}
+  ${steps([['2 wholes','2 × 4 = 8','8 quarter-steps to reach 2'],['Plus 1 more quarter','8 + 1','= 9'],['ANSWER',`${mx(2,1,4)} = ${fr(9,4)}`,'same point on the line']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Why does the method work?</div>
+  ${asWarm(`Each whole is a fraction with the same top and bottom: 1 = ${fr(5,5)}. So ${mx(3,2,5)} is three lots of ${fr(5,5)} plus ${fr(2,5)}.`)}
+  ${steps([['1st whole',`${fr(5,5)}`,'5 fifths'],['2nd whole',`${fr(5,5)}`,'5 fifths'],['3rd whole',`${fr(5,5)}`,'5 fifths'],['Extra',`${fr(2,5)}`,'2 fifths'],['TOTAL',`${fr(17,5)}`,'5 + 5 + 5 + 2 = 17']])}
+  <div class="card-body" style="margin-top:6px;">🔑 &ldquo;3 × 5 + 2&rdquo; is just a quick way to add 5 + 5 + 5 + 2.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Bigger numbers, and a check: 7 5/8</div>
+  ${asWarm('The method does not change when the numbers get big. Convert, then check by converting back using Step 6.')}
+  ${steps([['Whole × denominator','7 × 8','= 56'],['Add the numerator','56 + 5','= 61'],['ANSWER',`${mx(7,5,8)} = ${fr(61,8)}`,'']])}
+  ${steps([['CHECK: divide','61 ÷ 8','= 7 remainder 5'],['Read off','7 wholes, 5 left',`${mx(7,5,8)} ✓`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: how many scoops?</div>
+  ${asWarm(`A recipe needs ${mx(2,1,2)} cups of rice. Tunde only has a <strong>half-cup scoop</strong>. How many scoops does he need?`)}
+  ${steps([['Halves in 2 wholes','2 × 2','= 4'],['Plus the extra half','4 + 1','= 5'],['ANSWER',`${mx(2,1,2)} = ${fr(5,2)}`,'5 scoops of ½ cup']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Rope problem:</strong> Kemi has a rope that is ${mx(3,3,4)} m long. She cuts it into pieces of ${fr(1,4)} m. How many pieces?</div>
+  ${steps([['Quarters in 3 wholes','3 × 4','= 12'],['Plus 3 quarters','12 + 3','= 15'],['ANSWER',`${mx(3,3,4)} = ${fr(15,4)}`,'15 pieces']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistakes, then compare</div>
+  ${asWarm(`Tolu converts ${mx(2,3,5)} and gets ${fr(6,5)} because 2 × 3 = 6. Ada converts ${mx(3,1,2)} and gets ${fr(4,2)} because 3 + 1 = 4. Who is right?`)}
+  ${steps([['Tolu','2 × 3 = 6','multiplied the numerator ✗'],['Correct',`2 × 5 + 3 = 13`,`${fr(13,5)}`]])}
+  ${steps([['Ada','3 + 1 = 4','added instead of × ✗'],['Correct',`3 × 2 + 1 = 7`,`${fr(7,2)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: ${mx(2,1,3)} or ${fr(5,2)}?</strong> Convert, then use a common denominator (6).</div>
+  ${steps([['2 1/3',`${fr(7,3)}`,`= ${fr(14,6)}`],['5/2','',`= ${fr(15,6)}`],['Compare',`${fr(14,6)} &lt; ${fr(15,6)}`,`${fr(5,2)} is greater`]])}
+</div>
+
+${asExCard(7,[
+ exQ(1,'Convert 2 1/3 to an improper fraction.',['7/3','3/7','5/3'],0),
+ exQ(2,'Convert 3 2/5 to an improper fraction.',['17/5','6/5','15/5'],0),
+ exQ(3,'Convert 1 3/4 to an improper fraction.',['7/4','4/7','3/4'],0),
+ exQ(4,'Convert 4 1/2 to an improper fraction.',['9/2','5/2','8/2'],0),
+ exQ(5,'Convert 5 3/8 to an improper fraction.',['43/8','15/8','53/8'],0),
+ exQ(6,'A ribbon is 3 1/4 m long. It is cut into pieces of 1/4 m. How many pieces is that?',['13','12','7'],0),
+ exQ(7,'Tolu converts 2 3/5 to 6/5 by doing 2 × 3. Is he right?',['No — 2 × 5 + 3 = 13, so the answer is 13/5','Yes — whole × numerator is correct','No — the answer is 5/5'],0),
+ exQ(8,'Which improper fraction is equal to 3 whole and 1/6?',['19/6','13/6','18/6'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 2 1/3 or 5/2?',['5/2','2 1/3','They are equal'],0,'t'),
+ exQ(10,'BOSS LEVEL: Chef Bola uses 6 3/4 kg of flour. Her scoop holds 1/4 kg. How many scoops does she need?',['27','24','63'],0,'b')])}`;
+
+
+/* ---------- STEP 8 : Compare fractions ---------- */
+const P5_FA8 = `
+${asHeader('FA8','Step 8 — Compare Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Which Is Bigger?</div>
+  ${asWarm(`Would you rather have <strong>3/8</strong> or <strong>5/8</strong> of a cake? Easy — 5/8! But would you rather have <strong>2/3</strong> or <strong>5/6</strong>? Now it is harder, because the pieces are different sizes. To compare fairly we need <strong>equal-sized pieces</strong> — the same denominator.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> line up fraction strips of the <em>same length</em>. The strip that is shaded further is the bigger fraction.</div>
+  ${faWall([[2,3],[5,6]],'2/3 vs 5/6 — which is shaded further?','5/6 is longer, so 5/6 > 2/3',true)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Same denominator</div><div class="s-body" style="color:#0C447C;">Same-sized pieces → the one with the <strong>bigger numerator</strong> is bigger. ${fr(5,8)} &gt; ${fr(3,8)}</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">② Same numerator</div><div class="s-body" style="color:#27500A;">Same number of pieces → the <strong>smaller denominator</strong> means bigger pieces. ${fr(3,4)} &gt; ${fr(3,8)}</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">③ Different denominators</div><div class="s-body" style="color:#633806;">Change both to a <strong>common denominator</strong> (use Step 2!), then compare the numerators.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Benchmarks</div><div class="s-body" style="color:#3C3489;">Compare each fraction with <strong>½</strong> or <strong>1</strong> — often enough to decide quickly.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Bigger numbers</div><div class="s-body" style="color:#712B13;">${fr(1,8)} &gt; ${fr(1,4)}? NO! 8 is bigger than 4, but eighths are <strong>smaller pieces</strong> than quarters.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Ignoring the denominator</div><div class="s-body" style="color:#712B13;">${fr(3,5)} vs ${fr(4,9)}: do not just compare 3 and 4. The pieces are different sizes — convert first or use ½.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Same denominator: 3/8 and 5/8</div>
+  ${asWarm('Both fractions use eighths, so the pieces are the same size. Just count how many pieces.')}
+  ${faWall([[3,8],[5,8]],'3/8 vs 5/8','5/8 has more pieces shaded',true)}
+  ${steps([['Denominators','8 and 8','same ✓'],['Compare numerators','3 &lt; 5','5 pieces is more'],['ANSWER',`${fr(3,8)} &lt; ${fr(5,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Same numerator: 3/4 and 3/8</div>
+  ${asWarm('Both have 3 pieces — but are the pieces the same size? Quarters are bigger than eighths!')}
+  ${faWall([[3,4],[3,8]],'3/4 vs 3/8','Same number of pieces, but quarters are bigger',true)}
+  ${steps([['Numerators','3 and 3','same ✓'],['Compare denominators','4 &lt; 8','smaller denominator = bigger pieces'],['ANSWER',`${fr(3,4)} &gt; ${fr(3,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Related denominators: 2/3 and 5/6</div>
+  ${asWarm('3 goes into 6, so change the thirds into sixths. What do you multiply 3 by to get 6?')}
+  ${faWall([[2,3],[4,6],[5,6]],'2/3 = 4/6, so compare 4/6 and 5/6','',true)}
+  ${steps([['Common denominator','6','3 × 2 = 6'],['Convert 2/3','× 2 on top and bottom',`${fr(2,3)} = ${fr(4,6)}`],['Compare',`${fr(4,6)} &lt; ${fr(5,6)}`,'4 &lt; 5'],['ANSWER',`${fr(2,3)} &lt; ${fr(5,6)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Using ½ as a benchmark: 3/7 and 5/9</div>
+  ${asWarm('Half of 7 is 3½ and half of 9 is 4½. Is each numerator bigger or smaller than half of its denominator?')}
+  ${faWall([[3,7],[1,2],[5,9]],'3/7 (below the half), 1/2, and 5/9 (above the half)','')}
+  ${steps([['3/7','3 &lt; 3½',`${fr(3,7)} &lt; ${fr(1,2)}`],['5/9','5 &gt; 4½',`${fr(5,9)} &gt; ${fr(1,2)}`],['ANSWER',`${fr(3,7)} &lt; ${fr(1,2)} &lt; ${fr(5,9)}`,'so 3/7 &lt; 5/9']])}
+  <div class="card-body" style="margin-top:6px;">💡 If a fraction is on one side of ½ and the other is on the other side, you do not need a common denominator!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Mixed numbers and improper fractions</div>
+  ${asWarm('Compare the <strong>whole-number parts</strong> first. If they are different, you are done. If they match, compare the fraction parts.')}
+  <div class="card-body"><strong>(a) ${mx(3,1,2)} and ${mx(2,7,8)}</strong></div>
+  ${steps([['Whole parts','3 &gt; 2','different — decided!'],['ANSWER',`${mx(3,1,2)} &gt; ${mx(2,7,8)}`,'even though 7/8 is a big fraction']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ${mx(2,3,4)} and ${mx(2,2,3)}</strong></div>
+  ${steps([['Whole parts','2 and 2','same — compare 3/4 and 2/3'],['Common denominator 12',`${fr(9,12)} and ${fr(8,12)}`,'3 × 3 and 2 × 4'],['ANSWER',`${mx(2,3,4)} &gt; ${mx(2,2,3)}`,'9 &gt; 8']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(c) ${fr(11,4)} and ${fr(9,4)}</strong> — same denominator, so 11 &gt; 9: ${fr(11,4)} &gt; ${fr(9,4)}.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Unrelated denominators: 3/4 and 5/6</div>
+  ${asWarm('4 does not go into 6 and 6 does not go into 4. Find a number that <strong>both</strong> go into — the lowest common multiple.')}
+  ${steps([['Multiples of 4','4, 8, 12, 16…',''],['Multiples of 6','6, 12, 18…',''],['LCM','12','both go into 12']])}
+  ${faWall([[9,12],[10,12]],'3/4 = 9/12 and 5/6 = 10/12','10/12 is longer',true)}
+  ${steps([['3/4 → twelfths','× 3',`${fr(9,12)}`],['5/6 → twelfths','× 2',`${fr(10,12)}`],['ANSWER',`${fr(3,4)} &lt; ${fr(5,6)}`,'9 &lt; 10']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: who walks more?</div>
+  ${asWarm(`In Class A, <strong>3/5</strong> of the pupils walk to school. In Class B, <strong>5/8</strong> walk. Which class has the bigger fraction of walkers, and by how much?`)}
+  ${steps([['Common denominator','5 × 8 = 40','a number both go into'],['Class A',`${fr(3,5)} = ${fr(24,40)}`,'× 8'],['Class B',`${fr(5,8)} = ${fr(25,40)}`,'× 5'],['Compare',`${fr(24,40)} &lt; ${fr(25,40)}`,'Class B is bigger'],['Difference',`${fr(25,40)} − ${fr(24,40)}`,`= ${fr(1,40)}`]])}
+  <div class="card-body" style="margin-top:6px;">💡 When the denominators have no common factor, multiplying them always gives a common denominator.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning</div>
+  ${asWarm(`Tolu says: &ldquo;${fr(1,8)} &gt; ${fr(1,4)} because 8 is bigger than 4.&rdquo; Is he right?`)}
+  ${faWall([[1,4],[1,8]],'1/4 vs 1/8','A quarter is twice as big as an eighth!')}
+  ${steps([['Tolu&#39;s reason','8 &gt; 4','compares the denominators ✗'],['Truth','More parts, each part smaller','eighths are smaller'],['ANSWER',`${fr(1,8)} &lt; ${fr(1,4)}`,'Tolu is wrong']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Clever trick — which is greater: ${fr(4,5)} or ${fr(5,6)}?</strong> How much is each missing from 1 whole?</div>
+  ${steps([['4/5 is missing',`${fr(1,5)}`,'to make 1'],['5/6 is missing',`${fr(1,6)}`,'to make 1'],['Smaller gap wins',`${fr(1,6)} &lt; ${fr(1,5)}`,`so ${fr(5,6)} &gt; ${fr(4,5)}`]])}
+</div>
+
+${asExCard(8,[
+ exQ(1,'Which is greater: 3/9 or 7/9?',['7/9','3/9','They are equal'],0),
+ exQ(2,'Which statement is correct?',['3/5 > 3/8','3/5 < 3/8','3/5 = 3/8'],0),
+ exQ(3,'Which statement is correct?',['2/3 < 5/6','2/3 > 5/6','2/3 = 5/6'],0),
+ exQ(4,'Which of these fractions is less than 1/2?',['3/7','5/9','4/6'],0),
+ exQ(5,'Which statement is correct?',['2 3/4 > 2 2/3','2 3/4 < 2 2/3','2 3/4 = 2 2/3'],0),
+ exQ(6,'Which fraction is greater than one whole?',['9/8','7/8','Neither of them'],0),
+ exQ(7,'Compare 3/4 and 5/6 using twelfths. Which is greater?',['5/6 (10/12 is more than 9/12)','3/4 (9/12 is more than 10/12)','They are equal'],0),
+ exQ(8,'Tolu says 1/8 > 1/4 because 8 is bigger than 4. Is he right?',['No — eighths are smaller pieces than quarters','Yes — 8 is bigger than 4','No — they are equal'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 4/5 or 5/6? (Hint: how much is each missing from 1 whole?)',['5/6','4/5','They are equal'],0,'t'),
+ exQ(10,'BOSS LEVEL: In Class A, 3/5 of the pupils walk to school. In Class B, 5/8 walk. Which class has the bigger fraction walking, and by how much?',['Class B, by 1/40','Class A, by 1/40','Class B, by 2/3'],0,'b')])}`;
+
+
+
+
 const P5_FA9  = null; // Order fractions
 const P5_FA10 = null; // Fractions on a number line
 const P5_FA11 = null; // Fractions greater than one
