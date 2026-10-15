@@ -1,0 +1,16 @@
+name: Validate question pools
+on: [push, pull_request]
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check every pool file
+        run: |
+          for f in pools/*.js; do
+            echo "Checking $f"
+            node tools/validate-pools.js "$f" || exit 1
+          done
