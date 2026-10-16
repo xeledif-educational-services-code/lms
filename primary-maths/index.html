@@ -7615,10 +7615,253 @@ ${asExCard(8,[
 
 
 
-const P5_FA9  = null; // Order fractions
-const P5_FA10 = null; // Fractions on a number line
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 9 AND 10
+   Step 9:  Order fractions
+   Step 10: Fractions on a number line
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–8 files (re-uses faWall, faLine, faLineTo,
+      faLineMixed, faTwoLines, fr, mx, steps, exQ, asHeader,
+      asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA9  = null;
+        const P5_FA10 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* Number line from whole number `a` to whole number `b`, steps of 1/den.
+   marks = ABSOLUTE numerators over den (e.g. den 4, 5 → 1 1/4).
+   opts.hide = true → hide in-between tick labels and show "?" above the marks.
+   faLineSeg(1,2,4,[5],'title')  |  faLineSeg(2,3,5,[13],'title',{hide:true}) */
+function faLineSeg(a,b,den,marks,title,opts){
+  opts=opts||{};
+  const W=560,pad=40,y=66,N=(b-a)*den;
+  const X=k=>pad+(k-a*den)/N*(W-2*pad);
+  const label=k=>{
+    const w=Math.floor(k/den), r=k%den;
+    if(r===0) return String(w);
+    return (w>0?w+' ':'')+r+'/'+den;
+  };
+  let s=`<svg viewBox="0 0 ${W} 120" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="${pad-14}" y1="${y}" x2="${W-pad+14}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  for(let k=a*den;k<=b*den;k++){
+    const x=X(k), whole=(k%den===0);
+    s+=`<line x1="${x.toFixed(1)}" y1="${y-(whole?10:7)}" x2="${x.toFixed(1)}" y2="${y+(whole?10:7)}" stroke="#444" stroke-width="${whole?3:2}"/>`;
+    if(whole) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="13" font-weight="800" fill="#1D4ED8">${k/den}</text>`;
+    else if(!opts.hide && N<=14) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="10" font-weight="600" fill="#333">${label(k)}</text>`;
+  }
+  (marks||[]).forEach(k=>{
+    const x=X(k).toFixed(1);
+    s+=`<circle cx="${x}" cy="${y}" r="7" fill="#6D28D9"/>`;
+    s+=`<text x="${x}" y="${y-16}" text-anchor="middle" font-size="14" font-weight="800" fill="#6D28D9">${opts.hide?'?':label(k)}</text>`;
+  });
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 9 : Order fractions ---------- */
+const P5_FA9 = `
+${asHeader('FA9','Step 9 — Order Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Lining Fractions Up</div>
+  ${asWarm(`In Step 8 you compared <em>two</em> fractions. Ordering is comparing <strong>many</strong> fractions at once and putting them in a line — like lining up pupils from the shortest to the tallest. <strong>Ascending</strong> order goes from <strong>smallest to largest</strong>. <strong>Descending</strong> order goes from <strong>largest to smallest</strong>.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> stack fraction strips of the same length and slide them so they all start at the same edge. The shortest shaded strip is the smallest fraction.</div>
+  ${faWall([[1,4],[1,2],[3,4]],'Ascending order: 1/4, 1/2, 3/4','Each strip is shaded further than the one above')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Same denominator</div><div class="s-body" style="color:#0C447C;">Order the <strong>numerators</strong>. ${fr(2,9)} &lt; ${fr(5,9)} &lt; ${fr(7,9)}</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">② Same numerator</div><div class="s-body" style="color:#27500A;">Order the <strong>denominators backwards</strong> — the bigger the denominator, the smaller the fraction.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">③ Common denominator</div><div class="s-body" style="color:#633806;">Change every fraction to the <strong>same denominator</strong>, order the numerators, then <em>write the originals</em> in that order.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Mixed numbers &amp; improper</div><div class="s-body" style="color:#3C3489;">Sort by the <strong>whole-number part</strong> first, then compare the fraction parts (or change all to improper fractions).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Ordering the denominators</div><div class="s-body" style="color:#712B13;">${fr(3,4)}, ${fr(3,5)}, ${fr(3,8)} in order of <em>denominators</em> (4, 5, 8) is the order of <strong>largest to smallest</strong>, not smallest to largest!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Rewriting the answer</div><div class="s-body" style="color:#712B13;">After finding common denominators, write the <strong>ORIGINAL</strong> fractions in your answer, not the converted ones — unless told otherwise.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Same denominator: 5/9, 2/9, 7/9, 1/9</div>
+  ${asWarm('Order from <strong>smallest to largest</strong>. All the pieces are ninths — just order the numerators.')}
+  ${faWall([[1,9],[2,9],[5,9],[7,9]],'Ascending: 1/9, 2/9, 5/9, 7/9','Each strip is shaded a little further')}
+  ${steps([['Numerators','5, 2, 7, 1','same-sized pieces'],['Order them','1, 2, 5, 7','smallest first'],['ANSWER',`${fr(1,9)}, ${fr(2,9)}, ${fr(5,9)}, ${fr(7,9)}`,'ascending']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Same numerator: 2/3, 2/5, 2/9, 2/7</div>
+  ${asWarm('Order from <strong>largest to smallest</strong>. Every fraction has 2 parts — so the <em>bigger the pieces</em>, the bigger the fraction.')}
+  ${faWall([[2,3],[2,5],[2,7],[2,9]],'Descending: 2/3, 2/5, 2/7, 2/9','Bigger denominator → smaller pieces → shorter strip',false)}
+  ${steps([['Denominators','3, 5, 9, 7',''],['Smallest denominator = biggest fraction','3 &lt; 5 &lt; 7 &lt; 9','so thirds are biggest'],['ANSWER',`${fr(2,3)}, ${fr(2,5)}, ${fr(2,7)}, ${fr(2,9)}`,'descending']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Related denominators: 1/2, 3/4, 5/8, 3/8</div>
+  ${asWarm('2 and 4 both go into 8, so change everything to <strong>eighths</strong>.')}
+  ${steps([['1/2','× 4',`${fr(4,8)}`],['3/4','× 2',`${fr(6,8)}`],['5/8','no change',`${fr(5,8)}`],['3/8','no change',`${fr(3,8)}`]])}
+  ${faWall([[3,8],[4,8],[5,8],[6,8]],'Ascending in eighths: 3/8, 4/8, 5/8, 6/8','These are 3/8, 1/2, 5/8 and 3/4')}
+  ${steps([['Order the eighths','3, 4, 5, 6','smallest first'],['Write the originals',`${fr(3,8)}, ${fr(1,2)}, ${fr(5,8)}, ${fr(3,4)}`,'ascending ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Three different denominators: 5/6, 2/3, 1/2, 7/12</div>
+  ${asWarm('2, 3 and 6 all go into 12. Change everything to <strong>twelfths</strong> and place them on a number line.')}
+  ${steps([['5/6','× 2',`${fr(10,12)}`],['2/3','× 4',`${fr(8,12)}`],['1/2','× 6',`${fr(6,12)}`],['7/12','no change',`${fr(7,12)}`]])}
+  ${faLine(12,[6,7,8,10],'Twelfths on a number line: 6/12, 7/12, 8/12, 10/12')}
+  ${steps([['Order the numerators','6, 7, 8, 10','left to right on the line'],['ANSWER (ascending)',`${fr(1,2)}, ${fr(7,12)}, ${fr(2,3)}, ${fr(5,6)}`,'original fractions']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Mixed numbers and improper fractions: 1 3/4, 5/4, 2, 1 1/2</div>
+  ${asWarm('Put them all on a number line in <strong>quarters</strong> and read from left to right.')}
+  ${steps([['1 3/4',`${fr(7,4)}`,'1 × 4 + 3'],['5/4',`${fr(5,4)}`,'already improper'],['2',`${fr(8,4)}`,'2 × 4'],['1 1/2',`${fr(6,4)}`,'1½ = 1 2/4']])}
+  ${faLineMixed(2,4,[5,6,7,8],'1 1/4, 1 2/4, 1 3/4, 2 — left to right')}
+  ${steps([['Order the quarters','5, 6, 7, 8','5/4, 6/4, 7/4, 8/4'],['ANSWER (ascending)',`${fr(5,4)}, ${mx(1,1,2)}, ${mx(1,3,4)}, 2`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Unrelated denominators: 2/3, 3/4, 4/5</div>
+  ${asWarm('3, 4 and 5 share no factors, so multiply them: 3 × 4 × 5 = 60. Order from <strong>smallest to largest</strong>.')}
+  ${steps([['2/3',`× 20`,`${fr(40,60)}`],['3/4',`× 15`,`${fr(45,60)}`],['4/5',`× 12`,`${fr(48,60)}`],['ANSWER',`${fr(2,3)}, ${fr(3,4)}, ${fr(4,5)}`,'40 &lt; 45 &lt; 48']])}
+  ${faWall([[2,3],[3,4],[4,5]],'2/3, 3/4, 4/5 — each strip is longer','Ascending order')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Pattern:</strong> each fraction here is missing less from 1 whole: ${fr(1,3)}, ${fr(1,4)}, ${fr(1,5)} — the smaller the gap, the closer to 1.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the swimming race</div>
+  ${asWarm('In a charity swim, Ada swam <strong>3/4 km</strong>, Bola swam <strong>2/3 km</strong> and Chidi swam <strong>5/8 km</strong>. Put them in order from the <strong>furthest</strong> to the shortest distance.')}
+  ${steps([['Common denominator','24','4, 3 and 8 all go into 24'],['Ada',`${fr(3,4)}`,`= ${fr(18,24)}`],['Bola',`${fr(2,3)}`,`= ${fr(16,24)}`],['Chidi',`${fr(5,8)}`,`= ${fr(15,24)}`]])}
+  ${faWall([[18,24],[16,24],[15,24]],'Ada, Bola and Chidi (in 24ths)','Descending: Ada, Bola, Chidi',false)}
+  ${steps([['Descending order','18 &gt; 16 &gt; 15','largest first'],['ANSWER','Ada, Bola, Chidi',`${fr(3,4)} &gt; ${fr(2,3)} &gt; ${fr(5,8)}`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, then fill the gap</div>
+  ${asWarm(`Tolu writes ${fr(3,4)}, ${fr(3,5)}, ${fr(3,8)} and says &ldquo;this is smallest to largest because 4 &lt; 5 &lt; 8.&rdquo; Is he right?`)}
+  ${faWall([[3,4],[3,5],[3,8]],'3/4 vs 3/5 vs 3/8','The 3/8 strip is the SHORTEST — Tolu has it the wrong way round')}
+  ${steps([['Tolu ordered','the denominators','4, 5, 8 — but bigger denominator = smaller fraction ✗'],['CORRECT ascending',`${fr(3,8)}, ${fr(3,5)}, ${fr(3,4)}`,'smallest to largest ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Find a fraction between ${fr(1,2)} and ${fr(3,4)}.</strong> Change both to eighths first.</div>
+  ${steps([['1/2 and 3/4','4/8 and 6/8','same denominator'],['Number in between','5','4 &lt; 5 &lt; 6'],['ANSWER',`${fr(5,8)}`,`${fr(1,2)} &lt; ${fr(5,8)} &lt; ${fr(3,4)} ✓`]])}
+</div>
+
+${asExCard(9,[
+ exQ(1,'Order from smallest to largest: 5/9, 2/9, 7/9, 1/9.',['1/9, 2/9, 5/9, 7/9','7/9, 5/9, 2/9, 1/9','2/9, 1/9, 5/9, 7/9'],0),
+ exQ(2,'Order from largest to smallest: 2/3, 2/5, 2/9.',['2/3, 2/5, 2/9','2/9, 2/5, 2/3','2/5, 2/3, 2/9'],0),
+ exQ(3,'Order from smallest to largest: 1/2, 3/4, 5/8.',['1/2, 5/8, 3/4','3/4, 5/8, 1/2','5/8, 1/2, 3/4'],0),
+ exQ(4,'Which is the smallest: 5/6, 2/3, 1/2 or 7/12?',['1/2','7/12','2/3'],0),
+ exQ(5,'Order from smallest to largest: 1 1/2, 5/4, 2.',['5/4, 1 1/2, 2','2, 1 1/2, 5/4','1 1/2, 5/4, 2'],0),
+ exQ(6,'Order from largest to smallest: 2/3, 3/4, 4/5.',['4/5, 3/4, 2/3','2/3, 3/4, 4/5','3/4, 4/5, 2/3'],0),
+ exQ(7,'Ada swims 3/4 km, Bola swims 2/3 km and Chidi swims 5/8 km. Who swims the furthest?',['Ada','Bola','Chidi'],0),
+ exQ(8,'Tolu writes 3/4, 3/5, 3/8 and says it is smallest to largest. Is he right?',['No — the correct order is 3/8, 3/5, 3/4','Yes — the denominators go up','No — the correct order is 3/5, 3/4, 3/8'],0),
+ exQ(9,'THINK DEEPER: Which fraction lies between 1/2 and 3/4?',['5/8','1/4','7/8'],0,'t'),
+ exQ(10,'BOSS LEVEL: Order from largest to smallest: 7/4, 1 3/5, 9/5, 3/2.',['9/5, 7/4, 1 3/5, 3/2','7/4, 9/5, 3/2, 1 3/5','3/2, 1 3/5, 7/4, 9/5'],0,'b')])}`;
+
+
+/* ---------- STEP 10 : Fractions on a number line ---------- */
+const P5_FA10 = `
+${asHeader('FA10','Step 10 — Fractions on a Number Line','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Fractions Have an Address</div>
+  ${asWarm(`Every fraction has an exact <strong>address</strong> on the number line — a spot that belongs only to it. A number line is like a ruler: the <strong>distance between two whole numbers</strong> is cut into equal steps, and each step is a unit fraction. To read or place a fraction we need to know <strong>how big each step is</strong>.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> use a metre ruler or a long strip of paper folded into equal sections. The fold marks are the tick marks!</div>
+  ${faLine(5,[3],'0 to 1 cut into 5 equal steps — the dot is on step 3')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Step 1 — Find the step size</div><div class="s-body" style="color:#633806;">Count the <strong>equal gaps</strong> between two whole numbers. If there are 5 gaps, each step is ${fr(1,5)}.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Step 2 — Count the steps</div><div class="s-body" style="color:#085041;">Count steps <strong>from the nearest whole number</strong> to the dot. The count is the numerator.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">📋 Step 3 — Name it</div><div class="s-body" style="color:#3C3489;">Past 1? Write it as a <strong>mixed number</strong> (whole + steps) or an <strong>improper fraction</strong> (all the steps from 0).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Counting ticks</div><div class="s-body" style="color:#712B13;">Count the <strong>gaps</strong>, not the tick marks. 5 gaps need 6 ticks (including both whole numbers).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting the whole</div><div class="s-body" style="color:#712B13;">On a line from 2 to 3, a dot on the first quarter-tick is ${mx(2,1,4)}, <strong>not</strong> ${fr(1,4)}. Read where the line <em>starts</em>.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — What is each step worth?</div>
+  ${asWarm('A number line from 0 to 1 is cut into 8 equal steps. What fraction is each step? Where is the 5th tick?')}
+  ${faLine(8,[5],'0 to 1 in eighths — the dot is the 5th step')}
+  ${steps([['Gaps between 0 and 1','8','so each step is 1/8'],['Steps to the dot','5','numerator'],['ANSWER',`${fr(5,8)}`,'five eighths']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Beyond 1: where is 7/4?</div>
+  ${asWarm('The line goes from 0 to 2 and each whole is cut into quarters. Count 7 quarter-steps from 0.')}
+  ${faLineTo(2,4,[7],'7/4 on a line from 0 to 2')}
+  ${steps([['1 whole','4 steps','4/4 = 1'],['7 steps','4 + 3','one whole and 3 more quarters'],['ANSWER',`${fr(7,4)} = ${mx(1,3,4)}`,'between 1 and 2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A line that starts at 1: reading the scale</div>
+  ${asWarm('Number lines do not always start at 0! This one runs from <strong>1 to 2</strong> and is cut into 6 equal steps.')}
+  ${faLineSeg(1,2,6,[9],'1 to 2 in sixths — the dot is on the 3rd tick after 1')}
+  ${steps([['Step size','1/6','6 gaps between 1 and 2'],['Steps from 1','3','3 sixths'],['ANSWER',`${mx(1,3,6)} = ${mx(1,1,2)}`,'simplified: 3/6 = 1/2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A line with missing labels: what does the arrow show?</div>
+  ${asWarm('Only the whole numbers are labelled. Work out the step size yourself!')}
+  ${faLineSeg(2,3,5,[13],'The dot is on a number between 2 and 3',{hide:true})}
+  ${steps([['Count the gaps','5','so each step is 1/5'],['Steps from 2','3','the dot is on the 3rd tick'],['ANSWER',`${mx(2,3,5)}`,'= 13/5']])}
+  ${faLineSeg(2,3,5,[13],'Answer revealed: 2 3/5')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Equivalent fractions share one point</div>
+  ${asWarm('Halves, sixths and eighths cut the same 0-to-1 line differently — but some points line up exactly.')}
+  ${faTwoLines([[2,1],[6,3],[8,4]],'Halves, sixths and eighths: one point, three names')}
+  ${steps([['1/2','1 of 2 steps',''],['3/6','3 of 6 steps',`= ${fr(1,2)}`],['4/8','4 of 8 steps',`= ${fr(1,2)}`],['ANSWER',`${fr(1,2)} = ${fr(3,6)} = ${fr(4,8)}`,'the same spot on the line']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Jumping along the line</div>
+  ${asWarm('Start at <strong>1 1/4</strong> and jump forward 3 quarters. Where do you land?')}
+  ${faLineMixed(3,4,[5,8],'Start 1 1/4, jump +3 quarters, land on 2')}
+  ${steps([['Start',`${mx(1,1,4)}`,`= ${fr(5,4)}`],['Jump','+ 3 quarters',`${fr(5,4)} + ${fr(3,4)}`],['Land',`${fr(8,4)}`,'= 2 wholes ✓']])}
+  <div class="card-body" style="margin-top:6px;">🔑 This is how we will <strong>add</strong> fractions in Step 12: jump along the number line!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the measuring jug</div>
+  ${asWarm('A measuring jug is marked every <strong>quarter of a litre</strong> up to 2 litres. Water reaches the <strong>7th mark</strong>. How much water is in the jug?')}
+  ${faLineMixed(2,4,[7],'Jug scale: quarters from 0 to 2 litres')}
+  ${steps([['Each mark','1/4 L','quarter-litre steps'],['7 marks',`${fr(7,4)} L`,'seven quarters'],['ANSWER',`${mx(1,3,4)} L`,'one and three quarter litres']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and find the halfway point</div>
+  ${asWarm(`A line runs from 1 to 2 and is cut into quarters. Tolu says the dot on the first tick is ${fr(1,4)}. Is he right?`)}
+  ${faLineSeg(1,2,4,[5],'The dot is the first tick after 1')}
+  ${steps([['Tolu&#39;s answer',`${fr(1,4)}`,'forgot the line starts at 1 ✗'],['CORRECT',`${mx(1,1,4)}`,'1 + one quarter ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>What fraction is exactly halfway between ${fr(1,3)} and ${fr(2,3)}?</strong> Change both to sixths.</div>
+  ${faLine(6,[2,3,4],'1/3 = 2/6, 2/3 = 4/6 — the halfway point is 3/6')}
+  ${steps([['1/3 and 2/3','2/6 and 4/6','common denominator'],['Halfway','(2 + 4) ÷ 2 = 3','3/6'],['ANSWER',`${fr(3,6)} = ${fr(1,2)}`,'simplest form']])}
+</div>
+
+${asExCard(10,[
+ exQ(1,'A number line from 0 to 1 is cut into 8 equal steps. What fraction is each step worth?',['1/8','1/9','8'],0),
+ exQ(2,'A dot is on the 3rd tick of a 0 to 1 number line cut into 5 equal steps. What fraction is it?',['3/5','3/4','5/3'],0),
+ exQ(3,'On a number line from 0 to 2 cut into quarters, which number is on the 7th tick?',['1 3/4','1 1/4','7/8'],0),
+ exQ(4,'On a number line from 1 to 2 cut into 6 equal steps, what is on the 3rd tick after 1?',['1 3/6 (= 1 1/2)','3/6','1 6/3'],0),
+ exQ(5,'Which fraction is in the same place as 3/6 on a number line?',['1/2','1/3','2/3'],0),
+ exQ(6,'Start at 1 1/4 and jump forward 3 quarters. Where do you land?',['2','1 3/4','2 1/4'],0),
+ exQ(7,'A jug scale is marked in quarter litres. Water is at the 9th mark from 0. How much water is in the jug?',['2 1/4 L','1 1/4 L','9/2 L'],0),
+ exQ(8,'On a number line from 1 to 2 cut into quarters, Tolu says the first tick after 1 is 1/4. Is he right?',['No — it is 1 1/4','Yes — it is 1/4','No — it is 2 1/4'],0),
+ exQ(9,'THINK DEEPER: Which fraction is exactly halfway between 1/3 and 2/3?',['1/2','1/4','3/4'],0,'t'),
+ exQ(10,'BOSS LEVEL: A number line from 2 to 3 is cut into 10 equal steps. An arrow points to the 7th tick after 2. Write the number as a mixed number and as an improper fraction.',['2 7/10 = 27/10','7/10 = 7/10','2 7/10 = 17/10'],0,'b')])}`;
+
+
+
+ 
 const P5_FA11 = null; // Fractions greater than one
 const P5_FA12 = null; // Add fractions with the same denominator
+
 const P5_FA13 = null; // Add fractions with related denominators
 const P5_FA14 = null; // Subtract fractions with the same denominator
 const P5_FA15 = null; // Subtract fractions with related denominators

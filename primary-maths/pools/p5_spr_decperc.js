@@ -68,7 +68,103 @@ window.XELEDIF_POOLS['P5.SPR.DP'] = {
 
         { id:'P5.SPR.DP.S09.Q0010', v:1, concept:'dp9.hero-zero', level:'b', difficulty:3,
           stem:'Tomi says 8 ÷ 100 = 0.8. Is she right?',
-          options:['No — 8 ÷ 100 = 0.08; the 8 moves two places right, so a hero zero holds the tenths','Yes — 8 ÷ 100 = 0.8','No — 8 ÷ 100 = 0.008'], correct:0 }
+          options:['No — 8 ÷ 100 = 0.08; the 8 moves two places right, so a hero zero holds the tenths','Yes — 8 ÷ 100 = 0.8','No — 8 ÷ 100 = 0.008'], correct:0 },
+
+        /* ===== BATCH A — shift-right (Q0011–Q0015) ===== */
+        { id:'P5.SPR.DP.S09.Q0011', v:1, concept:'dp9.shift-right', level:'n', difficulty:1,
+          stem:'When you divide a number by 10, which way do its digits move?',
+          options:['One place to the right','One place to the left','The decimal point jumps to the end'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0012', v:1, concept:'dp9.shift-right', level:'n', difficulty:1,
+          stem:'Dividing by 100 moves every digit how many places to the right?',
+          options:['2','1','3'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0013', v:1, concept:'dp9.shift-right', level:'n', difficulty:1,
+          stem:'Dividing by 1,000 moves every digit how many places to the right?',
+          options:['3','2','4'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0014', v:1, concept:'dp9.shift-right', level:'n', difficulty:2,
+          stem:'What happens to the value of each digit when you divide a number by 10?',
+          options:['It becomes ten times smaller','It becomes ten times bigger','It stays the same'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0015', v:1, concept:'dp9.shift-right', level:'t', difficulty:2,
+          stem:'In 52.8 ÷ 100, the digit 5 starts in the tens column. Which column does it land in?',
+          options:['Tenths','Ones','Hundredths'], correct:0 },
+
+        /* ===== BATCH A — div10 (Q0016–Q0021) ===== */
+        { id:'P5.SPR.DP.S09.Q0016', v:1, concept:'dp9.div10', level:'n', difficulty:1,
+          stem:'70 ÷ 10 = ?', options:['7','0.7','700'], correct:0, check:'70/10' },
+
+        { id:'P5.SPR.DP.S09.Q0017', v:1, concept:'dp9.div10', level:'n', difficulty:1,
+          stem:'8 ÷ 10 = ?', options:['0.8','0.08','80'], correct:0, check:'8/10' },
+
+        { id:'P5.SPR.DP.S09.Q0018', v:1, concept:'dp9.div10', level:'n', difficulty:1,
+          stem:'6.3 ÷ 10 = ?', options:['0.63','63','0.063'], correct:0, check:'6.3/10' },
+
+        { id:'P5.SPR.DP.S09.Q0019', v:1, concept:'dp9.div10', level:'n', difficulty:2,
+          stem:'128 ÷ 10 = ?', options:['12.8','1.28','1,280'], correct:0, check:'128/10' },
+
+        { id:'P5.SPR.DP.S09.Q0020', v:1, concept:'dp9.div10', level:'n', difficulty:2,
+          stem:'25.9 ÷ 10 = ?', options:['2.59','259','0.259'], correct:0, check:'25.9/10' },
+
+        { id:'P5.SPR.DP.S09.Q0021', v:1, concept:'dp9.div10', level:'t', difficulty:2,
+          stem:'Which calculation gives the answer 4.6?', options:['46 ÷ 10','460 ÷ 10','4.6 ÷ 10'], correct:0 },
+
+        /* ===== BATCH A — div100 (Q0022–Q0028) ===== */
+        { id:'P5.SPR.DP.S09.Q0022', v:1, concept:'dp9.div100', level:'n', difficulty:1,
+          stem:'600 ÷ 100 = ?', options:['6','60','0.6'], correct:0, check:'600/100' },
+
+        { id:'P5.SPR.DP.S09.Q0023', v:1, concept:'dp9.div100', level:'n', difficulty:1,
+          stem:'345 ÷ 100 = ?', options:['3.45','34.5','0.345'], correct:0, check:'345/100' },
+
+        { id:'P5.SPR.DP.S09.Q0024', v:1, concept:'dp9.div100', level:'n', difficulty:2,
+          stem:'82.5 ÷ 100 = ?', options:['0.825','8.25','0.0825'], correct:0, check:'82.5/100' },
+
+        { id:'P5.SPR.DP.S09.Q0025', v:1, concept:'dp9.div100', level:'n', difficulty:2,
+          stem:'9 ÷ 100 = ?', options:['0.09','0.9','0.009'], correct:0, check:'9/100' },
+
+        { id:'P5.SPR.DP.S09.Q0026', v:1, concept:'dp9.div100', level:'n', difficulty:2,
+          stem:'4.7 ÷ 100 = ?', options:['0.047','0.47','0.0047'], correct:0, check:'4.7/100' },
+
+        { id:'P5.SPR.DP.S09.Q0027', v:1, concept:'dp9.div100', level:'t', difficulty:3,
+          stem:'2,050 ÷ 100 = ?', options:['20.5','2.05','205'], correct:0, check:'2050/100' },
+
+        { id:'P5.SPR.DP.S09.Q0028', v:1, concept:'dp9.div100', level:'b', difficulty:3,
+          stem:'Aisha says 350 ÷ 100 = 0.35. What is the correct answer, and what was her mistake?',
+          options:['3.5 — she moved the digits three places instead of two','0.35 — she is right','35 — she moved the digits only one place'], correct:0 },
+
+        /* ===== BATCH B — div1000 (Q0029–Q0034) ===== */
+        { id:'P5.SPR.DP.S09.Q0029', v:1, concept:'dp9.div1000', level:'n', difficulty:1,
+          stem:'9,000 ÷ 1,000 = ?', options:['9','90','0.9'], correct:0, check:'9000/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0030', v:1, concept:'dp9.div1000', level:'n', difficulty:1,
+          stem:'2,500 ÷ 1,000 = ?', options:['2.5','25','0.25'], correct:0, check:'2500/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0031', v:1, concept:'dp9.div1000', level:'n', difficulty:2,
+          stem:'738 ÷ 1,000 = ?', options:['0.738','7.38','0.0738'], correct:0, check:'738/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0032', v:1, concept:'dp9.div1000', level:'n', difficulty:2,
+          stem:'64.5 ÷ 1,000 = ?', options:['0.0645','0.645','0.00645'], correct:0, check:'64.5/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0033', v:1, concept:'dp9.div1000', level:'n', difficulty:3,
+          stem:'8.2 ÷ 1,000 = ?', options:['0.0082','0.082','0.00082'], correct:0, check:'8.2/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0034', v:1, concept:'dp9.div1000', level:'t', difficulty:3,
+          stem:'Which calculation gives the answer 0.0372?', options:['37.2 ÷ 1,000','3.72 ÷ 1,000','372 ÷ 1,000'], correct:0 },
+
+        /* ===== BATCH B — hero-zero (Q0035–Q0038) ===== */
+        { id:'P5.SPR.DP.S09.Q0035', v:1, concept:'dp9.hero-zero', level:'n', difficulty:2,
+          stem:'Which calculation has an answer with a zero in the TENTHS column?', options:['6 ÷ 100','60 ÷ 100','6 ÷ 10'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0036', v:1, concept:'dp9.hero-zero', level:'n', difficulty:2,
+          stem:'3 ÷ 1,000 = ?', options:['0.003','0.03','0.0003'], correct:0, check:'3/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0037', v:1, concept:'dp9.hero-zero', level:'n', difficulty:3,
+          stem:'0.5 ÷ 10 = ?', options:['0.05','0.5','0.005'], correct:0, check:'0.5/10' },
+
+        { id:'P5.SPR.DP.S09.Q0038', v:1, concept:'dp9.hero-zero', level:'b', difficulty:3,
+          stem:'Kemi writes 53.16 ÷ 1,000 = 0.5316. How many places did she move the digits, and what is the right answer?',
+          options:['She moved them 2 places; the right answer is 0.05316','She moved them 3 places; the right answer is 0.5316','She moved them 1 place; the right answer is 5.316'], correct:0 }
       ]
     }
 

@@ -1,8 +1,22 @@
 name: Validate question pools
-on: [push, pull_request]
+
+# Runs on GitHub whenever you push changes to the pool files or the validator.
+on:
+  push:
+    paths:
+      - 'primary-maths/pools/**'
+      - 'primary-maths/tools/**'
+  pull_request:
+    paths:
+      - 'primary-maths/pools/**'
+      - 'primary-maths/tools/**'
+
 jobs:
   validate:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: primary-maths
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
