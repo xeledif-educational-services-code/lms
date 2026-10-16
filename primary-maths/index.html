@@ -221,6 +221,8 @@
 <!-- Your Firebase integration -->
 <!-- Your Firebase integration -->
 <script src="firebase-integration.js"></script>
+<script src="pool-engine.js"></script>
+<script src="pool-ui.js"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -722,6 +724,9 @@ const MCQTracker = {
     this.showCompleteModal();
   },
 
+
+
+
   showCompleteModal() {
     const t = this.totals();
     const denom = t.actualTotal || t.total || 1;
@@ -781,6 +786,7 @@ const MCQTracker = {
           🔄 Start a fresh attempt
         </button>
       </div>
+      ${window.PracticeZone && PracticeZone.available() ? `<button class="modal-btn" style="margin-top:8px;background:#E1F5EE;border-color:#1D9E75;color:#085041;" onclick="PracticeZone.fromScorecard()">🚀 Practise 10 more questions</button>` : ''}
     `;
     overlay.classList.add('show');
   },
@@ -807,12 +813,19 @@ const MCQTracker = {
       window.__currentStepMeta || {}
     );
 
+
+
+
+
+
+
     // Rebuild the step content so all MCQ buttons reset to default
     // (removes ✓/✗ styling, re-enables clicking)
     if (window.__currentStepObject) {
       const host = document.querySelector('.step-content-area:not(.hidden)');
       if (host) {
         host.innerHTML = renderStepContent(window.__currentStepObject);
+        if (window.PracticeZone) PracticeZone.remount(host);
       }
     } else {
       // Fallback: just reload the tracker state and reset the DOM manually
@@ -11265,7 +11278,7 @@ ${asExCard(12,[
 const SCHEME_P5 = [
   {
     id:'autumn', emoji:'🍂', label:'Autumn Term', meta:'September – December 2026',
-    col: TERM_COLORS.autumn, open: true,
+    col: TERM_COLORS.autumn, open: false,
     topics: [
       { id:'placevalue', label:'Place Value', col: TOPIC_PALETTE[0],
         steps: [
@@ -11290,7 +11303,7 @@ const SCHEME_P5 = [
           { label:'Count forwards and backwards through zero', content: P5_PV19 },
           { label:'Number sequences involving large numbers', content: P5_PV20 }
         ]},
-      { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],open: true,
+      { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],open: false,
         steps: [
           { label:'Mental addition and subtraction strategies', content: P5_AS1 },
           { label:'Add and subtract multiples of 10, 100 and 1,000', content: P5_AS2 },
@@ -11349,7 +11362,7 @@ const SCHEME_P5 = [
         ]},
     ]
   },
-  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:false,
+  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:true,
     topics: [
       { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
       { id:'fractionsB', label:'Fractions B', col: TOPIC_PALETTE[2],
@@ -11365,7 +11378,7 @@ const SCHEME_P5 = [
           { label:'Subtract fractions with different denominators', content: P5_FB9 },
           { label:'Solve multi-step fraction problems', content: P5_FB10 }
         ]},
-      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],
+      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],open: true, poolKey:'P5.SPR.DP', poolFile:'pools/p5_spr_decperc.js',
         steps: [
           { label:'Decimal place value', content: P5_DP1 },
           { label:'Thousandths', content: P5_DP2 },
@@ -11744,6 +11757,7 @@ function buildTopic(topic, termId, termLabel) {
       window.__currentStepId = `${termId}-${topic.id}-step${si + 1}`;
       window.__currentStepLabel = step.label || `Step ${si + 1}`;
       window.__currentStepObject = step;
+      window.__currentTopic = topic;
       window.__currentStepMeta = {
         term: termLabel || termId,
         topic: topic.label,
@@ -11752,6 +11766,7 @@ function buildTopic(topic, termId, termLabel) {
         stepLabel: step.label || `Step ${si + 1}`
       };
       contentArea.innerHTML = renderStepContent(step);
+      if (window.PracticeZone) PracticeZone.mount(contentArea, topic, step);
       contentArea.scrollIntoView({ behavior:'smooth', block:'nearest' });
     };
     tabsRow.appendChild(btn);
