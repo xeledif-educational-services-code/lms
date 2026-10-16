@@ -164,7 +164,47 @@ window.XELEDIF_POOLS['P5.SPR.DP'] = {
 
         { id:'P5.SPR.DP.S09.Q0038', v:1, concept:'dp9.hero-zero', level:'b', difficulty:3,
           stem:'Kemi writes 53.16 ÷ 1,000 = 0.5316. How many places did she move the digits, and what is the right answer?',
-          options:['She moved them 2 places; the right answer is 0.05316','She moved them 3 places; the right answer is 0.5316','She moved them 1 place; the right answer is 5.316'], correct:0 }
+          options:['She moved them 2 places; the right answer is 0.05316','She moved them 3 places; the right answer is 0.5316','She moved them 1 place; the right answer is 5.316'], correct:0 },
+
+        /* ===== BATCH C — inverse (Q0039–Q0043) ===== */
+        { id:'P5.SPR.DP.S09.Q0039', v:1, concept:'dp9.inverse', level:'n', difficulty:1,
+          stem:'4.5 × 10 = 45. So what is 45 ÷ 10?', options:['4.5','450','0.45'], correct:0, check:'45/10' },
+
+        { id:'P5.SPR.DP.S09.Q0040', v:1, concept:'dp9.inverse', level:'n', difficulty:2,
+          stem:'0.82 × 100 = 82. So what is 82 ÷ 100?', options:['0.82','8.2','820'], correct:0, check:'82/100' },
+
+        { id:'P5.SPR.DP.S09.Q0041', v:1, concept:'dp9.inverse', level:'n', difficulty:2,
+          stem:'▢ ÷ 10 = 6.4. What number goes in the box?', options:['64','0.64','640'], correct:0, check:'6.4*10' },
+
+        { id:'P5.SPR.DP.S09.Q0042', v:1, concept:'dp9.inverse', level:'t', difficulty:2,
+          stem:'3.7 ÷ ▢ = 0.037. What number goes in the box?', options:['100','10','1,000'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0043', v:1, concept:'dp9.inverse', level:'t', difficulty:3,
+          stem:'▢ ÷ 1,000 = 0.0405. What number goes in the box?', options:['40.5','4.05','405'], correct:0, check:'0.0405*1000' },
+
+        /* ===== BATCH C — units (Q0044–Q0047) ===== */
+        { id:'P5.SPR.DP.S09.Q0044', v:1, concept:'dp9.units', level:'n', difficulty:1,
+          stem:'Change 75 cm into metres.', options:['0.75 m','7.5 m','0.075 m'], correct:0, check:'75/100' },
+
+        { id:'P5.SPR.DP.S09.Q0045', v:1, concept:'dp9.units', level:'n', difficulty:1,
+          stem:'Change 450 g into kilograms.', options:['0.45 kg','4.5 kg','0.045 kg'], correct:0, check:'450/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0046', v:1, concept:'dp9.units', level:'n', difficulty:2,
+          stem:'Change 1,250 ml into litres.', options:['1.25 L','12.5 L','0.125 L'], correct:0, check:'1250/1000' },
+
+        { id:'P5.SPR.DP.S09.Q0047', v:1, concept:'dp9.units', level:'b', difficulty:3,
+          stem:'Chidi has 4 pieces of ribbon, each 35 cm long. What is the total length in metres?', options:['1.4 m','14 m','0.14 m'], correct:0, check:'4*35/100' },
+
+        /* ===== BATCH C — reasoning (Q0048–Q0050) ===== */
+        { id:'P5.SPR.DP.S09.Q0048', v:1, concept:'dp9.reasoning', level:'t', difficulty:2,
+          stem:'Which is greater: 90 ÷ 10 or 900 ÷ 1,000?', options:['90 ÷ 10','900 ÷ 1,000','They are equal'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0049', v:1, concept:'dp9.reasoning', level:'t', difficulty:3,
+          stem:'What do 5.2 ÷ 10, 52 ÷ 100 and 520 ÷ 1,000 have in common?', options:['They all equal 0.52','They all equal 5.2','They all equal 0.052'], correct:0 },
+
+        { id:'P5.SPR.DP.S09.Q0050', v:1, concept:'dp9.reasoning', level:'b', difficulty:3,
+          stem:'Dev says: "To divide by 100, I just take away two zeros," so he writes 3.5 ÷ 100 = 3.5. Why is he wrong?',
+          options:['Dividing by 100 moves the digits two places right, so 3.5 ÷ 100 = 0.035','3.5 ÷ 100 = 0.35','3.5 ÷ 100 = 35'], correct:0 }
       ]
     }
 
