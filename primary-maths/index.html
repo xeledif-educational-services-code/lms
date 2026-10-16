@@ -8096,8 +8096,251 @@ ${asExCard(12,[
 
 
 
-const P5_FA13 = null; // Add fractions with related denominators
-const P5_FA14 = null; // Subtract fractions with the same denominator
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 13 AND 14
+   Step 13: Add fractions with related denominators
+   Step 14: Subtract fractions with the same denominator
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–12 files (re-uses faWall, faMulti, faCircle,
+      faLine, faLineTo, fr, mx, steps, exQ, asHeader, asWarm,
+      asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA13 = null;
+        const P5_FA14 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* Bars with `start` parts shaded; the last `take` shaded parts are CROSSED OUT.
+   Good for subtraction. faTake(8,8,3,'title','foot') → 8/8 with 3 taken away.
+   Works for more than one bar (start > den). */
+function faTake(den,start,take,title,foot){
+  const bars=Math.ceil(start/den), bw=300, x0=10, rowH=30, gap=8, cw=bw/den;
+  const H=34+bars*(rowH+gap)+(foot?30:6);
+  let s=`<svg viewBox="0 0 520 ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="260" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let b=0;b<bars;b++){
+    const y=28+b*(rowH+gap);
+    let inBar=0;
+    for(let k=0;k<den;k++){
+      const idx=b*den+k, x=x0+k*cw;
+      let fill='#fff';
+      if(idx<start-take) fill='#FCD34D';
+      else if(idx<start) fill='#FCA5A5';
+      if(idx<start) inBar++;
+      s+=`<rect x="${x.toFixed(1)}" y="${y}" width="${cw.toFixed(1)}" height="${rowH}" fill="${fill}" stroke="#333" stroke-width="1.5"/>`;
+      if(idx>=start-take && idx<start){
+        s+=`<line x1="${(x+5).toFixed(1)}" y1="${y+5}" x2="${(x+cw-5).toFixed(1)}" y2="${y+rowH-5}" stroke="#B91C1C" stroke-width="2.5"/>`;
+        s+=`<line x1="${(x+cw-5).toFixed(1)}" y1="${y+5}" x2="${(x+5).toFixed(1)}" y2="${y+rowH-5}" stroke="#B91C1C" stroke-width="2.5"/>`;
+      }
+    }
+    s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${rowH}" fill="none" stroke="#333" stroke-width="2"/>`;
+    s+=`<text x="${x0+bw+16}" y="${y+21}" font-size="14" font-weight="800" fill="#333">${inBar}/${den}</text>`;
+  }
+  if(foot) s+=`<text x="260" y="${H-10}" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 13 : Add fractions with related denominators ---------- */
+const P5_FA13 = `
+${asHeader('FA13','Step 13 — Add Fractions with Related Denominators','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Make the Pieces the Same Size First</div>
+  ${asWarm(`In Step 12 the pieces were the same size, so adding was easy. What about <strong>1/2 + 1/4</strong>? A half and a quarter are <em>different-sized pieces</em> — you cannot count them together. But <strong>2 goes into 4</strong> (the denominators are <strong>related</strong>), so we can cut the half into two quarters! Then both fractions are quarters and we can add.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take a half strip and a quarter strip. Swap the half for 2 quarter strips. Now count the quarters.</div>
+  ${faWall([[1,2],[2,4],[1,4],[3,4]],'1/2 = 2/4, so 1/2 + 1/4 = 2/4 + 1/4 = 3/4','Change the half to quarters, then add')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The method</div><div class="s-body" style="color:#633806;">1) Find the <strong>common denominator</strong> — when one denominator is a multiple of the other, it is the <strong>bigger</strong> one. 2) Change the other fraction (Step 2: multiply top and bottom). 3) Add the numerators, keep the denominator. 4) Tidy up.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">Related denominators</div><div class="s-body" style="color:#085041;">Denominators are <strong>related</strong> when one is a <strong>multiple</strong> of the other: 2 and 4, 3 and 6, 5 and 10, 4 and 12, 4 and 8.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Skills used</div><div class="s-body" style="color:#3C3489;">Equivalent fractions (Step 2) → add (Step 12) → improper to mixed (Step 6) → simplify (Step 3).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Adding tops and bottoms</div><div class="s-body" style="color:#712B13;">${fr(1,2)} + ${fr(1,4)} is NOT ${fr(2,6)}! You must make the pieces the same size <strong>before</strong> you add.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Changing only the denominator</div><div class="s-body" style="color:#712B13;">To change ${fr(1,2)} to quarters you must multiply the top <strong>and</strong> the bottom by 2: ${fr(2,4)}, not ${fr(1,4)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Halves and quarters: 1/2 + 1/4</div>
+  ${asWarm('The denominators are 2 and 4. Which one is the common denominator?')}
+  ${faWall([[1,2],[2,4],[1,4],[3,4]],'1/2 → 2/4, then add 1/4','')}
+  ${steps([['Common denominator','4','2 × 2 = 4'],['Convert 1/2','× 2 on top and bottom',`${fr(1,2)} = ${fr(2,4)}`],['Add',`${fr(2,4)} + ${fr(1,4)}`,`= ${fr(3,4)}`],['ANSWER',`${fr(1,2)} + ${fr(1,4)} = ${fr(3,4)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Thirds and sixths: 2/3 + 1/6</div>
+  ${asWarm('Change the thirds into sixths. What do you multiply 3 by to get 6?')}
+  ${faWall([[2,3],[4,6],[1,6],[5,6]],'2/3 = 4/6, so 2/3 + 1/6 = 4/6 + 1/6 = 5/6','')}
+  ${steps([['Common denominator','6','3 × 2 = 6'],['Convert 2/3','× 2',`${fr(2,3)} = ${fr(4,6)}`],['Add',`${fr(4,6)} + ${fr(1,6)}`,`= ${fr(5,6)}`],['ANSWER',`${fr(2,3)} + ${fr(1,6)} = ${fr(5,6)}`,'cannot be simplified']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Crossing a whole: 3/4 + 3/8</div>
+  ${asWarm('Change the quarters into eighths, then add. Will the answer be more than 1?')}
+  ${steps([['Common denominator','8','4 × 2 = 8'],['Convert 3/4','× 2',`${fr(3,4)} = ${fr(6,8)}`],['Add',`${fr(6,8)} + ${fr(3,8)}`,`= ${fr(9,8)}`]])}
+  ${faMulti(8,9,'6/8 + 3/8 = 9/8','One whole bar and 1 eighth more')}
+  ${steps([['Improper → mixed','9 ÷ 8 = 1 r 1',`${mx(1,1,8)}`],['ANSWER',`${fr(3,4)} + ${fr(3,8)} = ${mx(1,1,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — On a number line: 2/5 + 3/10</div>
+  ${asWarm('Fifths and tenths are related (5 × 2 = 10). Change 2/5 to tenths, then jump.')}
+  ${steps([['Convert 2/5','× 2',`${fr(2,5)} = ${fr(4,10)}`],['Start','4/10','4 tenth-steps from 0'],['Jump','+ 3/10','3 more steps'],['Land','7/10','']])}
+  ${faLine(10,[4,7],'Start at 4/10 (= 2/5), jump +3/10, land on 7/10')}
+  ${steps([['ANSWER',`${fr(2,5)} + ${fr(3,10)} = ${fr(7,10)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Simplifying the answer: 5/12 + 1/4</div>
+  ${asWarm('4 goes into 12, so use twelfths. Then check whether the answer simplifies.')}
+  ${steps([['Convert 1/4','× 3',`${fr(1,4)} = ${fr(3,12)}`],['Add',`${fr(5,12)} + ${fr(3,12)}`,`= ${fr(8,12)}`],['HCF of 8 and 12','4',`${fr(8,12)} = ${fr(2,3)}`],['ANSWER',`${fr(5,12)} + ${fr(1,4)} = ${fr(2,3)}`,'simplest form ✓']])}
+  ${faWall([[5,12],[3,12],[8,12],[2,3]],'5/12 + 3/12 = 8/12 = 2/3','',false)}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Three fractions: 1/2 + 1/4 + 3/8</div>
+  ${asWarm('The largest denominator (8) is a multiple of both 2 and 4. Convert everything to eighths.')}
+  ${steps([['1/2','× 4',`${fr(4,8)}`],['1/4','× 2',`${fr(2,8)}`],['3/8','no change',`${fr(3,8)}`],['Add','4 + 2 + 3',`= ${fr(9,8)}`]])}
+  ${faMulti(8,9,'4/8 + 2/8 + 3/8 = 9/8','')}
+  ${steps([['Improper → mixed','9 ÷ 8 = 1 r 1',`${mx(1,1,8)}`],['ANSWER',`${mx(1,1,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the training run</div>
+  ${asWarm(`Tunde runs <strong>3/4 km</strong> before school and <strong>5/8 km</strong> after school. How far does he run altogether?`)}
+  ${steps([['Common denominator','8','4 × 2 = 8'],['Convert 3/4','× 2',`${fr(3,4)} = ${fr(6,8)}`],['Add',`${fr(6,8)} + ${fr(5,8)}`,`= ${fr(11,8)}`],['Improper → mixed','11 ÷ 8 = 1 r 3',`${mx(1,3,8)} km`]])}
+  ${faMulti(8,11,'6/8 + 5/8 = 11/8','')}
+  ${steps([['ANSWER',`${mx(1,3,8)} km`,'a bit more than one and a third km']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, then complete the whole</div>
+  ${asWarm(`Tolu adds ${fr(1,2)} + ${fr(1,4)} and writes ${fr(2,6)}. Is he right?`)}
+  ${faWall([[1,2],[1,4],[3,4],[2,6]],'Tolu&#39;s 2/6 is smaller than 1/2 — adding made it SMALLER!','Impossible: adding cannot make a number smaller')}
+  ${steps([['Tolu','1 + 1 = 2, 2 + 4 = 6','added both tops and bottoms ✗'],['Correct',`${fr(1,2)} = ${fr(2,4)}`,`${fr(2,4)} + ${fr(1,4)} = ${fr(3,4)} ✓`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Complete the whole:</strong> ${fr(3,5)} + ${fr('?',10)} = 1</div>
+  ${steps([['Convert 3/5','× 2',`${fr(3,5)} = ${fr(6,10)}`],['1 whole in tenths','',`${fr(10,10)}`],['Missing numerator','10 − 6','= 4'],['ANSWER',`${fr(3,5)} + ${fr(4,10)} = 1`,`(${fr(4,10)} = ${fr(2,5)})`]])}
+</div>
+
+${asExCard(13,[
+ exQ(1,'Calculate 1/2 + 1/4.',['3/4','2/6','2/8'],0),
+ exQ(2,'Calculate 2/3 + 1/6.',['5/6','3/9','3/6'],0),
+ exQ(3,'Calculate 3/4 + 1/8.',['7/8','4/12','4/8'],0),
+ exQ(4,'Calculate 3/4 + 3/8. Give your answer as a mixed number.',['1 1/8','6/12','6/8'],0),
+ exQ(5,'Calculate 2/5 + 3/10.',['7/10','5/15','5/10'],0),
+ exQ(6,'Calculate 5/12 + 1/4. Give your answer in its simplest form.',['2/3','6/16','8/12'],0),
+ exQ(7,'Tunde runs 3/4 km before school and 5/8 km after school. How far does he run altogether?',['1 3/8 km','8/12 km','1 1/8 km'],0),
+ exQ(8,'Tolu says 1/2 + 1/4 = 2/6. Is he right?',['No — change 1/2 to 2/4 first, giving 3/4','Yes — add the tops and the bottoms','No — the answer is 2/4'],0),
+ exQ(9,'THINK DEEPER: 3/5 + ?/10 = 1 whole. What is the missing numerator?',['4','2','7'],0,'t'),
+ exQ(10,'BOSS LEVEL: Calculate 1/2 + 1/4 + 3/8. Give your answer as a mixed number.',['1 1/8','5/14','9/14'],0,'b')])}`;
+
+
+/* ---------- STEP 14 : Subtract fractions with the same denominator ---------- */
+const P5_FA14 = `
+${asHeader('FA14','Step 14 — Subtract Fractions with the Same Denominator','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Taking Away Same-Sized Pieces</div>
+  ${asWarm(`If you have 7 mangoes and eat 3, you have 4 left. If you have <strong>7 ninths</strong> and take away <strong>3 ninths</strong>, you have <strong>4 ninths</strong> left! The pieces are the same size so we simply <strong>take them away</strong>. The unit (ninths) does not change.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take a strip with 7 ninths shaded. Cross out 3 of the shaded parts. Count what is left.</div>
+  ${faTake(9,7,3,'7/9 − 3/9: cross out 3 shaded parts','4 ninths are left → 4/9')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;"><strong>Subtract the numerators. Keep the denominator.</strong> ${fr(7,9)} − ${fr(3,9)} = ${fr('7 − 3',9)} = ${fr(4,9)}</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Subtracting from a whole</div><div class="s-body" style="color:#085041;">Write the whole as a fraction first: 1 = ${fr(8,8)}, 2 = ${fr(10,5)}… then subtract the numerators.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Link to Step 12</div><div class="s-body" style="color:#3C3489;">Subtraction is the <strong>inverse</strong> of addition: ${fr(7,9)} − ${fr(3,9)} = ${fr(4,9)} because ${fr(4,9)} + ${fr(3,9)} = ${fr(7,9)}. Use it to <strong>check</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Subtracting the denominators</div><div class="s-body" style="color:#712B13;">${fr(7,9)} − ${fr(3,9)} is NOT ${fr(4,0)}! The pieces stay <strong>ninths</strong>. Never subtract the bottoms.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting to simplify</div><div class="s-body" style="color:#712B13;">${fr(7,8)} − ${fr(3,8)} = ${fr(4,8)} — correct, but unfinished! ${fr(4,8)} = ${fr(1,2)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Crossing out: 5/8 − 2/8</div>
+  ${asWarm('Shade 5 eighths. Cross out 2 of them. What is left?')}
+  ${faTake(8,5,2,'5/8 − 2/8','3 eighths left')}
+  ${steps([['Subtract the numerators','5 − 2','= 3'],['Keep the denominator','8','eighths stay eighths'],['ANSWER',`${fr(5,8)} − ${fr(2,8)} = ${fr(3,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Circles and simplifying: 7/8 − 3/8</div>
+  ${asWarm('Funke has 7/8 of a pizza left. Her brother eats 3/8 of the pizza. How much is left?')}
+  <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(8,7,'7/8 at the start','#FCD34D')}
+    <div style="font-size:26px;font-weight:800;color:#555;">−</div>
+    ${faCircle(8,3,'3/8 eaten','#FCA5A5')}
+    <div style="font-size:26px;font-weight:800;color:#555;">=</div>
+    ${faCircle(8,4,'4/8 left','#34D399')}
+  </div>
+  ${steps([['Subtract','7 − 3','= 4 → 4/8'],['HCF of 4 and 8','4',`${fr('4 ÷ 4','8 ÷ 4')}`],['ANSWER',`${fr(7,8)} − ${fr(3,8)} = ${fr(1,2)}`,'half the pizza']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Jumping back on a number line: 9/5 − 4/5</div>
+  ${asWarm('Subtracting means jumping to the <strong>left</strong>. Start at 9/5 and jump back 4 fifths.')}
+  ${faLineTo(2,5,[9,5],'Start at 9/5, jump back 4/5, land on 5/5 = 1')}
+  ${steps([['Start',`${fr(9,5)}`,'9 fifth-steps from 0'],['Jump back','− 4 steps','9 − 4 = 5'],['Land',`${fr(5,5)}`,'= 1 whole'],['ANSWER',`${fr(9,5)} − ${fr(4,5)} = 1`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Subtracting from a whole: 1 − 3/8 and 2 − 3/5</div>
+  ${asWarm('You cannot take thirds-of-eighths from a plain 1. Write the whole as a fraction with the same denominator first!')}
+  ${faTake(8,8,3,'1 = 8/8, take away 3/8','5/8 left')}
+  ${steps([['1 as eighths',`1 = ${fr(8,8)}`,''],['Subtract',`${fr(8,8)} − ${fr(3,8)}`,`= ${fr(5,8)}`],['ANSWER',`1 − ${fr(3,8)} = ${fr(5,8)}`,'']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Now 2 − ${fr(3,5)}:</strong></div>
+  ${faTake(5,10,3,'2 = 10/5, take away 3/5','7/5 left')}
+  ${steps([['2 as fifths',`2 = ${fr(10,5)}`,'2 × 5 = 10'],['Subtract',`${fr(10,5)} − ${fr(3,5)}`,`= ${fr(7,5)}`],['ANSWER',`${mx(1,2,5)}`,'7 ÷ 5 = 1 remainder 2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Improper fractions: 11/6 − 5/6 and 17/5 − 4/5</div>
+  ${asWarm('The rule is exactly the same for improper fractions. Tidy up at the end!')}
+  ${steps([['11/6 − 5/6','11 − 5 = 6',`${fr(6,6)} = 1`]])}
+  ${steps([['17/5 − 4/5','17 − 4 = 13',`${fr(13,5)}`],['Improper → mixed','13 ÷ 5 = 2 r 3',`${mx(2,3,5)}`],['ANSWER',`${mx(2,3,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Finding the difference</div>
+  ${asWarm('&ldquo;How much more?&rdquo; and &ldquo;What is the difference?&rdquo; both mean <strong>subtract</strong> the smaller from the larger. Ada ran 7/9 of a lap and Bola ran 4/9. How much further did Ada run?')}
+  ${faWall([[7,9],[4,9]],'Ada 7/9, Bola 4/9','The gap between the two strips is the difference',true)}
+  ${steps([['Larger − smaller',`${fr(7,9)} − ${fr(4,9)}`,`= ${fr(3,9)}`],['Simplify','HCF of 3 and 9 is 3',`${fr(3,9)} = ${fr(1,3)}`],['ANSWER',`Ada ran ${fr(1,3)} of a lap further`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: baking</div>
+  ${asWarm(`Chef Bola has <strong>${fr(11,8)} kg</strong> of flour. She uses <strong>${fr(5,8)} kg</strong> in a cake. How much flour is left?`)}
+  ${faTake(8,11,5,'11/8 kg − 5/8 kg','6/8 kg left')}
+  ${steps([['Subtract','11 − 5','= 6 → 6/8'],['Simplify','HCF of 6 and 8 is 2',`${fr(6,8)} = ${fr(3,4)}`],['ANSWER',`${fr(3,4)} kg`,'three quarters of a kilogram']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, check by adding</div>
+  ${asWarm(`Tolu works out ${fr(7,9)} − ${fr(4,9)} and writes ${fr(3,5)} (7 − 4 = 3 and 9 − 4 = 5). Is he right?`)}
+  ${steps([['Tolu','9 − 4 = 5','subtracted from the denominator ✗'],['Correct','Keep the 9',`${fr(7,9)} − ${fr(4,9)} = ${fr(3,9)} = ${fr(1,3)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Check with the inverse:</strong> if ${fr(3,9)} is correct then ${fr(3,9)} + ${fr(4,9)} should equal ${fr(7,9)}.</div>
+  ${steps([['Add back','3 + 4 = 7',`${fr(7,9)} ✓`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing numerator:</strong> ${fr('?',7)} − ${fr(2,7)} = ${fr(4,7)}</div>
+  ${steps([['Undo the subtraction','? = 4 + 2','= 6'],['ANSWER',`${fr(6,7)} − ${fr(2,7)} = ${fr(4,7)}`,'check: 6 − 2 = 4 ✓']])}
+</div>
+
+${asExCard(14,[
+ exQ(1,'Calculate 5/8 − 2/8.',['3/8','3/0','7/8'],0),
+ exQ(2,'Calculate 7/8 − 3/8. Give your answer in its simplest form.',['1/2','4/8','4/0'],0),
+ exQ(3,'Calculate 9/5 − 4/5.',['1','5/0','13/5'],0),
+ exQ(4,'Calculate 1 − 3/8.',['5/8','2/8','3/8'],0),
+ exQ(5,'Calculate 2 − 3/5. Give your answer as a mixed number.',['1 2/5','1 3/5','7/10'],0),
+ exQ(6,'Calculate 17/5 − 4/5. Give your answer as a mixed number.',['2 3/5','3 2/5','13/0'],0),
+ exQ(7,'Chef Bola has 11/8 kg of flour and uses 5/8 kg. How much is left, in its simplest form?',['3/4 kg','6/16 kg','16/8 kg'],0),
+ exQ(8,'Tolu says 7/9 − 4/9 = 3/5. Is he right?',['No — keep the denominator 9: 3/9 = 1/3','Yes — he subtracted the tops and the bottoms','No — the answer is 11/9'],0),
+ exQ(9,'THINK DEEPER: ?/7 − 2/7 = 4/7. What is the missing numerator?',['6','2','4'],0,'t'),
+ exQ(10,'BOSS LEVEL: A ribbon is 2 m long. Ada cuts off 3/4 m, then cuts off another 3/4 m. How much ribbon is left?',['1/2 m','1/4 m','6/4 m'],0,'b')])}`;
 
 
 const P5_FA15 = null; // Subtract fractions with related denominators
