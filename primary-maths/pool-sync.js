@@ -25,8 +25,18 @@
   const stamp = () => fb().firestore.FieldValue.serverTimestamp();
   const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
   const ready = () => (typeof waitForRole === 'function') ? withTimeout(waitForRole(), 4000).catch(() => null) : Promise.resolve();
+  /* The pupil's name lives in users/<uid>.pupilName (set when he signs in). Read it once. */
+  let profileName = null;
+  function loadProfileName() {
+    const u = user(), d = u ? db() : null;
+    if (!u || !d || profileName !== null) return Promise.resolve();
+    return withTimeout(d.collection('users').doc(u.uid).get(), 4000).then(snap => {
+      const n = snap.exists && snap.data().pupilName;
+      profileName = (n && String(n).trim()) || '';
+    }).catch(() => {});
+  }
   function pupilName() {
-    try { return localStorage.getItem('xeledif.pupil') || (user() && user().email) || 'Unknown'; } catch (e) { return 'Unknown'; }
+    try { return profileName || localStorage.getItem('xeledif.pupil') || (user() && user().email) || 'Unknown'; } catch (e) { return 'Unknown'; }
   }
 
   /* ---------- question-ID shortening (smaller documents; Firestore-safe keys) ---------- */
@@ -62,7 +72,7 @@
   /* ---------- the history store used by the Practice Zone ---------- */
   PZ.store = {
     load(stepKey) {
-      return ready().then(() => {
+      return ready().then(loadProfileName).then(() => {
         const u = user(), d = u ? db() : null;
         if (!u || !d) return local.load(stepKey);
         return Promise.all([
@@ -124,6 +134,10 @@
     S.startedAt = new Date().toISOString();
     S.meta = Object.assign({}, window.__currentStepMeta || {});
   };
-  PZ.hooks.onClick = function (info) { writeAttempt(info.ctx, info.question, false); };   // every click, right or wrong
+  PZ.hooks.onClick = function (info) {                                                      // every click, right or wrong
+    const S = info.ctx.session;
+    const allDone = info.correct && S.results.filter(Boolean).length === S.qs.length;       // the 10th question solved = session complete
+    writeAttempt(info.ctx, info.question, allDone);
+  };
   PZ.hooks.onSessionEnd = function (info) { writeAttempt(info.ctx, null, true); };         // mark the session completed
 })();
