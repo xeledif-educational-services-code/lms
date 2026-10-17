@@ -8781,6 +8781,326 @@ ${asExCard(18,[
 
 
 
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B
+   (topic id 'multdivB')
+   LESSONS 1 AND 2  +  PLACEHOLDERS 3–10  +  SCHEME BLOCK
+   8 worked examples + 10 exercises per lesson.
+ 
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers), B (lessons) and C (placeholders)
+      ABOVE `const SCHEME_P5` in index.html.
+   2. In SCHEME_P5 → Spring Term, replace the old one-line
+        { id:'multdivB', label:'Multiplication & Division B', ... },
+      with SECTION D.
+ 
+   NEEDS (already installed in your app):
+     asHeader, asWarm, asExCard, steps(), exQ().
+   All new helpers below are prefixed "md" so they cannot clash
+   with anything that already exists.
+ 
+   NOTE: Steps 1–2 use WHOLE NUMBERS. Decimal versions
+   (e.g. 467.1 ÷ 1,000) are taught later in
+   Decimals & Percentages → "Multiply / Divide decimals by
+   10, 100 and 1,000". Lesson 2, Example 8 previews the link.
+   ============================================================ */
+ 
+ 
+/* ================= SECTION A — HELPERS ================= */
+ 
+/* A simple "machine" picture: number in → operation → number out.
+   mdMachine('× 100','47','4,700','every digit moves 2 places left') */
+function mdMachine(op,vIn,vOut,sub){
+  return `<svg viewBox="0 0 560 130" class="shape-svg" style="max-width:100%;height:auto;">
+    <rect x="10" y="35" width="130" height="60" rx="12" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="2"/>
+    <text x="75" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">NUMBER IN</text>
+    <text x="75" y="82" text-anchor="middle" font-size="20" font-weight="800" fill="#1E40AF">${vIn}</text>
+    <line x1="142" y1="65" x2="188" y2="65" stroke="#6D28D9" stroke-width="3"/>
+    <polygon points="188,65 178,59 178,71" fill="#6D28D9"/>
+    <rect x="190" y="20" width="180" height="90" rx="16" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2.5"/>
+    <text x="280" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#5B21B6">THE MACHINE</text>
+    <text x="280" y="78" text-anchor="middle" font-size="24" font-weight="800" fill="#5B21B6">${op}</text>
+    <text x="280" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#5B21B6">${sub||''}</text>
+    <line x1="372" y1="65" x2="418" y2="65" stroke="#6D28D9" stroke-width="3"/>
+    <polygon points="418,65 408,59 408,71" fill="#6D28D9"/>
+    <rect x="420" y="35" width="130" height="60" rx="12" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+    <text x="485" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">NUMBER OUT</text>
+    <text x="485" y="82" text-anchor="middle" font-size="20" font-weight="800" fill="#92400E">${vOut}</text>
+  </svg>`;
+}
+ 
+/* Place value chart showing every digit SLIDING when we × or ÷ by 10^k.
+   num = whole number (≤ 7 digits after the operation, answer must be whole)
+   k   = 1 (10), 2 (100) or 3 (1,000)
+   dir = +1 for multiply (digits slide LEFT), −1 for divide (RIGHT)
+   mdSlide(47,2,1,'47 × 100') */
+function mdSlide(num,k,dir,title){
+  const names=['MILLIONS','100 THOU','10 THOU','THOUSANDS','HUNDREDS','TENS','ONES'];
+  const dark =['#0F766E','#B45309','#BE185D','#6D28D9','#1D4ED8','#15803D','#C2410C'];
+  const light=['#CCFBF1','#FEF3C7','#FCE7F3','#EDE9FE','#DBEAFE','#DCFCE7','#FFEDD5'];
+  const out = dir>0 ? num*Math.pow(10,k) : num/Math.pow(10,k);
+  const a=String(num).padStart(7,' ').split('');
+  const b=String(out).padStart(7,' ').split('');
+  const W=560,x0=35,cw=70,yT=44,h=44,yB=150;
+  const cx=i=>x0+i*cw+cw/2;
+  let s=`<svg viewBox="0 0 ${W} 222" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<defs><marker id="mdArr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="#444"/></marker></defs>`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="13" font-weight="800" fill="#333">${title}</text>`;
+  for(let i=0;i<7;i++) s+=`<text x="${cx(i)}" y="36" text-anchor="middle" font-size="8" font-weight="700" fill="${dark[i]}">${names[i]}</text>`;
+  // top row (before)
+  for(let i=0;i<7;i++){
+    s+=`<rect x="${x0+i*cw+2}" y="${yT}" width="${cw-4}" height="${h}" rx="6" fill="${a[i]===' '?'#F8F8F8':light[i]}" stroke="${a[i]===' '?'#ddd':dark[i]}" stroke-width="1.6"/>`;
+    if(a[i]!==' ') s+=`<text x="${cx(i)}" y="${yT+30}" text-anchor="middle" font-size="24" font-weight="800" fill="${dark[i]}">${a[i]}</text>`;
+  }
+  // arrows
+  for(let i=0;i<7;i++){
+    if(a[i]===' ') continue;
+    const j=i-dir*k;
+    if(j<0||j>6) continue;
+    s+=`<line x1="${cx(i)}" y1="${yT+h+3}" x2="${cx(j)}" y2="${yB-4}" stroke="#666" stroke-width="1.8" marker-end="url(#mdArr)"/>`;
+  }
+  // operation label
+  const opTxt=`${dir>0?'×':'÷'} ${Math.pow(10,k).toLocaleString('en-GB')}  →  every digit moves ${k} place${k>1?'s':''} ${dir>0?'LEFT':'RIGHT'}`;
+  s+=`<rect x="${W/2-185}" y="88" width="370" height="26" rx="13" fill="#fff" stroke="#6D28D9" stroke-width="1.5"/>`;
+  s+=`<text x="${W/2}" y="106" text-anchor="middle" font-size="12.5" font-weight="800" fill="#5B21B6">${opTxt}</text>`;
+  // bottom row (after)
+  for(let i=0;i<7;i++){
+    const placeholder = dir>0 && i>=7-k && b[i]!==' ';
+    const empty = b[i]===' ';
+    s+=`<rect x="${x0+i*cw+2}" y="${yB}" width="${cw-4}" height="${h}" rx="6" fill="${empty?'#F8F8F8':placeholder?'#FDE68A':light[i]}" stroke="${empty?'#ddd':placeholder?'#B45309':dark[i]}" stroke-width="${placeholder?2.2:1.6}" ${placeholder?'stroke-dasharray="5 3"':''}/>`;
+    if(!empty) s+=`<text x="${cx(i)}" y="${yB+30}" text-anchor="middle" font-size="24" font-weight="800" fill="${placeholder?'#92400E':dark[i]}">${b[i]}</text>`;
+  }
+  const note = dir>0
+    ? `The ${k} amber zero${k>1?'s':''} are PLACEHOLDERS — they keep every digit in its new column`
+    : `The last ${k} zero${k>1?'s':''} fall off the ones column — nothing is lost, every digit just moves right`;
+  s+=`<text x="${W/2}" y="${yB+h+18}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#92400E">${note}</text>`;
+  return s+'</svg>';
+}
+ 
+ 
+/* ================= SECTION B — LESSONS ================= */
+ 
+/* ---------- STEP 1 : Multiply by 10, 100 and 1,000 ---------- */
+const P5_MDB1 = `
+${asHeader('MB1','Step 1 — Multiply by 10, 100 and 1,000','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Every Digit Moves Left</div>
+  ${asWarm(`Imagine you have <strong>3 ten-pound notes</strong>: that is 30. If every note is replaced by a <strong>hundred-pound note</strong>, you now have 3 hundreds: 300! The digit 3 did not change — it just moved to a column that is <strong>10 times bigger</strong>. That is what <strong>multiplying by 10</strong> does to every digit.`)}
+ 
+  <div class="card-body"><strong>Concrete:</strong> use place value counters on a chart. Put 4 counters in the Tens column (40). Exchange <em>every counter</em> for one in the next column to the left — 4 counters are now in the Hundreds column (400). So 40 × 10 = 400.</div>
+  ${mdMachine('× 10','47','470','every digit moves 1 place left')}
+  ${mdSlide(47,1,1,'47 × 10 = 470')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">× 10</div><div class="s-body" style="color:#0C447C;">Each digit moves <strong>1 place left</strong>. It becomes 10 times bigger.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">× 100</div><div class="s-body" style="color:#27500A;">Each digit moves <strong>2 places left</strong> (× 10 and × 10 again). 100 times bigger.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">× 1,000</div><div class="s-body" style="color:#3C3489;">Each digit moves <strong>3 places left</strong>. 1,000 times bigger.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Placeholder zeros</div><div class="s-body" style="color:#633806;">The empty columns on the right are filled with <strong>0</strong> so the digits stay in the correct columns. Hero zeros!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Just add a zero&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;Add a zero&rdquo; gives the right answer for whole numbers, but it hides what is really happening — the <strong>digits move</strong>. In Year 6 and with decimals the shortcut breaks. Think: <em>digits slide, zeros hold places</em>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Wrong number of places</div><div class="s-body" style="color:#712B13;">× 1,000 needs <strong>3</strong> zeros / 3 places, not 2. Count the zeros in 10, 100, 1,000: 1, 2, 3.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Multiply by 10: 38 × 10</div>
+  ${asWarm('Place 38 on the chart. Slide each digit one place to the left.')}
+  ${mdSlide(38,1,1,'38 × 10 = 380')}
+  ${steps([['Tens digit 3','moves to Hundreds','3 tens → 3 hundreds'],['Ones digit 8','moves to Tens','8 ones → 8 tens'],['Ones column','needs a 0','placeholder'],['ANSWER','38 × 10 = 380','']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Multiply by 100: 47 × 100</div>
+  ${asWarm('× 100 is × 10 and then × 10 again. Two slides — or one slide of two places.')}
+  ${mdSlide(47,2,1,'47 × 100 = 4,700')}
+  ${steps([['× 10','47 → 470','one place left'],['× 10 again','470 → 4,700','one more place left'],['ANSWER','47 × 100 = 4,700','digits moved 2 places; two zeros hold the places']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Multiply by 1,000: 52 × 1,000 and 6 × 1,000</div>
+  ${asWarm('Three places! Count them carefully.')}
+  ${mdSlide(52,3,1,'52 × 1,000 = 52,000')}
+  ${steps([['5 tens','→ 5 ten-thousands','50 × 1,000 = 50,000'],['2 ones','→ 2 thousands','2 × 1,000 = 2,000'],['ANSWER','52,000','three zeros hold the places']])}
+  <div class="card-body" style="margin-top:8px;"><strong>And 6 × 1,000:</strong> the 6 moves from Ones to Thousands.</div>
+  ${mdSlide(6,3,1,'6 × 1,000 = 6,000')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Numbers that already contain zeros: 405 × 100</div>
+  ${asWarm('The zero in the middle is a digit too — it moves like all the others!')}
+  ${mdSlide(405,2,1,'405 × 100 = 40,500')}
+  ${steps([['4 hundreds','→ 4 ten-thousands','400 × 100 = 40,000'],['0 tens','→ 0 thousands','the zero moves too'],['5 ones','→ 5 hundreds','5 × 100 = 500'],['ANSWER','40,500','the two NEW zeros hold the Tens and Ones']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Also:</strong> 370 × 10 = 3,700 (the old 0 slides to Tens and a new 0 holds Ones) and 2,060 × 10 = 20,600.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Bigger numbers: 3,425 × 100 and 6,138 × 1,000</div>
+  ${asWarm('The method never changes, however large the number.')}
+  ${mdSlide(3425,2,1,'3,425 × 100 = 342,500')}
+  ${steps([['Slide each digit','2 places left','3 → Hundred-thousands … 5 → Hundreds'],['Fill with zeros','2 placeholder zeros','Tens and Ones'],['ANSWER','342,500','three hundred and forty-two thousand, five hundred']])}
+  ${mdSlide(6138,3,1,'6,138 × 1,000 = 6,138,000')}
+  <div class="card-body" style="margin-top:6px;">🌍 6,138,000 is <strong>six million, one hundred and thirty-eight thousand</strong> — a new column (Millions) appears!</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Missing numbers: which multiplier, which number?</div>
+  ${asWarm('Work out how many places the digits have moved — that tells you the multiplier.')}
+  <div class="card-body"><strong>(a) ? × 100 = 8,300</strong></div>
+  ${steps([['8,300 has digits','8 and 3','moved 2 places left'],['Slide back 2 places','8,300 → 83','83'],['ANSWER','83 × 100 = 8,300','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) 45 × ? = 45,000</strong></div>
+  ${steps([['45 → 45,000','3 places left','three zeros added'],['ANSWER','? = 1,000','45 × 1,000 = 45,000']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(c) ? × 10 = 7,000</strong></div>
+  ${steps([['Slide back 1 place','7,000 → 700',''],['ANSWER','? = 700','700 × 10 = 7,000']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life</div>
+  ${asWarm('Multiplying by 10, 100 and 1,000 is the secret of <strong>metric units</strong> and of ordering in bulk!')}
+  <div class="card-body"><strong>(a) A box holds 100 pencils. A school orders 235 boxes. How many pencils?</strong></div>
+  ${steps([['Calculation','235 × 100',''],['Slide 2 places','235 → 23,500',''],['ANSWER','23,500 pencils','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) Measures:</strong> 1 km = 1,000 m and 1 kg = 1,000 g. So 14 km = 14 × 1,000 = <strong>14,000 m</strong> and 8 kg = 8 × 1,000 = <strong>8,000 g</strong>.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and spot the mistake</div>
+  ${asWarm('Tolu says <strong>7 × 1,000 = 700</strong> because &ldquo;you add two zeros&rdquo;. Is he right?')}
+  ${mdSlide(7,3,1,'7 × 1,000 = 7,000')}
+  ${steps([['Tolu','added 2 zeros ✗','1,000 has THREE zeros'],['Correct','digit moves 3 places','Ones → Thousands'],['ANSWER','7 × 1,000 = 7,000','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: 45 × 100 or 450 × 10?</strong></div>
+  ${steps([['45 × 100','= 4,500','2 places'],['450 × 10','= 4,500','1 place'],['VERDICT','They are EQUAL','45 × 100 = 450 × 10 — shifting the same total distance']])}
+</div>
+ 
+${asExCard(1,[
+ exQ(1,'What is 36 × 10?',['360','306','3,600'],0),
+ exQ(2,'What is 52 × 100?',['5,200','520','52,000'],0),
+ exQ(3,'What is 9 × 1,000?',['9,000','900','90,000'],0),
+ exQ(4,'What is 370 × 10?',['3,700','370','37,000'],0),
+ exQ(5,'What is 405 × 100?',['40,500','4,050','45,000'],0),
+ exQ(6,'What is 3,425 × 100?',['342,500','34,250','3,425,000'],0),
+ exQ(7,'? × 100 = 8,300. What number goes in the box?',['83','830','8'],0),
+ exQ(8,'Tolu says 7 × 1,000 = 700. Is he right?',['No — × 1,000 moves the digit 3 places: 7,000','Yes — you add two zeros','No — it is 70,000'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 45 × 100 or 450 × 10?',['They are equal','45 × 100','450 × 10'],0,'t'),
+ exQ(10,'BOSS LEVEL: A box holds 100 pencils. A school orders 235 boxes and then 1,000 more pencils. How many pencils is that altogether?',['24,500','23,600','235,100'],0,'b')])}`;
+ 
+ 
+/* ---------- STEP 2 : Divide by 10, 100 and 1,000 ---------- */
+const P5_MDB2 = `
+${asHeader('MB2','Step 2 — Divide by 10, 100 and 1,000','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Every Digit Moves Right</div>
+  ${asWarm(`Division is the <strong>inverse</strong> (the undo button) of multiplication. In Step 1, × 10 slid every digit <em>one place left</em> and made it 10 times bigger. Now <strong>÷ 10</strong> slides every digit <em>one place right</em> and makes it 10 times <strong>smaller</strong>. 4,700 ÷ 100 undoes 47 × 100.`)}
+ 
+  <div class="card-body"><strong>Concrete:</strong> put 4 counters in the Hundreds column (400). Exchange each for a counter in the next column to the <em>right</em> (Tens) — now 4 counters in Tens: 40. So 400 ÷ 10 = 40.</div>
+  ${mdMachine('÷ 100','4,700','47','every digit moves 2 places right')}
+  ${mdSlide(4700,2,-1,'4,700 ÷ 100 = 47')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">÷ 10</div><div class="s-body" style="color:#0C447C;">Each digit moves <strong>1 place right</strong>. 10 times smaller.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">÷ 100</div><div class="s-body" style="color:#27500A;">Each digit moves <strong>2 places right</strong>. 100 times smaller.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">÷ 1,000</div><div class="s-body" style="color:#3C3489;">Each digit moves <strong>3 places right</strong>. 1,000 times smaller.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔗 Inverse pairs</div><div class="s-body" style="color:#633806;">56 × 100 = 5,600 ⟷ 5,600 ÷ 100 = 56. Use one to <strong>check</strong> the other!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Cross off zeros&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;Take off a zero&rdquo; only works when the number <em>has</em> zeros at the end. The real rule: <strong>digits move right</strong>. (What about 345 ÷ 10? See Example 8.)</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Wrong number of places</div><div class="s-body" style="color:#712B13;">6,000 ÷ 100 is <strong>60</strong>, not 600. ÷ 100 moves digits 2 places — count the zeros in the divisor.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Divide by 10: 380 ÷ 10</div>
+  ${asWarm('Place 380 on the chart. Slide each digit one place to the right.')}
+  ${mdSlide(380,1,-1,'380 ÷ 10 = 38')}
+  ${steps([['Hundreds digit 3','moves to Tens','3 hundreds → 3 tens'],['Tens digit 8','moves to Ones','8 tens → 8 ones'],['Ones digit 0','falls off the end','nothing lost'],['ANSWER','380 ÷ 10 = 38','check: 38 × 10 = 380 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Divide by 100: 4,700 ÷ 100</div>
+  ${asWarm('÷ 100 is ÷ 10 and then ÷ 10 again.')}
+  ${mdSlide(4700,2,-1,'4,700 ÷ 100 = 47')}
+  ${steps([['÷ 10','4,700 → 470','one place right'],['÷ 10 again','470 → 47','one more place right'],['ANSWER','4,700 ÷ 100 = 47','check: 47 × 100 = 4,700 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Divide by 1,000: 52,000 ÷ 1,000 and 6,000 ÷ 1,000</div>
+  ${asWarm('Three places to the right!')}
+  ${mdSlide(52000,3,-1,'52,000 ÷ 1,000 = 52')}
+  ${steps([['5 ten-thousands','→ 5 tens','50,000 ÷ 1,000 = 50'],['2 thousands','→ 2 ones','2,000 ÷ 1,000 = 2'],['ANSWER','52','check: 52 × 1,000 = 52,000 ✓']])}
+  ${mdSlide(6000,3,-1,'6,000 ÷ 1,000 = 6')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Numbers with zeros in the middle: 40,500 ÷ 100</div>
+  ${asWarm('Be careful! Not every zero falls off — only the ones that move past the Ones column.')}
+  ${mdSlide(40500,2,-1,'40,500 ÷ 100 = 405')}
+  ${steps([['4 ten-thousands','→ 4 hundreds','40,000 ÷ 100 = 400'],['0 thousands','→ 0 tens','the middle zero stays as a placeholder'],['5 hundreds','→ 5 ones','500 ÷ 100 = 5'],['ANSWER','405','NOT 45! The middle 0 is needed']])}
+  <div class="card-body" style="margin-top:6px;">💡 Compare: 20,600 ÷ 10 = <strong>2,060</strong> — only the very last 0 falls off.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Bigger numbers: 342,500 ÷ 100 and 6,138,000 ÷ 1,000</div>
+  ${asWarm('The same method works for the biggest numbers in our place value chart.')}
+  ${mdSlide(342500,2,-1,'342,500 ÷ 100 = 3,425')}
+  ${steps([['Slide each digit','2 places right','3 → Thousands … 5 → Ones'],['Last 2 zeros','fall off',''],['ANSWER','3,425','check: 3,425 × 100 = 342,500 ✓']])}
+  ${mdSlide(6138000,3,-1,'6,138,000 ÷ 1,000 = 6,138')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Inverse operations and missing numbers</div>
+  ${asWarm('Multiplication and division by powers of 10 come in <strong>fact families</strong> — like 3, 4 and 12.')}
+  ${steps([['56 × 100','= 5,600',''],['5,600 ÷ 100','= 56','undo the × 100'],['5,600 ÷ 56','= 100','the other division']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(a) 7,200 ÷ ? = 72</strong></div>
+  ${steps([['7,200 → 72','2 places right','two zeros gone'],['ANSWER','? = 100','7,200 ÷ 100 = 72']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ? ÷ 1,000 = 9</strong></div>
+  ${steps([['Undo: multiply','9 × 1,000','= 9,000'],['ANSWER','? = 9,000','9,000 ÷ 1,000 = 9']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life</div>
+  ${asWarm('Dividing by 10, 100 and 1,000 is how we convert <strong>smaller units to bigger units</strong> and share things into equal groups.')}
+  <div class="card-body"><strong>(a) A cyclist rides 4,000 m. How many kilometres?</strong> 4,000 ÷ 1,000 = <strong>4 km</strong>.</div>
+  <div class="card-body" style="margin-top:6px;"><strong>(b) A bag of rice weighs 25,000 g. How many kilograms?</strong> 25,000 ÷ 1,000 = <strong>25 kg</strong>.</div>
+  <div class="card-body" style="margin-top:6px;"><strong>(c) 3,600 sweets are packed equally into bags of 100. How many bags?</strong></div>
+  ${steps([['Calculation','3,600 ÷ 100',''],['Slide 2 places right','3,600 → 36',''],['ANSWER','36 bags','check: 36 × 100 = 3,600 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, and a peek ahead</div>
+  ${asWarm('Ada says <strong>6,000 ÷ 100 = 600</strong>. Is she right?')}
+  ${mdSlide(6000,2,-1,'6,000 ÷ 100 = 60')}
+  ${steps([['Ada','took off ONE zero ✗','÷ 100 needs TWO places'],['Correct','digit moves 2 places right','6 thousands → 6 tens'],['ANSWER','60','check: 60 × 100 = 6,000 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>What about 345 ÷ 10?</strong> There is no zero to cross off. The digits still move one place right — so the 5 lands in a column <em>after the ones column</em>: the <strong>tenths</strong>.</div>
+  ${steps([['3 hundreds','→ 3 tens',''],['4 tens','→ 4 ones',''],['5 ones','→ 5 tenths','needs a decimal point'],['ANSWER','345 ÷ 10 = 34.5','you will master this in Decimals &amp; Percentages!']])}
+</div>
+ 
+${asExCard(2,[
+ exQ(1,'What is 380 ÷ 10?',['38','3,800','308'],0),
+ exQ(2,'What is 4,700 ÷ 100?',['47','470','4,700'],0),
+ exQ(3,'What is 52,000 ÷ 1,000?',['52','520','5,200'],0),
+ exQ(4,'What is 40,500 ÷ 100?',['405','4,050','45'],0),
+ exQ(5,'What is 342,500 ÷ 100?',['3,425','34,250','342'],0),
+ exQ(6,'? ÷ 1,000 = 9. What number goes in the box?',['9,000','900','90,000'],0),
+ exQ(7,'7,200 ÷ ? = 72. What number goes in the box?',['100','10','1,000'],0),
+ exQ(8,'Ada says 6,000 ÷ 100 = 600. Is she right?',['No — ÷ 100 moves digits 2 places: 60','Yes — you take off one zero','No — it is 6'],0),
+ exQ(9,'THINK DEEPER: 5,600 ÷ 100 = 56. Which other calculation must also be true?',['56 × 100 = 5,600','56 ÷ 100 = 5,600','5,600 × 100 = 56'],0,'t'),
+ exQ(10,'BOSS LEVEL: A shop has 36,000 sweets. They are packed equally into bags of 100, and then the bags are packed into boxes of 10. How many boxes are there?',['36 boxes','360 boxes','3,600 boxes'],0,'b')])}`;
+ 
+ 
+/* ================= SECTION C — PLACEHOLDERS (steps 3–10) ================= */
+const P5_MDB3  = null; // Multiply a 4-digit number by a 1-digit number
+const P5_MDB4  = null; // Multiply a 4-digit number by a 2-digit number
+const P5_MDB5  = null; // Long multiplication
+const P5_MDB6  = null; // Divide up to 4 digits by a 1-digit number
+const P5_MDB7  = null; // Short division
+const P5_MDB8  = null; // Interpret remainders
+const P5_MDB9  = null; // Multi-step multiplication and division problems
+const P5_MDB10 = null; // Choosing efficient methods
+
+
+
+
+
+
+
+
 
 
 
@@ -11780,7 +12100,19 @@ const SCHEME_P5 = [
   },
   { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:true,
     topics: [
-      { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
+      { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0],
+        steps: [
+          { label:'Multiply by 10, 100 and 1,000', content: P5_MDB1 },
+          { label:'Divide by 10, 100 and 1,000', content: P5_MDB2 },
+          { label:'Multiply a 4-digit number by a 1-digit number', content: P5_MDB3 },
+          { label:'Multiply a 4-digit number by a 2-digit number', content: P5_MDB4 },
+          { label:'Long multiplication', content: P5_MDB5 },
+          { label:'Divide up to 4 digits by a 1-digit number', content: P5_MDB6 },
+          { label:'Short division', content: P5_MDB7 },
+          { label:'Interpret remainders', content: P5_MDB8 },
+          { label:'Multi-step multiplication and division problems', content: P5_MDB9 },
+          { label:'Choosing efficient methods', content: P5_MDB10 }
+      ]},
       { id:'fractionsB', label:'Fractions B', col: TOPIC_PALETTE[2],
         steps: [
           { label:'Multiply fractions by integers', content: P5_FB1 },
