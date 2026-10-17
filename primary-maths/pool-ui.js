@@ -125,6 +125,7 @@
   const PZ = {
     store: localStore,
     hooks: {                       // step 3 plugs real-time saving in here
+      onSessionStart(info) {},     // a session begins     { ctx }
       onClick(info) {},            // every option click  { ctx, question, correct, wrongSoFar }
       onAnswer(info) {},           // a question solved   { ctx, question, result, history, session }
       onSessionEnd(info) {}        // all 10 done         { ctx, results, firstTry }
@@ -217,6 +218,7 @@
       if (!sel.questions.length) { this.showError(ctx); return; }
       ctx.history = sel.history;                           // may start a new round; saved with the first answer
       ctx.session = { raw: sel.questions, qs: sel.questions.map(q => E.prepare(q)), i: 0, results: [], wrong: 0, shownAt: 0, locked: false, refs: null };
+      try { this.hooks.onSessionStart({ ctx }); } catch (e) { console.warn('hook error', e); }
       this.renderQuestion(ctx);
     },
 
@@ -259,6 +261,7 @@
       const next = div('pz-next'); card.appendChild(next);
       r.appendChild(card);
       const warn = div('pz-warn', '⚠️ Your last answer has not been saved yet. Please check your internet connection.');
+      if (ctx.unsaved) warn.style.display = 'block';
       r.appendChild(warn);
       S.refs = { fb, next, buttons, warn, card };
     },
@@ -293,15 +296,19 @@
       }
     },
 
-    /* saves the history immediately after every solved question */
+    /* saves the history immediately after every solved question.
+       If the save is not confirmed within 5 seconds (e.g. offline) the pupil sees a warning;
+       it disappears as soon as the save is finally confirmed. */
     persist(ctx) {
-      const token = ctx.token;
-      Promise.resolve(this.store.save(ctx.stepKey, ctx.history)).then(() => {
-        if (ctx.session && ctx.session.refs) ctx.session.refs.warn.style.display = 'none';
-      }).catch(err => {
-        console.warn('save failed', err);
-        if (token === ctx.token && ctx.session && ctx.session.refs) ctx.session.refs.warn.style.display = 'block';
-      });
+      const token = ctx.token; let settled = false;
+      const showWarn = on => {
+        ctx.unsaved = on;
+        if (token === ctx.token && ctx.session && ctx.session.refs) ctx.session.refs.warn.style.display = on ? 'block' : 'none';
+      };
+      const timer = setTimeout(() => { if (!settled) showWarn(true); }, 5000);
+      Promise.resolve(this.store.save(ctx.stepKey, ctx.history, ctx.data))
+        .then(() => { settled = true; clearTimeout(timer); showWarn(false); })
+        .catch(err => { settled = true; clearTimeout(timer); console.warn('save failed', err); showWarn(true); });
     },
 
     finish(ctx) {
