@@ -314,6 +314,12 @@ async function cloudDeleteAttempt(attemptId) {
 // completed, so this doesn't grow into unbounded re-writes over time.
 async function syncAllLocalAttempts() {
   if (!currentUser || !fbDb) return;
+  
+  // TEACHER GUARD: Teachers never upload local cache. 
+  // The teacher's dashboard is read-only; the cloud is the source of truth.
+  // This prevents a loop of permission errors where the teacher tries to
+  // upload pupils' cached records under their own uid.
+  if (currentRole === 'teacher') return; 
 
   let all;
   try { all = JSON.parse(localStorage.getItem('xeledif.progress.v2')) || {}; }
@@ -328,6 +334,10 @@ async function syncAllLocalAttempts() {
     !rec.attemptId.startsWith('smoke-test-') &&
     rec.stepId !== 'test-step' &&
     rec.answered > 0 &&
+    // PUPIL OWNERSHIP GUARD: A pupil must only ever upload their OWN attempts.
+    // If a pupil signs in on a shared device, this prevents them from trying
+    // to upload the previous pupil's cached records (which the rules would block).
+    (!rec.pupilUid || rec.pupilUid === currentUser.uid) && 
     !(syncedIds.has(rec.attemptId) && rec.completed)
   );
 

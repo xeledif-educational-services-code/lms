@@ -96,12 +96,43 @@
                         perarea: 'PA', stats: 'ST', shape: 'SH', posdir: 'PD', decimals: 'DC', negatives: 'NG', converting: 'CV', volume: 'VO' };
   const TERM_CODES = { autumn: 'AUT', spring: 'SPR', summer: 'SUM' };
 
-  function parseStepId(stepId) {                       // 'p5-term-groups-spring-decperc-step9' -> keys + pool file
-    const m = /^(p\d)-term-groups-(autumn|spring|summer)-([A-Za-z0-9]+)-step(\d+)$/.exec(baseStepId(stepId));
-    if (!m || !TOPIC_CODES[m[3]]) return null;
-    const term = TERM_CODES[m[2]], topicKey = m[1].toUpperCase() + '.' + term + '.' + TOPIC_CODES[m[3]];
-    return { topicKey, stepKey: topicKey + '.S' + String(m[4]).padStart(2, '0'), file: 'pools/' + m[1] + '_' + term.toLowerCase() + '_' + m[3].toLowerCase() + '.js' };
+  // function parseStepId(stepId) {                       // 'p5-term-groups-spring-decperc-step9' -> keys + pool file
+  //   const m = /^(p\d)-term-groups-(autumn|spring|summer)-([A-Za-z0-9]+)-step(\d+)$/.exec(baseStepId(stepId));
+  //   if (!m || !TOPIC_CODES[m[3]]) return null;
+  //   const term = TERM_CODES[m[2]], topicKey = m[1].toUpperCase() + '.' + term + '.' + TOPIC_CODES[m[3]];
+  //   return { topicKey, stepKey: topicKey + '.S' + String(m[4]).padStart(2, '0'), file: 'pools/' + m[1] + '_' + term.toLowerCase() + '_' + m[3].toLowerCase() + '.js' };
+  // }
+
+    /* ---------- curriculum lookup ---------- */
+  let _stepIndex = null;
+  function declaredPoolFor(stepId) {
+    if (_stepIndex) return _stepIndex.get(stepId) || null;
+
+    _stepIndex = new Map();
+    const tree = window.__xeledifCurriculum || [];
+
+    tree.forEach(term => {
+      (term.topics || []).forEach(topic => {
+        if (!topic.poolFile || !topic.poolKey) return;   // topic has no pool yet
+        (topic.steps || []).forEach((step, i) => {
+          if (!step.poolStep) return;                     // step has no pool yet
+          const stepNum = step.stepNumber || (i + 1);
+          const stepId = `p5-term-groups-${term.id}-${topic.id}-step${stepNum}`;
+          _stepIndex.set(stepId, {
+            topicKey: topic.poolKey,
+            stepKey:  step.poolStep,
+            file:     topic.poolFile
+          });
+        });
+      });
+    });
+    return _stepIndex.get(stepId) || null;
   }
+
+  function parseStepId(stepId) {
+    return declaredPoolFor(baseStepId(stepId));
+  }
+
   const poolState = {};
   let renderTimer = null;
   const scheduleRender = () => { clearTimeout(renderTimer); renderTimer = setTimeout(render, 60); };
