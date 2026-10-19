@@ -109,8 +109,16 @@
 
 <!-- Your Firebase integration -->
 <!-- Your Firebase integration -->
-<script src="firebase-integration.js"></script>
-<script src="dashboard-consolidate.js"></script>
+<!-- <script src="firebase-integration.js"></script>
+<script src="dashboard-consolidate.js"></script> -->
+
+<script src="firebase-integration.js?v=3"></script>
+<script src="dashboard-consolidate.js?v=3"></script>
+
+
+
+
+
 <style>
   html.xeledif-gate-active body > *:not(#xeledif-auth-gate) { visibility:hidden !important; }
 </style>
@@ -577,7 +585,14 @@ document.getElementById('pupilLink').addEventListener('click', e => {
     );
 
     const cloudIds = new Set(Object.keys(cloudData));
-    const toUpload = localAttempts.filter(rec => !cloudIds.has(rec.attemptId));
+    // const toUpload = localAttempts.filter(rec => !cloudIds.has(rec.attemptId));
+
+    // The teacher never uploads other people's attempts: the cloud is the single source of truth.
+// Only a pupil's own dashboard reconciles, and only that pupil's own attempts.
+const me = (typeof getFirebaseUser === 'function') ? getFirebaseUser() : null;
+const toUpload = role === 'teacher'
+  ? []
+  : localAttempts.filter(rec => !cloudIds.has(rec.attemptId) && (!rec.pupilUid || (me && rec.pupilUid === me.uid)));
 
     if (toUpload.length > 0) {
       console.log('[dashboard] Reconciling', toUpload.length, 'local attempt(s) not yet in the cloud...');
