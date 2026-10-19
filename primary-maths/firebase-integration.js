@@ -360,6 +360,9 @@ function cloudSubscribeAll(callback) {
 }
 
 */
+
+
+
 /* ============================================================
    REPLACE the old  function cloudSubscribeAll(callback) { ... }
    in  primary-maths\firebase-integration.js  with everything below.
@@ -392,6 +395,10 @@ function cloudSubscribeAll(callback) {
   _allUnsub = q.onSnapshot(snap => {
     const out = {};
     snap.forEach(d => { out[d.id] = d.data(); });
+    // The teacher dashboard treats the cloud as the source of truth. Refresh the local cache to match
+    // BEFORE the dashboard's own code runs, so records outside the window never look "not yet in the cloud"
+    // (which would make it try to upload them under the wrong owner).
+    try { localStorage.setItem('xeledif.progress.v2', JSON.stringify(out)); } catch (e) {}
     window.__dashLoaded = snap.size;
     if (typeof window.__dashInfo === 'function') window.__dashInfo(snap.size);
     if (_allCb) _allCb(out);

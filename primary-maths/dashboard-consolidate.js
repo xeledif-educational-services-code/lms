@@ -235,6 +235,7 @@
   function ensureBar() {
     if (document.getElementById('dash-bar')) return;
     const root = document.getElementById('root');
+    if (!root || !root.parentNode) return;
     const bar = document.createElement('div');
     bar.id = 'dash-bar';
     bar.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;margin-bottom:14px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px;';
@@ -258,6 +259,7 @@
      ============================================================ */
   function render() {
     const root = document.getElementById('root');
+    if (!root || typeof readAll !== 'function') { console.warn('[dashboard-consolidate] page not ready (no #root yet)'); return; }
     ensureBar();
     const openAttempts = new Set([...root.querySelectorAll('.attempt.open')].map(a => a.dataset.aid));
     const closedPanels = new Set([...root.querySelectorAll('details.cr:not([open])')].map(d => d.dataset.k));
@@ -462,9 +464,13 @@
     }).catch(err => console.warn('[dashboard] could not load pupil names (is the new firestore.rules published?)', err && err.message));
   }
 
-  /* ---------- take over ---------- */
-  Object.assign(window, { render, pupilRecords, exportPupilJSON, exportPupilCSV, buildRows, downloadCSV, groupRecords, openParentReport,
-                          __conceptReport: conceptReport, __parentReportHtml: parentReportHtml });
-  render();
-  loadUserNames();
+  /* ---------- take over (only once the page and its own script have finished loading) ---------- */
+  function start() {
+    Object.assign(window, { render, pupilRecords, exportPupilJSON, exportPupilCSV, buildRows, downloadCSV, groupRecords, openParentReport,
+                            __conceptReport: conceptReport, __parentReportHtml: parentReportHtml });
+    render();
+    loadUserNames();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
 })();
