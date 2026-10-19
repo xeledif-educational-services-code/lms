@@ -9703,8 +9703,267 @@ ${asExCard(6,[
  exQ(10,'BOSS LEVEL: A farmer packs 7,248 eggs into trays of 6. The trays are then packed into crates holding 8 trays each. How many crates are needed?',['151 crates','1,208 crates','150 crates'],0,'b')])}`;
 
 
-const P5_MDB7  = null; // Short division
-const P5_MDB8  = null; // Interpret remainders
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B — LESSONS 7 AND 8
+   Step 7: Short division
+   Step 8: Interpret remainders
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–6 files (re-uses mdShare, mdCol1, fr, mx, steps,
+      exQ, asHeader, asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_MDB7 = null;
+        const P5_MDB8 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* "Bus stop" SHORT DIVISION layout.
+   The answer is written above the line, each left-over is written as a small
+   amber digit in FRONT of the next digit (it is 10 of the next column).
+   mdBus(3648,4,'3,648 ÷ 4') */
+function mdBus(num,d,title){
+  const digs=String(num).split('').map(Number), n=digs.length;
+  let rem=0; const rows=[];
+  digs.forEach(dg=>{
+    const share=rem*10+dg, q=Math.floor(share/d), r=share%d;
+    rows.push({dg:dg,q:q,r:r}); rem=r;
+  });
+  const dark=['#C2410C','#15803D','#1D4ED8','#6D28D9'];
+  const colX=i=>130+i*58, W=130+n*58+130;
+  let s=`<svg viewBox="0 0 ${W} 196" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  let leading=true;
+  rows.forEach((r,i)=>{
+    const pos=(n-1-i)%4;
+    const faded=leading&&r.q===0&&i<n-1; if(r.q>0) leading=false;
+    // quotient (above the line)
+    s+=`<text x="${colX(i)}" y="78" text-anchor="middle" font-size="28" font-weight="800" fill="${faded?'#ccc':dark[pos]}">${r.q}</text>`;
+    // dividend digit
+    s+=`<text x="${colX(i)}" y="132" text-anchor="middle" font-size="28" font-weight="800" fill="${dark[pos]}">${r.dg}</text>`;
+    // left-over written in front of the next digit
+    if(i<n-1 && r.r>0) s+=`<text x="${colX(i+1)-24}" y="112" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${r.r}</text>`;
+  });
+  // bus stop
+  s+=`<path d="M 96,92 L ${colX(n-1)+34},92 M 96,92 L 96,146" fill="none" stroke="#333" stroke-width="2.6"/>`;
+  s+=`<text x="62" y="132" text-anchor="middle" font-size="30" font-weight="800" fill="#5B21B6">${d}</text>`;
+  if(rem>0) s+=`<text x="${colX(n-1)+48}" y="132" font-size="15" font-weight="800" fill="#B45309">remainder ${rem}</text>`;
+  const ans=Math.floor(num/d);
+  s+=`<text x="${W/2}" y="172" text-anchor="middle" font-size="12.5" font-weight="800" fill="#15803D">${num.toLocaleString('en-GB')} ÷ ${d} = ${ans.toLocaleString('en-GB')}${rem?' remainder '+rem:''}</text>`;
+  s+=`<text x="${W/2}" y="188" text-anchor="middle" font-size="9.5" font-weight="700" fill="#92400E">amber digits = left-overs exchanged for 10 of the next column</text>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 7 : Short division ---------- */
+const P5_MDB7 = `
+${asHeader('MB7','Step 7 — Short Division','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — The Sharing Chart Written Short</div>
+  ${asWarm(`In Step 6 you shared numbers column by column on a chart: share, exchange the left-over, share again. <strong>Short division</strong> (the &ldquo;bus stop&rdquo; method) is the <em>same sharing</em> written in a compact way. The answer goes <strong>above</strong> the line and every left-over is written <strong>in front of the next digit</strong> — it means <em>10 of the next column</em>.`)}
+
+  <div class="card-body"><strong>Same method, two layouts:</strong> the sharing chart (left) and the bus stop (right) show exactly the same exchanges.</div>
+  ${mdShare(846,2,'846 ÷ 2 — sharing chart')}
+  ${mdBus(846,2,'846 ÷ 2 — short division')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Set it out</div><div class="s-body" style="color:#0C447C;">Divisor on the <strong>left</strong>, the number being divided <strong>inside</strong> the bus stop, the answer on <strong>top</strong>.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">② Start on the left</div><div class="s-body" style="color:#27500A;">Divide the first digit. If it is too small, write <strong>0</strong> above it and exchange it into the next digit.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">③ Exchange the left-over</div><div class="s-body" style="color:#633806;">Write the left-over <strong>in front of the next digit</strong>. 3 left over and next digit 6 makes <strong>36</strong>.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Check it</div><div class="s-body" style="color:#3C3489;">Multiply the answer by the divisor (Step 3). Estimate first (Step 6).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Adding the carry</div><div class="s-body" style="color:#712B13;">A left-over of 1 before an 8 makes <strong>18</strong>, not 1 + 8 = 9. It is 1 ten and 8 ones!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Skipping a zero</div><div class="s-body" style="color:#712B13;">If a share is too small to divide, write 0 in the answer. Never skip a column!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — No exchange: 846 ÷ 2</div>
+  ${asWarm('Each digit can be divided exactly by 2.')}
+  ${mdBus(846,2,'846 ÷ 2')}
+  ${steps([['8 ÷ 2','= 4','4 hundreds'],['4 ÷ 2','= 2','2 tens'],['6 ÷ 2','= 3','3 ones'],['ANSWER','423','CHECK: 423 × 2 = 846 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Exchange: 3,648 ÷ 4</div>
+  ${asWarm('You did this one in Step 6 with the sharing chart. Now write it short!')}
+  ${mdBus(3648,4,'3,648 ÷ 4')}
+  ${steps([['3 ÷ 4','= 0 r 3','write 0; the 3 goes in front of the 6'],['36 ÷ 4','= 9 r 0',''],['4 ÷ 4','= 1 r 0',''],['8 ÷ 4','= 2',''],['ANSWER','912','the leading 0 is not written']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A zero in the answer: 5,418 ÷ 6</div>
+  ${asWarm('The tens column has a left-over of 1 that is too small to share. Write 0 and keep going.')}
+  ${mdBus(5418,6,'5,418 ÷ 6')}
+  ${steps([['5 ÷ 6','= 0 r 5',''],['54 ÷ 6','= 9 r 0',''],['1 ÷ 6','= 0 r 1','write 0! the 1 goes in front of the 8'],['18 ÷ 6','= 3',''],['ANSWER','903','ESTIMATE: 5,400 ÷ 6 = 900 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Exchange in several columns: 7,245 ÷ 5</div>
+  ${asWarm('Follow every left-over carefully.')}
+  ${mdBus(7245,5,'7,245 ÷ 5')}
+  ${steps([['7 ÷ 5','= 1 r 2','2 goes in front of 2 → 22'],['22 ÷ 5','= 4 r 2','2 goes in front of 4 → 24'],['24 ÷ 5','= 4 r 4','4 goes in front of 5 → 45'],['45 ÷ 5','= 9',''],['ANSWER','1,449','CHECK: 1,449 × 5 = 7,245 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — When the first digit is too small: 2,184 ÷ 7</div>
+  ${asWarm('2 thousands cannot be shared between 7 groups — so exchange them into the hundreds and share 21 hundreds.')}
+  ${mdBus(2184,7,'2,184 ÷ 7')}
+  ${steps([['2 ÷ 7','= 0 r 2','too small — exchange'],['21 ÷ 7','= 3 r 0',''],['8 ÷ 7','= 1 r 1',''],['14 ÷ 7','= 2',''],['ANSWER','312','CHECK: 312 × 7 = 2,184 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — With a remainder: 1,239 ÷ 4</div>
+  ${asWarm('If the last share is not exact, the final left-over is the <strong>remainder</strong>.')}
+  ${mdBus(1239,4,'1,239 ÷ 4')}
+  ${steps([['1 ÷ 4','= 0 r 1',''],['12 ÷ 4','= 3 r 0',''],['3 ÷ 4','= 0 r 3','write 0!'],['39 ÷ 4','= 9 r 3','4 × 9 = 36'],['ANSWER','309 remainder 3','CHECK: 309 × 4 + 3 = 1,239 ✓']])}
+  <div class="card-body" style="margin-top:6px;">🔗 What does the remainder <em>mean</em>? That is Step 8.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: sharing books</div>
+  ${asWarm(`A school has <strong>3,472 library books</strong> to share equally between <strong>8 classes</strong>. How many books does each class get?`)}
+  ${mdBus(3472,8,'3,472 ÷ 8')}
+  ${steps([['3 ÷ 8','= 0 r 3',''],['34 ÷ 8','= 4 r 2','8 × 4 = 32'],['27 ÷ 8','= 3 r 3','8 × 3 = 24'],['32 ÷ 8','= 4',''],['ANSWER','434 books each','CHECK: 434 × 8 = 3,472 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm('Tolu works out <strong>5,418 ÷ 6</strong>. After 54 ÷ 6 = 9, he has a left-over of 1 before the 8 and writes <strong>1 + 8 = 9</strong>. What goes wrong?')}
+  ${steps([['Tolu','1 + 8 = 9','ADDED the left-over ✗'],['9 ÷ 6','= 1 r 3','gives an answer like 91…'],['Correct','18 ÷ 6 = 3','the 1 is 1 TEN, so 1 ten + 8 ones = 18'],['CORRECT ANSWER','903','CHECK: 903 × 6 = 5,418 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Chain problem:</strong> A bakery has 8,415 cakes. They are packed in boxes of 5 and then the boxes are shared equally between 3 shops. How many boxes does each shop get?</div>
+  ${steps([['8,415 ÷ 5','= 1,683 boxes','short division'],['1,683 ÷ 3','= 561','short division'],['ANSWER','561 boxes each','CHECK: 561 × 3 × 5 = 8,415 ✓']])}
+</div>
+
+${asExCard(7,[
+ exQ(1,'What is 846 ÷ 2?',['423','432','413'],0),
+ exQ(2,'What is 3,648 ÷ 4?',['912','921','902'],0),
+ exQ(3,'What is 6,315 ÷ 3?',['2,105','2,150','215'],0),
+ exQ(4,'What is 7,245 ÷ 5?',['1,449','1,439','1,549'],0),
+ exQ(5,'What is 2,184 ÷ 7?',['312','321','302'],0),
+ exQ(6,'What is 1,239 ÷ 4?',['309 remainder 3','310 remainder 1','309 remainder 1'],0),
+ exQ(7,'A school shares 3,472 library books equally between 8 classes. How many books does each class get?',['434','443','424'],0),
+ exQ(8,'In short division, a left-over of 1 is followed by the digit 8. What do you do next?',['Make 18 and divide 18','Add 1 + 8 = 9 and divide 9','Ignore the 1'],0),
+ exQ(9,'THINK DEEPER: 4,236 ÷ 6 = 706. Which calculation checks this answer?',['706 × 6 = 4,236','706 + 6 = 712','4,236 × 6 = 706'],0,'t'),
+ exQ(10,'BOSS LEVEL: A bakery has 8,415 cakes. They are packed in boxes of 5, and then the boxes are shared equally between 3 shops. How many boxes does each shop get?',['561','1,683','2,805'],0,'b')])}`;
+
+
+/* ---------- STEP 8 : Interpret remainders ---------- */
+const P5_MDB8 = `
+${asHeader('MB8','Step 8 — Interpret Remainders','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — What Does the Left-Over Mean?</div>
+  ${asWarm(`When 1,239 pupils are put into minibuses that seat 4, short division gives <strong>309 remainder 3</strong>. But the <strong>answer to the question</strong> is not &ldquo;309 remainder 3&rdquo;! Three pupils are still standing at the gate — they need a bus too. The <strong>meaning of the remainder depends on the story</strong>, so we must always ask: <em>what is the question really asking?</em>`)}
+
+  <div class="card-body"><strong>Concrete:</strong> 1,239 counters shared into groups of 4. 309 full groups, and 3 counters left over.</div>
+  ${mdBus(1239,4,'1,239 ÷ 4 = 309 remainder 3')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">⬆️ Round UP</div><div class="s-body" style="color:#633806;">When <strong>everything must be catered for</strong> (buses, boxes, trips). A part-full container is still needed. 309 r 3 → <strong>310</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">⬇️ Round DOWN</div><div class="s-body" style="color:#085041;">When you can only count <strong>complete, full</strong> groups (full pages, full packs). The left-over is ignored. 309 r 3 → <strong>309</strong>.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">➗ As a FRACTION</div><div class="s-body" style="color:#3C3489;">When the left-over can be <strong>shared too</strong> (rice, cake, ribbon). Remainder over divisor: 309 r 3 ÷ 4 → ${mx(309,3,4)}.</div></div>
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">🔢 The REMAINDER itself</div><div class="s-body" style="color:#0C447C;">When the question asks <strong>&ldquo;how many are left over?&rdquo;</strong>. Answer: 3.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Always writing &ldquo;r&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;309 remainder 3&rdquo; is the <em>calculation result</em>. The <em>answer to the problem</em> must make sense: 310 minibuses.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Remainder too big</div><div class="s-body" style="color:#712B13;">A remainder is always <strong>smaller than the divisor</strong>. If ÷ 6 leaves 6, you can share one more time!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Writing and checking a remainder: 1,239 ÷ 4</div>
+  ${asWarm('First get the calculation right. Then check with the inverse: whole number × divisor + remainder.')}
+  ${mdBus(1239,4,'1,239 ÷ 4')}
+  ${steps([['Quotient','309','full groups of 4'],['Remainder','3','3 left over, and 3 &lt; 4 ✓'],['CHECK','309 × 4 + 3','= 1,236 + 3 = 1,239 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Round UP: the minibuses</div>
+  ${asWarm(`A school trip has <strong>1,239 pupils</strong>. Each minibus seats <strong>4</strong>. How many minibuses are needed?`)}
+  ${steps([['Calculation','1,239 ÷ 4','= 309 remainder 3'],['Think','309 full buses carry 1,236 pupils','3 pupils are still waiting!'],['They need a bus too','309 + 1','= 310'],['ANSWER','310 minibuses','ROUND UP — the last bus is only part-full']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Round DOWN: full pages</div>
+  ${asWarm(`Tolu has <strong>2,437 stickers</strong>. Each page of his album holds <strong>3 stickers</strong>. How many pages can he <strong>fill completely</strong>?`)}
+  ${mdBus(2437,3,'2,437 ÷ 3')}
+  ${steps([['Calculation','2,437 ÷ 3','= 812 remainder 1'],['Think','812 pages are completely full','1 sticker is left over — it does not fill a page'],['ANSWER','812 pages','ROUND DOWN — only count FULL pages']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — As a fraction: sharing rice</div>
+  ${asWarm(`<strong>1,239 kg</strong> of rice is shared equally between <strong>4 families</strong>. How much rice does each family get?`)}
+  ${steps([['Calculation','1,239 ÷ 4','= 309 remainder 3'],['The 3 kg left over','can be shared too!','3 kg ÷ 4 families'],['Remainder over divisor',`${fr(3,4)}`,'each family gets 3/4 kg more'],['ANSWER',`${mx(309,3,4)} kg`,'309 whole kg and three quarters']])}
+  <div class="card-body" style="margin-top:6px;">🔗 This is <strong>fractions as division</strong>: 3 ÷ 4 = ${fr(3,4)} (Step 1 of Fractions A!).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Which meaning? Sorting the stories</div>
+  ${asWarm('All four problems use 1,239 ÷ 4 = 309 remainder 3, but each has a <strong>different answer</strong>!')}
+  <div style="overflow-x:auto;margin:8px 0;">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:#185FA5;color:white;">
+        <th style="padding:8px 10px;text-align:left;">The story</th>
+        <th style="padding:8px 10px;text-align:left;">What the remainder means</th>
+        <th style="padding:8px 10px;text-align:left;">Answer</th>
+      </tr></thead>
+      <tbody>
+        ${[['1,239 pupils into 4-seat minibuses','Everyone needs a seat → ROUND UP','310 minibuses'],
+           ['1,239 sweets in packs of 4 — how many FULL packs?','Only full packs count → ROUND DOWN','309 packs'],
+           ['1,239 kg rice shared between 4 families','The left-over can be shared → FRACTION','309 3/4 kg each'],
+           ['1,239 sweets in packs of 4 — how many are left over?','The remainder itself','3 sweets']].map((r,i)=>`
+          <tr style="background:${i%2===0?'#E6F1FB':'#fff'};">
+            <td style="padding:7px 10px;">${r[0]}</td>
+            <td style="padding:7px 10px;color:#555;">${r[1]}</td>
+            <td style="padding:7px 10px;font-weight:700;color:#15803D;">${r[2]}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Remainder as a fraction in simplest form: 1,238 ÷ 4</div>
+  ${asWarm('Always simplify the fraction part (Fractions A, Step 3).')}
+  ${steps([['Calculation','1,238 ÷ 4','= 309 remainder 2'],['Remainder over divisor',`${fr(2,4)}`,''],['Simplify','÷ 2',`${fr(2,4)} = ${fr(1,2)}`],['ANSWER',`${mx(309,1,2)}`,'']])}
+  ${steps([['CHECK','309 × 4 = 1,236','+ ½ of 4 = 2 → 1,238 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — One calculation, three questions: 4,873 ÷ 6</div>
+  ${asWarm(`A shop has <strong>4,873 cm</strong> of ribbon.`)}
+  ${mdBus(4873,6,'4,873 ÷ 6')}
+  ${steps([['Calculation','4,873 ÷ 6','= 812 remainder 1']])}
+  ${steps([['(a) How many 6 cm pieces can be cut?','812','round DOWN — only full pieces; 1 cm is left'],['(b) The ribbon is shared equally between 6 children. How long is each share?',`${mx(812,1,6)} cm`,'as a FRACTION'],['(c) Ribbon is packed in rolls of 6 cm. How many rolls to hold ALL the ribbon?','813','round UP — the last roll is not full']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistakes</div>
+  ${asWarm('Tolu answers the minibus question with <strong>&ldquo;309 minibuses&rdquo;</strong>. Ada says 7,245 ÷ 5 = <strong>1,448 remainder 5</strong>. Who is right?')}
+  ${steps([['Tolu','309 buses carry 1,236 pupils','3 pupils have no bus ✗ → 310']])}
+  ${steps([['Ada','remainder 5 when dividing by 5','a remainder must be LESS than the divisor ✗'],['Share once more','5 ÷ 5 = 1',''],['CORRECT','1,449','no remainder: 1,449 × 5 = 7,245 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Remainder rule:</strong> remainder &lt; divisor, always. If ÷ 6, the only possible remainders are 0, 1, 2, 3, 4, 5.</div>
+</div>
+
+${asExCard(8,[
+ exQ(1,'What is 1,239 ÷ 4, written with a remainder?',['309 remainder 3','310 remainder 3','309 remainder 4'],0),
+ exQ(2,'1,239 pupils go on a trip. Each minibus seats 4 pupils. How many minibuses are needed?',['310','309','309 remainder 3'],0),
+ exQ(3,'Tolu has 2,437 stickers. Each page holds 3 stickers. How many pages can he fill completely?',['812','813','811'],0),
+ exQ(4,'1,239 kg of rice is shared equally between 4 families. How much does each family get?',['309 3/4 kg','309 1/4 kg','310 kg'],0),
+ exQ(5,'Work out 1,238 ÷ 4. Write the answer as a mixed number in its simplest form.',['309 1/2','309 2/4','309 remainder 2'],0),
+ exQ(6,'Which remainder is impossible when dividing by 6?',['6','5','0'],0),
+ exQ(7,'A lift holds 8 people. 3,009 people need to be carried to the top. How many trips does the lift need?',['377','376','375'],0),
+ exQ(8,'Tolu says 1,239 pupils need 309 minibuses (4 seats each). Is he right?',['No — 3 pupils still need a seat, so 310 minibuses','Yes — 1,239 ÷ 4 = 309','No — he needs 308 minibuses'],0),
+ exQ(9,'THINK DEEPER: 4,873 ÷ 6 = 812 remainder 1. Which statement checks this?',['6 × 812 + 1 = 4,873','6 × 813 + 1 = 4,873','812 × 1 + 6 = 4,873'],0,'t'),
+ exQ(10,'BOSS LEVEL: A school buys 4,873 pencils that are packed in boxes of 6. How many boxes are needed to hold ALL the pencils, and how many pencils are in the last box?',['813 boxes; 1 pencil in the last box','812 boxes; 1 pencil left over','813 boxes; 5 pencils in the last box'],0,'b')])}`;
+
+
+
 const P5_MDB9  = null; // Multi-step multiplication and division problems
 const P5_MDB10 = null; // Choosing efficient methods
 
