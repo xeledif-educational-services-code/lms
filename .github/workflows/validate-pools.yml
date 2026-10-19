@@ -1,0 +1,30 @@
+name: Validate question pools
+
+# Runs on GitHub whenever you push changes to the pool files or the validator.
+on:
+  push:
+    paths:
+      - 'primary-maths/pools/**'
+      - 'primary-maths/tools/**'
+  pull_request:
+    paths:
+      - 'primary-maths/pools/**'
+      - 'primary-maths/tools/**'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: primary-maths
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check every pool file
+        run: |
+          for f in pools/*.js; do
+            echo "Checking $f"
+            node tools/validate-pools.js "$f" || exit 1
+          done

@@ -219,8 +219,10 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <!-- Your Firebase integration -->
-<!-- Your Firebase integration -->
 <script src="firebase-integration.js"></script>
+<script src="pool-engine.js"></script>
+<script src="pool-ui.js"></script>
+<script src="pool-sync.js"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -722,6 +724,9 @@ const MCQTracker = {
     this.showCompleteModal();
   },
 
+
+
+
   showCompleteModal() {
     const t = this.totals();
     const denom = t.actualTotal || t.total || 1;
@@ -781,6 +786,7 @@ const MCQTracker = {
           🔄 Start a fresh attempt
         </button>
       </div>
+      ${window.PracticeZone && PracticeZone.available() ? `<button class="modal-btn" style="margin-top:8px;background:#E1F5EE;border-color:#1D9E75;color:#085041;" onclick="PracticeZone.fromScorecard()">🚀 Practise 10 more questions</button>` : ''}
     `;
     overlay.classList.add('show');
   },
@@ -807,12 +813,19 @@ const MCQTracker = {
       window.__currentStepMeta || {}
     );
 
+
+
+
+
+
+
     // Rebuild the step content so all MCQ buttons reset to default
     // (removes ✓/✗ styling, re-enables clicking)
     if (window.__currentStepObject) {
       const host = document.querySelector('.step-content-area:not(.hidden)');
       if (host) {
         host.innerHTML = renderStepContent(window.__currentStepObject);
+        if (window.PracticeZone) PracticeZone.remount(host);
       }
     } else {
       // Fallback: just reload the tracker state and reset the DOM manually
@@ -7615,16 +7628,2347 @@ ${asExCard(8,[
 
 
 
-const P5_FA9  = null; // Order fractions
-const P5_FA10 = null; // Fractions on a number line
-const P5_FA11 = null; // Fractions greater than one
-const P5_FA12 = null; // Add fractions with the same denominator
-const P5_FA13 = null; // Add fractions with related denominators
-const P5_FA14 = null; // Subtract fractions with the same denominator
-const P5_FA15 = null; // Subtract fractions with related denominators
-const P5_FA16 = null; // Add mixed numbers
-const P5_FA17 = null; // Subtract mixed numbers
-const P5_FA18 = null; // Fraction problem-solving
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 9 AND 10
+   Step 9:  Order fractions
+   Step 10: Fractions on a number line
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–8 files (re-uses faWall, faLine, faLineTo,
+      faLineMixed, faTwoLines, fr, mx, steps, exQ, asHeader,
+      asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA9  = null;
+        const P5_FA10 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* Number line from whole number `a` to whole number `b`, steps of 1/den.
+   marks = ABSOLUTE numerators over den (e.g. den 4, 5 → 1 1/4).
+   opts.hide = true → hide in-between tick labels and show "?" above the marks.
+   faLineSeg(1,2,4,[5],'title')  |  faLineSeg(2,3,5,[13],'title',{hide:true}) */
+function faLineSeg(a,b,den,marks,title,opts){
+  opts=opts||{};
+  const W=560,pad=40,y=66,N=(b-a)*den;
+  const X=k=>pad+(k-a*den)/N*(W-2*pad);
+  const label=k=>{
+    const w=Math.floor(k/den), r=k%den;
+    if(r===0) return String(w);
+    return (w>0?w+' ':'')+r+'/'+den;
+  };
+  let s=`<svg viewBox="0 0 ${W} 120" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  s+=`<line x1="${pad-14}" y1="${y}" x2="${W-pad+14}" y2="${y}" stroke="#444" stroke-width="2.5"/>`;
+  for(let k=a*den;k<=b*den;k++){
+    const x=X(k), whole=(k%den===0);
+    s+=`<line x1="${x.toFixed(1)}" y1="${y-(whole?10:7)}" x2="${x.toFixed(1)}" y2="${y+(whole?10:7)}" stroke="#444" stroke-width="${whole?3:2}"/>`;
+    if(whole) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="13" font-weight="800" fill="#1D4ED8">${k/den}</text>`;
+    else if(!opts.hide && N<=14) s+=`<text x="${x.toFixed(1)}" y="${y+28}" text-anchor="middle" font-size="10" font-weight="600" fill="#333">${label(k)}</text>`;
+  }
+  (marks||[]).forEach(k=>{
+    const x=X(k).toFixed(1);
+    s+=`<circle cx="${x}" cy="${y}" r="7" fill="#6D28D9"/>`;
+    s+=`<text x="${x}" y="${y-16}" text-anchor="middle" font-size="14" font-weight="800" fill="#6D28D9">${opts.hide?'?':label(k)}</text>`;
+  });
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 9 : Order fractions ---------- */
+const P5_FA9 = `
+${asHeader('FA9','Step 9 — Order Fractions','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Lining Fractions Up</div>
+  ${asWarm(`In Step 8 you compared <em>two</em> fractions. Ordering is comparing <strong>many</strong> fractions at once and putting them in a line — like lining up pupils from the shortest to the tallest. <strong>Ascending</strong> order goes from <strong>smallest to largest</strong>. <strong>Descending</strong> order goes from <strong>largest to smallest</strong>.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> stack fraction strips of the same length and slide them so they all start at the same edge. The shortest shaded strip is the smallest fraction.</div>
+  ${faWall([[1,4],[1,2],[3,4]],'Ascending order: 1/4, 1/2, 3/4','Each strip is shaded further than the one above')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Same denominator</div><div class="s-body" style="color:#0C447C;">Order the <strong>numerators</strong>. ${fr(2,9)} &lt; ${fr(5,9)} &lt; ${fr(7,9)}</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">② Same numerator</div><div class="s-body" style="color:#27500A;">Order the <strong>denominators backwards</strong> — the bigger the denominator, the smaller the fraction.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">③ Common denominator</div><div class="s-body" style="color:#633806;">Change every fraction to the <strong>same denominator</strong>, order the numerators, then <em>write the originals</em> in that order.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Mixed numbers &amp; improper</div><div class="s-body" style="color:#3C3489;">Sort by the <strong>whole-number part</strong> first, then compare the fraction parts (or change all to improper fractions).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Ordering the denominators</div><div class="s-body" style="color:#712B13;">${fr(3,4)}, ${fr(3,5)}, ${fr(3,8)} in order of <em>denominators</em> (4, 5, 8) is the order of <strong>largest to smallest</strong>, not smallest to largest!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Rewriting the answer</div><div class="s-body" style="color:#712B13;">After finding common denominators, write the <strong>ORIGINAL</strong> fractions in your answer, not the converted ones — unless told otherwise.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Same denominator: 5/9, 2/9, 7/9, 1/9</div>
+  ${asWarm('Order from <strong>smallest to largest</strong>. All the pieces are ninths — just order the numerators.')}
+  ${faWall([[1,9],[2,9],[5,9],[7,9]],'Ascending: 1/9, 2/9, 5/9, 7/9','Each strip is shaded a little further')}
+  ${steps([['Numerators','5, 2, 7, 1','same-sized pieces'],['Order them','1, 2, 5, 7','smallest first'],['ANSWER',`${fr(1,9)}, ${fr(2,9)}, ${fr(5,9)}, ${fr(7,9)}`,'ascending']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Same numerator: 2/3, 2/5, 2/9, 2/7</div>
+  ${asWarm('Order from <strong>largest to smallest</strong>. Every fraction has 2 parts — so the <em>bigger the pieces</em>, the bigger the fraction.')}
+  ${faWall([[2,3],[2,5],[2,7],[2,9]],'Descending: 2/3, 2/5, 2/7, 2/9','Bigger denominator → smaller pieces → shorter strip',false)}
+  ${steps([['Denominators','3, 5, 9, 7',''],['Smallest denominator = biggest fraction','3 &lt; 5 &lt; 7 &lt; 9','so thirds are biggest'],['ANSWER',`${fr(2,3)}, ${fr(2,5)}, ${fr(2,7)}, ${fr(2,9)}`,'descending']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Related denominators: 1/2, 3/4, 5/8, 3/8</div>
+  ${asWarm('2 and 4 both go into 8, so change everything to <strong>eighths</strong>.')}
+  ${steps([['1/2','× 4',`${fr(4,8)}`],['3/4','× 2',`${fr(6,8)}`],['5/8','no change',`${fr(5,8)}`],['3/8','no change',`${fr(3,8)}`]])}
+  ${faWall([[3,8],[4,8],[5,8],[6,8]],'Ascending in eighths: 3/8, 4/8, 5/8, 6/8','These are 3/8, 1/2, 5/8 and 3/4')}
+  ${steps([['Order the eighths','3, 4, 5, 6','smallest first'],['Write the originals',`${fr(3,8)}, ${fr(1,2)}, ${fr(5,8)}, ${fr(3,4)}`,'ascending ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Three different denominators: 5/6, 2/3, 1/2, 7/12</div>
+  ${asWarm('2, 3 and 6 all go into 12. Change everything to <strong>twelfths</strong> and place them on a number line.')}
+  ${steps([['5/6','× 2',`${fr(10,12)}`],['2/3','× 4',`${fr(8,12)}`],['1/2','× 6',`${fr(6,12)}`],['7/12','no change',`${fr(7,12)}`]])}
+  ${faLine(12,[6,7,8,10],'Twelfths on a number line: 6/12, 7/12, 8/12, 10/12')}
+  ${steps([['Order the numerators','6, 7, 8, 10','left to right on the line'],['ANSWER (ascending)',`${fr(1,2)}, ${fr(7,12)}, ${fr(2,3)}, ${fr(5,6)}`,'original fractions']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Mixed numbers and improper fractions: 1 3/4, 5/4, 2, 1 1/2</div>
+  ${asWarm('Put them all on a number line in <strong>quarters</strong> and read from left to right.')}
+  ${steps([['1 3/4',`${fr(7,4)}`,'1 × 4 + 3'],['5/4',`${fr(5,4)}`,'already improper'],['2',`${fr(8,4)}`,'2 × 4'],['1 1/2',`${fr(6,4)}`,'1½ = 1 2/4']])}
+  ${faLineMixed(2,4,[5,6,7,8],'1 1/4, 1 2/4, 1 3/4, 2 — left to right')}
+  ${steps([['Order the quarters','5, 6, 7, 8','5/4, 6/4, 7/4, 8/4'],['ANSWER (ascending)',`${fr(5,4)}, ${mx(1,1,2)}, ${mx(1,3,4)}, 2`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Unrelated denominators: 2/3, 3/4, 4/5</div>
+  ${asWarm('3, 4 and 5 share no factors, so multiply them: 3 × 4 × 5 = 60. Order from <strong>smallest to largest</strong>.')}
+  ${steps([['2/3',`× 20`,`${fr(40,60)}`],['3/4',`× 15`,`${fr(45,60)}`],['4/5',`× 12`,`${fr(48,60)}`],['ANSWER',`${fr(2,3)}, ${fr(3,4)}, ${fr(4,5)}`,'40 &lt; 45 &lt; 48']])}
+  ${faWall([[2,3],[3,4],[4,5]],'2/3, 3/4, 4/5 — each strip is longer','Ascending order')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Pattern:</strong> each fraction here is missing less from 1 whole: ${fr(1,3)}, ${fr(1,4)}, ${fr(1,5)} — the smaller the gap, the closer to 1.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the swimming race</div>
+  ${asWarm('In a charity swim, Ada swam <strong>3/4 km</strong>, Bola swam <strong>2/3 km</strong> and Chidi swam <strong>5/8 km</strong>. Put them in order from the <strong>furthest</strong> to the shortest distance.')}
+  ${steps([['Common denominator','24','4, 3 and 8 all go into 24'],['Ada',`${fr(3,4)}`,`= ${fr(18,24)}`],['Bola',`${fr(2,3)}`,`= ${fr(16,24)}`],['Chidi',`${fr(5,8)}`,`= ${fr(15,24)}`]])}
+  ${faWall([[18,24],[16,24],[15,24]],'Ada, Bola and Chidi (in 24ths)','Descending: Ada, Bola, Chidi',false)}
+  ${steps([['Descending order','18 &gt; 16 &gt; 15','largest first'],['ANSWER','Ada, Bola, Chidi',`${fr(3,4)} &gt; ${fr(2,3)} &gt; ${fr(5,8)}`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, then fill the gap</div>
+  ${asWarm(`Tolu writes ${fr(3,4)}, ${fr(3,5)}, ${fr(3,8)} and says &ldquo;this is smallest to largest because 4 &lt; 5 &lt; 8.&rdquo; Is he right?`)}
+  ${faWall([[3,4],[3,5],[3,8]],'3/4 vs 3/5 vs 3/8','The 3/8 strip is the SHORTEST — Tolu has it the wrong way round')}
+  ${steps([['Tolu ordered','the denominators','4, 5, 8 — but bigger denominator = smaller fraction ✗'],['CORRECT ascending',`${fr(3,8)}, ${fr(3,5)}, ${fr(3,4)}`,'smallest to largest ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Find a fraction between ${fr(1,2)} and ${fr(3,4)}.</strong> Change both to eighths first.</div>
+  ${steps([['1/2 and 3/4','4/8 and 6/8','same denominator'],['Number in between','5','4 &lt; 5 &lt; 6'],['ANSWER',`${fr(5,8)}`,`${fr(1,2)} &lt; ${fr(5,8)} &lt; ${fr(3,4)} ✓`]])}
+</div>
+
+${asExCard(9,[
+ exQ(1,'Order from smallest to largest: 5/9, 2/9, 7/9, 1/9.',['1/9, 2/9, 5/9, 7/9','7/9, 5/9, 2/9, 1/9','2/9, 1/9, 5/9, 7/9'],0),
+ exQ(2,'Order from largest to smallest: 2/3, 2/5, 2/9.',['2/3, 2/5, 2/9','2/9, 2/5, 2/3','2/5, 2/3, 2/9'],0),
+ exQ(3,'Order from smallest to largest: 1/2, 3/4, 5/8.',['1/2, 5/8, 3/4','3/4, 5/8, 1/2','5/8, 1/2, 3/4'],0),
+ exQ(4,'Which is the smallest: 5/6, 2/3, 1/2 or 7/12?',['1/2','7/12','2/3'],0),
+ exQ(5,'Order from smallest to largest: 1 1/2, 5/4, 2.',['5/4, 1 1/2, 2','2, 1 1/2, 5/4','1 1/2, 5/4, 2'],0),
+ exQ(6,'Order from largest to smallest: 2/3, 3/4, 4/5.',['4/5, 3/4, 2/3','2/3, 3/4, 4/5','3/4, 4/5, 2/3'],0),
+ exQ(7,'Ada swims 3/4 km, Bola swims 2/3 km and Chidi swims 5/8 km. Who swims the furthest?',['Ada','Bola','Chidi'],0),
+ exQ(8,'Tolu writes 3/4, 3/5, 3/8 and says it is smallest to largest. Is he right?',['No — the correct order is 3/8, 3/5, 3/4','Yes — the denominators go up','No — the correct order is 3/5, 3/4, 3/8'],0),
+ exQ(9,'THINK DEEPER: Which fraction lies between 1/2 and 3/4?',['5/8','1/4','7/8'],0,'t'),
+ exQ(10,'BOSS LEVEL: Order from largest to smallest: 7/4, 1 3/5, 9/5, 3/2.',['9/5, 7/4, 1 3/5, 3/2','7/4, 9/5, 3/2, 1 3/5','3/2, 1 3/5, 7/4, 9/5'],0,'b')])}`;
+
+
+/* ---------- STEP 10 : Fractions on a number line ---------- */
+const P5_FA10 = `
+${asHeader('FA10','Step 10 — Fractions on a Number Line','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Fractions Have an Address</div>
+  ${asWarm(`Every fraction has an exact <strong>address</strong> on the number line — a spot that belongs only to it. A number line is like a ruler: the <strong>distance between two whole numbers</strong> is cut into equal steps, and each step is a unit fraction. To read or place a fraction we need to know <strong>how big each step is</strong>.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> use a metre ruler or a long strip of paper folded into equal sections. The fold marks are the tick marks!</div>
+  ${faLine(5,[3],'0 to 1 cut into 5 equal steps — the dot is on step 3')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Step 1 — Find the step size</div><div class="s-body" style="color:#633806;">Count the <strong>equal gaps</strong> between two whole numbers. If there are 5 gaps, each step is ${fr(1,5)}.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Step 2 — Count the steps</div><div class="s-body" style="color:#085041;">Count steps <strong>from the nearest whole number</strong> to the dot. The count is the numerator.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">📋 Step 3 — Name it</div><div class="s-body" style="color:#3C3489;">Past 1? Write it as a <strong>mixed number</strong> (whole + steps) or an <strong>improper fraction</strong> (all the steps from 0).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Counting ticks</div><div class="s-body" style="color:#712B13;">Count the <strong>gaps</strong>, not the tick marks. 5 gaps need 6 ticks (including both whole numbers).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting the whole</div><div class="s-body" style="color:#712B13;">On a line from 2 to 3, a dot on the first quarter-tick is ${mx(2,1,4)}, <strong>not</strong> ${fr(1,4)}. Read where the line <em>starts</em>.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — What is each step worth?</div>
+  ${asWarm('A number line from 0 to 1 is cut into 8 equal steps. What fraction is each step? Where is the 5th tick?')}
+  ${faLine(8,[5],'0 to 1 in eighths — the dot is the 5th step')}
+  ${steps([['Gaps between 0 and 1','8','so each step is 1/8'],['Steps to the dot','5','numerator'],['ANSWER',`${fr(5,8)}`,'five eighths']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Beyond 1: where is 7/4?</div>
+  ${asWarm('The line goes from 0 to 2 and each whole is cut into quarters. Count 7 quarter-steps from 0.')}
+  ${faLineTo(2,4,[7],'7/4 on a line from 0 to 2')}
+  ${steps([['1 whole','4 steps','4/4 = 1'],['7 steps','4 + 3','one whole and 3 more quarters'],['ANSWER',`${fr(7,4)} = ${mx(1,3,4)}`,'between 1 and 2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A line that starts at 1: reading the scale</div>
+  ${asWarm('Number lines do not always start at 0! This one runs from <strong>1 to 2</strong> and is cut into 6 equal steps.')}
+  ${faLineSeg(1,2,6,[9],'1 to 2 in sixths — the dot is on the 3rd tick after 1')}
+  ${steps([['Step size','1/6','6 gaps between 1 and 2'],['Steps from 1','3','3 sixths'],['ANSWER',`${mx(1,3,6)} = ${mx(1,1,2)}`,'simplified: 3/6 = 1/2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A line with missing labels: what does the arrow show?</div>
+  ${asWarm('Only the whole numbers are labelled. Work out the step size yourself!')}
+  ${faLineSeg(2,3,5,[13],'The dot is on a number between 2 and 3',{hide:true})}
+  ${steps([['Count the gaps','5','so each step is 1/5'],['Steps from 2','3','the dot is on the 3rd tick'],['ANSWER',`${mx(2,3,5)}`,'= 13/5']])}
+  ${faLineSeg(2,3,5,[13],'Answer revealed: 2 3/5')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Equivalent fractions share one point</div>
+  ${asWarm('Halves, sixths and eighths cut the same 0-to-1 line differently — but some points line up exactly.')}
+  ${faTwoLines([[2,1],[6,3],[8,4]],'Halves, sixths and eighths: one point, three names')}
+  ${steps([['1/2','1 of 2 steps',''],['3/6','3 of 6 steps',`= ${fr(1,2)}`],['4/8','4 of 8 steps',`= ${fr(1,2)}`],['ANSWER',`${fr(1,2)} = ${fr(3,6)} = ${fr(4,8)}`,'the same spot on the line']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Jumping along the line</div>
+  ${asWarm('Start at <strong>1 1/4</strong> and jump forward 3 quarters. Where do you land?')}
+  ${faLineMixed(3,4,[5,8],'Start 1 1/4, jump +3 quarters, land on 2')}
+  ${steps([['Start',`${mx(1,1,4)}`,`= ${fr(5,4)}`],['Jump','+ 3 quarters',`${fr(5,4)} + ${fr(3,4)}`],['Land',`${fr(8,4)}`,'= 2 wholes ✓']])}
+  <div class="card-body" style="margin-top:6px;">🔑 This is how we will <strong>add</strong> fractions in Step 12: jump along the number line!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the measuring jug</div>
+  ${asWarm('A measuring jug is marked every <strong>quarter of a litre</strong> up to 2 litres. Water reaches the <strong>7th mark</strong>. How much water is in the jug?')}
+  ${faLineMixed(2,4,[7],'Jug scale: quarters from 0 to 2 litres')}
+  ${steps([['Each mark','1/4 L','quarter-litre steps'],['7 marks',`${fr(7,4)} L`,'seven quarters'],['ANSWER',`${mx(1,3,4)} L`,'one and three quarter litres']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and find the halfway point</div>
+  ${asWarm(`A line runs from 1 to 2 and is cut into quarters. Tolu says the dot on the first tick is ${fr(1,4)}. Is he right?`)}
+  ${faLineSeg(1,2,4,[5],'The dot is the first tick after 1')}
+  ${steps([['Tolu&#39;s answer',`${fr(1,4)}`,'forgot the line starts at 1 ✗'],['CORRECT',`${mx(1,1,4)}`,'1 + one quarter ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>What fraction is exactly halfway between ${fr(1,3)} and ${fr(2,3)}?</strong> Change both to sixths.</div>
+  ${faLine(6,[2,3,4],'1/3 = 2/6, 2/3 = 4/6 — the halfway point is 3/6')}
+  ${steps([['1/3 and 2/3','2/6 and 4/6','common denominator'],['Halfway','(2 + 4) ÷ 2 = 3','3/6'],['ANSWER',`${fr(3,6)} = ${fr(1,2)}`,'simplest form']])}
+</div>
+
+${asExCard(10,[
+ exQ(1,'A number line from 0 to 1 is cut into 8 equal steps. What fraction is each step worth?',['1/8','1/9','8'],0),
+ exQ(2,'A dot is on the 3rd tick of a 0 to 1 number line cut into 5 equal steps. What fraction is it?',['3/5','3/4','5/3'],0),
+ exQ(3,'On a number line from 0 to 2 cut into quarters, which number is on the 7th tick?',['1 3/4','1 1/4','7/8'],0),
+ exQ(4,'On a number line from 1 to 2 cut into 6 equal steps, what is on the 3rd tick after 1?',['1 3/6 (= 1 1/2)','3/6','1 6/3'],0),
+ exQ(5,'Which fraction is in the same place as 3/6 on a number line?',['1/2','1/3','2/3'],0),
+ exQ(6,'Start at 1 1/4 and jump forward 3 quarters. Where do you land?',['2','1 3/4','2 1/4'],0),
+ exQ(7,'A jug scale is marked in quarter litres. Water is at the 9th mark from 0. How much water is in the jug?',['2 1/4 L','1 1/4 L','9/2 L'],0),
+ exQ(8,'On a number line from 1 to 2 cut into quarters, Tolu says the first tick after 1 is 1/4. Is he right?',['No — it is 1 1/4','Yes — it is 1/4','No — it is 2 1/4'],0),
+ exQ(9,'THINK DEEPER: Which fraction is exactly halfway between 1/3 and 2/3?',['1/2','1/4','3/4'],0,'t'),
+ exQ(10,'BOSS LEVEL: A number line from 2 to 3 is cut into 10 equal steps. An arrow points to the 7th tick after 2. Write the number as a mixed number and as an improper fraction.',['2 7/10 = 27/10','7/10 = 7/10','2 7/10 = 17/10'],0,'b')])}`;
+
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 11 AND 12
+   Step 11: Fractions greater than one
+   Step 12: Add fractions with the same denominator
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–10 files (re-uses faWall, faMulti, faCircle,
+      faLineTo, faLineMixed, fr, mx, steps, exQ, asHeader,
+      asWarm, asExCard). No new helpers are needed.
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA11 = null;
+        const P5_FA12 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ---------- STEP 11 : Fractions greater than one ---------- */
+const P5_FA11 = `
+${asHeader('FA11','Step 11 — Fractions Greater Than One','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — One Amount, Many Names</div>
+  ${asWarm(`You have met improper fractions (Step 4), mixed numbers (Step 5) and the conversions between them (Steps 6 and 7). Now we pull it all together. Any amount bigger than 1 can be shown in <strong>many ways</strong> — as bars, circles, a point on a number line, a <strong>mixed number</strong>, an <strong>improper fraction</strong> or even a <strong>division</strong>. They are all the <strong>same amount</strong>.`)}
+
+  <div class="card-body"><strong>Four ways to show ${mx(1,3,4)} = ${fr(7,4)}:</strong></div>
+  ${faMulti(4,7,'Bars: one full bar and 3 quarters','7 quarters')}
+  <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;margin:4px 0;">
+    ${faCircle(4,4,'Circles: 4/4 = 1','#34D399')}
+    <div style="font-size:24px;font-weight:800;color:#555;">+</div>
+    ${faCircle(4,3,'3/4','#FCD34D')}
+  </div>
+  ${faLineMixed(2,4,[7],'Number line: the 7th quarter-step from 0')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">Mixed number</div><div class="s-body" style="color:#0C447C;">Whole + proper fraction. Best for <strong>reading size</strong> quickly: ${mx(1,3,4)} is between 1 and 2.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">Improper fraction</div><div class="s-body" style="color:#633806;">All parts of one size. Best for <strong>calculating</strong> and comparing: ${fr(7,4)}.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">Division</div><div class="s-body" style="color:#3C3489;">7 ÷ 4 — <strong>7 things shared between 4</strong> gives ${fr(7,4)} each (Step 1).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Fractions stop at 1&rdquo;</div><div class="s-body" style="color:#712B13;">The number line, and the fraction family, keep going: 1 ${fr(1,4)}, 1 ${fr(2,4)}, 2, 2 ${fr(1,4)} … forever.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Mixed vs improper are different</div><div class="s-body" style="color:#712B13;">${mx(1,3,4)} and ${fr(7,4)} are NOT different numbers — they are the <strong>same point</strong> on the number line.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Choosing the best form</div>
+  ${asWarm(`Chidi has <strong>${mx(2,3,5)}</strong> pizzas. Show him how to write it as an improper fraction and as a division, and say which two whole numbers it lies between.`)}
+  ${steps([['Improper fraction','2 × 5 + 3',`${fr(13,5)}`],['Division','13 ÷ 5','= 13 fifths'],['Between','2 and 3',`2 &lt; ${mx(2,3,5)} &lt; 3`]])}
+  ${faMulti(5,13,'13 fifths = 2 whole bars + 3 fifths','')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Counting in fractions past 1</div>
+  ${asWarm('Count on in <strong>thirds</strong> starting at 2/3. Watch what happens as you pass each whole number!')}
+  ${faLineMixed(3,3,[2,3,4,5,6,7],'Counting in thirds: 2/3, 1, 1 1/3, 1 2/3, 2, 2 1/3')}
+  ${steps([['Start',`${fr(2,3)}`,''],['+ 1/3','1','3/3 = 1 whole'],['+ 1/3',`${mx(1,1,3)}`,''],['+ 1/3',`${mx(1,2,3)}`,''],['+ 1/3','2','6/3 = 2 wholes'],['+ 1/3',`${mx(2,1,3)}`,'']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Missing numbers:</strong> ${fr(4,5)}, 1, ${mx(1,1,5)}, ${mx(1,2,5)}, ___, ${mx(1,4,5)} — the missing number is ${mx(1,3,5)}.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Sharing gives fractions greater than 1: 7 ÷ 4</div>
+  ${asWarm('Seven equal chocolate bars are shared between 4 pupils. How much does each pupil get?')}
+  ${faMulti(4,7,'7 bars shared between 4 pupils','Each pupil gets 1 whole bar and 3/4 more, i.e. 7/4')}
+  ${steps([['Give each pupil 1 whole bar','4 bars used','3 bars left'],['Cut the 3 bars into quarters','12 quarters','share between 4 → 3 each'],['ANSWER',`7 ÷ 4 = ${fr(7,4)} = ${mx(1,3,4)}`,'each pupil gets 1¾ bars']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Quick conversions: fill the table</div>
+  ${asWarm('Use the methods from Steps 6 and 7: <strong>÷ and remainder</strong> to go to a mixed number; <strong>× and +</strong> to go to an improper fraction.')}
+  <div style="overflow-x:auto;margin:8px 0;">
+    <table style="width:100%;border-collapse:collapse;font-size:13px;">
+      <thead><tr style="background:#BA7517;color:white;">
+        <th style="padding:8px 10px;text-align:left;">Mixed number</th>
+        <th style="padding:8px 10px;text-align:left;">Working</th>
+        <th style="padding:8px 10px;text-align:left;">Improper fraction</th>
+      </tr></thead>
+      <tbody>
+        ${[[mx(1,1,2),'1 × 2 + 1',fr(3,2)],[mx(2,2,3),'2 × 3 + 2',fr(8,3)],[mx(3,1,4),'3 × 4 + 1',fr(13,4)],[mx(4,3,5),'4 × 5 + 3',fr(23,5)]].map((r,i)=>`
+          <tr style="background:${i%2===0?'#FAEEDA':'#fff'};">
+            <td style="padding:7px 10px;">${r[0]}</td>
+            <td style="padding:7px 10px;color:#555;">${r[1]}</td>
+            <td style="padding:7px 10px;">${r[2]}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+  ${steps([['Check the last row','23 ÷ 5','= 4 remainder 3'],['Back to mixed',`${fr(23,5)}`,`= ${mx(4,3,5)} ✓`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Fractions greater than 1 in measures</div>
+  ${asWarm('Time and capacity use fractions greater than 1 all the time. Convert each amount.')}
+  <div class="card-body"><strong>(a) ${mx(2,1,4)} hours in minutes</strong></div>
+  ${steps([['1 hour','60 min',''],['¼ hour','60 ÷ 4 = 15 min',''],['2 hours','2 × 60 = 120',''],['ANSWER','120 + 15',`= 135 minutes`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ${mx(1,3,4)} litres in millilitres</strong></div>
+  ${steps([['1 litre','1,000 ml',''],['¼ litre','1,000 ÷ 4 = 250 ml',''],['¾ litre','3 × 250 = 750 ml',''],['ANSWER','1,000 + 750','= 1,750 ml']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Comparing fractions greater than 1</div>
+  ${asWarm(`Which is greater: ${fr(11,6)} or ${mx(1,3,4)}? Change both to mixed numbers, compare the wholes, then the fraction parts.`)}
+  ${steps([['11/6','11 ÷ 6 = 1 r 5',`${mx(1,5,6)}`],['Whole parts','1 and 1','same — compare 5/6 and 3/4'],['Twelfths',`${fr(10,12)} and ${fr(9,12)}`,'5 × 2 and 3 × 3'],['ANSWER',`${fr(11,6)} &gt; ${mx(1,3,4)}`,'10 &gt; 9']])}
+  ${faWall([[10,12],[9,12]],'5/6 = 10/12 is longer than 3/4 = 9/12','So 1 5/6 > 1 3/4',true)}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Missing numbers</div>
+  ${asWarm(`Find the missing numbers. Think about which step you need to <strong>undo</strong>.`)}
+  <div class="card-body"><strong>(a) ${mx(3,2,5)} = ${fr('?',5)}</strong></div>
+  ${steps([['Whole × denominator','3 × 5','= 15'],['Add the numerator','15 + 2','= 17 → ? = 17']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ${fr(31,7)} = 4 and ${fr('?',7)}</strong></div>
+  ${steps([['Divide','31 ÷ 7','= 4 remainder 3'],['The remainder is the numerator','? = 3',`${fr(31,7)} = ${mx(4,3,7)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>(c) How many halves are in ${mx(4,1,2)}?</strong></div>
+  ${steps([['Halves in 4 wholes','4 × 2','= 8'],['Plus one more half','8 + 1','= 9 halves']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: the odd one out</div>
+  ${asWarm(`Which of these is the <strong>odd one out</strong>? ${fr(7,4)}, ${mx(1,3,4)}, ${fr(14,8)}, ${mx(1,2,3)}`)}
+  ${steps([['7/4','',`${mx(1,3,4)}`],['1 3/4','','already mixed'],['14/8','14 ÷ 8 = 1 r 6',`${mx(1,6,8)} = ${mx(1,3,4)}`],['1 2/3','',`${fr(2,3)} ≠ ${fr(3,4)}`]])}
+  <div class="card-body" style="margin-top:6px;">✅ ${mx(1,2,3)} is the odd one out — the other three all equal ${mx(1,3,4)}.</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Counting in three quarters:</strong> ${fr(3,4)}, ${mx(1,1,2)}, ${mx(2,1,4)}, 3, ___. Next term?</div>
+  ${steps([['Each jump','+ 3/4','three quarters'],['Last term','3',`= ${fr(12,4)}`],['Next',`${fr(12,4)} + ${fr(3,4)}`,`= ${fr(15,4)} = ${mx(3,3,4)}`]])}
+</div>
+
+${asExCard(11,[
+ exQ(1,'Which improper fraction is the same as 1 3/4?',['7/4','5/4','13/4'],0),
+ exQ(2,'Count in thirds: 2/3, 1, 1 1/3, 1 2/3, ___ . What comes next?',['2','1 3/3','2 1/3'],0),
+ exQ(3,'Seven bars are shared equally between 4 pupils. How much does each pupil get?',['1 3/4 bars','1 1/4 bars','4/7 of a bar'],0),
+ exQ(4,'How many minutes are in 2 1/4 hours?',['135 minutes','125 minutes','140 minutes'],0),
+ exQ(5,'Which is greater: 11/6 or 1 3/4?',['11/6','1 3/4','They are equal'],0),
+ exQ(6,'How many halves are there in 4 1/2?',['9','8','5'],0),
+ exQ(7,'Which is the odd one out: 7/4, 1 3/4, 14/8, 1 2/3?',['1 2/3','14/8','7/4'],0),
+ exQ(8,'Count in three quarters: 3/4, 1 1/2, 2 1/4, 3, ___ . What comes next?',['3 3/4','3 1/4','4'],0),
+ exQ(9,'THINK DEEPER: Seven chocolate bars are shared equally between 5 pupils. How much does each pupil get?',['1 2/5 bars','1 1/5 bars','5/7 of a bar'],0,'t'),
+ exQ(10,'BOSS LEVEL: A sequence starts at 1/2 and goes up by 3/4 each time: 1/2, 1 1/4, 2, 2 3/4, … What is the 6th term?',['4 1/4','3 1/2','5'],0,'b')])}`;
+
+
+/* ---------- STEP 12 : Add fractions with the same denominator ---------- */
+const P5_FA12 = `
+${asHeader('FA12','Step 12 — Add Fractions with the Same Denominator','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Joining Same-Sized Pieces</div>
+  ${asWarm(`If you have 2 apples and 3 apples, you have 5 apples. If you have <strong>2 sevenths</strong> and <strong>3 sevenths</strong>, you have <strong>5 sevenths</strong>! The pieces are the same size, so we simply <strong>count them together</strong>. The unit (sevenths) does not change.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take a strip with 2 sevenths shaded and a strip with 3 sevenths shaded. Join them end to end and count the sevenths.</div>
+  ${faWall([[2,7],[3,7],[5,7]],'2/7 + 3/7 = 5/7','Same-sized pieces — just count them',false)}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;"><strong>Add the numerators. Keep the denominator.</strong> ${fr(2,7)} + ${fr(3,7)} = ${fr('2 + 3',7)} = ${fr(5,7)}</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Then tidy up</div><div class="s-body" style="color:#085041;">If the answer is an <strong>improper fraction</strong>, change it to a <strong>mixed number</strong>. If the fraction part can be <strong>simplified</strong>, simplify it.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Links</div><div class="s-body" style="color:#3C3489;">Uses Step 6 (improper → mixed) and Step 3 (simplifying). On a number line, adding is <strong>jumping to the right</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Adding the denominators</div><div class="s-body" style="color:#712B13;">${fr(2,5)} + ${fr(1,5)} is NOT ${fr(3,10)}! Adding the bottoms changes the size of the pieces. The pieces stay <strong>fifths</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Stopping at the improper fraction</div><div class="s-body" style="color:#712B13;">${fr(9,6)} is correct but unfinished. Write it as ${mx(1,3,6)} and simplify to ${mx(1,1,2)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Joining bars: 2/7 + 3/7</div>
+  ${asWarm('Add the shaded parts of two sevenths strips. How many sevenths altogether?')}
+  ${faWall([[2,7],[3,7],[5,7]],'2/7 + 3/7 = 5/7','')}
+  ${steps([['Add the numerators','2 + 3','= 5'],['Keep the denominator','7','sevenths stay sevenths'],['ANSWER',`${fr(2,7)} + ${fr(3,7)} = ${fr(5,7)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Circles: 3/8 + 2/8</div>
+  ${asWarm('Chidi eats 3/8 of a pizza and Ngozi eats 2/8 of the same pizza. How much of the pizza did they eat together?')}
+  <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(8,3,'3/8','#F472B6')}
+    <div style="font-size:26px;font-weight:800;color:#555;">+</div>
+    ${faCircle(8,2,'2/8','#60A5FA')}
+    <div style="font-size:26px;font-weight:800;color:#555;">=</div>
+    ${faCircle(8,5,'5/8 together','#FCD34D')}
+  </div>
+  ${steps([['3 + 2','= 5','eighths'],['ANSWER',`${fr(3,8)} + ${fr(2,8)} = ${fr(5,8)}`,'five eighths of the pizza']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Jumping on a number line: 3/5 + 4/5</div>
+  ${asWarm('Start at 3/5 and jump 4 fifths to the right. What happens when you pass 1?')}
+  ${faLineTo(2,5,[3,7],'Start at 3/5, jump +4/5, land on 7/5')}
+  ${steps([['Start',`${fr(3,5)}`,'3 fifth-steps from 0'],['Jump','+ 4 steps','3 + 4 = 7'],['Land',`${fr(7,5)}`,'past 1 whole'],['ANSWER',`${fr(3,5)} + ${fr(4,5)} = ${fr(7,5)} = ${mx(1,2,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Crossing a whole and simplifying: 5/6 + 4/6</div>
+  ${asWarm('Fill one whole bar of sixths first. What is left over goes into a second bar.')}
+  ${faMulti(6,9,'5 sixths + 4 sixths = 9 sixths','1 whole bar full, 3 sixths in the next')}
+  ${steps([['Add the numerators','5 + 4','= 9 → 9/6'],['Improper → mixed','9 ÷ 6 = 1 r 3',`${mx(1,3,6)}`],['Simplify the fraction part',`${fr('3 ÷ 3','6 ÷ 3')}`,`= ${fr(1,2)}`],['ANSWER',`${mx(1,1,2)}`,'one and a half']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Simplifying the answer: 3/10 + 1/10 and 5/12 + 3/12</div>
+  ${asWarm('Even when the answer is less than 1, check whether it can be simplified.')}
+  ${faWall([[4,10],[2,5]],'4/10 = 2/5','Same amount, fewer pieces',true)}
+  ${steps([['3/10 + 1/10','3 + 1 = 4',`${fr(4,10)}`],['HCF of 4 and 10','2',`${fr(4,10)} = ${fr(2,5)}`]])}
+  ${steps([['5/12 + 3/12','5 + 3 = 8',`${fr(8,12)}`],['HCF of 8 and 12','4',`${fr(8,12)} = ${fr(2,3)}`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Adding three fractions: 2/9 + 4/9 + 5/9</div>
+  ${asWarm('The same rule works for any number of fractions — add all the numerators.')}
+  ${faMulti(9,11,'2 + 4 + 5 = 11 ninths','1 whole bar full and 2 ninths in the next')}
+  ${steps([['Add the numerators','2 + 4 + 5','= 11'],['Keep the denominator','9',`${fr(11,9)}`],['Improper → mixed','11 ÷ 9 = 1 r 2',`${mx(1,2,9)}`],['ANSWER',`${mx(1,2,9)}`,'cannot be simplified: 2 and 9 share no factor']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: water bottles</div>
+  ${asWarm(`Ngozi drinks <strong>3/8 litre</strong> of water at break and <strong>7/8 litre</strong> at lunch. How much water does she drink altogether?`)}
+  ${faMulti(8,10,'3/8 + 7/8 = 10/8','One litre bottle full, and 2/8 more')}
+  ${steps([['Add the numerators','3 + 7','= 10'],['Total',`${fr(10,8)} L`,'10 eighths'],['Improper → mixed','10 ÷ 8 = 1 r 2',`${mx(1,2,8)} L`],['ANSWER',`${mx(1,1,4)} L`,`${fr(2,8)} simplified to ${fr(1,4)}`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and missing numbers</div>
+  ${asWarm(`Tolu says ${fr(2,5)} + ${fr(1,5)} = ${fr(3,10)} because 2 + 1 = 3 and 5 + 5 = 10. Is he right?`)}
+  ${faWall([[2,5],[1,5],[3,5],[3,10]],'2/5 + 1/5 = 3/5, but Tolu&#39;s 3/10 is far too small','')}
+  ${steps([['Tolu','5 + 5 = 10','added the denominators ✗'],['Correct','Keep the 5',`${fr(2,5)} + ${fr(1,5)} = ${fr(3,5)} ✓`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Find the missing numerator:</strong> ${fr('?',9)} + ${fr(4,9)} = ${fr(11,9)}</div>
+  ${steps([['Think','? + 4 = 11','undo the addition'],['Subtract','11 − 4','= 7'],['ANSWER',`${fr(7,9)} + ${fr(4,9)} = ${fr(11,9)}`,'check: 7 + 4 = 11 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Complete to one whole:</strong> ${fr(5,12)} + ${fr('?',12)} = 1. Since 1 = ${fr(12,12)}, ? = 12 − 5 = 7.</div>
+</div>
+
+${asExCard(12,[
+ exQ(1,'Calculate 3/8 + 2/8.',['5/8','5/16','6/8'],0),
+ exQ(2,'Calculate 2/9 + 5/9.',['7/9','7/18','10/9'],0),
+ exQ(3,'Calculate 4/7 + 5/7. Give your answer as a mixed number.',['1 2/7','9/14','1 5/7'],0),
+ exQ(4,'Calculate 5/6 + 4/6. Give your answer as a mixed number in its simplest form.',['1 1/2','1 3/6','9/12'],0),
+ exQ(5,'Calculate 3/10 + 1/10. Give your answer in its simplest form.',['2/5','4/20','4/10'],0),
+ exQ(6,'Calculate 2/9 + 4/9 + 5/9. Give your answer as a mixed number.',['1 2/9','11/27','1 1/9'],0),
+ exQ(7,'Ngozi drinks 3/8 L of water at break and 7/8 L at lunch. How much does she drink altogether?',['1 1/4 L','10/16 L','1 1/8 L'],0),
+ exQ(8,'Tolu says 1/5 + 2/5 = 3/10. Is he right?',['No — add the numerators and keep the denominator: 3/5','Yes — add the tops and add the bottoms','No — the answer is 3/0'],0),
+ exQ(9,'THINK DEEPER: 5/12 + ?/12 = 1 whole. What is the missing numerator?',['7','5','12'],0,'t'),
+ exQ(10,'BOSS LEVEL: Chef Bola uses 5/8 kg, 7/8 kg and 6/8 kg of rice in three recipes. How much rice is that in total, as a mixed number in its simplest form?',['2 1/4 kg','1 3/4 kg','18/24 kg'],0,'b')])}`;
+
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 13 AND 14
+   Step 13: Add fractions with related denominators
+   Step 14: Subtract fractions with the same denominator
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–12 files (re-uses faWall, faMulti, faCircle,
+      faLine, faLineTo, fr, mx, steps, exQ, asHeader, asWarm,
+      asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA13 = null;
+        const P5_FA14 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* Bars with `start` parts shaded; the last `take` shaded parts are CROSSED OUT.
+   Good for subtraction. faTake(8,8,3,'title','foot') → 8/8 with 3 taken away.
+   Works for more than one bar (start > den). */
+function faTake(den,start,take,title,foot){
+  const bars=Math.ceil(start/den), bw=300, x0=10, rowH=30, gap=8, cw=bw/den;
+  const H=34+bars*(rowH+gap)+(foot?30:6);
+  let s=`<svg viewBox="0 0 520 ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="260" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#333">${title}</text>`;
+  for(let b=0;b<bars;b++){
+    const y=28+b*(rowH+gap);
+    let inBar=0;
+    for(let k=0;k<den;k++){
+      const idx=b*den+k, x=x0+k*cw;
+      let fill='#fff';
+      if(idx<start-take) fill='#FCD34D';
+      else if(idx<start) fill='#FCA5A5';
+      if(idx<start) inBar++;
+      s+=`<rect x="${x.toFixed(1)}" y="${y}" width="${cw.toFixed(1)}" height="${rowH}" fill="${fill}" stroke="#333" stroke-width="1.5"/>`;
+      if(idx>=start-take && idx<start){
+        s+=`<line x1="${(x+5).toFixed(1)}" y1="${y+5}" x2="${(x+cw-5).toFixed(1)}" y2="${y+rowH-5}" stroke="#B91C1C" stroke-width="2.5"/>`;
+        s+=`<line x1="${(x+cw-5).toFixed(1)}" y1="${y+5}" x2="${(x+5).toFixed(1)}" y2="${y+rowH-5}" stroke="#B91C1C" stroke-width="2.5"/>`;
+      }
+    }
+    s+=`<rect x="${x0}" y="${y}" width="${bw}" height="${rowH}" fill="none" stroke="#333" stroke-width="2"/>`;
+    s+=`<text x="${x0+bw+16}" y="${y+21}" font-size="14" font-weight="800" fill="#333">${inBar}/${den}</text>`;
+  }
+  if(foot) s+=`<text x="260" y="${H-10}" text-anchor="middle" font-size="13" font-weight="800" fill="#B45309">${foot}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ---------- STEP 13 : Add fractions with related denominators ---------- */
+const P5_FA13 = `
+${asHeader('FA13','Step 13 — Add Fractions with Related Denominators','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Make the Pieces the Same Size First</div>
+  ${asWarm(`In Step 12 the pieces were the same size, so adding was easy. What about <strong>1/2 + 1/4</strong>? A half and a quarter are <em>different-sized pieces</em> — you cannot count them together. But <strong>2 goes into 4</strong> (the denominators are <strong>related</strong>), so we can cut the half into two quarters! Then both fractions are quarters and we can add.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take a half strip and a quarter strip. Swap the half for 2 quarter strips. Now count the quarters.</div>
+  ${faWall([[1,2],[2,4],[1,4],[3,4]],'1/2 = 2/4, so 1/2 + 1/4 = 2/4 + 1/4 = 3/4','Change the half to quarters, then add')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The method</div><div class="s-body" style="color:#633806;">1) Find the <strong>common denominator</strong> — when one denominator is a multiple of the other, it is the <strong>bigger</strong> one. 2) Change the other fraction (Step 2: multiply top and bottom). 3) Add the numerators, keep the denominator. 4) Tidy up.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">Related denominators</div><div class="s-body" style="color:#085041;">Denominators are <strong>related</strong> when one is a <strong>multiple</strong> of the other: 2 and 4, 3 and 6, 5 and 10, 4 and 12, 4 and 8.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Skills used</div><div class="s-body" style="color:#3C3489;">Equivalent fractions (Step 2) → add (Step 12) → improper to mixed (Step 6) → simplify (Step 3).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Adding tops and bottoms</div><div class="s-body" style="color:#712B13;">${fr(1,2)} + ${fr(1,4)} is NOT ${fr(2,6)}! You must make the pieces the same size <strong>before</strong> you add.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Changing only the denominator</div><div class="s-body" style="color:#712B13;">To change ${fr(1,2)} to quarters you must multiply the top <strong>and</strong> the bottom by 2: ${fr(2,4)}, not ${fr(1,4)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Halves and quarters: 1/2 + 1/4</div>
+  ${asWarm('The denominators are 2 and 4. Which one is the common denominator?')}
+  ${faWall([[1,2],[2,4],[1,4],[3,4]],'1/2 → 2/4, then add 1/4','')}
+  ${steps([['Common denominator','4','2 × 2 = 4'],['Convert 1/2','× 2 on top and bottom',`${fr(1,2)} = ${fr(2,4)}`],['Add',`${fr(2,4)} + ${fr(1,4)}`,`= ${fr(3,4)}`],['ANSWER',`${fr(1,2)} + ${fr(1,4)} = ${fr(3,4)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Thirds and sixths: 2/3 + 1/6</div>
+  ${asWarm('Change the thirds into sixths. What do you multiply 3 by to get 6?')}
+  ${faWall([[2,3],[4,6],[1,6],[5,6]],'2/3 = 4/6, so 2/3 + 1/6 = 4/6 + 1/6 = 5/6','')}
+  ${steps([['Common denominator','6','3 × 2 = 6'],['Convert 2/3','× 2',`${fr(2,3)} = ${fr(4,6)}`],['Add',`${fr(4,6)} + ${fr(1,6)}`,`= ${fr(5,6)}`],['ANSWER',`${fr(2,3)} + ${fr(1,6)} = ${fr(5,6)}`,'cannot be simplified']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Crossing a whole: 3/4 + 3/8</div>
+  ${asWarm('Change the quarters into eighths, then add. Will the answer be more than 1?')}
+  ${steps([['Common denominator','8','4 × 2 = 8'],['Convert 3/4','× 2',`${fr(3,4)} = ${fr(6,8)}`],['Add',`${fr(6,8)} + ${fr(3,8)}`,`= ${fr(9,8)}`]])}
+  ${faMulti(8,9,'6/8 + 3/8 = 9/8','One whole bar and 1 eighth more')}
+  ${steps([['Improper → mixed','9 ÷ 8 = 1 r 1',`${mx(1,1,8)}`],['ANSWER',`${fr(3,4)} + ${fr(3,8)} = ${mx(1,1,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — On a number line: 2/5 + 3/10</div>
+  ${asWarm('Fifths and tenths are related (5 × 2 = 10). Change 2/5 to tenths, then jump.')}
+  ${steps([['Convert 2/5','× 2',`${fr(2,5)} = ${fr(4,10)}`],['Start','4/10','4 tenth-steps from 0'],['Jump','+ 3/10','3 more steps'],['Land','7/10','']])}
+  ${faLine(10,[4,7],'Start at 4/10 (= 2/5), jump +3/10, land on 7/10')}
+  ${steps([['ANSWER',`${fr(2,5)} + ${fr(3,10)} = ${fr(7,10)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Simplifying the answer: 5/12 + 1/4</div>
+  ${asWarm('4 goes into 12, so use twelfths. Then check whether the answer simplifies.')}
+  ${steps([['Convert 1/4','× 3',`${fr(1,4)} = ${fr(3,12)}`],['Add',`${fr(5,12)} + ${fr(3,12)}`,`= ${fr(8,12)}`],['HCF of 8 and 12','4',`${fr(8,12)} = ${fr(2,3)}`],['ANSWER',`${fr(5,12)} + ${fr(1,4)} = ${fr(2,3)}`,'simplest form ✓']])}
+  ${faWall([[5,12],[3,12],[8,12],[2,3]],'5/12 + 3/12 = 8/12 = 2/3','',false)}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Three fractions: 1/2 + 1/4 + 3/8</div>
+  ${asWarm('The largest denominator (8) is a multiple of both 2 and 4. Convert everything to eighths.')}
+  ${steps([['1/2','× 4',`${fr(4,8)}`],['1/4','× 2',`${fr(2,8)}`],['3/8','no change',`${fr(3,8)}`],['Add','4 + 2 + 3',`= ${fr(9,8)}`]])}
+  ${faMulti(8,9,'4/8 + 2/8 + 3/8 = 9/8','')}
+  ${steps([['Improper → mixed','9 ÷ 8 = 1 r 1',`${mx(1,1,8)}`],['ANSWER',`${mx(1,1,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the training run</div>
+  ${asWarm(`Tunde runs <strong>3/4 km</strong> before school and <strong>5/8 km</strong> after school. How far does he run altogether?`)}
+  ${steps([['Common denominator','8','4 × 2 = 8'],['Convert 3/4','× 2',`${fr(3,4)} = ${fr(6,8)}`],['Add',`${fr(6,8)} + ${fr(5,8)}`,`= ${fr(11,8)}`],['Improper → mixed','11 ÷ 8 = 1 r 3',`${mx(1,3,8)} km`]])}
+  ${faMulti(8,11,'6/8 + 5/8 = 11/8','')}
+  ${steps([['ANSWER',`${mx(1,3,8)} km`,'a bit more than one and a third km']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, then complete the whole</div>
+  ${asWarm(`Tolu adds ${fr(1,2)} + ${fr(1,4)} and writes ${fr(2,6)}. Is he right?`)}
+  ${faWall([[1,2],[1,4],[3,4],[2,6]],'Tolu&#39;s 2/6 is smaller than 1/2 — adding made it SMALLER!','Impossible: adding cannot make a number smaller')}
+  ${steps([['Tolu','1 + 1 = 2, 2 + 4 = 6','added both tops and bottoms ✗'],['Correct',`${fr(1,2)} = ${fr(2,4)}`,`${fr(2,4)} + ${fr(1,4)} = ${fr(3,4)} ✓`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Complete the whole:</strong> ${fr(3,5)} + ${fr('?',10)} = 1</div>
+  ${steps([['Convert 3/5','× 2',`${fr(3,5)} = ${fr(6,10)}`],['1 whole in tenths','',`${fr(10,10)}`],['Missing numerator','10 − 6','= 4'],['ANSWER',`${fr(3,5)} + ${fr(4,10)} = 1`,`(${fr(4,10)} = ${fr(2,5)})`]])}
+</div>
+
+${asExCard(13,[
+ exQ(1,'Calculate 1/2 + 1/4.',['3/4','2/6','2/8'],0),
+ exQ(2,'Calculate 2/3 + 1/6.',['5/6','3/9','3/6'],0),
+ exQ(3,'Calculate 3/4 + 1/8.',['7/8','4/12','4/8'],0),
+ exQ(4,'Calculate 3/4 + 3/8. Give your answer as a mixed number.',['1 1/8','6/12','6/8'],0),
+ exQ(5,'Calculate 2/5 + 3/10.',['7/10','5/15','5/10'],0),
+ exQ(6,'Calculate 5/12 + 1/4. Give your answer in its simplest form.',['2/3','6/16','8/12'],0),
+ exQ(7,'Tunde runs 3/4 km before school and 5/8 km after school. How far does he run altogether?',['1 3/8 km','8/12 km','1 1/8 km'],0),
+ exQ(8,'Tolu says 1/2 + 1/4 = 2/6. Is he right?',['No — change 1/2 to 2/4 first, giving 3/4','Yes — add the tops and the bottoms','No — the answer is 2/4'],0),
+ exQ(9,'THINK DEEPER: 3/5 + ?/10 = 1 whole. What is the missing numerator?',['4','2','7'],0,'t'),
+ exQ(10,'BOSS LEVEL: Calculate 1/2 + 1/4 + 3/8. Give your answer as a mixed number.',['1 1/8','5/14','9/14'],0,'b')])}`;
+
+
+/* ---------- STEP 14 : Subtract fractions with the same denominator ---------- */
+const P5_FA14 = `
+${asHeader('FA14','Step 14 — Subtract Fractions with the Same Denominator','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Taking Away Same-Sized Pieces</div>
+  ${asWarm(`If you have 7 mangoes and eat 3, you have 4 left. If you have <strong>7 ninths</strong> and take away <strong>3 ninths</strong>, you have <strong>4 ninths</strong> left! The pieces are the same size so we simply <strong>take them away</strong>. The unit (ninths) does not change.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> take a strip with 7 ninths shaded. Cross out 3 of the shaded parts. Count what is left.</div>
+  ${faTake(9,7,3,'7/9 − 3/9: cross out 3 shaded parts','4 ninths are left → 4/9')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The rule</div><div class="s-body" style="color:#633806;"><strong>Subtract the numerators. Keep the denominator.</strong> ${fr(7,9)} − ${fr(3,9)} = ${fr('7 − 3',9)} = ${fr(4,9)}</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Subtracting from a whole</div><div class="s-body" style="color:#085041;">Write the whole as a fraction first: 1 = ${fr(8,8)}, 2 = ${fr(10,5)}… then subtract the numerators.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Link to Step 12</div><div class="s-body" style="color:#3C3489;">Subtraction is the <strong>inverse</strong> of addition: ${fr(7,9)} − ${fr(3,9)} = ${fr(4,9)} because ${fr(4,9)} + ${fr(3,9)} = ${fr(7,9)}. Use it to <strong>check</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Subtracting the denominators</div><div class="s-body" style="color:#712B13;">${fr(7,9)} − ${fr(3,9)} is NOT ${fr(4,0)}! The pieces stay <strong>ninths</strong>. Never subtract the bottoms.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting to simplify</div><div class="s-body" style="color:#712B13;">${fr(7,8)} − ${fr(3,8)} = ${fr(4,8)} — correct, but unfinished! ${fr(4,8)} = ${fr(1,2)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Crossing out: 5/8 − 2/8</div>
+  ${asWarm('Shade 5 eighths. Cross out 2 of them. What is left?')}
+  ${faTake(8,5,2,'5/8 − 2/8','3 eighths left')}
+  ${steps([['Subtract the numerators','5 − 2','= 3'],['Keep the denominator','8','eighths stay eighths'],['ANSWER',`${fr(5,8)} − ${fr(2,8)} = ${fr(3,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Circles and simplifying: 7/8 − 3/8</div>
+  ${asWarm('Funke has 7/8 of a pizza left. Her brother eats 3/8 of the pizza. How much is left?')}
+  <div style="display:flex;gap:14px;align-items:center;justify-content:center;flex-wrap:wrap;">
+    ${faCircle(8,7,'7/8 at the start','#FCD34D')}
+    <div style="font-size:26px;font-weight:800;color:#555;">−</div>
+    ${faCircle(8,3,'3/8 eaten','#FCA5A5')}
+    <div style="font-size:26px;font-weight:800;color:#555;">=</div>
+    ${faCircle(8,4,'4/8 left','#34D399')}
+  </div>
+  ${steps([['Subtract','7 − 3','= 4 → 4/8'],['HCF of 4 and 8','4',`${fr('4 ÷ 4','8 ÷ 4')}`],['ANSWER',`${fr(7,8)} − ${fr(3,8)} = ${fr(1,2)}`,'half the pizza']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Jumping back on a number line: 9/5 − 4/5</div>
+  ${asWarm('Subtracting means jumping to the <strong>left</strong>. Start at 9/5 and jump back 4 fifths.')}
+  ${faLineTo(2,5,[9,5],'Start at 9/5, jump back 4/5, land on 5/5 = 1')}
+  ${steps([['Start',`${fr(9,5)}`,'9 fifth-steps from 0'],['Jump back','− 4 steps','9 − 4 = 5'],['Land',`${fr(5,5)}`,'= 1 whole'],['ANSWER',`${fr(9,5)} − ${fr(4,5)} = 1`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Subtracting from a whole: 1 − 3/8 and 2 − 3/5</div>
+  ${asWarm('You cannot take thirds-of-eighths from a plain 1. Write the whole as a fraction with the same denominator first!')}
+  ${faTake(8,8,3,'1 = 8/8, take away 3/8','5/8 left')}
+  ${steps([['1 as eighths',`1 = ${fr(8,8)}`,''],['Subtract',`${fr(8,8)} − ${fr(3,8)}`,`= ${fr(5,8)}`],['ANSWER',`1 − ${fr(3,8)} = ${fr(5,8)}`,'']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Now 2 − ${fr(3,5)}:</strong></div>
+  ${faTake(5,10,3,'2 = 10/5, take away 3/5','7/5 left')}
+  ${steps([['2 as fifths',`2 = ${fr(10,5)}`,'2 × 5 = 10'],['Subtract',`${fr(10,5)} − ${fr(3,5)}`,`= ${fr(7,5)}`],['ANSWER',`${mx(1,2,5)}`,'7 ÷ 5 = 1 remainder 2']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Improper fractions: 11/6 − 5/6 and 17/5 − 4/5</div>
+  ${asWarm('The rule is exactly the same for improper fractions. Tidy up at the end!')}
+  ${steps([['11/6 − 5/6','11 − 5 = 6',`${fr(6,6)} = 1`]])}
+  ${steps([['17/5 − 4/5','17 − 4 = 13',`${fr(13,5)}`],['Improper → mixed','13 ÷ 5 = 2 r 3',`${mx(2,3,5)}`],['ANSWER',`${mx(2,3,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Finding the difference</div>
+  ${asWarm('&ldquo;How much more?&rdquo; and &ldquo;What is the difference?&rdquo; both mean <strong>subtract</strong> the smaller from the larger. Ada ran 7/9 of a lap and Bola ran 4/9. How much further did Ada run?')}
+  ${faWall([[7,9],[4,9]],'Ada 7/9, Bola 4/9','The gap between the two strips is the difference',true)}
+  ${steps([['Larger − smaller',`${fr(7,9)} − ${fr(4,9)}`,`= ${fr(3,9)}`],['Simplify','HCF of 3 and 9 is 3',`${fr(3,9)} = ${fr(1,3)}`],['ANSWER',`Ada ran ${fr(1,3)} of a lap further`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: baking</div>
+  ${asWarm(`Chef Bola has <strong>${fr(11,8)} kg</strong> of flour. She uses <strong>${fr(5,8)} kg</strong> in a cake. How much flour is left?`)}
+  ${faTake(8,11,5,'11/8 kg − 5/8 kg','6/8 kg left')}
+  ${steps([['Subtract','11 − 5','= 6 → 6/8'],['Simplify','HCF of 6 and 8 is 2',`${fr(6,8)} = ${fr(3,4)}`],['ANSWER',`${fr(3,4)} kg`,'three quarters of a kilogram']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, check by adding</div>
+  ${asWarm(`Tolu works out ${fr(7,9)} − ${fr(4,9)} and writes ${fr(3,5)} (7 − 4 = 3 and 9 − 4 = 5). Is he right?`)}
+  ${steps([['Tolu','9 − 4 = 5','subtracted from the denominator ✗'],['Correct','Keep the 9',`${fr(7,9)} − ${fr(4,9)} = ${fr(3,9)} = ${fr(1,3)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Check with the inverse:</strong> if ${fr(3,9)} is correct then ${fr(3,9)} + ${fr(4,9)} should equal ${fr(7,9)}.</div>
+  ${steps([['Add back','3 + 4 = 7',`${fr(7,9)} ✓`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing numerator:</strong> ${fr('?',7)} − ${fr(2,7)} = ${fr(4,7)}</div>
+  ${steps([['Undo the subtraction','? = 4 + 2','= 6'],['ANSWER',`${fr(6,7)} − ${fr(2,7)} = ${fr(4,7)}`,'check: 6 − 2 = 4 ✓']])}
+</div>
+
+${asExCard(14,[
+ exQ(1,'Calculate 5/8 − 2/8.',['3/8','3/0','7/8'],0),
+ exQ(2,'Calculate 7/8 − 3/8. Give your answer in its simplest form.',['1/2','4/8','4/0'],0),
+ exQ(3,'Calculate 9/5 − 4/5.',['1','5/0','13/5'],0),
+ exQ(4,'Calculate 1 − 3/8.',['5/8','2/8','3/8'],0),
+ exQ(5,'Calculate 2 − 3/5. Give your answer as a mixed number.',['1 2/5','1 3/5','7/10'],0),
+ exQ(6,'Calculate 17/5 − 4/5. Give your answer as a mixed number.',['2 3/5','3 2/5','13/0'],0),
+ exQ(7,'Chef Bola has 11/8 kg of flour and uses 5/8 kg. How much is left, in its simplest form?',['3/4 kg','6/16 kg','16/8 kg'],0),
+ exQ(8,'Tolu says 7/9 − 4/9 = 3/5. Is he right?',['No — keep the denominator 9: 3/9 = 1/3','Yes — he subtracted the tops and the bottoms','No — the answer is 11/9'],0),
+ exQ(9,'THINK DEEPER: ?/7 − 2/7 = 4/7. What is the missing numerator?',['6','2','4'],0,'t'),
+ exQ(10,'BOSS LEVEL: A ribbon is 2 m long. Ada cuts off 3/4 m, then cuts off another 3/4 m. How much ribbon is left?',['1/2 m','1/4 m','6/4 m'],0,'b')])}`;
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 15 AND 16
+   Step 15: Subtract fractions with related denominators
+   Step 16: Add mixed numbers
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–14 files (re-uses faWall, faTake, faMulti,
+      faCircle, faLine, faLineMixed, fr, mx, steps, exQ,
+      asHeader, asWarm, asExCard). No new helpers are needed.
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA15 = null;
+        const P5_FA16 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ---------- STEP 15 : Subtract fractions with related denominators ---------- */
+const P5_FA15 = `
+${asHeader('FA15','Step 15 — Subtract Fractions with Related Denominators','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Same-Sized Pieces Before Taking Away</div>
+  ${asWarm(`To take <strong>1/8</strong> away from <strong>3/4</strong> we have a problem: quarters and eighths are <em>different-sized</em> pieces. But 4 goes into 8, so the denominators are <strong>related</strong>. Cut every quarter into two eighths — now 3/4 is <strong>6/8</strong> and we can cross out 1 eighth!`)}
+
+  <div class="card-body"><strong>Concrete:</strong> shade 3 quarters. Fold each quarter in half to make eighths — you now have 6 eighths shaded. Cross out 1 eighth.</div>
+  ${faWall([[3,4],[6,8]],'3/4 and 6/8 are the same amount','')}
+  ${faTake(8,6,1,'3/4 − 1/8 = 6/8 − 1/8','5 eighths left → 5/8')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 The method</div><div class="s-body" style="color:#633806;">1) Find the <strong>common denominator</strong> (the bigger denominator when one is a multiple of the other). 2) <strong>Convert</strong> the other fraction (×  top and bottom). 3) <strong>Subtract the numerators</strong>, keep the denominator. 4) Simplify.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">🔗 Skills used</div><div class="s-body" style="color:#085041;">Equivalent fractions (Step 2) + subtract same denominator (Step 14) + simplify (Step 3).</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">✅ Check by adding</div><div class="s-body" style="color:#3C3489;">${fr(5,8)} + ${fr(1,8)} = ${fr(6,8)} = ${fr(3,4)} ✓ — addition undoes subtraction.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Subtracting tops and bottoms</div><div class="s-body" style="color:#712B13;">${fr(5,6)} − ${fr(1,3)} is NOT ${fr(4,3)}! You cannot subtract across when the pieces are different sizes — and the answer cannot be bigger than 5/6.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Converting only one number</div><div class="s-body" style="color:#712B13;">Change BOTH the top and the bottom: ${fr(1,3)} = ${fr(2,6)}, not ${fr(1,6)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Quarters and eighths: 3/4 − 1/8</div>
+  ${asWarm('Which denominator is the common one? What do you multiply 4 by to get 8?')}
+  ${faTake(8,6,1,'6/8 − 1/8','5/8 left')}
+  ${steps([['Common denominator','8','4 × 2 = 8'],['Convert 3/4','× 2',`${fr(3,4)} = ${fr(6,8)}`],['Subtract',`${fr(6,8)} − ${fr(1,8)}`,`= ${fr(5,8)}`],['ANSWER',`${fr(3,4)} − ${fr(1,8)} = ${fr(5,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Sixths and thirds: 5/6 − 1/3</div>
+  ${asWarm('Change the thirds to sixths. Then cross out the sixths.')}
+  ${faTake(6,5,2,'5/6 − 2/6 (1/3 = 2/6)','3 sixths left')}
+  ${steps([['Common denominator','6','3 × 2 = 6'],['Convert 1/3','× 2',`${fr(1,3)} = ${fr(2,6)}`],['Subtract',`${fr(5,6)} − ${fr(2,6)}`,`= ${fr(3,6)}`],['Simplify','÷ 3',`${fr(3,6)} = ${fr(1,2)}`],['ANSWER',`${fr(1,2)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Jumping back on a number line: 7/10 − 2/5</div>
+  ${asWarm('Fifths and tenths are related. Change 2/5 to tenths, then jump left.')}
+  ${steps([['Convert 2/5','× 2',`${fr(2,5)} = ${fr(4,10)}`],['Start','7/10',''],['Jump back','− 4/10','7 − 4 = 3'],['Land','3/10','']])}
+  ${faLine(10,[7,3],'Start at 7/10, jump back 4/10, land on 3/10')}
+  ${steps([['ANSWER',`${fr(7,10)} − ${fr(2,5)} = ${fr(3,10)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Improper fraction minus a fraction: 9/8 − 1/2</div>
+  ${asWarm('The answer starts above 1. Change 1/2 into eighths first.')}
+  ${faTake(8,9,4,'9/8 − 4/8','5 eighths left')}
+  ${steps([['Convert 1/2','× 4',`${fr(1,2)} = ${fr(4,8)}`],['Subtract',`${fr(9,8)} − ${fr(4,8)}`,`= ${fr(5,8)}`],['ANSWER',`${fr(9,8)} − ${fr(1,2)} = ${fr(5,8)}`,'less than 1 now']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Simplify or convert at the end</div>
+  ${asWarm('Always look at your answer: can it be simplified? Is it improper?')}
+  <div class="card-body"><strong>(a) ${fr(11,12)} − ${fr(1,4)}</strong></div>
+  ${steps([['Convert 1/4','× 3',`${fr(1,4)} = ${fr(3,12)}`],['Subtract',`${fr(11,12)} − ${fr(3,12)}`,`= ${fr(8,12)}`],['Simplify','÷ 4',`${fr(8,12)} = ${fr(2,3)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ${fr(7,6)} − ${fr(1,3)}</strong></div>
+  ${steps([['Convert 1/3','× 2',`${fr(1,3)} = ${fr(2,6)}`],['Subtract',`${fr(7,6)} − ${fr(2,6)}`,`= ${fr(5,6)}`],['Check','5/6 is already simplest','✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Taking away twice from a whole: 1 − 1/2 − 1/8</div>
+  ${asWarm('Write 1 as eighths (8/8). Then take away both fractions, converted to eighths.')}
+  ${faTake(8,8,5,'1 = 8/8; take away 1/2 (4/8) and 1/8','3 eighths left')}
+  ${steps([['1 as eighths',`${fr(8,8)}`,''],['1/2 as eighths',`${fr(4,8)}`,'× 4'],['Take away both','4 + 1 = 5 eighths',''],['Subtract',`${fr(8,8)} − ${fr(5,8)}`,`= ${fr(3,8)}`],['ANSWER',`${fr(3,8)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the juice jug</div>
+  ${asWarm(`Ada has <strong>3/4 litre</strong> of juice. She pours <strong>3/8 litre</strong> into a glass for Kemi. How much juice is left in the jug?`)}
+  ${steps([['Convert 3/4','× 2',`${fr(3,4)} = ${fr(6,8)}`],['Subtract',`${fr(6,8)} − ${fr(3,8)}`,`= ${fr(3,8)}`],['ANSWER',`${fr(3,8)} litre`,'exactly half of what she started with']])}
+  ${faTake(8,6,3,'6/8 L − 3/8 L','3/8 L left')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, check, and missing numbers</div>
+  ${asWarm(`Tolu says ${fr(5,6)} − ${fr(1,3)} = ${fr(4,3)} because 5 − 1 = 4 and 6 − 3 = 3. Is he right?`)}
+  ${steps([['Tolu','4/3','is MORE than 1 — but we started with 5/6 and took something away! ✗'],['Correct',`${fr(1,3)} = ${fr(2,6)}`,`${fr(5,6)} − ${fr(2,6)} = ${fr(3,6)} = ${fr(1,2)} ✓`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>Check with addition:</strong> ${fr(1,2)} + ${fr(1,3)} = ${fr(3,6)} + ${fr(2,6)} = ${fr(5,6)} ✓</div>
+  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> ${fr(7,8)} − ${fr('?',4)} = ${fr(1,8)}</div>
+  ${steps([['Think','7/8 − 1/8','= 6/8 is what is taken away'],['In quarters',`${fr(6,8)} = ${fr(3,4)}`,'÷ 2'],['ANSWER','? = 3',`${fr(7,8)} − ${fr(3,4)} = ${fr(1,8)} ✓`]])}
+</div>
+
+${asExCard(15,[
+ exQ(1,'Calculate 3/4 − 1/8.',['5/8','2/4','2/8'],0),
+ exQ(2,'Calculate 5/6 − 1/3. Give your answer in its simplest form.',['1/2','4/3','4/6'],0),
+ exQ(3,'Calculate 7/10 − 2/5.',['3/10','5/5','5/10'],0),
+ exQ(4,'Calculate 9/8 − 1/2.',['5/8','8/6','4/6'],0),
+ exQ(5,'Calculate 11/12 − 1/4. Give your answer in its simplest form.',['2/3','10/8','8/12'],0),
+ exQ(6,'Calculate 1 − 1/2 − 1/8.',['3/8','6/8','0'],0),
+ exQ(7,'Ada has 3/4 L of juice and pours out 3/8 L. How much juice is left?',['3/8 L','1/4 L','6/4 L'],0),
+ exQ(8,'Tolu says 5/6 − 1/3 = 4/3. Is he right?',['No — change 1/3 to 2/6 first, giving 3/6 = 1/2','Yes — subtract the tops and the bottoms','No — the answer is 4/6'],0),
+ exQ(9,'THINK DEEPER: 7/8 − ?/4 = 1/8. What is the missing numerator?',['3','6','1'],0,'t'),
+ exQ(10,'BOSS LEVEL: A tank is full. In the morning 1/4 of the water is used and in the afternoon 3/8 is used. What fraction of the tank is left?',['3/8','1/2','5/8'],0,'b')])}`;
+
+
+/* ---------- STEP 16 : Add mixed numbers ---------- */
+const P5_FA16 = `
+${asHeader('FA16','Step 16 — Add Mixed Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Wholes with Wholes, Parts with Parts</div>
+  ${asWarm(`A mixed number has two parts: a <strong>whole-number part</strong> and a <strong>fraction part</strong>. To add two mixed numbers we <strong>add the wholes together</strong> and <strong>add the fractions together</strong> — this is called <strong>partitioning</strong>. If the fractions add to more than 1, we convert and carry the extra whole.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> use fraction strips. Put the whole strips together in one pile and the fraction pieces in another. Add each pile, then join them.</div>
+  ${faMulti(5,11,'2 1/5 = 2 whole bars + 1/5','')}
+  ${faMulti(5,7,'1 2/5 = 1 whole bar + 2/5','')}
+  ${faMulti(5,18,'Together: 3 whole bars + 3/5 = 3 3/5','2 + 1 = 3 wholes and 1/5 + 2/5 = 3/5')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method 1 — Partition</div><div class="s-body" style="color:#633806;">1) Add the <strong>whole numbers</strong>. 2) Add the <strong>fractions</strong>. 3) If the fraction total is improper, convert it and <strong>add the extra whole</strong>. 4) Simplify.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method 2 — Improper fractions</div><div class="s-body" style="color:#085041;">Convert both to improper fractions (Step 7), add the numerators (Step 12), then convert back (Step 6).</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Related denominators</div><div class="s-body" style="color:#3C3489;">If the fraction parts have <strong>different but related</strong> denominators, convert them first (Step 13).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Adding denominators</div><div class="s-body" style="color:#712B13;">${mx(1,3,4)} + ${mx(1,3,4)} is NOT ${mx(2,6,8)}. Add the numerators <strong>only</strong> and keep the denominator 4.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Leaving an improper fraction part</div><div class="s-body" style="color:#712B13;">${mx(3,6,4)} is not finished — 6 quarters hides another whole. Write ${mx(4,2,4)} = ${mx(4,1,2)}.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Partitioning: 2 1/5 + 1 2/5</div>
+  ${asWarm('Add the wholes. Add the fifths.')}
+  ${faMulti(5,18,'2 1/5 + 1 2/5','Wholes: 2 + 1 = 3. Fifths: 1/5 + 2/5 = 3/5')}
+  ${steps([['Add the wholes','2 + 1','= 3'],['Add the fractions',`${fr(1,5)} + ${fr(2,5)}`,`= ${fr(3,5)}`],['Put them together','3 and 3/5',''],['ANSWER',`${mx(3,3,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The fractions make more than 1: 1 3/4 + 2 3/4</div>
+  ${asWarm('3/4 + 3/4 = 6/4 — that is more than a whole! Convert it and carry the extra whole.')}
+  ${faMulti(4,18,'1 3/4 + 2 3/4 = 4 2/4','7/4 + 11/4 = 18/4')}
+  ${steps([['Add the wholes','1 + 2','= 3'],['Add the fractions',`${fr(3,4)} + ${fr(3,4)}`,`= ${fr(6,4)}`],['Improper → mixed','6 ÷ 4 = 1 r 2',`${mx(1,2,4)}`],['Add the extra whole','3 + 1 and 2/4',`= ${mx(4,2,4)}`],['Simplify','÷ 2',`${mx(4,1,2)}`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — On a number line: 2 3/5 + 1 4/5</div>
+  ${asWarm('Jump the <strong>whole number</strong> first, then the fraction. Start at 2 3/5.')}
+  ${faLineMixed(5,5,[13,18,22],'2 3/5 → +1 → 3 3/5 → +4/5 → 4 2/5')}
+  ${steps([['Start',`${mx(2,3,5)}`,''],['Jump + 1','3 3/5','add the whole number'],['Jump + 4/5',`${fr(3,5)} + ${fr(4,5)} = ${fr(7,5)}`,`= ${mx(1,2,5)}`],['ANSWER',`${mx(3,3,5)} + ${fr(4,5)} = ${mx(4,2,5)}`,'3 + 1 = 4 wholes and 2/5']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Method 2: improper fractions: 3 2/3 + 1 2/3</div>
+  ${asWarm('Convert both to improper fractions, add, then convert back. Then check with partitioning.')}
+  ${steps([['3 2/3','3 × 3 + 2',`${fr(11,3)}`],['1 2/3','1 × 3 + 2',`${fr(5,3)}`],['Add',`${fr(11,3)} + ${fr(5,3)}`,`= ${fr(16,3)}`],['Convert back','16 ÷ 3 = 5 r 1',`${mx(5,1,3)}`]])}
+  ${steps([['CHECK (partition)','3 + 1 = 4 and 2/3 + 2/3 = 4/3',`4 + ${mx(1,1,3)} = ${mx(5,1,3)} ✓`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Related denominators: 1 1/2 + 2 3/4</div>
+  ${asWarm('The fraction parts are halves and quarters. Change the halves to quarters first.')}
+  ${steps([['Convert 1/2','× 2',`${fr(1,2)} = ${fr(2,4)}`],['Add the wholes','1 + 2','= 3'],['Add the fractions',`${fr(2,4)} + ${fr(3,4)}`,`= ${fr(5,4)} = ${mx(1,1,4)}`],['ANSWER','3 + 1 and 1/4',`${mx(4,1,4)}`]])}
+  ${faMulti(4,17,'1 2/4 + 2 3/4 = 4 1/4','')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Adding a fraction or a whole number to a mixed number</div>
+  ${asWarm('Only part of the number changes. Add the fractions with the fractions and the wholes with the wholes.')}
+  <div class="card-body"><strong>(a) ${mx(2,5,6)} + ${fr(1,3)}</strong></div>
+  ${steps([['Convert 1/3','× 2',`${fr(1,3)} = ${fr(2,6)}`],['Add the fractions',`${fr(5,6)} + ${fr(2,6)}`,`= ${fr(7,6)} = ${mx(1,1,6)}`],['ANSWER','2 + 1 and 1/6',`${mx(3,1,6)}`]])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ${mx(3,1,4)} + 2</strong></div>
+  ${steps([['Add the wholes','3 + 2','= 5'],['Fraction part stays',`${fr(1,4)}`,''],['ANSWER',`${mx(5,1,4)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: two ribbons</div>
+  ${asWarm(`Ngozi has a ribbon <strong>2 3/8 m</strong> long and another <strong>1 7/8 m</strong> long. She joins them end to end. How long is the new ribbon?`)}
+  ${steps([['Add the wholes','2 + 1','= 3'],['Add the fractions',`${fr(3,8)} + ${fr(7,8)}`,`= ${fr(10,8)} = ${mx(1,2,8)}`],['Combine','3 + 1 and 2/8',`${mx(4,2,8)}`],['Simplify','÷ 2',`${mx(4,1,4)} m`]])}
+  ${faMulti(8,34,'19/8 + 15/8 = 34/8','')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Estimate first:</strong> 2 3/8 ≈ 2, 1 7/8 ≈ 2, so the total should be about 4 — our answer of 4 1/4 is sensible ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistakes and missing numbers</div>
+  ${asWarm(`Ada works out ${mx(1,3,4)} + ${mx(2,3,4)} and writes ${mx(3,6,4)}. Is her answer complete?`)}
+  ${steps([['Ada','3 and 6/4','the fraction part is improper — NOT finished ✗'],['Convert','6/4 = 1 2/4','so 3 + 1 and 2/4'],['CORRECT',`${mx(4,2,4)} = ${mx(4,1,2)}`,'✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> 2 ${fr('?',5)} + 1 ${fr(3,5)} = 4 ${fr(1,5)}</div>
+  ${steps([['Wholes','2 + 1 = 3','so the fractions made 1 more whole'],['Fractions',`? + 3 = 6`,`${fr(6,5)} = ${mx(1,1,5)} → 3 + 1 and 1/5 = 4 1/5 ✓`],['ANSWER','? = 3',`${mx(2,3,5)} + ${mx(1,3,5)} = ${mx(4,1,5)}`]])}
+</div>
+
+${asExCard(16,[
+ exQ(1,'Calculate 2 1/5 + 1 2/5.',['3 3/5','3 3/10','2 3/5'],0),
+ exQ(2,'Calculate 1 3/4 + 2 3/4. Give your answer in its simplest form.',['4 1/2','3 6/4','3 6/8'],0),
+ exQ(3,'Calculate 3 2/3 + 1 2/3.',['5 1/3','4 4/6','5 4/3'],0),
+ exQ(4,'Calculate 1 1/2 + 2 3/4.',['4 1/4','3 4/6','4 1/2'],0),
+ exQ(5,'Calculate 2 5/6 + 1/3.',['3 1/6','2 6/9','3 7/6'],0),
+ exQ(6,'Calculate 3 1/4 + 2.',['5 1/4','5 1/6','3 3/4'],0),
+ exQ(7,'Ngozi joins a ribbon 2 3/8 m long to one 1 7/8 m long. How long is the new ribbon, in its simplest form?',['4 1/4 m','3 10/16 m','4 5/8 m'],0),
+ exQ(8,'Tolu says 1 3/4 + 1 3/4 = 2 6/8. Is he right?',['No — add the numerators and keep the 4: 6/4 = 1 2/4, so 3 1/2','Yes — add the tops and the bottoms','No — the answer is 2 3/4'],0),
+ exQ(9,'THINK DEEPER: 2 ?/5 + 1 3/5 = 4 1/5. What is the missing numerator?',['3','4','1'],0,'t'),
+ exQ(10,'BOSS LEVEL: A journey has three parts: 1 1/2 km, 2 3/4 km and 1 1/4 km. What is the total distance?',['5 1/2 km','4 1/2 km','5 1/4 km'],0,'b')])}`;
+
+
+
+
+/* ============================================================
+   PRIMARY 5 — AUTUMN — FRACTIONS A — LESSONS 17 AND 18 (FINAL)
+   Step 17: Subtract mixed numbers
+   Step 18: Fraction problem-solving
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–16 files (re-uses faWall, faTake, faMulti,
+      faLineMixed, fr, mx, steps, exQ, asHeader, asWarm,
+      asExCard). No new helpers are needed.
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_FA17 = null;
+        const P5_FA18 = null;
+      After this, SECTION C should contain no Fractions A
+      placeholders at all.
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ---------- STEP 17 : Subtract mixed numbers ---------- */
+const P5_FA17 = `
+${asHeader('FA17','Step 17 — Subtract Mixed Numbers','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Wholes from Wholes, Parts from Parts… and the Exchange</div>
+  ${asWarm(`Subtracting mixed numbers uses the same <strong>partitioning</strong> idea as adding: take the wholes away from the wholes and the fractions away from the fractions. But what if the fraction you are taking away is <strong>bigger</strong> than the one you have, like 3 1/4 − 1 <strong>3/4</strong>? You cannot take 3 quarters from 1 quarter! So we do an <strong>exchange</strong> — we break 1 whole into fractions, just like borrowing in column subtraction.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> you have 3 whole strips and 1 quarter. You need to take away 1 whole strip and 3 quarters. Swap 1 whole strip for 4 quarters — now you have 2 whole strips and <strong>5 quarters</strong>.</div>
+  ${faTake(4,13,7,'3 1/4 = 13/4; take away 1 3/4 = 7/4','6 quarters left = 1 2/4 = 1 1/2')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method 1 — Partition</div><div class="s-body" style="color:#633806;">Subtract the <strong>wholes</strong>, subtract the <strong>fractions</strong>. If the fraction to subtract is bigger, <strong>exchange 1 whole</strong> for a fraction first: ${mx(3,1,4)} = 2 and ${fr(5,4)}.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method 2 — Improper fractions</div><div class="s-body" style="color:#085041;">Convert both to improper fractions (Step 7), subtract the numerators (Step 14), convert back (Step 6). No exchange needed!</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">✅ Always check by adding</div><div class="s-body" style="color:#3C3489;">${mx(1,1,2)} + ${mx(1,3,4)} should equal ${mx(3,1,4)} (Step 16).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Turning it round</div><div class="s-body" style="color:#712B13;">${mx(3,1,4)} − ${mx(1,3,4)} is NOT ${mx(2,2,4)}. Pupils subtract the <em>smaller from the larger</em> in the fraction column (3/4 − 1/4) — but 1/4 is the one we START with!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Forgetting to reduce the whole</div><div class="s-body" style="color:#712B13;">After you exchange 1 whole, the whole-number part goes <strong>down by 1</strong>: 3 becomes 2.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — No exchange needed: 4 4/5 − 2 1/5</div>
+  ${asWarm('The fraction we start with (4/5) is bigger than the one we take away (1/5), so just partition.')}
+  ${faTake(5,24,11,'24/5 − 11/5 (4 4/5 − 2 1/5)','13 fifths left = 2 3/5')}
+  ${steps([['Subtract the wholes','4 − 2','= 2'],['Subtract the fractions',`${fr(4,5)} − ${fr(1,5)}`,`= ${fr(3,5)}`],['ANSWER',`${mx(2,3,5)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The exchange: 3 1/4 − 1 3/4</div>
+  ${asWarm('1/4 is smaller than 3/4. Break 1 whole into 4 quarters and add it to the 1/4.')}
+  ${steps([['Exchange','3 1/4 = 2 and 4/4 + 1/4',`= 2 and ${fr(5,4)}`],['Subtract the wholes','2 − 1','= 1'],['Subtract the fractions',`${fr(5,4)} − ${fr(3,4)}`,`= ${fr(2,4)}`],['Simplify',`${fr(2,4)}`,`= ${fr(1,2)}`],['ANSWER',`${mx(1,1,2)}`,'']])}
+  ${faTake(4,13,7,'13/4 − 7/4','6/4 left = 1 1/2')}
+  ${steps([['CHECK (add)',`${mx(1,1,2)} + ${mx(1,3,4)}`,`= ${mx(1,2,4)} + ${mx(1,3,4)} = ${mx(3,1,4)} ✓`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Jumping back on a number line: 5 1/3 − 2 2/3</div>
+  ${asWarm('Jump back the <strong>whole number</strong> first, then the fraction.')}
+  ${faLineMixed(6,3,[16,10,8],'5 1/3 → −2 → 3 1/3 → −2/3 → 2 2/3')}
+  ${steps([['Start',`${mx(5,1,3)}`,''],['Jump back 2','3 1/3','subtract the whole number'],['Jump back 2/3',`${mx(3,1,3)} − ${fr(2,3)}`,'cross 3 going back: 3 1/3 → 3 → 2 2/3'],['ANSWER',`${mx(2,2,3)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Method 2: improper fractions: 4 1/6 − 1 5/6</div>
+  ${asWarm('Convert both numbers to improper fractions, subtract, then convert back.')}
+  ${steps([['4 1/6','4 × 6 + 1',`${fr(25,6)}`],['1 5/6','1 × 6 + 5',`${fr(11,6)}`],['Subtract',`${fr(25,6)} − ${fr(11,6)}`,`= ${fr(14,6)}`],['Convert back','14 ÷ 6 = 2 r 2',`${mx(2,2,6)}`],['Simplify','÷ 2',`${mx(2,1,3)}`]])}
+  ${steps([['CHECK (exchange)',`3 and ${fr(7,6)} − 1 and ${fr(5,6)}`,`= 2 and ${fr(2,6)} = ${mx(2,1,3)} ✓`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Related denominators: 3 1/2 − 1 3/4</div>
+  ${asWarm('Change the halves into quarters first. Then see whether you need an exchange.')}
+  ${steps([['Convert 1/2','× 2',`${mx(3,1,2)} = ${mx(3,2,4)}`],['Compare fractions',`${fr(2,4)} &lt; ${fr(3,4)}`,'exchange needed!'],['Exchange',`3 and ${fr(2,4)}`,`= 2 and ${fr(6,4)}`],['Subtract',`2 − 1 = 1 and ${fr(6,4)} − ${fr(3,4)} = ${fr(3,4)}`,'']])}
+  ${steps([['ANSWER',`${mx(1,3,4)}`,'CHECK: 14/4 − 7/4 = 7/4 = 1 3/4 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Subtracting from a whole number: 5 − 1 2/5 and 3 − 3/4</div>
+  ${asWarm('A whole number has no fraction part to take from! Exchange 1 whole into fractions first.')}
+  <div class="card-body"><strong>(a) 5 − ${mx(1,2,5)}</strong></div>
+  ${steps([['Exchange 1 whole','5 = 4 and 5/5',`= 4 ${fr(5,5)}`],['Subtract the wholes','4 − 1','= 3'],['Subtract the fractions',`${fr(5,5)} − ${fr(2,5)}`,`= ${fr(3,5)}`],['ANSWER',`${mx(3,3,5)}`,'']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) 3 − ${fr(3,4)}</strong></div>
+  ${steps([['Exchange','3 = 2 and 4/4',''],['Subtract',`${fr(4,4)} − ${fr(3,4)}`,`= ${fr(1,4)}`],['ANSWER',`${mx(2,1,4)}`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the rice sack</div>
+  ${asWarm(`Chef Bola has <strong>6 1/4 kg</strong> of rice. She uses <strong>2 3/4 kg</strong> for a party. How much rice is left?`)}
+  ${steps([['Exchange','6 1/4 = 5 and 5/4',''],['Subtract the wholes','5 − 2','= 3'],['Subtract the fractions',`${fr(5,4)} − ${fr(3,4)}`,`= ${fr(2,4)} = ${fr(1,2)}`],['ANSWER',`${mx(3,1,2)} kg`,'']])}
+  ${faTake(4,25,11,'25/4 kg − 11/4 kg','14/4 kg left = 3 1/2 kg')}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Estimate:</strong> 6 − 3 = 3 — our answer of 3 ½ is sensible ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and missing number</div>
+  ${asWarm(`Tolu works out ${mx(3,1,4)} − ${mx(1,3,4)} and writes ${mx(2,2,4)} (3 − 1 = 2 and 3/4 − 1/4 = 2/4). Is he right?`)}
+  ${steps([['Tolu','3/4 − 1/4','turned the fractions round ✗'],['Check by adding',`${mx(2,2,4)} + ${mx(1,3,4)}`,`= ${mx(4,1,4)} — that is NOT 3 1/4!`],['CORRECT',`${mx(1,1,2)}`,'(exchange needed)']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Missing number:</strong> 5 ${fr('?',6)} − 2 ${fr(4,6)} = 2 ${fr(5,6)}</div>
+  ${steps([['Undo: add',`${mx(2,5,6)} + ${mx(2,4,6)}`,`= 4 and ${fr(9,6)} = ${mx(5,3,6)}`],['ANSWER','? = 3',`${mx(5,3,6)} − ${mx(2,4,6)} = ${mx(2,5,6)} ✓`]])}
+</div>
+
+${asExCard(17,[
+ exQ(1,'Calculate 4 4/5 − 2 1/5.',['2 3/5','2 5/5','3 3/5'],0),
+ exQ(2,'Calculate 3 1/4 − 1 3/4. Give your answer in its simplest form.',['1 1/2','2 1/2','1 3/4'],0),
+ exQ(3,'Calculate 5 1/3 − 2 2/3.',['2 2/3','3 1/3','2 1/3'],0),
+ exQ(4,'Calculate 4 1/6 − 1 5/6. Give your answer in its simplest form.',['2 1/3','3 4/6','2 4/6'],0),
+ exQ(5,'Calculate 3 1/2 − 1 3/4.',['1 3/4','2 2/4','1 1/4'],0),
+ exQ(6,'Calculate 5 − 1 2/5.',['3 3/5','4 2/5','3 2/5'],0),
+ exQ(7,'Chef Bola has 6 1/4 kg of rice and uses 2 3/4 kg. How much rice is left?',['3 1/2 kg','4 1/2 kg','3 3/4 kg'],0),
+ exQ(8,'Tolu says 3 1/4 − 1 3/4 = 2 2/4. Is he right?',['No — 1/4 is smaller than 3/4, so exchange: the answer is 1 1/2','Yes — he subtracted the wholes and the fractions','No — the answer is 2 1/4'],0),
+ exQ(9,'THINK DEEPER: 5 ?/6 − 2 4/6 = 2 5/6. What is the missing numerator?',['3','1','5'],0,'t'),
+ exQ(10,'BOSS LEVEL: A plank is 8 1/2 m long. Kemi cuts off 2 3/4 m and then another 3 1/4 m. How much of the plank is left?',['2 1/2 m','3 m','2 3/4 m'],0,'b')])}`;
+
+
+/* ---------- STEP 18 : Fraction problem-solving ---------- */
+const P5_FA18 = `
+${asHeader('FA18','Step 18 — Fraction Problem-Solving','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#BA7517;">
+  <div class="card-title" style="color:#633806;">1. Concrete &amp; Pictorial Stage — Using Everything You Know</div>
+  ${asWarm(`You can now write, simplify, compare, order, add and subtract fractions and mixed numbers. In this final step you use <strong>all of it together</strong> to solve real-life problems. The secret is not a new rule — it is a <strong>plan</strong>: read carefully, draw a <strong>bar model</strong>, choose the operation, calculate, and check.`)}
+
+  <div class="card-body"><strong>Bar model:</strong> a bar shows the <strong>whole</strong>; each part is a fraction of it. Here 3/8 walk, 2/8 cycle and the rest take the bus.</div>
+  ${faWall([[3,8],[5,8],[8,8]],'Walk 3/8 → Walk + cycle 5/8 → The whole 8/8','The unknown part is whole − known parts')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">1 · Read</div><div class="s-body" style="color:#0C447C;">Read twice. Underline the numbers and the question. What is the <strong>whole</strong>?</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">2 · Draw</div><div class="s-body" style="color:#3C3489;">Sketch a <strong>bar model</strong> or number line. Mark what you know and put <strong>?</strong> on what you want.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">3 · Choose</div><div class="s-body" style="color:#633806;"><strong>Altogether, total, in all</strong> → add. <strong>Left, remaining, how much more, difference</strong> → subtract.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">4 · Calculate</div><div class="s-body" style="color:#085041;">Same denominators? Convert if needed. Add or subtract numerators. Then simplify or convert to a mixed number.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">5 · Check</div><div class="s-body" style="color:#27500A;"><strong>Estimate</strong> with whole numbers, or use the <strong>inverse</strong> operation. Does the answer make sense?</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert</div><div class="s-body" style="color:#712B13;">Do not just pick the numbers and add them! Always ask: <em>is the total more or less than I started with?</em> And always answer in a <strong>sentence with units</strong>.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Part-whole: the school journey</div>
+  ${asWarm(`In a class, <strong>3/8</strong> of the pupils walk to school and <strong>1/4</strong> cycle. The rest come by bus. What fraction of the class come by bus?`)}
+  ${faTake(8,8,5,'The whole = 8/8. Walk (3/8) and cycle (2/8) use 5/8','3/8 are left for the bus')}
+  ${steps([['Convert 1/4','× 2',`${fr(1,4)} = ${fr(2,8)}`],['Walk + cycle',`${fr(3,8)} + ${fr(2,8)}`,`= ${fr(5,8)}`],['Bus = whole − that',`${fr(8,8)} − ${fr(5,8)}`,`= ${fr(3,8)}`],['ANSWER',`${fr(3,8)} of the class come by bus`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Adding three distances</div>
+  ${asWarm(`Tunde runs <strong>3/4 km</strong> on Monday, <strong>5/8 km</strong> on Tuesday and <strong>1 1/2 km</strong> on Wednesday. How far does he run in total?`)}
+  ${steps([['Common denominator','8','4 and 2 both go into 8'],['Monday',`${fr(3,4)}`,`= ${fr(6,8)}`],['Tuesday',`${fr(5,8)}`,''],['Wednesday',`${mx(1,1,2)}`,`= ${mx(1,4,8)}`]])}
+  ${steps([['Add the fractions',`${fr(6,8)} + ${fr(5,8)} + ${fr(4,8)}`,`= ${fr(15,8)} = ${mx(1,7,8)}`],['Add the whole','1 + 1 and 7/8',`${mx(2,7,8)}`],['ANSWER',`${mx(2,7,8)} km`,'']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — &ldquo;How much more?&rdquo; (finding a difference)</div>
+  ${asWarm(`Ada drinks <strong>3 1/2 litres</strong> of water in a week. Bola drinks <strong>2 7/8 litres</strong>. How much more water does Ada drink?`)}
+  ${faLineMixed(4,8,[23,28],'The gap between 2 7/8 and 3 4/8 is the difference')}
+  ${steps([['Convert 1/2','× 4',`${mx(3,1,2)} = ${mx(3,4,8)}`],['Exchange','3 4/8 = 2 and 12/8','4/8 &lt; 7/8'],['Subtract',`2 − 2 = 0 and ${fr(12,8)} − ${fr(7,8)}`,`= ${fr(5,8)}`],['ANSWER',`${fr(5,8)} litre more`,'CHECK: 2 7/8 + 5/8 = 3 4/8 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Two things taken away</div>
+  ${asWarm(`A rope is <strong>5 m</strong> long. Kemi cuts off <strong>1 1/2 m</strong> and then <strong>2 3/4 m</strong>. How much rope is left?`)}
+  ${faTake(4,20,17,'5 m = 20/4. Cut 1 1/2 (6/4) and 2 3/4 (11/4) = 17/4 altogether','3/4 m left')}
+  ${steps([['Total cut off',`${mx(1,1,2)} + ${mx(2,3,4)}`,`= ${mx(1,2,4)} + ${mx(2,3,4)} = ${mx(4,1,4)}`],['Subtract from 5',`5 − ${mx(4,1,4)}`,`= 4 ${fr(4,4)} − ${mx(4,1,4)} = ${fr(3,4)}`],['ANSWER',`${fr(3,4)} m left`,'ESTIMATE: 5 − 2 − 3 ≈ 0… close to ¾ ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Working backwards</div>
+  ${asWarm(`Funke pours <strong>3/4 litre</strong> of milk out of a jug. <strong>1 1/4 litres</strong> are left. How much milk was in the jug at the start?`)}
+  ${steps([['What happened','start − 3/4 = 1 1/4','pouring is subtraction'],['Do the inverse','1 1/4 + 3/4','add it back'],['Add the fractions',`${fr(1,4)} + ${fr(3,4)}`,`= ${fr(4,4)} = 1`],['ANSWER','1 + 1','= 2 litres at the start']])}
+  <div class="card-body" style="margin-top:6px;">✅ Check: 2 − 3/4 = 1 4/4 − 3/4 = 1 1/4 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Reading a table: the pizza party</div>
+  ${asWarm('Four children share a pizza. The table shows the fraction each ate.')}
+  <div style="overflow-x:auto;margin:8px 0;">
+    <table style="border-collapse:collapse;font-size:13px;margin:0 auto;">
+      <thead><tr style="background:#BA7517;color:white;"><th style="padding:7px 14px;">Child</th><th style="padding:7px 14px;">Ada</th><th style="padding:7px 14px;">Bola</th><th style="padding:7px 14px;">Chidi</th><th style="padding:7px 14px;">Dayo</th></tr></thead>
+      <tbody><tr style="background:#FAEEDA;"><td style="padding:7px 14px;font-weight:700;">Fraction</td><td style="padding:7px 14px;text-align:center;">${fr(1,2)}</td><td style="padding:7px 14px;text-align:center;">${fr(1,8)}</td><td style="padding:7px 14px;text-align:center;">${fr(1,4)}</td><td style="padding:7px 14px;text-align:center;">${fr(1,8)}</td></tr></tbody>
+    </table>
+  </div>
+  ${faWall([[4,8],[1,8],[2,8],[1,8]],'Ada 1/2 = 4/8, Bola 1/8, Chidi 1/4 = 2/8, Dayo 1/8','')}
+  ${steps([['In eighths',`${fr(4,8)} + ${fr(1,8)} + ${fr(2,8)} + ${fr(1,8)}`,''],['Add','4 + 1 + 2 + 1',`= ${fr(8,8)} = 1`],['ANSWER','They ate the whole pizza','nothing is left!']])}
+  <div class="card-body" style="margin-top:6px;">❓ <strong>Which two children together ate the same as Chidi?</strong> Bola + Dayo = ${fr(1,8)} + ${fr(1,8)} = ${fr(2,8)} = ${fr(1,4)} ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Multi-step with mixed numbers and an estimate</div>
+  ${asWarm(`Chef Bola has <strong>6 kg</strong> of flour. She uses <strong>1 3/4 kg</strong> for a cake and <strong>2 1/2 kg</strong> for bread. How much flour is left?`)}
+  ${steps([['ESTIMATE FIRST','6 − 2 − 3','≈ 1 kg'],['Total used',`${mx(1,3,4)} + ${mx(2,1,2)}`,`= ${mx(1,3,4)} + ${mx(2,2,4)}`],['Add','1 + 2 = 3 and 3/4 + 2/4 = 5/4',`= 3 + ${mx(1,1,4)} = ${mx(4,1,4)}`],['Subtract',`6 − ${mx(4,1,4)}`,`= 5 ${fr(4,4)} − ${mx(4,1,4)} = ${mx(1,3,4)}`]])}
+  ${steps([['ANSWER',`${mx(1,3,4)} kg left`,'close to the estimate of 1 kg ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: always, sometimes or never? and a faulty solution</div>
+  ${asWarm(`Ada says: &ldquo;The sum of two proper fractions is <strong>always</strong> less than 1.&rdquo; Test her claim.`)}
+  ${steps([['Try 1/4 + 1/4',`= ${fr(2,4)}`,'less than 1 ✓'],['Try 3/4 + 3/4',`= ${fr(6,4)} = ${mx(1,1,2)}`,'MORE than 1 ✗'],['VERDICT','Sometimes','it depends on the fractions']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Spot the mistake:</strong> Ngozi has ${fr(3,4)} m of ribbon and uses ${fr(1,8)} m. Tolu says ${fr(2,4)} m is left (3 − 1 = 2 and 4 stays).</div>
+  ${steps([['Tolu','forgot the pieces are different sizes ✗','quarters and eighths!'],['Convert',`${fr(3,4)} = ${fr(6,8)}`,''],['Subtract',`${fr(6,8)} − ${fr(1,8)}`,`= ${fr(5,8)} m ✓`]])}
+</div>
+
+${asExCard(18,[
+ exQ(1,'In a class, 3/8 of the pupils walk to school and 1/4 cycle. The rest come by bus. What fraction come by bus?',['3/8','5/8','1/2'],0),
+ exQ(2,'Tunde runs 3/4 km on Monday, 5/8 km on Tuesday and 1 1/2 km on Wednesday. How far does he run in total?',['2 7/8 km','2 1/8 km','3 3/8 km'],0),
+ exQ(3,'Ada drinks 3 1/2 L of water and Bola drinks 2 7/8 L. How much more does Ada drink?',['5/8 L','1 3/8 L','1 L'],0),
+ exQ(4,'A rope is 5 m long. Kemi cuts off 1 1/2 m and then 2 3/4 m. How much rope is left?',['3/4 m','1 1/4 m','4 1/4 m'],0),
+ exQ(5,'Funke pours 3/4 L of milk out of a jug and 1 1/4 L is left. How much milk was in the jug at the start?',['2 L','1/2 L','1 1/2 L'],0),
+ exQ(6,'Four children eat 1/2, 1/8, 1/4 and 1/8 of a pizza. How much pizza did they eat altogether?',['1 whole pizza','7/8 of a pizza','1/2 of a pizza'],0),
+ exQ(7,'Which question tells you to SUBTRACT?',['How much is left?','How much altogether?','What is the total?'],0),
+ exQ(8,'Ngozi has 3/4 m of ribbon and uses 1/8 m. Tolu says 2/4 m is left. Is he right?',['No — 3/4 = 6/8, so 5/8 m is left','Yes — 3 − 1 = 2 and the 4 stays','No — 4/8 m is left'],0),
+ exQ(9,'THINK DEEPER: Is the sum of two proper fractions always less than 1?',['No — for example 3/4 + 3/4 = 1 1/2','Yes — proper fractions are always less than 1','Only when the denominators are 2'],0,'t'),
+ exQ(10,'BOSS LEVEL: Chef Bola has 6 kg of flour. She uses 1 3/4 kg for a cake and 2 1/2 kg for bread. How much flour is left?',['1 3/4 kg','2 1/4 kg','4 1/4 kg'],0,'b')])}`;
+
+
+
+
+
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B
+   (topic id 'multdivB')
+   LESSONS 1 AND 2  +  PLACEHOLDERS 3–10  +  SCHEME BLOCK
+   8 worked examples + 10 exercises per lesson.
+ 
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers), B (lessons) and C (placeholders)
+      ABOVE `const SCHEME_P5` in index.html.
+   2. In SCHEME_P5 → Spring Term, replace the old one-line
+        { id:'multdivB', label:'Multiplication & Division B', ... },
+      with SECTION D.
+ 
+   NEEDS (already installed in your app):
+     asHeader, asWarm, asExCard, steps(), exQ().
+   All new helpers below are prefixed "md" so they cannot clash
+   with anything that already exists.
+ 
+   NOTE: Steps 1–2 use WHOLE NUMBERS. Decimal versions
+   (e.g. 467.1 ÷ 1,000) are taught later in
+   Decimals & Percentages → "Multiply / Divide decimals by
+   10, 100 and 1,000". Lesson 2, Example 8 previews the link.
+   ============================================================ */
+ 
+ 
+/* ================= SECTION A — HELPERS ================= */
+ 
+/* A simple "machine" picture: number in → operation → number out.
+   mdMachine('× 100','47','4,700','every digit moves 2 places left') */
+function mdMachine(op,vIn,vOut,sub){
+  return `<svg viewBox="0 0 560 130" class="shape-svg" style="max-width:100%;height:auto;">
+    <rect x="10" y="35" width="130" height="60" rx="12" fill="#DBEAFE" stroke="#1D4ED8" stroke-width="2"/>
+    <text x="75" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#1E40AF">NUMBER IN</text>
+    <text x="75" y="82" text-anchor="middle" font-size="20" font-weight="800" fill="#1E40AF">${vIn}</text>
+    <line x1="142" y1="65" x2="188" y2="65" stroke="#6D28D9" stroke-width="3"/>
+    <polygon points="188,65 178,59 178,71" fill="#6D28D9"/>
+    <rect x="190" y="20" width="180" height="90" rx="16" fill="#EDE9FE" stroke="#6D28D9" stroke-width="2.5"/>
+    <text x="280" y="52" text-anchor="middle" font-size="12" font-weight="700" fill="#5B21B6">THE MACHINE</text>
+    <text x="280" y="78" text-anchor="middle" font-size="24" font-weight="800" fill="#5B21B6">${op}</text>
+    <text x="280" y="98" text-anchor="middle" font-size="10" font-weight="600" fill="#5B21B6">${sub||''}</text>
+    <line x1="372" y1="65" x2="418" y2="65" stroke="#6D28D9" stroke-width="3"/>
+    <polygon points="418,65 408,59 408,71" fill="#6D28D9"/>
+    <rect x="420" y="35" width="130" height="60" rx="12" fill="#FEF3C7" stroke="#B45309" stroke-width="2"/>
+    <text x="485" y="58" text-anchor="middle" font-size="11" font-weight="700" fill="#92400E">NUMBER OUT</text>
+    <text x="485" y="82" text-anchor="middle" font-size="20" font-weight="800" fill="#92400E">${vOut}</text>
+  </svg>`;
+}
+ 
+/* Place value chart showing every digit SLIDING when we × or ÷ by 10^k.
+   num = whole number (≤ 7 digits after the operation, answer must be whole)
+   k   = 1 (10), 2 (100) or 3 (1,000)
+   dir = +1 for multiply (digits slide LEFT), −1 for divide (RIGHT)
+   mdSlide(47,2,1,'47 × 100') */
+function mdSlide(num,k,dir,title){
+  const names=['MILLIONS','100 THOU','10 THOU','THOUSANDS','HUNDREDS','TENS','ONES'];
+  const dark =['#0F766E','#B45309','#BE185D','#6D28D9','#1D4ED8','#15803D','#C2410C'];
+  const light=['#CCFBF1','#FEF3C7','#FCE7F3','#EDE9FE','#DBEAFE','#DCFCE7','#FFEDD5'];
+  const out = dir>0 ? num*Math.pow(10,k) : num/Math.pow(10,k);
+  const a=String(num).padStart(7,' ').split('');
+  const b=String(out).padStart(7,' ').split('');
+  const W=560,x0=35,cw=70,yT=44,h=44,yB=150;
+  const cx=i=>x0+i*cw+cw/2;
+  let s=`<svg viewBox="0 0 ${W} 222" class="shape-svg" style="max-width:100%;height:auto;">`;
+  s+=`<defs><marker id="mdArr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><polygon points="0,0 8,4 0,8" fill="#444"/></marker></defs>`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="13" font-weight="800" fill="#333">${title}</text>`;
+  for(let i=0;i<7;i++) s+=`<text x="${cx(i)}" y="36" text-anchor="middle" font-size="8" font-weight="700" fill="${dark[i]}">${names[i]}</text>`;
+  // top row (before)
+  for(let i=0;i<7;i++){
+    s+=`<rect x="${x0+i*cw+2}" y="${yT}" width="${cw-4}" height="${h}" rx="6" fill="${a[i]===' '?'#F8F8F8':light[i]}" stroke="${a[i]===' '?'#ddd':dark[i]}" stroke-width="1.6"/>`;
+    if(a[i]!==' ') s+=`<text x="${cx(i)}" y="${yT+30}" text-anchor="middle" font-size="24" font-weight="800" fill="${dark[i]}">${a[i]}</text>`;
+  }
+  // arrows
+  for(let i=0;i<7;i++){
+    if(a[i]===' ') continue;
+    const j=i-dir*k;
+    if(j<0||j>6) continue;
+    s+=`<line x1="${cx(i)}" y1="${yT+h+3}" x2="${cx(j)}" y2="${yB-4}" stroke="#666" stroke-width="1.8" marker-end="url(#mdArr)"/>`;
+  }
+  // operation label
+  const opTxt=`${dir>0?'×':'÷'} ${Math.pow(10,k).toLocaleString('en-GB')}  →  every digit moves ${k} place${k>1?'s':''} ${dir>0?'LEFT':'RIGHT'}`;
+  s+=`<rect x="${W/2-185}" y="88" width="370" height="26" rx="13" fill="#fff" stroke="#6D28D9" stroke-width="1.5"/>`;
+  s+=`<text x="${W/2}" y="106" text-anchor="middle" font-size="12.5" font-weight="800" fill="#5B21B6">${opTxt}</text>`;
+  // bottom row (after)
+  for(let i=0;i<7;i++){
+    const placeholder = dir>0 && i>=7-k && b[i]!==' ';
+    const empty = b[i]===' ';
+    s+=`<rect x="${x0+i*cw+2}" y="${yB}" width="${cw-4}" height="${h}" rx="6" fill="${empty?'#F8F8F8':placeholder?'#FDE68A':light[i]}" stroke="${empty?'#ddd':placeholder?'#B45309':dark[i]}" stroke-width="${placeholder?2.2:1.6}" ${placeholder?'stroke-dasharray="5 3"':''}/>`;
+    if(!empty) s+=`<text x="${cx(i)}" y="${yB+30}" text-anchor="middle" font-size="24" font-weight="800" fill="${placeholder?'#92400E':dark[i]}">${b[i]}</text>`;
+  }
+  const note = dir>0
+    ? `The ${k} amber zero${k>1?'s':''} are PLACEHOLDERS — they keep every digit in its new column`
+    : `The last ${k} zero${k>1?'s':''} fall off the ones column — nothing is lost, every digit just moves right`;
+  s+=`<text x="${W/2}" y="${yB+h+18}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#92400E">${note}</text>`;
+  return s+'</svg>';
+}
+ 
+ 
+/* ================= SECTION B — LESSONS ================= */
+ 
+/* ---------- STEP 1 : Multiply by 10, 100 and 1,000 ---------- */
+const P5_MDB1 = `
+${asHeader('MB1','Step 1 — Multiply by 10, 100 and 1,000','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Every Digit Moves Left</div>
+  ${asWarm(`Imagine you have <strong>3 ten-pound notes</strong>: that is 30. If every note is replaced by a <strong>hundred-pound note</strong>, you now have 3 hundreds: 300! The digit 3 did not change — it just moved to a column that is <strong>10 times bigger</strong>. That is what <strong>multiplying by 10</strong> does to every digit.`)}
+ 
+  <div class="card-body"><strong>Concrete:</strong> use place value counters on a chart. Put 4 counters in the Tens column (40). Exchange <em>every counter</em> for one in the next column to the left — 4 counters are now in the Hundreds column (400). So 40 × 10 = 400.</div>
+  ${mdMachine('× 10','47','470','every digit moves 1 place left')}
+  ${mdSlide(47,1,1,'47 × 10 = 470')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">× 10</div><div class="s-body" style="color:#0C447C;">Each digit moves <strong>1 place left</strong>. It becomes 10 times bigger.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">× 100</div><div class="s-body" style="color:#27500A;">Each digit moves <strong>2 places left</strong> (× 10 and × 10 again). 100 times bigger.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">× 1,000</div><div class="s-body" style="color:#3C3489;">Each digit moves <strong>3 places left</strong>. 1,000 times bigger.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔑 Placeholder zeros</div><div class="s-body" style="color:#633806;">The empty columns on the right are filled with <strong>0</strong> so the digits stay in the correct columns. Hero zeros!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Just add a zero&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;Add a zero&rdquo; gives the right answer for whole numbers, but it hides what is really happening — the <strong>digits move</strong>. In Year 6 and with decimals the shortcut breaks. Think: <em>digits slide, zeros hold places</em>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Wrong number of places</div><div class="s-body" style="color:#712B13;">× 1,000 needs <strong>3</strong> zeros / 3 places, not 2. Count the zeros in 10, 100, 1,000: 1, 2, 3.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Multiply by 10: 38 × 10</div>
+  ${asWarm('Place 38 on the chart. Slide each digit one place to the left.')}
+  ${mdSlide(38,1,1,'38 × 10 = 380')}
+  ${steps([['Tens digit 3','moves to Hundreds','3 tens → 3 hundreds'],['Ones digit 8','moves to Tens','8 ones → 8 tens'],['Ones column','needs a 0','placeholder'],['ANSWER','38 × 10 = 380','']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Multiply by 100: 47 × 100</div>
+  ${asWarm('× 100 is × 10 and then × 10 again. Two slides — or one slide of two places.')}
+  ${mdSlide(47,2,1,'47 × 100 = 4,700')}
+  ${steps([['× 10','47 → 470','one place left'],['× 10 again','470 → 4,700','one more place left'],['ANSWER','47 × 100 = 4,700','digits moved 2 places; two zeros hold the places']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Multiply by 1,000: 52 × 1,000 and 6 × 1,000</div>
+  ${asWarm('Three places! Count them carefully.')}
+  ${mdSlide(52,3,1,'52 × 1,000 = 52,000')}
+  ${steps([['5 tens','→ 5 ten-thousands','50 × 1,000 = 50,000'],['2 ones','→ 2 thousands','2 × 1,000 = 2,000'],['ANSWER','52,000','three zeros hold the places']])}
+  <div class="card-body" style="margin-top:8px;"><strong>And 6 × 1,000:</strong> the 6 moves from Ones to Thousands.</div>
+  ${mdSlide(6,3,1,'6 × 1,000 = 6,000')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Numbers that already contain zeros: 405 × 100</div>
+  ${asWarm('The zero in the middle is a digit too — it moves like all the others!')}
+  ${mdSlide(405,2,1,'405 × 100 = 40,500')}
+  ${steps([['4 hundreds','→ 4 ten-thousands','400 × 100 = 40,000'],['0 tens','→ 0 thousands','the zero moves too'],['5 ones','→ 5 hundreds','5 × 100 = 500'],['ANSWER','40,500','the two NEW zeros hold the Tens and Ones']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Also:</strong> 370 × 10 = 3,700 (the old 0 slides to Tens and a new 0 holds Ones) and 2,060 × 10 = 20,600.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Bigger numbers: 3,425 × 100 and 6,138 × 1,000</div>
+  ${asWarm('The method never changes, however large the number.')}
+  ${mdSlide(3425,2,1,'3,425 × 100 = 342,500')}
+  ${steps([['Slide each digit','2 places left','3 → Hundred-thousands … 5 → Hundreds'],['Fill with zeros','2 placeholder zeros','Tens and Ones'],['ANSWER','342,500','three hundred and forty-two thousand, five hundred']])}
+  ${mdSlide(6138,3,1,'6,138 × 1,000 = 6,138,000')}
+  <div class="card-body" style="margin-top:6px;">🌍 6,138,000 is <strong>six million, one hundred and thirty-eight thousand</strong> — a new column (Millions) appears!</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Missing numbers: which multiplier, which number?</div>
+  ${asWarm('Work out how many places the digits have moved — that tells you the multiplier.')}
+  <div class="card-body"><strong>(a) ? × 100 = 8,300</strong></div>
+  ${steps([['8,300 has digits','8 and 3','moved 2 places left'],['Slide back 2 places','8,300 → 83','83'],['ANSWER','83 × 100 = 8,300','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) 45 × ? = 45,000</strong></div>
+  ${steps([['45 → 45,000','3 places left','three zeros added'],['ANSWER','? = 1,000','45 × 1,000 = 45,000']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(c) ? × 10 = 7,000</strong></div>
+  ${steps([['Slide back 1 place','7,000 → 700',''],['ANSWER','? = 700','700 × 10 = 7,000']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life</div>
+  ${asWarm('Multiplying by 10, 100 and 1,000 is the secret of <strong>metric units</strong> and of ordering in bulk!')}
+  <div class="card-body"><strong>(a) A box holds 100 pencils. A school orders 235 boxes. How many pencils?</strong></div>
+  ${steps([['Calculation','235 × 100',''],['Slide 2 places','235 → 23,500',''],['ANSWER','23,500 pencils','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) Measures:</strong> 1 km = 1,000 m and 1 kg = 1,000 g. So 14 km = 14 × 1,000 = <strong>14,000 m</strong> and 8 kg = 8 × 1,000 = <strong>8,000 g</strong>.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning and spot the mistake</div>
+  ${asWarm('Tolu says <strong>7 × 1,000 = 700</strong> because &ldquo;you add two zeros&rdquo;. Is he right?')}
+  ${mdSlide(7,3,1,'7 × 1,000 = 7,000')}
+  ${steps([['Tolu','added 2 zeros ✗','1,000 has THREE zeros'],['Correct','digit moves 3 places','Ones → Thousands'],['ANSWER','7 × 1,000 = 7,000','']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Which is greater: 45 × 100 or 450 × 10?</strong></div>
+  ${steps([['45 × 100','= 4,500','2 places'],['450 × 10','= 4,500','1 place'],['VERDICT','They are EQUAL','45 × 100 = 450 × 10 — shifting the same total distance']])}
+</div>
+ 
+${asExCard(1,[
+ exQ(1,'What is 36 × 10?',['360','306','3,600'],0),
+ exQ(2,'What is 52 × 100?',['5,200','520','52,000'],0),
+ exQ(3,'What is 9 × 1,000?',['9,000','900','90,000'],0),
+ exQ(4,'What is 370 × 10?',['3,700','370','37,000'],0),
+ exQ(5,'What is 405 × 100?',['40,500','4,050','45,000'],0),
+ exQ(6,'What is 3,425 × 100?',['342,500','34,250','3,425,000'],0),
+ exQ(7,'? × 100 = 8,300. What number goes in the box?',['83','830','8'],0),
+ exQ(8,'Tolu says 7 × 1,000 = 700. Is he right?',['No — × 1,000 moves the digit 3 places: 7,000','Yes — you add two zeros','No — it is 70,000'],0),
+ exQ(9,'THINK DEEPER: Which is greater, 45 × 100 or 450 × 10?',['They are equal','45 × 100','450 × 10'],0,'t'),
+ exQ(10,'BOSS LEVEL: A box holds 100 pencils. A school orders 235 boxes and then 1,000 more pencils. How many pencils is that altogether?',['24,500','23,600','235,100'],0,'b')])}`;
+ 
+ 
+/* ---------- STEP 2 : Divide by 10, 100 and 1,000 ---------- */
+const P5_MDB2 = `
+${asHeader('MB2','Step 2 — Divide by 10, 100 and 1,000','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Every Digit Moves Right</div>
+  ${asWarm(`Division is the <strong>inverse</strong> (the undo button) of multiplication. In Step 1, × 10 slid every digit <em>one place left</em> and made it 10 times bigger. Now <strong>÷ 10</strong> slides every digit <em>one place right</em> and makes it 10 times <strong>smaller</strong>. 4,700 ÷ 100 undoes 47 × 100.`)}
+ 
+  <div class="card-body"><strong>Concrete:</strong> put 4 counters in the Hundreds column (400). Exchange each for a counter in the next column to the <em>right</em> (Tens) — now 4 counters in Tens: 40. So 400 ÷ 10 = 40.</div>
+  ${mdMachine('÷ 100','4,700','47','every digit moves 2 places right')}
+  ${mdSlide(4700,2,-1,'4,700 ÷ 100 = 47')}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">÷ 10</div><div class="s-body" style="color:#0C447C;">Each digit moves <strong>1 place right</strong>. 10 times smaller.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">÷ 100</div><div class="s-body" style="color:#27500A;">Each digit moves <strong>2 places right</strong>. 100 times smaller.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">÷ 1,000</div><div class="s-body" style="color:#3C3489;">Each digit moves <strong>3 places right</strong>. 1,000 times smaller.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">🔗 Inverse pairs</div><div class="s-body" style="color:#633806;">56 × 100 = 5,600 ⟷ 5,600 ÷ 100 = 56. Use one to <strong>check</strong> the other!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;Cross off zeros&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;Take off a zero&rdquo; only works when the number <em>has</em> zeros at the end. The real rule: <strong>digits move right</strong>. (What about 345 ÷ 10? See Example 8.)</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Wrong number of places</div><div class="s-body" style="color:#712B13;">6,000 ÷ 100 is <strong>60</strong>, not 600. ÷ 100 moves digits 2 places — count the zeros in the divisor.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Divide by 10: 380 ÷ 10</div>
+  ${asWarm('Place 380 on the chart. Slide each digit one place to the right.')}
+  ${mdSlide(380,1,-1,'380 ÷ 10 = 38')}
+  ${steps([['Hundreds digit 3','moves to Tens','3 hundreds → 3 tens'],['Tens digit 8','moves to Ones','8 tens → 8 ones'],['Ones digit 0','falls off the end','nothing lost'],['ANSWER','380 ÷ 10 = 38','check: 38 × 10 = 380 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Divide by 100: 4,700 ÷ 100</div>
+  ${asWarm('÷ 100 is ÷ 10 and then ÷ 10 again.')}
+  ${mdSlide(4700,2,-1,'4,700 ÷ 100 = 47')}
+  ${steps([['÷ 10','4,700 → 470','one place right'],['÷ 10 again','470 → 47','one more place right'],['ANSWER','4,700 ÷ 100 = 47','check: 47 × 100 = 4,700 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Divide by 1,000: 52,000 ÷ 1,000 and 6,000 ÷ 1,000</div>
+  ${asWarm('Three places to the right!')}
+  ${mdSlide(52000,3,-1,'52,000 ÷ 1,000 = 52')}
+  ${steps([['5 ten-thousands','→ 5 tens','50,000 ÷ 1,000 = 50'],['2 thousands','→ 2 ones','2,000 ÷ 1,000 = 2'],['ANSWER','52','check: 52 × 1,000 = 52,000 ✓']])}
+  ${mdSlide(6000,3,-1,'6,000 ÷ 1,000 = 6')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Numbers with zeros in the middle: 40,500 ÷ 100</div>
+  ${asWarm('Be careful! Not every zero falls off — only the ones that move past the Ones column.')}
+  ${mdSlide(40500,2,-1,'40,500 ÷ 100 = 405')}
+  ${steps([['4 ten-thousands','→ 4 hundreds','40,000 ÷ 100 = 400'],['0 thousands','→ 0 tens','the middle zero stays as a placeholder'],['5 hundreds','→ 5 ones','500 ÷ 100 = 5'],['ANSWER','405','NOT 45! The middle 0 is needed']])}
+  <div class="card-body" style="margin-top:6px;">💡 Compare: 20,600 ÷ 10 = <strong>2,060</strong> — only the very last 0 falls off.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Bigger numbers: 342,500 ÷ 100 and 6,138,000 ÷ 1,000</div>
+  ${asWarm('The same method works for the biggest numbers in our place value chart.')}
+  ${mdSlide(342500,2,-1,'342,500 ÷ 100 = 3,425')}
+  ${steps([['Slide each digit','2 places right','3 → Thousands … 5 → Ones'],['Last 2 zeros','fall off',''],['ANSWER','3,425','check: 3,425 × 100 = 342,500 ✓']])}
+  ${mdSlide(6138000,3,-1,'6,138,000 ÷ 1,000 = 6,138')}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Inverse operations and missing numbers</div>
+  ${asWarm('Multiplication and division by powers of 10 come in <strong>fact families</strong> — like 3, 4 and 12.')}
+  ${steps([['56 × 100','= 5,600',''],['5,600 ÷ 100','= 56','undo the × 100'],['5,600 ÷ 56','= 100','the other division']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(a) 7,200 ÷ ? = 72</strong></div>
+  ${steps([['7,200 → 72','2 places right','two zeros gone'],['ANSWER','? = 100','7,200 ÷ 100 = 72']])}
+  <div class="card-body" style="margin-top:8px;"><strong>(b) ? ÷ 1,000 = 9</strong></div>
+  ${steps([['Undo: multiply','9 × 1,000','= 9,000'],['ANSWER','? = 9,000','9,000 ÷ 1,000 = 9']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life</div>
+  ${asWarm('Dividing by 10, 100 and 1,000 is how we convert <strong>smaller units to bigger units</strong> and share things into equal groups.')}
+  <div class="card-body"><strong>(a) A cyclist rides 4,000 m. How many kilometres?</strong> 4,000 ÷ 1,000 = <strong>4 km</strong>.</div>
+  <div class="card-body" style="margin-top:6px;"><strong>(b) A bag of rice weighs 25,000 g. How many kilograms?</strong> 25,000 ÷ 1,000 = <strong>25 kg</strong>.</div>
+  <div class="card-body" style="margin-top:6px;"><strong>(c) 3,600 sweets are packed equally into bags of 100. How many bags?</strong></div>
+  ${steps([['Calculation','3,600 ÷ 100',''],['Slide 2 places right','3,600 → 36',''],['ANSWER','36 bags','check: 36 × 100 = 3,600 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake, and a peek ahead</div>
+  ${asWarm('Ada says <strong>6,000 ÷ 100 = 600</strong>. Is she right?')}
+  ${mdSlide(6000,2,-1,'6,000 ÷ 100 = 60')}
+  ${steps([['Ada','took off ONE zero ✗','÷ 100 needs TWO places'],['Correct','digit moves 2 places right','6 thousands → 6 tens'],['ANSWER','60','check: 60 × 100 = 6,000 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>What about 345 ÷ 10?</strong> There is no zero to cross off. The digits still move one place right — so the 5 lands in a column <em>after the ones column</em>: the <strong>tenths</strong>.</div>
+  ${steps([['3 hundreds','→ 3 tens',''],['4 tens','→ 4 ones',''],['5 ones','→ 5 tenths','needs a decimal point'],['ANSWER','345 ÷ 10 = 34.5','you will master this in Decimals &amp; Percentages!']])}
+</div>
+ 
+${asExCard(2,[
+ exQ(1,'What is 380 ÷ 10?',['38','3,800','308'],0),
+ exQ(2,'What is 4,700 ÷ 100?',['47','470','4,700'],0),
+ exQ(3,'What is 52,000 ÷ 1,000?',['52','520','5,200'],0),
+ exQ(4,'What is 40,500 ÷ 100?',['405','4,050','45'],0),
+ exQ(5,'What is 342,500 ÷ 100?',['3,425','34,250','342'],0),
+ exQ(6,'? ÷ 1,000 = 9. What number goes in the box?',['9,000','900','90,000'],0),
+ exQ(7,'7,200 ÷ ? = 72. What number goes in the box?',['100','10','1,000'],0),
+ exQ(8,'Ada says 6,000 ÷ 100 = 600. Is she right?',['No — ÷ 100 moves digits 2 places: 60','Yes — you take off one zero','No — it is 6'],0),
+ exQ(9,'THINK DEEPER: 5,600 ÷ 100 = 56. Which other calculation must also be true?',['56 × 100 = 5,600','56 ÷ 100 = 5,600','5,600 × 100 = 56'],0,'t'),
+ exQ(10,'BOSS LEVEL: A shop has 36,000 sweets. They are packed equally into bags of 100, and then the bags are packed into boxes of 10. How many boxes are there?',['36 boxes','360 boxes','3,600 boxes'],0,'b')])}`;
+ 
+ 
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B — LESSONS 3 AND 4
+   Step 3: Multiply a 4-digit number by a 1-digit number
+   Step 4: Multiply a 4-digit number by a 2-digit number
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–2 file (re-uses mdSlide, steps, exQ, asHeader,
+      asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_MDB3 = null;
+        const P5_MDB4 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPERS ================= */
+
+/* Column multiplication (4-digit × 1-digit etc.) with carries shown in amber.
+   mdCol1(4758,6,'4,758 × 6') */
+function mdCol1(num,d,title){
+  const digs=String(num).split('').map(Number), n=digs.length;
+  let carry=0; const res=[], carries=[];
+  for(let i=n-1;i>=0;i--){
+    const p=digs[i]*d+carry;
+    res[i]=p%10; carries[i]=carry; carry=Math.floor(p/10);
+  }
+  const lead=carry>0?String(carry):'';
+  const cols=n+(lead?1:0);
+  const colX=j=>110+j*58;                 // j = 0..cols-1
+  const off=lead?1:0;                     // number starts one column right if there is a leading result digit
+  const names=['Ones','Tens','Hundreds','Thousands','10 Thou'];
+  const dark=['#C2410C','#15803D','#1D4ED8','#6D28D9','#BE185D'];
+  const W=130+cols*58+20;
+  let s=`<svg viewBox="0 0 ${W} 205" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  // column headers
+  for(let i=0;i<n;i++){
+    const pos=n-1-i; // 0 = ones
+    s+=`<text x="${colX(i+off)}" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="${dark[pos%5]}">${(names[pos]||'').toUpperCase()}</text>`;
+  }
+  if(lead) s+=`<text x="${colX(0)}" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="${dark[n%5]}">${(names[n]||'').toUpperCase()}</text>`;
+  // carries
+  for(let i=0;i<n;i++){
+    if(carries[i]>0) s+=`<text x="${colX(i+off)}" y="62" text-anchor="middle" font-size="16" font-weight="800" fill="#B45309">${carries[i]}</text>`;
+  }
+  // number
+  for(let i=0;i<n;i++) s+=`<text x="${colX(i+off)}" y="96" text-anchor="middle" font-size="26" font-weight="800" fill="#1E40AF">${digs[i]}</text>`;
+  // multiplier
+  s+=`<text x="${colX(n-1+off)-0}" y="132" text-anchor="middle" font-size="26" font-weight="800" fill="#5B21B6">${d}</text>`;
+  s+=`<text x="50" y="132" text-anchor="middle" font-size="26" font-weight="800" fill="#555">×</text>`;
+  // line
+  s+=`<line x1="30" y1="144" x2="${W-14}" y2="144" stroke="#333" stroke-width="2.5"/>`;
+  // result
+  const full=(lead+res.join('')).split('');
+  full.forEach((ch,j)=>{
+    s+=`<text x="${colX(j)}" y="180" text-anchor="middle" font-size="26" font-weight="800" fill="#15803D">${ch}</text>`;
+  });
+  s+=`<text x="${W/2}" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="#92400E">amber digits = carried (exchanged) numbers</text>`;
+  return s+'</svg>';
+}
+
+/* Area (grid) model. Partitions a into its place-value parts and b into its parts.
+   mdArea(2453,24,'2,453 × 24') → 2×2 style grid with every partial product. */
+function mdArea(a,b,title){
+  const part=n=>{
+    const s=String(n), out=[];
+    for(let i=0;i<s.length;i++){ const v=Number(s[i])*Math.pow(10,s.length-1-i); if(v>0) out.push(v); }
+    return out;
+  };
+  const fmt=v=>v.toLocaleString('en-GB');
+  const A=part(a), B=part(b);
+  const x0=78,cw=108,yH=36,hH=32,rh=52;
+  const W=x0+A.length*cw+16, H=yH+hH+B.length*rh+44;
+  const fills=['#DBEAFE','#DCFCE7','#FEF3C7','#FCE7F3'];
+  const darks=['#1E40AF','#166534','#92400E','#9D174D'];
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  s+=`<text x="${x0-8}" y="${yH+21}" text-anchor="end" font-size="16" font-weight="800" fill="#555">×</text>`;
+  A.forEach((v,i)=>{
+    s+=`<rect x="${x0+i*cw+2}" y="${yH}" width="${cw-4}" height="${hH}" rx="6" fill="${fills[i%4]}" stroke="${darks[i%4]}" stroke-width="1.5"/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="${yH+21}" text-anchor="middle" font-size="15" font-weight="800" fill="${darks[i%4]}">${fmt(v)}</text>`;
+  });
+  let total=0; const prods=[];
+  B.forEach((bv,r)=>{
+    const y=yH+hH+r*rh+4;
+    s+=`<rect x="6" y="${y}" width="${x0-16}" height="${rh-8}" rx="6" fill="#EDE9FE" stroke="#6D28D9" stroke-width="1.5"/>`;
+    s+=`<text x="${(x0-10)/2+6}" y="${y+(rh-8)/2+5}" text-anchor="middle" font-size="15" font-weight="800" fill="#5B21B6">${fmt(bv)}</text>`;
+    A.forEach((av,i)=>{
+      const p=av*bv; total+=p; prods.push(p);
+      s+=`<rect x="${x0+i*cw+2}" y="${y}" width="${cw-4}" height="${rh-8}" rx="6" fill="#fff" stroke="${darks[i%4]}" stroke-width="1.5"/>`;
+      s+=`<text x="${x0+i*cw+cw/2}" y="${y+16}" text-anchor="middle" font-size="9" fill="#777">${fmt(av)} × ${fmt(bv)}</text>`;
+      s+=`<text x="${x0+i*cw+cw/2}" y="${y+33}" text-anchor="middle" font-size="15" font-weight="800" fill="${darks[i%4]}">${fmt(p)}</text>`;
+    });
+  });
+  s+=`<text x="${W/2}" y="${H-12}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#B45309">${prods.map(fmt).join(' + ')} = ${fmt(total)}</text>`;
+  return s+'</svg>';
+}
+
+/* Stacked partial products (bridge to long multiplication).
+   mdStack([['3,142 × 5','15,710'],['3,142 × 10','31,420']],'47,130','title') */
+function mdStack(rows,total,title){
+  let h=`<div style="max-width:380px;margin:8px auto;background:#F8FAFF;border:1.5px solid #378ADD;border-radius:10px;padding:10px 14px;font-family:'Courier New',monospace;">`;
+  if(title) h+=`<div style="text-align:center;font-size:12px;font-weight:800;color:#0C447C;margin-bottom:6px;font-family:inherit;">${title}</div>`;
+  rows.forEach((r,i)=>{
+    h+=`<div style="display:flex;justify-content:space-between;font-size:14px;color:#1E40AF;padding:2px 0;"><span style="color:#666;font-size:12px;">${i>0?'+ ':''}${r[0]}</span><strong>${r[1]}</strong></div>`;
+  });
+  h+=`<div style="border-top:2px solid #333;margin-top:4px;padding-top:4px;display:flex;justify-content:space-between;font-size:16px;color:#15803D;"><span style="font-size:12px;color:#666;">TOTAL</span><strong>${total}</strong></div></div>`;
+  return h;
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 3 : Multiply a 4-digit number by a 1-digit number ---------- */
+const P5_MDB3 = `
+${asHeader('MB3','Step 3 — Multiply a 4-Digit Number by a 1-Digit Number','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Partition, Multiply, Add</div>
+  ${asWarm(`There are <strong>3 shelves</strong> in a library and each shelf holds <strong>1,324 books</strong>. How many books altogether? That is 1,324 × 3. A smart way is to <strong>partition</strong> 1,324 into thousands, hundreds, tens and ones, multiply <em>each part</em> by 3, and then add the answers.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> use place value counters. Make 1,324 three times: 3 groups of 1 thousand, 3 groups of 3 hundreds, 3 groups of 2 tens and 3 groups of 4 ones. Count each column.</div>
+  ${mdArea(1324,3,'1,324 × 3 — area model')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">📋 Method 1 — Partition (area model)</div><div class="s-body" style="color:#0C447C;">Split the 4-digit number into <strong>Th + H + T + O</strong>. Multiply each part. <strong>Add</strong> the products.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">📋 Method 2 — Column method</div><div class="s-body" style="color:#27500A;">Multiply <strong>ones first</strong>, then tens, hundreds, thousands. If a column makes 10 or more, <strong>exchange</strong>: write the ones digit, carry the tens digit.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Link to Step 1</div><div class="s-body" style="color:#3C3489;">2,000 × 4 is just 2 × 4 = 8, then × 1,000. Use your × 10, 100, 1,000 skills to multiply the parts!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Forgetting the carry</div><div class="s-body" style="color:#712B13;">The carried number must be <strong>added to the next column&#39;s product</strong> — after you multiply, not before!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Skipping zeros</div><div class="s-body" style="color:#712B13;">A zero in the number (like 3,060) is a digit too. 0 × 7 = 0 — but a carry may still land there.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Partitioning, no exchange: 1,324 × 3</div>
+  ${asWarm('Multiply each part of 1,324 by 3, then add.')}
+  ${mdArea(1324,3,'1,324 × 3')}
+  ${steps([['1,000 × 3','= 3,000',''],['300 × 3','= 900',''],['20 × 3','= 60',''],['4 × 3','= 12',''],['ADD','3,000 + 900 + 60 + 12',`= 3,972`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Partitioning, bigger products: 2,415 × 4</div>
+  ${asWarm('Some of the partial products are bigger now — watch how they add.')}
+  ${mdArea(2415,4,'2,415 × 4')}
+  ${steps([['2,000 × 4','= 8,000',''],['400 × 4','= 1,600',''],['10 × 4','= 40',''],['5 × 4','= 20',''],['ADD','8,000 + 1,600 + 40 + 20','= 9,660']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Column method: 3,425 × 3</div>
+  ${asWarm('Start with the ones. When a column product reaches 10 or more, exchange: write the ones digit and carry the tens digit.')}
+  ${mdCol1(3425,3,'3,425 × 3')}
+  ${steps([['Ones: 5 × 3','= 15','write 5, carry 1'],['Tens: 2 × 3 + 1','= 6 + 1 = 7','write 7'],['Hundreds: 4 × 3','= 12','write 2, carry 1'],['Thousands: 3 × 3 + 1','= 9 + 1 = 10','write 10'],['ANSWER','10,275','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Exchange in every column: 4,758 × 6</div>
+  ${asWarm('Every column needs an exchange this time! Take your time and carry carefully.')}
+  ${mdCol1(4758,6,'4,758 × 6')}
+  ${steps([['8 × 6','= 48','write 8, carry 4'],['5 × 6 + 4','= 34','write 4, carry 3'],['7 × 6 + 3','= 45','write 5, carry 4'],['4 × 6 + 4','= 28','write 28'],['ANSWER','28,548','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — A zero in the number: 3,060 × 7</div>
+  ${asWarm('Zeros are digits too — and a carry can land on them!')}
+  ${mdCol1(3060,7,'3,060 × 7')}
+  ${steps([['0 × 7','= 0','write 0'],['6 × 7','= 42','write 2, carry 4'],['0 × 7 + 4','= 4','the carry lands on the zero → write 4'],['3 × 7','= 21','write 21'],['ANSWER','21,420','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with Step 1:</strong> 3,060 × 7 = 306 × 7 × 10 = 2,142 × 10 = 21,420 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Estimate first, then check: 2,845 × 4</div>
+  ${asWarm('An <strong>estimate</strong> catches big mistakes. Round to the nearest thousand and multiply.')}
+  ${steps([['ESTIMATE','2,845 ≈ 3,000','3,000 × 4 = 12,000']])}
+  ${mdCol1(2845,4,'2,845 × 4')}
+  ${steps([['Exact answer','11,380','5×4=20, 4×4+2=18, 8×4+1=33, 2×4+3=11'],['Compare','11,380 is close to 12,000','✓ sensible']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: lorries of bricks</div>
+  ${asWarm(`Each lorry carries <strong>2,375 bricks</strong>. A builder orders <strong>6 lorries</strong>. How many bricks arrive?`)}
+  ${mdCol1(2375,6,'2,375 × 6')}
+  ${steps([['Estimate','2,400 × 6','≈ 14,400'],['Exact','2,375 × 6','= 14,250'],['ANSWER','14,250 bricks','close to the estimate ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: does the answer make sense?</div>
+  ${asWarm('Funke works out <strong>2,845 × 4</strong> and gets <strong>1,380</strong>. Is that possible?')}
+  ${steps([['Estimate','3,000 × 4','= 12,000'],['Funke&#39;s answer','1,380','far too small ✗'],['What went wrong?','Lost a digit','correct answer is 11,380']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;A 4-digit number × a 1-digit number gives a 5-digit answer.&rdquo;</div>
+  ${steps([['1,324 × 3','= 3,972','4 digits'],['4,758 × 6','= 28,548','5 digits'],['VERDICT','Sometimes','depends on the numbers']])}
+</div>
+
+${asExCard(3,[
+ exQ(1,'What is 1,324 × 3?',['3,972','3,962','4,972'],0),
+ exQ(2,'What is 2,415 × 4?',['9,660','8,660','9,460'],0),
+ exQ(3,'What is 3,425 × 3?',['10,275','9,275','10,265'],0),
+ exQ(4,'What is 4,758 × 6?',['28,548','27,548','28,448'],0),
+ exQ(5,'What is 3,060 × 7?',['21,420','21,042','2,142'],0),
+ exQ(6,'Which is the best estimate for 2,845 × 4?',['About 12,000','About 8,000','About 1,200'],0),
+ exQ(7,'Each lorry carries 2,375 bricks. How many bricks do 6 lorries carry?',['14,250','13,250','12,250'],0),
+ exQ(8,'Funke says 2,845 × 4 = 1,380. Is she right?',['No — an estimate of 3,000 × 4 shows the answer is about 12,000','Yes — 2,845 × 4 = 1,380','No — the answer should be about 8,000'],0),
+ exQ(9,'THINK DEEPER: "A 4-digit number × a 1-digit number always gives a 5-digit answer." Always, sometimes or never?',['Sometimes','Always','Never'],0,'t'),
+ exQ(10,'BOSS LEVEL: A stadium has 9 blocks of seats with 1,875 seats in each block. 2,000 seats are reserved. How many seats are NOT reserved?',['14,875','16,875','13,875'],0,'b')])}`;
+
+
+/* ---------- STEP 4 : Multiply a 4-digit number by a 2-digit number ---------- */
+const P5_MDB4 = `
+${asHeader('MB4','Step 4 — Multiply a 4-Digit Number by a 2-Digit Number','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Split the Multiplier Too</div>
+  ${asWarm(`A baker makes <strong>1,234 loaves</strong> a week. How many loaves in <strong>12 weeks</strong>? To multiply by a 2-digit number we <strong>partition the 2-digit number</strong> as well: 12 = <strong>10 + 2</strong>. First work out 10 weeks, then 2 weeks, then add: 1,234 × 12 = (1,234 × 10) + (1,234 × 2).`)}
+
+  <div class="card-body"><strong>Concrete:</strong> build 1,234 with place value counters. Make 10 copies (exchange each counter for the next column to the left — Step 1!), then make 2 more copies. Add all the counters.</div>
+  ${mdArea(1234,12,'1,234 × 12 — area model')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">📋 The big idea</div><div class="s-body" style="color:#0C447C;">Partition the multiplier into <strong>tens + ones</strong> (24 = 20 + 4). Multiply by each part, then <strong>add the two answers</strong>.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">📋 Multiplying by tens</div><div class="s-body" style="color:#27500A;">× 20 = × 2 then × 10. × 30 = × 3 then × 10. Use Step 1 — the digits slide left and a zero holds the ones.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">📋 Using factors</div><div class="s-body" style="color:#3C3489;">12 = 3 × 4, so × 12 = × 3 then × 4. 20 = 2 × 10. Break the multiplier into smaller factors when it helps.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Forgetting the zero</div><div class="s-body" style="color:#712B13;">The tens row is × <strong>20</strong>, not × 2! 2,453 × 2 = 4,906 but 2,453 × 20 = <strong>49,060</strong>. The placeholder zero is essential.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Only multiplying by the ones digit</div><div class="s-body" style="color:#712B13;">1,234 × 12 needs BOTH × 10 and × 2. Missing one part gives an answer that is far too small.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Partition the multiplier: 1,234 × 12</div>
+  ${asWarm('12 = 10 + 2. Multiply 1,234 by each part and add.')}
+  ${mdArea(1234,12,'1,234 × 12')}
+  ${steps([['1,234 × 10','= 12,340','digits slide 1 place left'],['1,234 × 2','= 2,468',''],['ADD','12,340 + 2,468','= 14,808']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Multiplying by a multiple of 10: 1,235 × 30</div>
+  ${asWarm('30 = 3 × 10. Multiply by 3 first, then slide the digits left.')}
+  ${steps([['1,235 × 3','= 3,705','use Step 3'],['× 10','3,705 → 37,050','digits slide 1 place left; 0 holds the ones'],['ANSWER','1,235 × 30 = 37,050','']])}
+  ${mdSlide(3705,1,1,'3,705 × 10 = 37,050')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A bigger area model: 2,453 × 24</div>
+  ${asWarm('24 = 20 + 4. There will be 8 partial products in the grid!')}
+  ${mdArea(2453,24,'2,453 × 24')}
+  ${steps([['Row of 20: add','40,000 + 8,000 + 1,000 + 60','= 49,060'],['Row of 4: add','8,000 + 1,600 + 200 + 12','= 9,812'],['ADD the rows','49,060 + 9,812','= 58,872']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Stacking the partial products: 3,142 × 15</div>
+  ${asWarm('Write each multiplication as a row, one under the other, and add — this is the step before long multiplication (Step 5)!')}
+  ${mdStack([['3,142 × 5','15,710'],['3,142 × 10','31,420']],'47,130','3,142 × 15')}
+  ${steps([['3,142 × 5','= 15,710','multiply by the ones'],['3,142 × 10','= 31,420','multiply by the tens: slide left'],['ADD','15,710 + 31,420','= 47,130']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Using factors: 1,125 × 12</div>
+  ${asWarm('12 = 3 × 4. Instead of splitting 12 into 10 + 2, split it into factors.')}
+  ${steps([['1,125 × 3','= 3,375',''],['3,375 × 4','= 13,500',''],['ANSWER','1,125 × 12 = 13,500','']])}
+  ${steps([['CHECK (partition)','1,125 × 10 = 11,250','+ 1,125 × 2 = 2,250 → 13,500 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 Handy factor pairs: × 20 = × 2 × 10 · × 15 = × 3 × 5 · × 24 = × 4 × 6 · × 18 = × 2 × 9.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Estimate first: 3,876 × 21</div>
+  ${asWarm('Round to numbers that are easy to multiply. 3,876 ≈ 4,000 and 21 ≈ 20.')}
+  ${steps([['ESTIMATE','4,000 × 20','= 80,000']])}
+  ${mdArea(3876,21,'3,876 × 21')}
+  ${steps([['3,876 × 20','= 77,520','3,876 × 2 = 7,752, then × 10'],['3,876 × 1','= 3,876',''],['ADD','77,520 + 3,876','= 81,396'],['Compare','81,396 ≈ 80,000','✓ sensible']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: a bakery year</div>
+  ${asWarm(`A bakery makes <strong>1,640 loaves</strong> every week. How many loaves does it make in <strong>26 weeks</strong>?`)}
+  ${steps([['26','= 20 + 6',''],['1,640 × 20','= 32,800','1,640 × 2 = 3,280, then × 10'],['1,640 × 6','= 9,840',''],['ADD','32,800 + 9,840','= 42,640']])}
+  ${mdStack([['1,640 × 20','32,800'],['1,640 × 6','9,840']],'42,640','1,640 × 26')}
+  ${steps([['ESTIMATE','1,600 × 25','= 40,000 → 42,640 is sensible ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm('Tolu works out <strong>2,453 × 24</strong> as 9,812 + 4,906 = <strong>14,718</strong>. What went wrong?')}
+  ${steps([['9,812','= 2,453 × 4','✓ correct'],['4,906','= 2,453 × 2','✗ should be × 20 = 49,060'],['Missing','the placeholder zero','Tolu multiplied by 2, not 20'],['CORRECT','9,812 + 49,060','= 58,872']])}
+  ${steps([['ESTIMATE','2,500 × 24','= 60,000 — so 14,718 was impossible!']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;A 4-digit × 2-digit number has a 6-digit answer.&rdquo;</div>
+  ${steps([['1,000 × 10','= 10,000','5 digits'],['9,999 × 99','= 989,901','6 digits'],['VERDICT','Sometimes','5 or 6 digits']])}
+</div>
+
+${asExCard(4,[
+ exQ(1,'What is 1,234 × 12?',['14,808','13,808','14,708'],0),
+ exQ(2,'What is 1,235 × 30?',['37,050','3,705','370,500'],0),
+ exQ(3,'What is 2,453 × 24?',['58,872','48,872','59,872'],0),
+ exQ(4,'What is 3,142 × 15?',['47,130','46,130','15,710'],0),
+ exQ(5,'What is 1,125 × 12?',['13,500','12,500','14,500'],0),
+ exQ(6,'Which is the best estimate for 3,876 × 21?',['About 80,000','About 8,000','About 800,000'],0),
+ exQ(7,'A bakery makes 1,640 loaves every week. How many loaves does it make in 26 weeks?',['42,640','41,640','43,640'],0),
+ exQ(8,'Tolu says 2,453 × 24 = 14,718. Is he right?',['No — he forgot that 20 × 2,453 = 49,060, so the answer is 58,872','Yes — 9,812 + 4,906 = 14,718','No — the answer is 9,812'],0),
+ exQ(9,'THINK DEEPER: Which calculation gives the same answer as 1,500 × 12?',['1,500 × 3 × 4','1,500 × 2 × 5','1,500 × 6 × 3'],0,'t'),
+ exQ(10,'BOSS LEVEL: A factory makes 2,375 bottles every hour for 16 hours a day. How many bottles does it make in one day, and how many in 10 days?',['38,000 a day; 380,000 in 10 days','36,000 a day; 360,000 in 10 days','38,000 a day; 38,000 in 10 days'],0,'b')])}`;
+
+
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B — LESSONS 5 AND 6
+   Step 5: Long multiplication
+   Step 6: Divide up to 4 digits by a 1-digit number
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–4 files (re-uses mdSlide, mdCol1, mdArea, mdStack,
+      steps, exQ, asHeader, asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_MDB5 = null;
+        const P5_MDB6 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPERS ================= */
+
+/* Multiply a digit array by ONE digit. Returns the answer as a string plus
+   the carry that lands above each digit. */
+function mdMulRow(digs,d){
+  let carry=0; const res=[], carries=[];
+  for(let i=digs.length-1;i>=0;i--){
+    const p=digs[i]*d+carry;
+    res[i]=p%10; carries[i]=carry; carry=Math.floor(p/10);
+  }
+  return {str:(carry>0?String(carry):'')+res.join(''), carries:carries};
+}
+
+/* FORMAL LONG MULTIPLICATION layout for a × (2-digit b).
+   Row 1 = a × ones digit (amber carries above). Row 2 = a × tens digit with
+   an amber PLACEHOLDER 0 (pink carries). Then the total.
+   mdLong(134,12,'134 × 12') */
+function mdLong(a,b,title){
+  const digs=String(a).split('').map(Number), n=digs.length;
+  const bs=String(b), bU=Number(bs[bs.length-1]), bT=Number(bs[bs.length-2]||0);
+  const r1=mdMulRow(digs,bU), r2=mdMulRow(digs,bT);
+  const s1=r1.str, s2=r2.str+'0', tot=String(a*b);
+  const N=Math.max(tot.length,s1.length,s2.length,n,bs.length);
+  const colX=j=>80+j*50;
+  const W=80+N*50+170;
+  const fmt=v=>Number(v).toLocaleString('en-GB');
+  const put=(str,y,fill,placeholderLast)=>{
+    let o='';
+    str.split('').forEach((ch,k)=>{
+      const j=N-str.length+k, last=(k===str.length-1);
+      if(placeholderLast&&last) o+=`<rect x="${colX(j)-20}" y="${y-26}" width="40" height="34" rx="6" fill="#FDE68A" stroke="#B45309" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+      o+=`<text x="${colX(j)}" y="${y}" text-anchor="middle" font-size="26" font-weight="800" fill="${placeholderLast&&last?'#92400E':fill}">${ch}</text>`;
+    });
+    return o;
+  };
+  let s=`<svg viewBox="0 0 ${W} 300" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  // carries
+  for(let i=0;i<n;i++){
+    const j=N-n+i;
+    if(r1.carries[i]>0) s+=`<text x="${colX(j)}" y="42" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${r1.carries[i]}</text>`;
+    if(r2.carries[i]>0) s+=`<text x="${colX(j)}" y="62" text-anchor="middle" font-size="15" font-weight="800" fill="#BE185D">${r2.carries[i]}</text>`;
+  }
+  s+=put(String(a),104,'#1E40AF');
+  s+=`<text x="26" y="142" text-anchor="middle" font-size="26" font-weight="800" fill="#555">×</text>`;
+  s+=put(bs,142,'#5B21B6');
+  s+=`<line x1="16" y1="154" x2="${colX(N-1)+30}" y2="154" stroke="#333" stroke-width="2.5"/>`;
+  s+=put(s1,190,'#1D4ED8');
+  s+=put(s2,226,'#15803D',true);
+  s+=`<line x1="16" y1="238" x2="${colX(N-1)+30}" y2="238" stroke="#333" stroke-width="2.5"/>`;
+  s+=put(tot,274,'#C2410C');
+  const nx=colX(N-1)+38;
+  s+=`<text x="${nx}" y="186" font-size="10.5" font-weight="700" fill="#1D4ED8">← ${fmt(a)} × ${bU}</text>`;
+  s+=`<text x="${nx}" y="222" font-size="10.5" font-weight="700" fill="#15803D">← ${fmt(a)} × ${bT*10}</text>`;
+  s+=`<text x="${nx}" y="236" font-size="9" font-weight="700" fill="#92400E">(the 0 is the placeholder)</text>`;
+  s+=`<text x="${nx}" y="270" font-size="10.5" font-weight="800" fill="#C2410C">← ADD the rows</text>`;
+  s+=`<text x="${nx}" y="40" font-size="9" font-weight="700" fill="#B45309">amber = carries (× ones)</text>`;
+  s+=`<text x="${nx}" y="60" font-size="9" font-weight="700" fill="#BE185D">pink = carries (× tens)</text>`;
+  return s+'</svg>';
+}
+
+/* SHARING CHART for division by a 1-digit number, one column at a time.
+   Shows: the dividend digit, what is shared (after exchanging the left-over
+   from the last column), what each group gets, and what is left over.
+   mdShare(3648,4,'3,648 ÷ 4') */
+function mdShare(num,d,title){
+  const digs=String(num).split('').map(Number), n=digs.length;
+  let rem=0; const rows=[];
+  digs.forEach(dg=>{
+    const share=rem*10+dg, q=Math.floor(share/d), r=share%d;
+    rows.push({dg:dg,prev:rem,share:share,q:q,r:r}); rem=r;
+  });
+  const names=['ONES','TENS','HUNDREDS','THOUSANDS'];
+  const dark =['#C2410C','#15803D','#1D4ED8','#6D28D9'];
+  const light=['#FFEDD5','#DCFCE7','#DBEAFE','#EDE9FE'];
+  const x0=140,cw=84,W=x0+n*cw+24;
+  const cx=i=>x0+i*cw+cw/2;
+  const ys=[48,112,176,240], h=44;
+  const labels=['The number','To share','Each of the '+d+' groups gets','Left over'];
+  let s=`<svg viewBox="0 0 ${W} 316" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  rows.forEach((r,i)=>{
+    const pos=n-1-i;
+    s+=`<text x="${cx(i)}" y="34" text-anchor="middle" font-size="8.5" font-weight="700" fill="${dark[pos%4]}">${names[pos]||''}</text>`;
+  });
+  labels.forEach((t,k)=>{
+    s+=`<text x="${x0-10}" y="${ys[k]+h/2+4}" text-anchor="end" font-size="10.5" font-weight="700" fill="#444">${t}</text>`;
+  });
+  let leading=true;
+  rows.forEach((r,i)=>{
+    const pos=(n-1-i)%4, x=x0+i*cw+3, w=cw-6;
+    // row 1
+    s+=`<rect x="${x}" y="${ys[0]}" width="${w}" height="${h}" rx="6" fill="${light[pos]}" stroke="${dark[pos]}" stroke-width="1.6"/>`;
+    s+=`<text x="${cx(i)}" y="${ys[0]+31}" text-anchor="middle" font-size="24" font-weight="800" fill="${dark[pos]}">${r.dg}</text>`;
+    // row 2
+    s+=`<rect x="${x}" y="${ys[1]}" width="${w}" height="${h}" rx="6" fill="#fff" stroke="${dark[pos]}" stroke-width="1.6"/>`;
+    s+=`<text x="${cx(i)}" y="${ys[1]+26}" text-anchor="middle" font-size="22" font-weight="800" fill="#333">${r.share}</text>`;
+    s+=`<text x="${cx(i)}" y="${ys[1]+39}" text-anchor="middle" font-size="8.5" font-weight="600" fill="#B45309">${i===0?'':'10×'+r.prev+'+'+r.dg}</text>`;
+    // row 3
+    const faded=leading&&r.q===0&&i<n-1; if(r.q>0) leading=false;
+    s+=`<rect x="${x}" y="${ys[2]}" width="${w}" height="${h}" rx="6" fill="${faded?'#F8F8F8':light[pos]}" stroke="${faded?'#ccc':dark[pos]}" stroke-width="1.8"/>`;
+    s+=`<text x="${cx(i)}" y="${ys[2]+31}" text-anchor="middle" font-size="24" font-weight="800" fill="${faded?'#bbb':dark[pos]}">${r.q}</text>`;
+    // row 4
+    s+=`<rect x="${x}" y="${ys[3]}" width="${w}" height="${h}" rx="6" fill="${r.r>0?'#FDE68A':'#fff'}" stroke="${r.r>0?'#B45309':'#ccc'}" stroke-width="1.6" ${r.r>0?'stroke-dasharray="5 3"':''}/>`;
+    s+=`<text x="${cx(i)}" y="${ys[3]+31}" text-anchor="middle" font-size="22" font-weight="800" fill="${r.r>0?'#92400E':'#bbb'}">${r.r}</text>`;
+    if(i<n-1 && r.r>0) s+=`<text x="${cx(i)+cw/2}" y="${ys[3]+h+14}" text-anchor="middle" font-size="9" font-weight="700" fill="#B45309">exchange →</text>`;
+  });
+  const ans=Math.floor(num/d), rm=num%d;
+  s+=`<text x="${W/2}" y="308" text-anchor="middle" font-size="13" font-weight="800" fill="#15803D">${num.toLocaleString('en-GB')} ÷ ${d} = ${ans.toLocaleString('en-GB')}${rm?' remainder '+rm:''}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 5 : Long multiplication ---------- */
+const P5_MDB5 = `
+${asHeader('MB5','Step 5 — Long Multiplication','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — From the Area Model to the Formal Method</div>
+  ${asWarm(`In Step 4 you split the multiplier into <strong>tens + ones</strong> and multiplied twice. <strong>Long multiplication</strong> is the tidy, formal way to do exactly the same thing: one row for the <strong>ones</strong>, one row for the <strong>tens</strong> (with a <strong>placeholder 0</strong>), and then you <strong>add the rows</strong>. Nothing new is happening — it is the area model in columns!`)}
+
+  <div class="card-body"><strong>Pictorial → formal:</strong> the two rows of the area model become the two rows of the column method.</div>
+  ${mdArea(134,12,'134 × 12 — area model')}
+  ${mdLong(134,12,'134 × 12 — long multiplication')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Ones row</div><div class="s-body" style="color:#0C447C;">Multiply the top number by the <strong>ones digit</strong> of the multiplier. Exchange (carry) as in Step 3.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">② Placeholder zero</div><div class="s-body" style="color:#633806;">Before the tens row, write a <strong>0</strong> in the ones column. We are multiplying by a number of tens, so the answer is 10 times bigger.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">③ Tens row</div><div class="s-body" style="color:#27500A;">Multiply the top number by the <strong>tens digit</strong>, starting in the tens column, next to the placeholder.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Add the rows</div><div class="s-body" style="color:#3C3489;">Add the two rows. Check with an <strong>estimate</strong>: round both numbers.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — No placeholder zero</div><div class="s-body" style="color:#712B13;">Without the 0, the tens row is multiplied by ONE-tenth too little. The answer is wildly too small.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Mixing up the carries</div><div class="s-body" style="color:#712B13;">Carries from the <strong>ones row</strong> must not be added in the <strong>tens row</strong>. Use a different colour or rub them out before starting the tens row.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — From the area model: 134 × 12</div>
+  ${asWarm('Multiply by the 2 ones first, then by the 1 ten, then add.')}
+  ${mdLong(134,12,'134 × 12')}
+  ${steps([['Ones row: 134 × 2','= 268','4×2=8, 3×2=6, 1×2=2'],['Placeholder','write 0','so the next row is × 10'],['Tens row: 134 × 1','= 134 → 1,340',''],['ADD','268 + 1,340','= 1,608']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Carrying in both rows: 286 × 34</div>
+  ${asWarm('Both rows need exchanges this time. Keep the carries tidy!')}
+  ${mdLong(286,34,'286 × 34')}
+  ${steps([['Ones row: 286 × 4','= 1,144','6×4=24 (c2), 8×4+2=34 (c3), 2×4+3=11'],['Tens row: 286 × 30','= 8,580','286 × 3 = 858, then × 10'],['ADD','1,144 + 8,580','= 9,724'],['ESTIMATE','300 × 30','= 9,000 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A 4-digit number: 4,127 × 36</div>
+  ${asWarm('The method does not change when the numbers get bigger — only the rows get longer.')}
+  ${mdLong(4127,36,'4,127 × 36')}
+  ${steps([['Ones row: 4,127 × 6','= 24,762',''],['Tens row: 4,127 × 30','= 123,810','4,127 × 3 = 12,381, then × 10'],['ADD','24,762 + 123,810','= 148,572'],['ESTIMATE','4,000 × 36','= 144,000 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A zero in the multiplier: 1,325 × 40</div>
+  ${asWarm('When the ones digit of the multiplier is 0, the ones row is all zeros — so we can skip straight to the tens row.')}
+  ${mdLong(1325,40,'1,325 × 40')}
+  ${steps([['Ones row: × 0','= 0000','every product is 0'],['Tens row: 1,325 × 4','= 5,300','then × 10 (placeholder)'],['ANSWER','53,000','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Shortcut (Step 4):</strong> 1,325 × 40 = 1,325 × 4 × 10 = 5,300 × 10 = 53,000 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — A zero in the number: 3,050 × 27</div>
+  ${asWarm('Zeros in the top number are digits too. Watch the carry land on a zero in the ones row.')}
+  ${mdLong(3050,27,'3,050 × 27')}
+  ${steps([['Ones row: 3,050 × 7','= 21,350','0×7=0, 5×7=35 (c3), 0×7+3=3, 3×7=21'],['Tens row: 3,050 × 20','= 61,000','3,050 × 2 = 6,100, then × 10'],['ADD','21,350 + 61,000','= 82,350']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Estimate first, then check: 1,874 × 28</div>
+  ${asWarm('Always estimate: round 1,874 to 2,000 and 28 to 30.')}
+  ${steps([['ESTIMATE','2,000 × 30','= 60,000']])}
+  ${mdLong(1874,28,'1,874 × 28')}
+  ${steps([['Exact answer','52,472','14,992 + 37,480'],['Compare','52,472 is a bit less than 60,000','both numbers were rounded UP ✓'],['Inverse check','52,472 ÷ 28','= 1,874 ✓ (Step 8 will teach this!)']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the printing press</div>
+  ${asWarm(`A printing press prints <strong>1,325 pages every hour</strong>. How many pages does it print in <strong>24 hours</strong>?`)}
+  ${mdLong(1325,24,'1,325 × 24')}
+  ${steps([['Ones row: 1,325 × 4','= 5,300',''],['Tens row: 1,325 × 20','= 26,500',''],['ADD','5,300 + 26,500','= 31,800'],['ANSWER','31,800 pages','ESTIMATE: 1,300 × 25 ≈ 32,500 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and explain the zero</div>
+  ${asWarm('Tolu works out <strong>4,127 × 36</strong> and gets <strong>37,143</strong> (24,762 + 12,381). Is he right?')}
+  ${steps([['Tens row','12,381','this is 4,127 × 3 — but it should be × 30!'],['Missing','the placeholder 0','12,381 should be 123,810'],['CORRECT','24,762 + 123,810','= 148,572'],['ESTIMATE','4,000 × 36 = 144,000','so 37,143 was impossible ✗']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Why is the zero there?</strong> The 3 in 36 is not 3 — it is <strong>30</strong>. Multiplying by 30 means ×3 and then ×10, and ×10 slides every digit left (Step 1). The zero holds the ones column.</div>
+</div>
+
+${asExCard(5,[
+ exQ(1,'What is 134 × 12?',['1,608','1,068','1,408'],0),
+ exQ(2,'What is 286 × 34?',['9,724','9,624','8,724'],0),
+ exQ(3,'What is 4,127 × 36?',['148,572','148,472','138,572'],0),
+ exQ(4,'What is 1,325 × 40?',['53,000','5,300','530,000'],0),
+ exQ(5,'What is 3,050 × 27?',['82,350','82,305','8,235'],0),
+ exQ(6,'Which is the best estimate for 1,874 × 28?',['About 60,000','About 6,000','About 600,000'],0),
+ exQ(7,'A printing press prints 1,325 pages every hour. How many pages does it print in 24 hours?',['31,800','30,800','32,800'],0),
+ exQ(8,'In long multiplication, why do we write a 0 at the start of the tens row?',['Because we are multiplying by tens, so the answer is 10 times bigger','To make the working look neat','Because the number ends in a zero'],0),
+ exQ(9,'THINK DEEPER: Tolu says 4,127 × 36 = 37,143. How can you tell he is wrong without calculating exactly?',['An estimate of 4,000 × 36 = 144,000 is much bigger','Because 37,143 is an odd number','Because 36 is an even number'],0,'t'),
+ exQ(10,'BOSS LEVEL: A theatre sells 2,468 tickets every night for 35 nights. How many MORE tickets must it sell to reach 90,000?',['3,620','4,620','3,720'],0,'b')])}`;
+
+
+/* ---------- STEP 6 : Divide up to 4 digits by a 1-digit number ---------- */
+const P5_MDB6 = `
+${asHeader('MB6','Step 6 — Divide Up to 4 Digits by a 1-Digit Number','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Sharing, One Column at a Time</div>
+  ${asWarm(`Division is <strong>fair sharing</strong>. Imagine sharing <strong>3,648 counters</strong> equally between <strong>4 groups</strong>. Start with the biggest place value: share the thousands, then the hundreds, then the tens, then the ones. If some are <strong>left over</strong> in a column, <strong>exchange</strong> them for 10 of the next smaller column and keep sharing!`)}
+
+  <div class="card-body"><strong>Concrete:</strong> 3 thousand-counters cannot be shared between 4 groups, so exchange them for 30 hundreds and add the 6 hundreds: 36 hundreds ÷ 4 = 9 hundreds each. Continue with the tens and ones.</div>
+  ${mdShare(3648,4,'3,648 ÷ 4 — sharing chart')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">📋 Sharing method</div><div class="s-body" style="color:#0C447C;">Work from the <strong>left</strong>. Share each column. The <strong>left-over</strong> is exchanged: 10 × left-over + next digit becomes the next amount to share.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">📋 Chunking (partitioning)</div><div class="s-body" style="color:#27500A;">Split the number into parts that are <strong>easy to divide</strong>: 3,648 = 3,600 + 48. Divide each part, then add the answers.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">✅ Check with the inverse</div><div class="s-body" style="color:#3C3489;">If 3,648 ÷ 4 = 912, then 912 × 4 must equal 3,648 (Step 3).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Losing a zero</div><div class="s-body" style="color:#712B13;">If a column cannot be shared (like 1 ten ÷ 6) the answer digit is <strong>0</strong>, not nothing. 5,418 ÷ 6 = 903, not 93.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Dividing the smaller by the bigger</div><div class="s-body" style="color:#712B13;">Always divide the <strong>number being shared</strong> by the divisor, never the other way round. 3 ÷ 4 does not work in whole numbers — so exchange!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — No exchange needed: 2,484 ÷ 2</div>
+  ${asWarm('Every digit can be shared exactly between 2 groups.')}
+  ${mdShare(2484,2,'2,484 ÷ 2')}
+  ${steps([['2 thousands ÷ 2','= 1 thousand',''],['4 hundreds ÷ 2','= 2 hundreds',''],['8 tens ÷ 2','= 4 tens',''],['4 ones ÷ 2','= 2 ones',''],['ANSWER','2,484 ÷ 2 = 1,242','CHECK: 1,242 × 2 = 2,484 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Exchanging thousands for hundreds: 3,648 ÷ 4</div>
+  ${asWarm('3 thousands cannot be shared into 4 groups — so exchange them!')}
+  ${mdShare(3648,4,'3,648 ÷ 4')}
+  ${steps([['3 thousands ÷ 4','= 0 r 3','exchange 3 thousands for 30 hundreds'],['36 hundreds ÷ 4','= 9',''],['4 tens ÷ 4','= 1',''],['8 ones ÷ 4','= 2',''],['ANSWER','912','CHECK: 912 × 4 = 3,648 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Chunking check:</strong> 3,648 = 3,600 + 48 → 3,600 ÷ 4 = 900 and 48 ÷ 4 = 12 → 900 + 12 = 912 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A zero in the answer: 5,418 ÷ 6</div>
+  ${asWarm('Watch the tens column carefully — there is only 1 ten to share between 6 groups!')}
+  ${mdShare(5418,6,'5,418 ÷ 6')}
+  ${steps([['5 thousands ÷ 6','= 0 r 5','exchange for 50 hundreds'],['54 hundreds ÷ 6','= 9',''],['1 ten ÷ 6','= 0 r 1','NOTHING each — write 0! Exchange for 10 ones'],['18 ones ÷ 6','= 3',''],['ANSWER','903','NOT 93! CHECK: 903 × 6 = 5,418 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Chunking with multiples: 7,248 ÷ 6</div>
+  ${asWarm('Split 7,248 into a part that is a multiple of 6 that is easy to divide, and the rest.')}
+  ${steps([['Partition','7,248 = 7,200 + 48','both easy to divide by 6'],['7,200 ÷ 6','= 1,200','72 ÷ 6 = 12, then × 100'],['48 ÷ 6','= 8',''],['ADD','1,200 + 8','= 1,208']])}
+  ${mdShare(7248,6,'7,248 ÷ 6 — the sharing chart agrees')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — When something is left over: 2,437 ÷ 3</div>
+  ${asWarm('If the ones cannot be shared exactly, the last left-over is the <strong>remainder</strong>.')}
+  ${mdShare(2437,3,'2,437 ÷ 3')}
+  ${steps([['2,436 ÷ 3','= 812','exactly (the 6 ones share exactly)'],['The extra 1','cannot be shared into 3 groups','it is left over'],['ANSWER','812 remainder 1','CHECK: 812 × 3 + 1 = 2,437 ✓']])}
+  <div class="card-body" style="margin-top:6px;">🔗 What to <em>do</em> with a remainder is the subject of Step 8!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Check with the inverse, and estimate</div>
+  ${asWarm('Division and multiplication undo each other. Use that to prove 3,648 ÷ 4 = 912.')}
+  ${steps([['ESTIMATE first','3,600 ÷ 4','= 900 — so the answer should be near 900'],['Answer','3,648 ÷ 4','= 912 ✓ close to the estimate']])}
+  ${mdCol1(912,4,'CHECK: 912 × 4')}
+  ${steps([['Inverse','912 × 4','= 3,648 ✓ — the same as the number we started with']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: cutting ribbon</div>
+  ${asWarm(`A roll holds <strong>4,872 cm</strong> of ribbon. A shop cuts it into <strong>8 equal pieces</strong>. How long is each piece?`)}
+  ${mdShare(4872,8,'4,872 ÷ 8')}
+  ${steps([['4 thousands ÷ 8','= 0 r 4','exchange for 40 hundreds'],['48 hundreds ÷ 8','= 6',''],['7 tens ÷ 8','= 0 r 7','zero in the answer!'],['72 ones ÷ 8','= 9',''],['ANSWER','609 cm','CHECK: 609 × 8 = 4,872 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm('Tolu says <strong>5,418 ÷ 6 = 93</strong>. How can you show he is wrong?')}
+  ${steps([['Estimate','5,400 ÷ 6','= 900 — so 93 is far too small ✗'],['Inverse','93 × 6','= 558, not 5,418 ✗'],['What went wrong?','he lost the zero in the tens place','1 ten ÷ 6 = 0'],['CORRECT','903','903 × 6 = 5,418 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;A 4-digit number ÷ a 1-digit number gives a 4-digit answer.&rdquo;</div>
+  ${steps([['7,248 ÷ 6','= 1,208','4 digits'],['3,648 ÷ 4','= 912','3 digits'],['VERDICT','Sometimes','depends on the numbers']])}
+</div>
+
+${asExCard(6,[
+ exQ(1,'What is 2,484 ÷ 2?',['1,242','1,224','1,142'],0),
+ exQ(2,'What is 3,648 ÷ 4?',['912','921','902'],0),
+ exQ(3,'What is 5,418 ÷ 6?',['903','93','930'],0),
+ exQ(4,'What is 7,248 ÷ 6?',['1,208','1,280','1,218'],0),
+ exQ(5,'What is 2,436 ÷ 3?',['812','821','802'],0),
+ exQ(6,'A roll of ribbon is 4,872 cm long. It is cut into 8 equal pieces. How long is each piece?',['609 cm','69 cm','690 cm'],0),
+ exQ(7,'What is 2,437 ÷ 3?',['812 remainder 1','812','811 remainder 4'],0),
+ exQ(8,'Tolu says 5,418 ÷ 6 = 93. Is he right?',['No — the tens column gives 0, so the answer is 903','Yes — 93 × 6 = 5,418','No — the answer is 930'],0),
+ exQ(9,'THINK DEEPER: 3,648 ÷ 4 = 912. Which calculation checks this answer?',['912 × 4 = 3,648','912 + 4 = 916','3,648 × 4 = 912'],0,'t'),
+ exQ(10,'BOSS LEVEL: A farmer packs 7,248 eggs into trays of 6. The trays are then packed into crates holding 8 trays each. How many crates are needed?',['151 crates','1,208 crates','150 crates'],0,'b')])}`;
+
+
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B — LESSONS 7 AND 8
+   Step 7: Short division
+   Step 8: Interpret remainders
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–6 files (re-uses mdShare, mdCol1, fr, mx, steps,
+      exQ, asHeader, asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_MDB7 = null;
+        const P5_MDB8 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPER ================= */
+
+/* "Bus stop" SHORT DIVISION layout.
+   The answer is written above the line, each left-over is written as a small
+   amber digit in FRONT of the next digit (it is 10 of the next column).
+   mdBus(3648,4,'3,648 ÷ 4') */
+function mdBus(num,d,title){
+  const digs=String(num).split('').map(Number), n=digs.length;
+  let rem=0; const rows=[];
+  digs.forEach(dg=>{
+    const share=rem*10+dg, q=Math.floor(share/d), r=share%d;
+    rows.push({dg:dg,q:q,r:r}); rem=r;
+  });
+  const dark=['#C2410C','#15803D','#1D4ED8','#6D28D9'];
+  const colX=i=>130+i*58, W=130+n*58+130;
+  let s=`<svg viewBox="0 0 ${W} 196" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  let leading=true;
+  rows.forEach((r,i)=>{
+    const pos=(n-1-i)%4;
+    const faded=leading&&r.q===0&&i<n-1; if(r.q>0) leading=false;
+    // quotient (above the line)
+    s+=`<text x="${colX(i)}" y="78" text-anchor="middle" font-size="28" font-weight="800" fill="${faded?'#ccc':dark[pos]}">${r.q}</text>`;
+    // dividend digit
+    s+=`<text x="${colX(i)}" y="132" text-anchor="middle" font-size="28" font-weight="800" fill="${dark[pos]}">${r.dg}</text>`;
+    // left-over written in front of the next digit
+    if(i<n-1 && r.r>0) s+=`<text x="${colX(i+1)-24}" y="112" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${r.r}</text>`;
+  });
+  // bus stop
+  s+=`<path d="M 96,92 L ${colX(n-1)+34},92 M 96,92 L 96,146" fill="none" stroke="#333" stroke-width="2.6"/>`;
+  s+=`<text x="62" y="132" text-anchor="middle" font-size="30" font-weight="800" fill="#5B21B6">${d}</text>`;
+  if(rem>0) s+=`<text x="${colX(n-1)+48}" y="132" font-size="15" font-weight="800" fill="#B45309">remainder ${rem}</text>`;
+  const ans=Math.floor(num/d);
+  s+=`<text x="${W/2}" y="172" text-anchor="middle" font-size="12.5" font-weight="800" fill="#15803D">${num.toLocaleString('en-GB')} ÷ ${d} = ${ans.toLocaleString('en-GB')}${rem?' remainder '+rem:''}</text>`;
+  s+=`<text x="${W/2}" y="188" text-anchor="middle" font-size="9.5" font-weight="700" fill="#92400E">amber digits = left-overs exchanged for 10 of the next column</text>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 7 : Short division ---------- */
+const P5_MDB7 = `
+${asHeader('MB7','Step 7 — Short Division','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — The Sharing Chart Written Short</div>
+  ${asWarm(`In Step 6 you shared numbers column by column on a chart: share, exchange the left-over, share again. <strong>Short division</strong> (the &ldquo;bus stop&rdquo; method) is the <em>same sharing</em> written in a compact way. The answer goes <strong>above</strong> the line and every left-over is written <strong>in front of the next digit</strong> — it means <em>10 of the next column</em>.`)}
+
+  <div class="card-body"><strong>Same method, two layouts:</strong> the sharing chart (left) and the bus stop (right) show exactly the same exchanges.</div>
+  ${mdShare(846,2,'846 ÷ 2 — sharing chart')}
+  ${mdBus(846,2,'846 ÷ 2 — short division')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Set it out</div><div class="s-body" style="color:#0C447C;">Divisor on the <strong>left</strong>, the number being divided <strong>inside</strong> the bus stop, the answer on <strong>top</strong>.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">② Start on the left</div><div class="s-body" style="color:#27500A;">Divide the first digit. If it is too small, write <strong>0</strong> above it and exchange it into the next digit.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">③ Exchange the left-over</div><div class="s-body" style="color:#633806;">Write the left-over <strong>in front of the next digit</strong>. 3 left over and next digit 6 makes <strong>36</strong>.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Check it</div><div class="s-body" style="color:#3C3489;">Multiply the answer by the divisor (Step 3). Estimate first (Step 6).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Adding the carry</div><div class="s-body" style="color:#712B13;">A left-over of 1 before an 8 makes <strong>18</strong>, not 1 + 8 = 9. It is 1 ten and 8 ones!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Skipping a zero</div><div class="s-body" style="color:#712B13;">If a share is too small to divide, write 0 in the answer. Never skip a column!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — No exchange: 846 ÷ 2</div>
+  ${asWarm('Each digit can be divided exactly by 2.')}
+  ${mdBus(846,2,'846 ÷ 2')}
+  ${steps([['8 ÷ 2','= 4','4 hundreds'],['4 ÷ 2','= 2','2 tens'],['6 ÷ 2','= 3','3 ones'],['ANSWER','423','CHECK: 423 × 2 = 846 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Exchange: 3,648 ÷ 4</div>
+  ${asWarm('You did this one in Step 6 with the sharing chart. Now write it short!')}
+  ${mdBus(3648,4,'3,648 ÷ 4')}
+  ${steps([['3 ÷ 4','= 0 r 3','write 0; the 3 goes in front of the 6'],['36 ÷ 4','= 9 r 0',''],['4 ÷ 4','= 1 r 0',''],['8 ÷ 4','= 2',''],['ANSWER','912','the leading 0 is not written']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A zero in the answer: 5,418 ÷ 6</div>
+  ${asWarm('The tens column has a left-over of 1 that is too small to share. Write 0 and keep going.')}
+  ${mdBus(5418,6,'5,418 ÷ 6')}
+  ${steps([['5 ÷ 6','= 0 r 5',''],['54 ÷ 6','= 9 r 0',''],['1 ÷ 6','= 0 r 1','write 0! the 1 goes in front of the 8'],['18 ÷ 6','= 3',''],['ANSWER','903','ESTIMATE: 5,400 ÷ 6 = 900 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Exchange in several columns: 7,245 ÷ 5</div>
+  ${asWarm('Follow every left-over carefully.')}
+  ${mdBus(7245,5,'7,245 ÷ 5')}
+  ${steps([['7 ÷ 5','= 1 r 2','2 goes in front of 2 → 22'],['22 ÷ 5','= 4 r 2','2 goes in front of 4 → 24'],['24 ÷ 5','= 4 r 4','4 goes in front of 5 → 45'],['45 ÷ 5','= 9',''],['ANSWER','1,449','CHECK: 1,449 × 5 = 7,245 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — When the first digit is too small: 2,184 ÷ 7</div>
+  ${asWarm('2 thousands cannot be shared between 7 groups — so exchange them into the hundreds and share 21 hundreds.')}
+  ${mdBus(2184,7,'2,184 ÷ 7')}
+  ${steps([['2 ÷ 7','= 0 r 2','too small — exchange'],['21 ÷ 7','= 3 r 0',''],['8 ÷ 7','= 1 r 1',''],['14 ÷ 7','= 2',''],['ANSWER','312','CHECK: 312 × 7 = 2,184 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — With a remainder: 1,239 ÷ 4</div>
+  ${asWarm('If the last share is not exact, the final left-over is the <strong>remainder</strong>.')}
+  ${mdBus(1239,4,'1,239 ÷ 4')}
+  ${steps([['1 ÷ 4','= 0 r 1',''],['12 ÷ 4','= 3 r 0',''],['3 ÷ 4','= 0 r 3','write 0!'],['39 ÷ 4','= 9 r 3','4 × 9 = 36'],['ANSWER','309 remainder 3','CHECK: 309 × 4 + 3 = 1,239 ✓']])}
+  <div class="card-body" style="margin-top:6px;">🔗 What does the remainder <em>mean</em>? That is Step 8.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: sharing books</div>
+  ${asWarm(`A school has <strong>3,472 library books</strong> to share equally between <strong>8 classes</strong>. How many books does each class get?`)}
+  ${mdBus(3472,8,'3,472 ÷ 8')}
+  ${steps([['3 ÷ 8','= 0 r 3',''],['34 ÷ 8','= 4 r 2','8 × 4 = 32'],['27 ÷ 8','= 3 r 3','8 × 3 = 24'],['32 ÷ 8','= 4',''],['ANSWER','434 books each','CHECK: 434 × 8 = 3,472 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm('Tolu works out <strong>5,418 ÷ 6</strong>. After 54 ÷ 6 = 9, he has a left-over of 1 before the 8 and writes <strong>1 + 8 = 9</strong>. What goes wrong?')}
+  ${steps([['Tolu','1 + 8 = 9','ADDED the left-over ✗'],['9 ÷ 6','= 1 r 3','gives an answer like 91…'],['Correct','18 ÷ 6 = 3','the 1 is 1 TEN, so 1 ten + 8 ones = 18'],['CORRECT ANSWER','903','CHECK: 903 × 6 = 5,418 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Chain problem:</strong> A bakery has 8,415 cakes. They are packed in boxes of 5 and then the boxes are shared equally between 3 shops. How many boxes does each shop get?</div>
+  ${steps([['8,415 ÷ 5','= 1,683 boxes','short division'],['1,683 ÷ 3','= 561','short division'],['ANSWER','561 boxes each','CHECK: 561 × 3 × 5 = 8,415 ✓']])}
+</div>
+
+${asExCard(7,[
+ exQ(1,'What is 846 ÷ 2?',['423','432','413'],0),
+ exQ(2,'What is 3,648 ÷ 4?',['912','921','902'],0),
+ exQ(3,'What is 6,315 ÷ 3?',['2,105','2,150','215'],0),
+ exQ(4,'What is 7,245 ÷ 5?',['1,449','1,439','1,549'],0),
+ exQ(5,'What is 2,184 ÷ 7?',['312','321','302'],0),
+ exQ(6,'What is 1,239 ÷ 4?',['309 remainder 3','310 remainder 1','309 remainder 1'],0),
+ exQ(7,'A school shares 3,472 library books equally between 8 classes. How many books does each class get?',['434','443','424'],0),
+ exQ(8,'In short division, a left-over of 1 is followed by the digit 8. What do you do next?',['Make 18 and divide 18','Add 1 + 8 = 9 and divide 9','Ignore the 1'],0),
+ exQ(9,'THINK DEEPER: 4,236 ÷ 6 = 706. Which calculation checks this answer?',['706 × 6 = 4,236','706 + 6 = 712','4,236 × 6 = 706'],0,'t'),
+ exQ(10,'BOSS LEVEL: A bakery has 8,415 cakes. They are packed in boxes of 5, and then the boxes are shared equally between 3 shops. How many boxes does each shop get?',['561','1,683','2,805'],0,'b')])}`;
+
+
+/* ---------- STEP 8 : Interpret remainders ---------- */
+const P5_MDB8 = `
+${asHeader('MB8','Step 8 — Interpret Remainders','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — What Does the Left-Over Mean?</div>
+  ${asWarm(`When 1,239 pupils are put into minibuses that seat 4, short division gives <strong>309 remainder 3</strong>. But the <strong>answer to the question</strong> is not &ldquo;309 remainder 3&rdquo;! Three pupils are still standing at the gate — they need a bus too. The <strong>meaning of the remainder depends on the story</strong>, so we must always ask: <em>what is the question really asking?</em>`)}
+
+  <div class="card-body"><strong>Concrete:</strong> 1,239 counters shared into groups of 4. 309 full groups, and 3 counters left over.</div>
+  ${mdBus(1239,4,'1,239 ÷ 4 = 309 remainder 3')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">⬆️ Round UP</div><div class="s-body" style="color:#633806;">When <strong>everything must be catered for</strong> (buses, boxes, trips). A part-full container is still needed. 309 r 3 → <strong>310</strong>.</div></div>
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">⬇️ Round DOWN</div><div class="s-body" style="color:#085041;">When you can only count <strong>complete, full</strong> groups (full pages, full packs). The left-over is ignored. 309 r 3 → <strong>309</strong>.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">➗ As a FRACTION</div><div class="s-body" style="color:#3C3489;">When the left-over can be <strong>shared too</strong> (rice, cake, ribbon). Remainder over divisor: 309 r 3 ÷ 4 → ${mx(309,3,4)}.</div></div>
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">🔢 The REMAINDER itself</div><div class="s-body" style="color:#0C447C;">When the question asks <strong>&ldquo;how many are left over?&rdquo;</strong>. Answer: 3.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Always writing &ldquo;r&rdquo;</div><div class="s-body" style="color:#712B13;">&ldquo;309 remainder 3&rdquo; is the <em>calculation result</em>. The <em>answer to the problem</em> must make sense: 310 minibuses.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Remainder too big</div><div class="s-body" style="color:#712B13;">A remainder is always <strong>smaller than the divisor</strong>. If ÷ 6 leaves 6, you can share one more time!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Writing and checking a remainder: 1,239 ÷ 4</div>
+  ${asWarm('First get the calculation right. Then check with the inverse: whole number × divisor + remainder.')}
+  ${mdBus(1239,4,'1,239 ÷ 4')}
+  ${steps([['Quotient','309','full groups of 4'],['Remainder','3','3 left over, and 3 &lt; 4 ✓'],['CHECK','309 × 4 + 3','= 1,236 + 3 = 1,239 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Round UP: the minibuses</div>
+  ${asWarm(`A school trip has <strong>1,239 pupils</strong>. Each minibus seats <strong>4</strong>. How many minibuses are needed?`)}
+  ${steps([['Calculation','1,239 ÷ 4','= 309 remainder 3'],['Think','309 full buses carry 1,236 pupils','3 pupils are still waiting!'],['They need a bus too','309 + 1','= 310'],['ANSWER','310 minibuses','ROUND UP — the last bus is only part-full']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Round DOWN: full pages</div>
+  ${asWarm(`Tolu has <strong>2,437 stickers</strong>. Each page of his album holds <strong>3 stickers</strong>. How many pages can he <strong>fill completely</strong>?`)}
+  ${mdBus(2437,3,'2,437 ÷ 3')}
+  ${steps([['Calculation','2,437 ÷ 3','= 812 remainder 1'],['Think','812 pages are completely full','1 sticker is left over — it does not fill a page'],['ANSWER','812 pages','ROUND DOWN — only count FULL pages']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — As a fraction: sharing rice</div>
+  ${asWarm(`<strong>1,239 kg</strong> of rice is shared equally between <strong>4 families</strong>. How much rice does each family get?`)}
+  ${steps([['Calculation','1,239 ÷ 4','= 309 remainder 3'],['The 3 kg left over','can be shared too!','3 kg ÷ 4 families'],['Remainder over divisor',`${fr(3,4)}`,'each family gets 3/4 kg more'],['ANSWER',`${mx(309,3,4)} kg`,'309 whole kg and three quarters']])}
+  <div class="card-body" style="margin-top:6px;">🔗 This is <strong>fractions as division</strong>: 3 ÷ 4 = ${fr(3,4)} (Step 1 of Fractions A!).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Which meaning? Sorting the stories</div>
+  ${asWarm('All four problems use 1,239 ÷ 4 = 309 remainder 3, but each has a <strong>different answer</strong>!')}
+  <div style="overflow-x:auto;margin:8px 0;">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:#185FA5;color:white;">
+        <th style="padding:8px 10px;text-align:left;">The story</th>
+        <th style="padding:8px 10px;text-align:left;">What the remainder means</th>
+        <th style="padding:8px 10px;text-align:left;">Answer</th>
+      </tr></thead>
+      <tbody>
+        ${[['1,239 pupils into 4-seat minibuses','Everyone needs a seat → ROUND UP','310 minibuses'],
+           ['1,239 sweets in packs of 4 — how many FULL packs?','Only full packs count → ROUND DOWN','309 packs'],
+           ['1,239 kg rice shared between 4 families','The left-over can be shared → FRACTION','309 3/4 kg each'],
+           ['1,239 sweets in packs of 4 — how many are left over?','The remainder itself','3 sweets']].map((r,i)=>`
+          <tr style="background:${i%2===0?'#E6F1FB':'#fff'};">
+            <td style="padding:7px 10px;">${r[0]}</td>
+            <td style="padding:7px 10px;color:#555;">${r[1]}</td>
+            <td style="padding:7px 10px;font-weight:700;color:#15803D;">${r[2]}</td>
+          </tr>`).join('')}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Remainder as a fraction in simplest form: 1,238 ÷ 4</div>
+  ${asWarm('Always simplify the fraction part (Fractions A, Step 3).')}
+  ${steps([['Calculation','1,238 ÷ 4','= 309 remainder 2'],['Remainder over divisor',`${fr(2,4)}`,''],['Simplify','÷ 2',`${fr(2,4)} = ${fr(1,2)}`],['ANSWER',`${mx(309,1,2)}`,'']])}
+  ${steps([['CHECK','309 × 4 = 1,236','+ ½ of 4 = 2 → 1,238 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — One calculation, three questions: 4,873 ÷ 6</div>
+  ${asWarm(`A shop has <strong>4,873 cm</strong> of ribbon.`)}
+  ${mdBus(4873,6,'4,873 ÷ 6')}
+  ${steps([['Calculation','4,873 ÷ 6','= 812 remainder 1']])}
+  ${steps([['(a) How many 6 cm pieces can be cut?','812','round DOWN — only full pieces; 1 cm is left'],['(b) The ribbon is shared equally between 6 children. How long is each share?',`${mx(812,1,6)} cm`,'as a FRACTION'],['(c) Ribbon is packed in rolls of 6 cm. How many rolls to hold ALL the ribbon?','813','round UP — the last roll is not full']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistakes</div>
+  ${asWarm('Tolu answers the minibus question with <strong>&ldquo;309 minibuses&rdquo;</strong>. Ada says 7,245 ÷ 5 = <strong>1,448 remainder 5</strong>. Who is right?')}
+  ${steps([['Tolu','309 buses carry 1,236 pupils','3 pupils have no bus ✗ → 310']])}
+  ${steps([['Ada','remainder 5 when dividing by 5','a remainder must be LESS than the divisor ✗'],['Share once more','5 ÷ 5 = 1',''],['CORRECT','1,449','no remainder: 1,449 × 5 = 7,245 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Remainder rule:</strong> remainder &lt; divisor, always. If ÷ 6, the only possible remainders are 0, 1, 2, 3, 4, 5.</div>
+</div>
+
+${asExCard(8,[
+ exQ(1,'What is 1,239 ÷ 4, written with a remainder?',['309 remainder 3','310 remainder 3','309 remainder 4'],0),
+ exQ(2,'1,239 pupils go on a trip. Each minibus seats 4 pupils. How many minibuses are needed?',['310','309','309 remainder 3'],0),
+ exQ(3,'Tolu has 2,437 stickers. Each page holds 3 stickers. How many pages can he fill completely?',['812','813','811'],0),
+ exQ(4,'1,239 kg of rice is shared equally between 4 families. How much does each family get?',['309 3/4 kg','309 1/4 kg','310 kg'],0),
+ exQ(5,'Work out 1,238 ÷ 4. Write the answer as a mixed number in its simplest form.',['309 1/2','309 2/4','309 remainder 2'],0),
+ exQ(6,'Which remainder is impossible when dividing by 6?',['6','5','0'],0),
+ exQ(7,'A lift holds 8 people. 3,009 people need to be carried to the top. How many trips does the lift need?',['377','376','375'],0),
+ exQ(8,'Tolu says 1,239 pupils need 309 minibuses (4 seats each). Is he right?',['No — 3 pupils still need a seat, so 310 minibuses','Yes — 1,239 ÷ 4 = 309','No — he needs 308 minibuses'],0),
+ exQ(9,'THINK DEEPER: 4,873 ÷ 6 = 812 remainder 1. Which statement checks this?',['6 × 812 + 1 = 4,873','6 × 813 + 1 = 4,873','812 × 1 + 6 = 4,873'],0,'t'),
+ exQ(10,'BOSS LEVEL: A school buys 4,873 pencils that are packed in boxes of 6. How many boxes are needed to hold ALL the pencils, and how many pencils are in the last box?',['813 boxes; 1 pencil in the last box','812 boxes; 1 pencil left over','813 boxes; 5 pencils in the last box'],0,'b')])}`;
+
+
+
+const P5_MDB9  = null; // Multi-step multiplication and division problems
+const P5_MDB10 = null; // Choosing efficient methods
+
+
+
 
 
 
@@ -10543,7 +12887,7 @@ ${asExCard(12,[
 const SCHEME_P5 = [
   {
     id:'autumn', emoji:'🍂', label:'Autumn Term', meta:'September – December 2026',
-    col: TERM_COLORS.autumn, open: true,
+    col: TERM_COLORS.autumn, open: false,
     topics: [
       { id:'placevalue', label:'Place Value', col: TOPIC_PALETTE[0],
         steps: [
@@ -10568,7 +12912,7 @@ const SCHEME_P5 = [
           { label:'Count forwards and backwards through zero', content: P5_PV19 },
           { label:'Number sequences involving large numbers', content: P5_PV20 }
         ]},
-      { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],open: true,
+      { id:'addsub', label:'Addition and Subtraction', col: TOPIC_PALETTE[1],open: false,
         steps: [
           { label:'Mental addition and subtraction strategies', content: P5_AS1 },
           { label:'Add and subtract multiples of 10, 100 and 1,000', content: P5_AS2 },
@@ -10627,9 +12971,21 @@ const SCHEME_P5 = [
         ]},
     ]
   },
-  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:false,
+  { id:'spring', emoji:'🌱', label:'Spring Term', meta:'January – April 2027', col: TERM_COLORS.spring, open:true,
     topics: [
-      { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0], steps:['Multiply by 10, 100 and 1,000','Divide by 10, 100 and 1,000','Multiply a 4-digit number by a 1-digit number','Multiply a 4-digit number by a 2-digit number','Long multiplication','Divide up to 4 digits by a 1-digit number','Short division','Interpret remainders','Multi-step multiplication and division problems','Choosing efficient methods'].map(s=>({label:s,content:null}))},
+      { id:'multdivB', label:'Multiplication & Division B', col: TOPIC_PALETTE[0],
+        steps: [
+          { label:'Multiply by 10, 100 and 1,000', content: P5_MDB1 },
+          { label:'Divide by 10, 100 and 1,000', content: P5_MDB2 },
+          { label:'Multiply a 4-digit number by a 1-digit number', content: P5_MDB3 },
+          { label:'Multiply a 4-digit number by a 2-digit number', content: P5_MDB4 },
+          { label:'Long multiplication', content: P5_MDB5 },
+          { label:'Divide up to 4 digits by a 1-digit number', content: P5_MDB6 },
+          { label:'Short division', content: P5_MDB7 },
+          { label:'Interpret remainders', content: P5_MDB8 },
+          { label:'Multi-step multiplication and division problems', content: P5_MDB9 },
+          { label:'Choosing efficient methods', content: P5_MDB10 }
+      ]},
       { id:'fractionsB', label:'Fractions B', col: TOPIC_PALETTE[2],
         steps: [
           { label:'Multiply fractions by integers', content: P5_FB1 },
@@ -10643,7 +12999,7 @@ const SCHEME_P5 = [
           { label:'Subtract fractions with different denominators', content: P5_FB9 },
           { label:'Solve multi-step fraction problems', content: P5_FB10 }
         ]},
-      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],
+      { id:'decperc', label:'Decimals & Percentages', col: TOPIC_PALETTE[3],open: true, poolKey:'P5.SPR.DP', poolFile:'pools/p5_spr_decperc.js',
         steps: [
           { label:'Decimal place value', content: P5_DP1 },
           { label:'Thousandths', content: P5_DP2 },
@@ -10653,7 +13009,7 @@ const SCHEME_P5 = [
           { label:'Order decimals', content: P5_DP6 },
           { label:'Round decimals', content: P5_DP7 },
           { label:'Multiply decimals by 10, 100 and 1,000', content: P5_DP8 },
-          { label:'Divide decimals by 10, 100 and 1,000', content: P5_DP9 },
+          { label:'Divide decimals by 10, 100 and 1,000', content: P5_DP9, poolStep:'P5.SPR.DP.S09' },
           { label:'Percentages as fractions', content: P5_DP10 },
           { label:'Percentages as decimals', content: P5_DP11 },
           { label:'Find simple percentages of quantities', content: P5_DP12 }
@@ -11022,6 +13378,7 @@ function buildTopic(topic, termId, termLabel) {
       window.__currentStepId = `${termId}-${topic.id}-step${si + 1}`;
       window.__currentStepLabel = step.label || `Step ${si + 1}`;
       window.__currentStepObject = step;
+      window.__currentTopic = topic;
       window.__currentStepMeta = {
         term: termLabel || termId,
         topic: topic.label,
@@ -11030,6 +13387,7 @@ function buildTopic(topic, termId, termLabel) {
         stepLabel: step.label || `Step ${si + 1}`
       };
       contentArea.innerHTML = renderStepContent(step);
+      if (window.PracticeZone) PracticeZone.mount(contentArea, topic, step);
       contentArea.scrollIntoView({ behavior:'smooth', block:'nearest' });
     };
     tabsRow.appendChild(btn);
