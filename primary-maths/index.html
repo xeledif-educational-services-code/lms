@@ -9084,11 +9084,625 @@ ${asExCard(2,[
  exQ(10,'BOSS LEVEL: A shop has 36,000 sweets. They are packed equally into bags of 100, and then the bags are packed into boxes of 10. How many boxes are there?',['36 boxes','360 boxes','3,600 boxes'],0,'b')])}`;
  
  
-/* ================= SECTION C — PLACEHOLDERS (steps 3–10) ================= */
-const P5_MDB3  = null; // Multiply a 4-digit number by a 1-digit number
-const P5_MDB4  = null; // Multiply a 4-digit number by a 2-digit number
-const P5_MDB5  = null; // Long multiplication
-const P5_MDB6  = null; // Divide up to 4 digits by a 1-digit number
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B — LESSONS 3 AND 4
+   Step 3: Multiply a 4-digit number by a 1-digit number
+   Step 4: Multiply a 4-digit number by a 2-digit number
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–2 file (re-uses mdSlide, steps, exQ, asHeader,
+      asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_MDB3 = null;
+        const P5_MDB4 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPERS ================= */
+
+/* Column multiplication (4-digit × 1-digit etc.) with carries shown in amber.
+   mdCol1(4758,6,'4,758 × 6') */
+function mdCol1(num,d,title){
+  const digs=String(num).split('').map(Number), n=digs.length;
+  let carry=0; const res=[], carries=[];
+  for(let i=n-1;i>=0;i--){
+    const p=digs[i]*d+carry;
+    res[i]=p%10; carries[i]=carry; carry=Math.floor(p/10);
+  }
+  const lead=carry>0?String(carry):'';
+  const cols=n+(lead?1:0);
+  const colX=j=>110+j*58;                 // j = 0..cols-1
+  const off=lead?1:0;                     // number starts one column right if there is a leading result digit
+  const names=['Ones','Tens','Hundreds','Thousands','10 Thou'];
+  const dark=['#C2410C','#15803D','#1D4ED8','#6D28D9','#BE185D'];
+  const W=130+cols*58+20;
+  let s=`<svg viewBox="0 0 ${W} 205" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  // column headers
+  for(let i=0;i<n;i++){
+    const pos=n-1-i; // 0 = ones
+    s+=`<text x="${colX(i+off)}" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="${dark[pos%5]}">${(names[pos]||'').toUpperCase()}</text>`;
+  }
+  if(lead) s+=`<text x="${colX(0)}" y="32" text-anchor="middle" font-size="8.5" font-weight="700" fill="${dark[n%5]}">${(names[n]||'').toUpperCase()}</text>`;
+  // carries
+  for(let i=0;i<n;i++){
+    if(carries[i]>0) s+=`<text x="${colX(i+off)}" y="62" text-anchor="middle" font-size="16" font-weight="800" fill="#B45309">${carries[i]}</text>`;
+  }
+  // number
+  for(let i=0;i<n;i++) s+=`<text x="${colX(i+off)}" y="96" text-anchor="middle" font-size="26" font-weight="800" fill="#1E40AF">${digs[i]}</text>`;
+  // multiplier
+  s+=`<text x="${colX(n-1+off)-0}" y="132" text-anchor="middle" font-size="26" font-weight="800" fill="#5B21B6">${d}</text>`;
+  s+=`<text x="50" y="132" text-anchor="middle" font-size="26" font-weight="800" fill="#555">×</text>`;
+  // line
+  s+=`<line x1="30" y1="144" x2="${W-14}" y2="144" stroke="#333" stroke-width="2.5"/>`;
+  // result
+  const full=(lead+res.join('')).split('');
+  full.forEach((ch,j)=>{
+    s+=`<text x="${colX(j)}" y="180" text-anchor="middle" font-size="26" font-weight="800" fill="#15803D">${ch}</text>`;
+  });
+  s+=`<text x="${W/2}" y="200" text-anchor="middle" font-size="10" font-weight="700" fill="#92400E">amber digits = carried (exchanged) numbers</text>`;
+  return s+'</svg>';
+}
+
+/* Area (grid) model. Partitions a into its place-value parts and b into its parts.
+   mdArea(2453,24,'2,453 × 24') → 2×2 style grid with every partial product. */
+function mdArea(a,b,title){
+  const part=n=>{
+    const s=String(n), out=[];
+    for(let i=0;i<s.length;i++){ const v=Number(s[i])*Math.pow(10,s.length-1-i); if(v>0) out.push(v); }
+    return out;
+  };
+  const fmt=v=>v.toLocaleString('en-GB');
+  const A=part(a), B=part(b);
+  const x0=78,cw=108,yH=36,hH=32,rh=52;
+  const W=x0+A.length*cw+16, H=yH+hH+B.length*rh+44;
+  const fills=['#DBEAFE','#DCFCE7','#FEF3C7','#FCE7F3'];
+  const darks=['#1E40AF','#166534','#92400E','#9D174D'];
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="16" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  s+=`<text x="${x0-8}" y="${yH+21}" text-anchor="end" font-size="16" font-weight="800" fill="#555">×</text>`;
+  A.forEach((v,i)=>{
+    s+=`<rect x="${x0+i*cw+2}" y="${yH}" width="${cw-4}" height="${hH}" rx="6" fill="${fills[i%4]}" stroke="${darks[i%4]}" stroke-width="1.5"/>`;
+    s+=`<text x="${x0+i*cw+cw/2}" y="${yH+21}" text-anchor="middle" font-size="15" font-weight="800" fill="${darks[i%4]}">${fmt(v)}</text>`;
+  });
+  let total=0; const prods=[];
+  B.forEach((bv,r)=>{
+    const y=yH+hH+r*rh+4;
+    s+=`<rect x="6" y="${y}" width="${x0-16}" height="${rh-8}" rx="6" fill="#EDE9FE" stroke="#6D28D9" stroke-width="1.5"/>`;
+    s+=`<text x="${(x0-10)/2+6}" y="${y+(rh-8)/2+5}" text-anchor="middle" font-size="15" font-weight="800" fill="#5B21B6">${fmt(bv)}</text>`;
+    A.forEach((av,i)=>{
+      const p=av*bv; total+=p; prods.push(p);
+      s+=`<rect x="${x0+i*cw+2}" y="${y}" width="${cw-4}" height="${rh-8}" rx="6" fill="#fff" stroke="${darks[i%4]}" stroke-width="1.5"/>`;
+      s+=`<text x="${x0+i*cw+cw/2}" y="${y+16}" text-anchor="middle" font-size="9" fill="#777">${fmt(av)} × ${fmt(bv)}</text>`;
+      s+=`<text x="${x0+i*cw+cw/2}" y="${y+33}" text-anchor="middle" font-size="15" font-weight="800" fill="${darks[i%4]}">${fmt(p)}</text>`;
+    });
+  });
+  s+=`<text x="${W/2}" y="${H-12}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#B45309">${prods.map(fmt).join(' + ')} = ${fmt(total)}</text>`;
+  return s+'</svg>';
+}
+
+/* Stacked partial products (bridge to long multiplication).
+   mdStack([['3,142 × 5','15,710'],['3,142 × 10','31,420']],'47,130','title') */
+function mdStack(rows,total,title){
+  let h=`<div style="max-width:380px;margin:8px auto;background:#F8FAFF;border:1.5px solid #378ADD;border-radius:10px;padding:10px 14px;font-family:'Courier New',monospace;">`;
+  if(title) h+=`<div style="text-align:center;font-size:12px;font-weight:800;color:#0C447C;margin-bottom:6px;font-family:inherit;">${title}</div>`;
+  rows.forEach((r,i)=>{
+    h+=`<div style="display:flex;justify-content:space-between;font-size:14px;color:#1E40AF;padding:2px 0;"><span style="color:#666;font-size:12px;">${i>0?'+ ':''}${r[0]}</span><strong>${r[1]}</strong></div>`;
+  });
+  h+=`<div style="border-top:2px solid #333;margin-top:4px;padding-top:4px;display:flex;justify-content:space-between;font-size:16px;color:#15803D;"><span style="font-size:12px;color:#666;">TOTAL</span><strong>${total}</strong></div></div>`;
+  return h;
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 3 : Multiply a 4-digit number by a 1-digit number ---------- */
+const P5_MDB3 = `
+${asHeader('MB3','Step 3 — Multiply a 4-Digit Number by a 1-Digit Number','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Partition, Multiply, Add</div>
+  ${asWarm(`There are <strong>3 shelves</strong> in a library and each shelf holds <strong>1,324 books</strong>. How many books altogether? That is 1,324 × 3. A smart way is to <strong>partition</strong> 1,324 into thousands, hundreds, tens and ones, multiply <em>each part</em> by 3, and then add the answers.`)}
+
+  <div class="card-body"><strong>Concrete:</strong> use place value counters. Make 1,324 three times: 3 groups of 1 thousand, 3 groups of 3 hundreds, 3 groups of 2 tens and 3 groups of 4 ones. Count each column.</div>
+  ${mdArea(1324,3,'1,324 × 3 — area model')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">📋 Method 1 — Partition (area model)</div><div class="s-body" style="color:#0C447C;">Split the 4-digit number into <strong>Th + H + T + O</strong>. Multiply each part. <strong>Add</strong> the products.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">📋 Method 2 — Column method</div><div class="s-body" style="color:#27500A;">Multiply <strong>ones first</strong>, then tens, hundreds, thousands. If a column makes 10 or more, <strong>exchange</strong>: write the ones digit, carry the tens digit.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">🔗 Link to Step 1</div><div class="s-body" style="color:#3C3489;">2,000 × 4 is just 2 × 4 = 8, then × 1,000. Use your × 10, 100, 1,000 skills to multiply the parts!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Forgetting the carry</div><div class="s-body" style="color:#712B13;">The carried number must be <strong>added to the next column&#39;s product</strong> — after you multiply, not before!</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Skipping zeros</div><div class="s-body" style="color:#712B13;">A zero in the number (like 3,060) is a digit too. 0 × 7 = 0 — but a carry may still land there.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Partitioning, no exchange: 1,324 × 3</div>
+  ${asWarm('Multiply each part of 1,324 by 3, then add.')}
+  ${mdArea(1324,3,'1,324 × 3')}
+  ${steps([['1,000 × 3','= 3,000',''],['300 × 3','= 900',''],['20 × 3','= 60',''],['4 × 3','= 12',''],['ADD','3,000 + 900 + 60 + 12',`= 3,972`]])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Partitioning, bigger products: 2,415 × 4</div>
+  ${asWarm('Some of the partial products are bigger now — watch how they add.')}
+  ${mdArea(2415,4,'2,415 × 4')}
+  ${steps([['2,000 × 4','= 8,000',''],['400 × 4','= 1,600',''],['10 × 4','= 40',''],['5 × 4','= 20',''],['ADD','8,000 + 1,600 + 40 + 20','= 9,660']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Column method: 3,425 × 3</div>
+  ${asWarm('Start with the ones. When a column product reaches 10 or more, exchange: write the ones digit and carry the tens digit.')}
+  ${mdCol1(3425,3,'3,425 × 3')}
+  ${steps([['Ones: 5 × 3','= 15','write 5, carry 1'],['Tens: 2 × 3 + 1','= 6 + 1 = 7','write 7'],['Hundreds: 4 × 3','= 12','write 2, carry 1'],['Thousands: 3 × 3 + 1','= 9 + 1 = 10','write 10'],['ANSWER','10,275','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Exchange in every column: 4,758 × 6</div>
+  ${asWarm('Every column needs an exchange this time! Take your time and carry carefully.')}
+  ${mdCol1(4758,6,'4,758 × 6')}
+  ${steps([['8 × 6','= 48','write 8, carry 4'],['5 × 6 + 4','= 34','write 4, carry 3'],['7 × 6 + 3','= 45','write 5, carry 4'],['4 × 6 + 4','= 28','write 28'],['ANSWER','28,548','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — A zero in the number: 3,060 × 7</div>
+  ${asWarm('Zeros are digits too — and a carry can land on them!')}
+  ${mdCol1(3060,7,'3,060 × 7')}
+  ${steps([['0 × 7','= 0','write 0'],['6 × 7','= 42','write 2, carry 4'],['0 × 7 + 4','= 4','the carry lands on the zero → write 4'],['3 × 7','= 21','write 21'],['ANSWER','21,420','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Check with Step 1:</strong> 3,060 × 7 = 306 × 7 × 10 = 2,142 × 10 = 21,420 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Estimate first, then check: 2,845 × 4</div>
+  ${asWarm('An <strong>estimate</strong> catches big mistakes. Round to the nearest thousand and multiply.')}
+  ${steps([['ESTIMATE','2,845 ≈ 3,000','3,000 × 4 = 12,000']])}
+  ${mdCol1(2845,4,'2,845 × 4')}
+  ${steps([['Exact answer','11,380','5×4=20, 4×4+2=18, 8×4+1=33, 2×4+3=11'],['Compare','11,380 is close to 12,000','✓ sensible']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: lorries of bricks</div>
+  ${asWarm(`Each lorry carries <strong>2,375 bricks</strong>. A builder orders <strong>6 lorries</strong>. How many bricks arrive?`)}
+  ${mdCol1(2375,6,'2,375 × 6')}
+  ${steps([['Estimate','2,400 × 6','≈ 14,400'],['Exact','2,375 × 6','= 14,250'],['ANSWER','14,250 bricks','close to the estimate ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: does the answer make sense?</div>
+  ${asWarm('Funke works out <strong>2,845 × 4</strong> and gets <strong>1,380</strong>. Is that possible?')}
+  ${steps([['Estimate','3,000 × 4','= 12,000'],['Funke&#39;s answer','1,380','far too small ✗'],['What went wrong?','Lost a digit','correct answer is 11,380']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;A 4-digit number × a 1-digit number gives a 5-digit answer.&rdquo;</div>
+  ${steps([['1,324 × 3','= 3,972','4 digits'],['4,758 × 6','= 28,548','5 digits'],['VERDICT','Sometimes','depends on the numbers']])}
+</div>
+
+${asExCard(3,[
+ exQ(1,'What is 1,324 × 3?',['3,972','3,962','4,972'],0),
+ exQ(2,'What is 2,415 × 4?',['9,660','8,660','9,460'],0),
+ exQ(3,'What is 3,425 × 3?',['10,275','9,275','10,265'],0),
+ exQ(4,'What is 4,758 × 6?',['28,548','27,548','28,448'],0),
+ exQ(5,'What is 3,060 × 7?',['21,420','21,042','2,142'],0),
+ exQ(6,'Which is the best estimate for 2,845 × 4?',['About 12,000','About 8,000','About 1,200'],0),
+ exQ(7,'Each lorry carries 2,375 bricks. How many bricks do 6 lorries carry?',['14,250','13,250','12,250'],0),
+ exQ(8,'Funke says 2,845 × 4 = 1,380. Is she right?',['No — an estimate of 3,000 × 4 shows the answer is about 12,000','Yes — 2,845 × 4 = 1,380','No — the answer should be about 8,000'],0),
+ exQ(9,'THINK DEEPER: "A 4-digit number × a 1-digit number always gives a 5-digit answer." Always, sometimes or never?',['Sometimes','Always','Never'],0,'t'),
+ exQ(10,'BOSS LEVEL: A stadium has 9 blocks of seats with 1,875 seats in each block. 2,000 seats are reserved. How many seats are NOT reserved?',['14,875','16,875','13,875'],0,'b')])}`;
+
+
+/* ---------- STEP 4 : Multiply a 4-digit number by a 2-digit number ---------- */
+const P5_MDB4 = `
+${asHeader('MB4','Step 4 — Multiply a 4-Digit Number by a 2-Digit Number','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Split the Multiplier Too</div>
+  ${asWarm(`A baker makes <strong>1,234 loaves</strong> a week. How many loaves in <strong>12 weeks</strong>? To multiply by a 2-digit number we <strong>partition the 2-digit number</strong> as well: 12 = <strong>10 + 2</strong>. First work out 10 weeks, then 2 weeks, then add: 1,234 × 12 = (1,234 × 10) + (1,234 × 2).`)}
+
+  <div class="card-body"><strong>Concrete:</strong> build 1,234 with place value counters. Make 10 copies (exchange each counter for the next column to the left — Step 1!), then make 2 more copies. Add all the counters.</div>
+  ${mdArea(1234,12,'1,234 × 12 — area model')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">📋 The big idea</div><div class="s-body" style="color:#0C447C;">Partition the multiplier into <strong>tens + ones</strong> (24 = 20 + 4). Multiply by each part, then <strong>add the two answers</strong>.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">📋 Multiplying by tens</div><div class="s-body" style="color:#27500A;">× 20 = × 2 then × 10. × 30 = × 3 then × 10. Use Step 1 — the digits slide left and a zero holds the ones.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">📋 Using factors</div><div class="s-body" style="color:#3C3489;">12 = 3 × 4, so × 12 = × 3 then × 4. 20 = 2 × 10. Break the multiplier into smaller factors when it helps.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Forgetting the zero</div><div class="s-body" style="color:#712B13;">The tens row is × <strong>20</strong>, not × 2! 2,453 × 2 = 4,906 but 2,453 × 20 = <strong>49,060</strong>. The placeholder zero is essential.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Only multiplying by the ones digit</div><div class="s-body" style="color:#712B13;">1,234 × 12 needs BOTH × 10 and × 2. Missing one part gives an answer that is far too small.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — Partition the multiplier: 1,234 × 12</div>
+  ${asWarm('12 = 10 + 2. Multiply 1,234 by each part and add.')}
+  ${mdArea(1234,12,'1,234 × 12')}
+  ${steps([['1,234 × 10','= 12,340','digits slide 1 place left'],['1,234 × 2','= 2,468',''],['ADD','12,340 + 2,468','= 14,808']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Multiplying by a multiple of 10: 1,235 × 30</div>
+  ${asWarm('30 = 3 × 10. Multiply by 3 first, then slide the digits left.')}
+  ${steps([['1,235 × 3','= 3,705','use Step 3'],['× 10','3,705 → 37,050','digits slide 1 place left; 0 holds the ones'],['ANSWER','1,235 × 30 = 37,050','']])}
+  ${mdSlide(3705,1,1,'3,705 × 10 = 37,050')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A bigger area model: 2,453 × 24</div>
+  ${asWarm('24 = 20 + 4. There will be 8 partial products in the grid!')}
+  ${mdArea(2453,24,'2,453 × 24')}
+  ${steps([['Row of 20: add','40,000 + 8,000 + 1,000 + 60','= 49,060'],['Row of 4: add','8,000 + 1,600 + 200 + 12','= 9,812'],['ADD the rows','49,060 + 9,812','= 58,872']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Stacking the partial products: 3,142 × 15</div>
+  ${asWarm('Write each multiplication as a row, one under the other, and add — this is the step before long multiplication (Step 5)!')}
+  ${mdStack([['3,142 × 5','15,710'],['3,142 × 10','31,420']],'47,130','3,142 × 15')}
+  ${steps([['3,142 × 5','= 15,710','multiply by the ones'],['3,142 × 10','= 31,420','multiply by the tens: slide left'],['ADD','15,710 + 31,420','= 47,130']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Using factors: 1,125 × 12</div>
+  ${asWarm('12 = 3 × 4. Instead of splitting 12 into 10 + 2, split it into factors.')}
+  ${steps([['1,125 × 3','= 3,375',''],['3,375 × 4','= 13,500',''],['ANSWER','1,125 × 12 = 13,500','']])}
+  ${steps([['CHECK (partition)','1,125 × 10 = 11,250','+ 1,125 × 2 = 2,250 → 13,500 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 Handy factor pairs: × 20 = × 2 × 10 · × 15 = × 3 × 5 · × 24 = × 4 × 6 · × 18 = × 2 × 9.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Estimate first: 3,876 × 21</div>
+  ${asWarm('Round to numbers that are easy to multiply. 3,876 ≈ 4,000 and 21 ≈ 20.')}
+  ${steps([['ESTIMATE','4,000 × 20','= 80,000']])}
+  ${mdArea(3876,21,'3,876 × 21')}
+  ${steps([['3,876 × 20','= 77,520','3,876 × 2 = 7,752, then × 10'],['3,876 × 1','= 3,876',''],['ADD','77,520 + 3,876','= 81,396'],['Compare','81,396 ≈ 80,000','✓ sensible']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: a bakery year</div>
+  ${asWarm(`A bakery makes <strong>1,640 loaves</strong> every week. How many loaves does it make in <strong>26 weeks</strong>?`)}
+  ${steps([['26','= 20 + 6',''],['1,640 × 20','= 32,800','1,640 × 2 = 3,280, then × 10'],['1,640 × 6','= 9,840',''],['ADD','32,800 + 9,840','= 42,640']])}
+  ${mdStack([['1,640 × 20','32,800'],['1,640 × 6','9,840']],'42,640','1,640 × 26')}
+  ${steps([['ESTIMATE','1,600 × 25','= 40,000 → 42,640 is sensible ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm('Tolu works out <strong>2,453 × 24</strong> as 9,812 + 4,906 = <strong>14,718</strong>. What went wrong?')}
+  ${steps([['9,812','= 2,453 × 4','✓ correct'],['4,906','= 2,453 × 2','✗ should be × 20 = 49,060'],['Missing','the placeholder zero','Tolu multiplied by 2, not 20'],['CORRECT','9,812 + 49,060','= 58,872']])}
+  ${steps([['ESTIMATE','2,500 × 24','= 60,000 — so 14,718 was impossible!']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;A 4-digit × 2-digit number has a 6-digit answer.&rdquo;</div>
+  ${steps([['1,000 × 10','= 10,000','5 digits'],['9,999 × 99','= 989,901','6 digits'],['VERDICT','Sometimes','5 or 6 digits']])}
+</div>
+
+${asExCard(4,[
+ exQ(1,'What is 1,234 × 12?',['14,808','13,808','14,708'],0),
+ exQ(2,'What is 1,235 × 30?',['37,050','3,705','370,500'],0),
+ exQ(3,'What is 2,453 × 24?',['58,872','48,872','59,872'],0),
+ exQ(4,'What is 3,142 × 15?',['47,130','46,130','15,710'],0),
+ exQ(5,'What is 1,125 × 12?',['13,500','12,500','14,500'],0),
+ exQ(6,'Which is the best estimate for 3,876 × 21?',['About 80,000','About 8,000','About 800,000'],0),
+ exQ(7,'A bakery makes 1,640 loaves every week. How many loaves does it make in 26 weeks?',['42,640','41,640','43,640'],0),
+ exQ(8,'Tolu says 2,453 × 24 = 14,718. Is he right?',['No — he forgot that 20 × 2,453 = 49,060, so the answer is 58,872','Yes — 9,812 + 4,906 = 14,718','No — the answer is 9,812'],0),
+ exQ(9,'THINK DEEPER: Which calculation gives the same answer as 1,500 × 12?',['1,500 × 3 × 4','1,500 × 2 × 5','1,500 × 6 × 3'],0,'t'),
+ exQ(10,'BOSS LEVEL: A factory makes 2,375 bottles every hour for 16 hours a day. How many bottles does it make in one day, and how many in 10 days?',['38,000 a day; 380,000 in 10 days','36,000 a day; 360,000 in 10 days','38,000 a day; 38,000 in 10 days'],0,'b')])}`;
+
+
+/* ============================================================
+   PRIMARY 5 — SPRING — MULTIPLICATION & DIVISION B — LESSONS 5 AND 6
+   Step 5: Long multiplication
+   Step 6: Divide up to 4 digits by a 1-digit number
+   8 worked examples + 10 exercises per lesson.
+
+   HOW TO INSTALL
+   1. Paste this whole file ABOVE `const SCHEME_P5`, AFTER the
+      Lessons 1–4 files (re-uses mdSlide, mdCol1, mdArea, mdStack,
+      steps, exQ, asHeader, asWarm, asExCard).
+   2. DELETE these two placeholder lines from SECTION C:
+        const P5_MDB5 = null;
+        const P5_MDB6 = null;
+   Nothing needs to change in SCHEME_P5.
+   ============================================================ */
+
+
+/* ================= EXTRA HELPERS ================= */
+
+/* Multiply a digit array by ONE digit. Returns the answer as a string plus
+   the carry that lands above each digit. */
+function mdMulRow(digs,d){
+  let carry=0; const res=[], carries=[];
+  for(let i=digs.length-1;i>=0;i--){
+    const p=digs[i]*d+carry;
+    res[i]=p%10; carries[i]=carry; carry=Math.floor(p/10);
+  }
+  return {str:(carry>0?String(carry):'')+res.join(''), carries:carries};
+}
+
+/* FORMAL LONG MULTIPLICATION layout for a × (2-digit b).
+   Row 1 = a × ones digit (amber carries above). Row 2 = a × tens digit with
+   an amber PLACEHOLDER 0 (pink carries). Then the total.
+   mdLong(134,12,'134 × 12') */
+function mdLong(a,b,title){
+  const digs=String(a).split('').map(Number), n=digs.length;
+  const bs=String(b), bU=Number(bs[bs.length-1]), bT=Number(bs[bs.length-2]||0);
+  const r1=mdMulRow(digs,bU), r2=mdMulRow(digs,bT);
+  const s1=r1.str, s2=r2.str+'0', tot=String(a*b);
+  const N=Math.max(tot.length,s1.length,s2.length,n,bs.length);
+  const colX=j=>80+j*50;
+  const W=80+N*50+170;
+  const fmt=v=>Number(v).toLocaleString('en-GB');
+  const put=(str,y,fill,placeholderLast)=>{
+    let o='';
+    str.split('').forEach((ch,k)=>{
+      const j=N-str.length+k, last=(k===str.length-1);
+      if(placeholderLast&&last) o+=`<rect x="${colX(j)-20}" y="${y-26}" width="40" height="34" rx="6" fill="#FDE68A" stroke="#B45309" stroke-width="1.6" stroke-dasharray="4 3"/>`;
+      o+=`<text x="${colX(j)}" y="${y}" text-anchor="middle" font-size="26" font-weight="800" fill="${placeholderLast&&last?'#92400E':fill}">${ch}</text>`;
+    });
+    return o;
+  };
+  let s=`<svg viewBox="0 0 ${W} 300" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  // carries
+  for(let i=0;i<n;i++){
+    const j=N-n+i;
+    if(r1.carries[i]>0) s+=`<text x="${colX(j)}" y="42" text-anchor="middle" font-size="15" font-weight="800" fill="#B45309">${r1.carries[i]}</text>`;
+    if(r2.carries[i]>0) s+=`<text x="${colX(j)}" y="62" text-anchor="middle" font-size="15" font-weight="800" fill="#BE185D">${r2.carries[i]}</text>`;
+  }
+  s+=put(String(a),104,'#1E40AF');
+  s+=`<text x="26" y="142" text-anchor="middle" font-size="26" font-weight="800" fill="#555">×</text>`;
+  s+=put(bs,142,'#5B21B6');
+  s+=`<line x1="16" y1="154" x2="${colX(N-1)+30}" y2="154" stroke="#333" stroke-width="2.5"/>`;
+  s+=put(s1,190,'#1D4ED8');
+  s+=put(s2,226,'#15803D',true);
+  s+=`<line x1="16" y1="238" x2="${colX(N-1)+30}" y2="238" stroke="#333" stroke-width="2.5"/>`;
+  s+=put(tot,274,'#C2410C');
+  const nx=colX(N-1)+38;
+  s+=`<text x="${nx}" y="186" font-size="10.5" font-weight="700" fill="#1D4ED8">← ${fmt(a)} × ${bU}</text>`;
+  s+=`<text x="${nx}" y="222" font-size="10.5" font-weight="700" fill="#15803D">← ${fmt(a)} × ${bT*10}</text>`;
+  s+=`<text x="${nx}" y="236" font-size="9" font-weight="700" fill="#92400E">(the 0 is the placeholder)</text>`;
+  s+=`<text x="${nx}" y="270" font-size="10.5" font-weight="800" fill="#C2410C">← ADD the rows</text>`;
+  s+=`<text x="${nx}" y="40" font-size="9" font-weight="700" fill="#B45309">amber = carries (× ones)</text>`;
+  s+=`<text x="${nx}" y="60" font-size="9" font-weight="700" fill="#BE185D">pink = carries (× tens)</text>`;
+  return s+'</svg>';
+}
+
+/* SHARING CHART for division by a 1-digit number, one column at a time.
+   Shows: the dividend digit, what is shared (after exchanging the left-over
+   from the last column), what each group gets, and what is left over.
+   mdShare(3648,4,'3,648 ÷ 4') */
+function mdShare(num,d,title){
+  const digs=String(num).split('').map(Number), n=digs.length;
+  let rem=0; const rows=[];
+  digs.forEach(dg=>{
+    const share=rem*10+dg, q=Math.floor(share/d), r=share%d;
+    rows.push({dg:dg,prev:rem,share:share,q:q,r:r}); rem=r;
+  });
+  const names=['ONES','TENS','HUNDREDS','THOUSANDS'];
+  const dark =['#C2410C','#15803D','#1D4ED8','#6D28D9'];
+  const light=['#FFEDD5','#DCFCE7','#DBEAFE','#EDE9FE'];
+  const x0=140,cw=84,W=x0+n*cw+24;
+  const cx=i=>x0+i*cw+cw/2;
+  const ys=[48,112,176,240], h=44;
+  const labels=['The number','To share','Each of the '+d+' groups gets','Left over'];
+  let s=`<svg viewBox="0 0 ${W} 316" class="shape-svg" style="max-width:100%;height:auto;">`;
+  if(title) s+=`<text x="${W/2}" y="14" text-anchor="middle" font-size="12.5" font-weight="800" fill="#333">${title}</text>`;
+  rows.forEach((r,i)=>{
+    const pos=n-1-i;
+    s+=`<text x="${cx(i)}" y="34" text-anchor="middle" font-size="8.5" font-weight="700" fill="${dark[pos%4]}">${names[pos]||''}</text>`;
+  });
+  labels.forEach((t,k)=>{
+    s+=`<text x="${x0-10}" y="${ys[k]+h/2+4}" text-anchor="end" font-size="10.5" font-weight="700" fill="#444">${t}</text>`;
+  });
+  let leading=true;
+  rows.forEach((r,i)=>{
+    const pos=(n-1-i)%4, x=x0+i*cw+3, w=cw-6;
+    // row 1
+    s+=`<rect x="${x}" y="${ys[0]}" width="${w}" height="${h}" rx="6" fill="${light[pos]}" stroke="${dark[pos]}" stroke-width="1.6"/>`;
+    s+=`<text x="${cx(i)}" y="${ys[0]+31}" text-anchor="middle" font-size="24" font-weight="800" fill="${dark[pos]}">${r.dg}</text>`;
+    // row 2
+    s+=`<rect x="${x}" y="${ys[1]}" width="${w}" height="${h}" rx="6" fill="#fff" stroke="${dark[pos]}" stroke-width="1.6"/>`;
+    s+=`<text x="${cx(i)}" y="${ys[1]+26}" text-anchor="middle" font-size="22" font-weight="800" fill="#333">${r.share}</text>`;
+    s+=`<text x="${cx(i)}" y="${ys[1]+39}" text-anchor="middle" font-size="8.5" font-weight="600" fill="#B45309">${i===0?'':'10×'+r.prev+'+'+r.dg}</text>`;
+    // row 3
+    const faded=leading&&r.q===0&&i<n-1; if(r.q>0) leading=false;
+    s+=`<rect x="${x}" y="${ys[2]}" width="${w}" height="${h}" rx="6" fill="${faded?'#F8F8F8':light[pos]}" stroke="${faded?'#ccc':dark[pos]}" stroke-width="1.8"/>`;
+    s+=`<text x="${cx(i)}" y="${ys[2]+31}" text-anchor="middle" font-size="24" font-weight="800" fill="${faded?'#bbb':dark[pos]}">${r.q}</text>`;
+    // row 4
+    s+=`<rect x="${x}" y="${ys[3]}" width="${w}" height="${h}" rx="6" fill="${r.r>0?'#FDE68A':'#fff'}" stroke="${r.r>0?'#B45309':'#ccc'}" stroke-width="1.6" ${r.r>0?'stroke-dasharray="5 3"':''}/>`;
+    s+=`<text x="${cx(i)}" y="${ys[3]+31}" text-anchor="middle" font-size="22" font-weight="800" fill="${r.r>0?'#92400E':'#bbb'}">${r.r}</text>`;
+    if(i<n-1 && r.r>0) s+=`<text x="${cx(i)+cw/2}" y="${ys[3]+h+14}" text-anchor="middle" font-size="9" font-weight="700" fill="#B45309">exchange →</text>`;
+  });
+  const ans=Math.floor(num/d), rm=num%d;
+  s+=`<text x="${W/2}" y="308" text-anchor="middle" font-size="13" font-weight="800" fill="#15803D">${num.toLocaleString('en-GB')} ÷ ${d} = ${ans.toLocaleString('en-GB')}${rm?' remainder '+rm:''}</text>`;
+  return s+'</svg>';
+}
+
+
+/* ================= SECTION B — LESSONS ================= */
+
+/* ---------- STEP 5 : Long multiplication ---------- */
+const P5_MDB5 = `
+${asHeader('MB5','Step 5 — Long Multiplication','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — From the Area Model to the Formal Method</div>
+  ${asWarm(`In Step 4 you split the multiplier into <strong>tens + ones</strong> and multiplied twice. <strong>Long multiplication</strong> is the tidy, formal way to do exactly the same thing: one row for the <strong>ones</strong>, one row for the <strong>tens</strong> (with a <strong>placeholder 0</strong>), and then you <strong>add the rows</strong>. Nothing new is happening — it is the area model in columns!`)}
+
+  <div class="card-body"><strong>Pictorial → formal:</strong> the two rows of the area model become the two rows of the column method.</div>
+  ${mdArea(134,12,'134 × 12 — area model')}
+  ${mdLong(134,12,'134 × 12 — long multiplication')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">① Ones row</div><div class="s-body" style="color:#0C447C;">Multiply the top number by the <strong>ones digit</strong> of the multiplier. Exchange (carry) as in Step 3.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">② Placeholder zero</div><div class="s-body" style="color:#633806;">Before the tens row, write a <strong>0</strong> in the ones column. We are multiplying by a number of tens, so the answer is 10 times bigger.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">③ Tens row</div><div class="s-body" style="color:#27500A;">Multiply the top number by the <strong>tens digit</strong>, starting in the tens column, next to the placeholder.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">④ Add the rows</div><div class="s-body" style="color:#3C3489;">Add the two rows. Check with an <strong>estimate</strong>: round both numbers.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — No placeholder zero</div><div class="s-body" style="color:#712B13;">Without the 0, the tens row is multiplied by ONE-tenth too little. The answer is wildly too small.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Mixing up the carries</div><div class="s-body" style="color:#712B13;">Carries from the <strong>ones row</strong> must not be added in the <strong>tens row</strong>. Use a different colour or rub them out before starting the tens row.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — From the area model: 134 × 12</div>
+  ${asWarm('Multiply by the 2 ones first, then by the 1 ten, then add.')}
+  ${mdLong(134,12,'134 × 12')}
+  ${steps([['Ones row: 134 × 2','= 268','4×2=8, 3×2=6, 1×2=2'],['Placeholder','write 0','so the next row is × 10'],['Tens row: 134 × 1','= 134 → 1,340',''],['ADD','268 + 1,340','= 1,608']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Carrying in both rows: 286 × 34</div>
+  ${asWarm('Both rows need exchanges this time. Keep the carries tidy!')}
+  ${mdLong(286,34,'286 × 34')}
+  ${steps([['Ones row: 286 × 4','= 1,144','6×4=24 (c2), 8×4+2=34 (c3), 2×4+3=11'],['Tens row: 286 × 30','= 8,580','286 × 3 = 858, then × 10'],['ADD','1,144 + 8,580','= 9,724'],['ESTIMATE','300 × 30','= 9,000 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A 4-digit number: 4,127 × 36</div>
+  ${asWarm('The method does not change when the numbers get bigger — only the rows get longer.')}
+  ${mdLong(4127,36,'4,127 × 36')}
+  ${steps([['Ones row: 4,127 × 6','= 24,762',''],['Tens row: 4,127 × 30','= 123,810','4,127 × 3 = 12,381, then × 10'],['ADD','24,762 + 123,810','= 148,572'],['ESTIMATE','4,000 × 36','= 144,000 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — A zero in the multiplier: 1,325 × 40</div>
+  ${asWarm('When the ones digit of the multiplier is 0, the ones row is all zeros — so we can skip straight to the tens row.')}
+  ${mdLong(1325,40,'1,325 × 40')}
+  ${steps([['Ones row: × 0','= 0000','every product is 0'],['Tens row: 1,325 × 4','= 5,300','then × 10 (placeholder)'],['ANSWER','53,000','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Shortcut (Step 4):</strong> 1,325 × 40 = 1,325 × 4 × 10 = 5,300 × 10 = 53,000 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — A zero in the number: 3,050 × 27</div>
+  ${asWarm('Zeros in the top number are digits too. Watch the carry land on a zero in the ones row.')}
+  ${mdLong(3050,27,'3,050 × 27')}
+  ${steps([['Ones row: 3,050 × 7','= 21,350','0×7=0, 5×7=35 (c3), 0×7+3=3, 3×7=21'],['Tens row: 3,050 × 20','= 61,000','3,050 × 2 = 6,100, then × 10'],['ADD','21,350 + 61,000','= 82,350']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Estimate first, then check: 1,874 × 28</div>
+  ${asWarm('Always estimate: round 1,874 to 2,000 and 28 to 30.')}
+  ${steps([['ESTIMATE','2,000 × 30','= 60,000']])}
+  ${mdLong(1874,28,'1,874 × 28')}
+  ${steps([['Exact answer','52,472','14,992 + 37,480'],['Compare','52,472 is a bit less than 60,000','both numbers were rounded UP ✓'],['Inverse check','52,472 ÷ 28','= 1,874 ✓ (Step 8 will teach this!)']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: the printing press</div>
+  ${asWarm(`A printing press prints <strong>1,325 pages every hour</strong>. How many pages does it print in <strong>24 hours</strong>?`)}
+  ${mdLong(1325,24,'1,325 × 24')}
+  ${steps([['Ones row: 1,325 × 4','= 5,300',''],['Tens row: 1,325 × 20','= 26,500',''],['ADD','5,300 + 26,500','= 31,800'],['ANSWER','31,800 pages','ESTIMATE: 1,300 × 25 ≈ 32,500 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake and explain the zero</div>
+  ${asWarm('Tolu works out <strong>4,127 × 36</strong> and gets <strong>37,143</strong> (24,762 + 12,381). Is he right?')}
+  ${steps([['Tens row','12,381','this is 4,127 × 3 — but it should be × 30!'],['Missing','the placeholder 0','12,381 should be 123,810'],['CORRECT','24,762 + 123,810','= 148,572'],['ESTIMATE','4,000 × 36 = 144,000','so 37,143 was impossible ✗']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Why is the zero there?</strong> The 3 in 36 is not 3 — it is <strong>30</strong>. Multiplying by 30 means ×3 and then ×10, and ×10 slides every digit left (Step 1). The zero holds the ones column.</div>
+</div>
+
+${asExCard(5,[
+ exQ(1,'What is 134 × 12?',['1,608','1,068','1,408'],0),
+ exQ(2,'What is 286 × 34?',['9,724','9,624','8,724'],0),
+ exQ(3,'What is 4,127 × 36?',['148,572','148,472','138,572'],0),
+ exQ(4,'What is 1,325 × 40?',['53,000','5,300','530,000'],0),
+ exQ(5,'What is 3,050 × 27?',['82,350','82,305','8,235'],0),
+ exQ(6,'Which is the best estimate for 1,874 × 28?',['About 60,000','About 6,000','About 600,000'],0),
+ exQ(7,'A printing press prints 1,325 pages every hour. How many pages does it print in 24 hours?',['31,800','30,800','32,800'],0),
+ exQ(8,'In long multiplication, why do we write a 0 at the start of the tens row?',['Because we are multiplying by tens, so the answer is 10 times bigger','To make the working look neat','Because the number ends in a zero'],0),
+ exQ(9,'THINK DEEPER: Tolu says 4,127 × 36 = 37,143. How can you tell he is wrong without calculating exactly?',['An estimate of 4,000 × 36 = 144,000 is much bigger','Because 37,143 is an odd number','Because 36 is an even number'],0,'t'),
+ exQ(10,'BOSS LEVEL: A theatre sells 2,468 tickets every night for 35 nights. How many MORE tickets must it sell to reach 90,000?',['3,620','4,620','3,720'],0,'b')])}`;
+
+
+/* ---------- STEP 6 : Divide up to 4 digits by a 1-digit number ---------- */
+const P5_MDB6 = `
+${asHeader('MB6','Step 6 — Divide Up to 4 Digits by a 1-Digit Number','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#378ADD;">
+  <div class="card-title" style="color:#0C447C;">1. Concrete &amp; Pictorial Stage — Sharing, One Column at a Time</div>
+  ${asWarm(`Division is <strong>fair sharing</strong>. Imagine sharing <strong>3,648 counters</strong> equally between <strong>4 groups</strong>. Start with the biggest place value: share the thousands, then the hundreds, then the tens, then the ones. If some are <strong>left over</strong> in a column, <strong>exchange</strong> them for 10 of the next smaller column and keep sharing!`)}
+
+  <div class="card-body"><strong>Concrete:</strong> 3 thousand-counters cannot be shared between 4 groups, so exchange them for 30 hundreds and add the 6 hundreds: 36 hundreds ÷ 4 = 9 hundreds each. Continue with the tens and ones.</div>
+  ${mdShare(3648,4,'3,648 ÷ 4 — sharing chart')}
+
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">📋 Sharing method</div><div class="s-body" style="color:#0C447C;">Work from the <strong>left</strong>. Share each column. The <strong>left-over</strong> is exchanged: 10 × left-over + next digit becomes the next amount to share.</div></div>
+    <div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">📋 Chunking (partitioning)</div><div class="s-body" style="color:#27500A;">Split the number into parts that are <strong>easy to divide</strong>: 3,648 = 3,600 + 48. Divide each part, then add the answers.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">✅ Check with the inverse</div><div class="s-body" style="color:#3C3489;">If 3,648 ÷ 4 = 912, then 912 × 4 must equal 3,648 (Step 3).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Losing a zero</div><div class="s-body" style="color:#712B13;">If a column cannot be shared (like 1 ten ÷ 6) the answer digit is <strong>0</strong>, not nothing. 5,418 ÷ 6 = 903, not 93.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Dividing the smaller by the bigger</div><div class="s-body" style="color:#712B13;">Always divide the <strong>number being shared</strong> by the divisor, never the other way round. 3 ÷ 4 does not work in whole numbers — so exchange!</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — No exchange needed: 2,484 ÷ 2</div>
+  ${asWarm('Every digit can be shared exactly between 2 groups.')}
+  ${mdShare(2484,2,'2,484 ÷ 2')}
+  ${steps([['2 thousands ÷ 2','= 1 thousand',''],['4 hundreds ÷ 2','= 2 hundreds',''],['8 tens ÷ 2','= 4 tens',''],['4 ones ÷ 2','= 2 ones',''],['ANSWER','2,484 ÷ 2 = 1,242','CHECK: 1,242 × 2 = 2,484 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Exchanging thousands for hundreds: 3,648 ÷ 4</div>
+  ${asWarm('3 thousands cannot be shared into 4 groups — so exchange them!')}
+  ${mdShare(3648,4,'3,648 ÷ 4')}
+  ${steps([['3 thousands ÷ 4','= 0 r 3','exchange 3 thousands for 30 hundreds'],['36 hundreds ÷ 4','= 9',''],['4 tens ÷ 4','= 1',''],['8 ones ÷ 4','= 2',''],['ANSWER','912','CHECK: 912 × 4 = 3,648 ✓']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Chunking check:</strong> 3,648 = 3,600 + 48 → 3,600 ÷ 4 = 900 and 48 ÷ 4 = 12 → 900 + 12 = 912 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A zero in the answer: 5,418 ÷ 6</div>
+  ${asWarm('Watch the tens column carefully — there is only 1 ten to share between 6 groups!')}
+  ${mdShare(5418,6,'5,418 ÷ 6')}
+  ${steps([['5 thousands ÷ 6','= 0 r 5','exchange for 50 hundreds'],['54 hundreds ÷ 6','= 9',''],['1 ten ÷ 6','= 0 r 1','NOTHING each — write 0! Exchange for 10 ones'],['18 ones ÷ 6','= 3',''],['ANSWER','903','NOT 93! CHECK: 903 × 6 = 5,418 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Chunking with multiples: 7,248 ÷ 6</div>
+  ${asWarm('Split 7,248 into a part that is a multiple of 6 that is easy to divide, and the rest.')}
+  ${steps([['Partition','7,248 = 7,200 + 48','both easy to divide by 6'],['7,200 ÷ 6','= 1,200','72 ÷ 6 = 12, then × 100'],['48 ÷ 6','= 8',''],['ADD','1,200 + 8','= 1,208']])}
+  ${mdShare(7248,6,'7,248 ÷ 6 — the sharing chart agrees')}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — When something is left over: 2,437 ÷ 3</div>
+  ${asWarm('If the ones cannot be shared exactly, the last left-over is the <strong>remainder</strong>.')}
+  ${mdShare(2437,3,'2,437 ÷ 3')}
+  ${steps([['2,436 ÷ 3','= 812','exactly (the 6 ones share exactly)'],['The extra 1','cannot be shared into 3 groups','it is left over'],['ANSWER','812 remainder 1','CHECK: 812 × 3 + 1 = 2,437 ✓']])}
+  <div class="card-body" style="margin-top:6px;">🔗 What to <em>do</em> with a remainder is the subject of Step 8!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Check with the inverse, and estimate</div>
+  ${asWarm('Division and multiplication undo each other. Use that to prove 3,648 ÷ 4 = 912.')}
+  ${steps([['ESTIMATE first','3,600 ÷ 4','= 900 — so the answer should be near 900'],['Answer','3,648 ÷ 4','= 912 ✓ close to the estimate']])}
+  ${mdCol1(912,4,'CHECK: 912 × 4')}
+  ${steps([['Inverse','912 × 4','= 3,648 ✓ — the same as the number we started with']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Real life: cutting ribbon</div>
+  ${asWarm(`A roll holds <strong>4,872 cm</strong> of ribbon. A shop cuts it into <strong>8 equal pieces</strong>. How long is each piece?`)}
+  ${mdShare(4872,8,'4,872 ÷ 8')}
+  ${steps([['4 thousands ÷ 8','= 0 r 4','exchange for 40 hundreds'],['48 hundreds ÷ 8','= 6',''],['7 tens ÷ 8','= 0 r 7','zero in the answer!'],['72 ones ÷ 8','= 9',''],['ANSWER','609 cm','CHECK: 609 × 8 = 4,872 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: spot the mistake</div>
+  ${asWarm('Tolu says <strong>5,418 ÷ 6 = 93</strong>. How can you show he is wrong?')}
+  ${steps([['Estimate','5,400 ÷ 6','= 900 — so 93 is far too small ✗'],['Inverse','93 × 6','= 558, not 5,418 ✗'],['What went wrong?','he lost the zero in the tens place','1 ten ÷ 6 = 0'],['CORRECT','903','903 × 6 = 5,418 ✓']])}
+  <div class="card-body" style="margin-top:8px;"><strong>Always, sometimes or never?</strong> &ldquo;A 4-digit number ÷ a 1-digit number gives a 4-digit answer.&rdquo;</div>
+  ${steps([['7,248 ÷ 6','= 1,208','4 digits'],['3,648 ÷ 4','= 912','3 digits'],['VERDICT','Sometimes','depends on the numbers']])}
+</div>
+
+${asExCard(6,[
+ exQ(1,'What is 2,484 ÷ 2?',['1,242','1,224','1,142'],0),
+ exQ(2,'What is 3,648 ÷ 4?',['912','921','902'],0),
+ exQ(3,'What is 5,418 ÷ 6?',['903','93','930'],0),
+ exQ(4,'What is 7,248 ÷ 6?',['1,208','1,280','1,218'],0),
+ exQ(5,'What is 2,436 ÷ 3?',['812','821','802'],0),
+ exQ(6,'A roll of ribbon is 4,872 cm long. It is cut into 8 equal pieces. How long is each piece?',['609 cm','69 cm','690 cm'],0),
+ exQ(7,'What is 2,437 ÷ 3?',['812 remainder 1','812','811 remainder 4'],0),
+ exQ(8,'Tolu says 5,418 ÷ 6 = 93. Is he right?',['No — the tens column gives 0, so the answer is 903','Yes — 93 × 6 = 5,418','No — the answer is 930'],0),
+ exQ(9,'THINK DEEPER: 3,648 ÷ 4 = 912. Which calculation checks this answer?',['912 × 4 = 3,648','912 + 4 = 916','3,648 × 4 = 912'],0,'t'),
+ exQ(10,'BOSS LEVEL: A farmer packs 7,248 eggs into trays of 6. The trays are then packed into crates holding 8 trays each. How many crates are needed?',['151 crates','1,208 crates','150 crates'],0,'b')])}`;
+
+
 const P5_MDB7  = null; // Short division
 const P5_MDB8  = null; // Interpret remainders
 const P5_MDB9  = null; // Multi-step multiplication and division problems

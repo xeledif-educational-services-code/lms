@@ -348,7 +348,7 @@ async function syncAllLocalAttempts() {
   }
 }
 
-/* ─── Firestore reads ─── */
+/* ─── Firestore reads OLD and replaced───
 
 function cloudSubscribeAll(callback) {
   if (!fbDb) return () => {};
@@ -358,6 +358,47 @@ function cloudSubscribeAll(callback) {
     callback(out);
   }, err => console.warn('cloudSubscribeAll error:', err));
 }
+
+*/
+/* ============================================================
+   REPLACE the old  function cloudSubscribeAll(callback) { ... }
+   in  primary-maths\firebase-integration.js  with everything below.
+   (Leave cloudSubscribeMy and all other functions exactly as they are.)
+
+   Why: the teacher dashboard used to download EVERY progress record, every time.
+   Now it only listens to the last 30 days (or 90 days / all time, chosen on the
+   dashboard), so Firestore reads stay low however many records pile up.
+   Records are filtered by their "updatedAt" (ISO text) field.
+   ============================================================ */
+
+let _allUnsub = null;
+let _allCb = null;
+
+function dashDays() {
+  const v = localStorage.getItem('xeledif.dash.days');
+  return v === 'all' ? 'all' : (parseInt(v, 10) || 30);
+}
+
+function cloudSubscribeAll(callback) {
+  if (!fbDb) return () => {};
+  if (callback) _allCb = callback;                     // call again with no argument to re-subscribe (period changed)
+  if (_allUnsub) { try { _allUnsub(); } catch (e) {} _allUnsub = null; }
+
+  let q = fbDb.collection('progress');
+  const days = dashDays();
+  if (days !== 'all') {
+    q = q.where('updatedAt', '>=', new Date(Date.now() - days * 86400000).toISOString());
+  }
+  _allUnsub = q.onSnapshot(snap => {
+    const out = {};
+    snap.forEach(d => { out[d.id] = d.data(); });
+    window.__dashLoaded = snap.size;
+    if (typeof window.__dashInfo === 'function') window.__dashInfo(snap.size);
+    if (_allCb) _allCb(out);
+  }, err => console.warn('cloudSubscribeAll error:', err));
+  return () => { if (_allUnsub) _allUnsub(); };
+}
+
 
 function cloudSubscribeMy(callback) {
   if (!fbDb || !currentUser) return () => {};
