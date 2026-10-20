@@ -12889,9 +12889,9 @@ const SCHEME_P5 = [
     id:'autumn', emoji:'🍂', label:'Autumn Term', meta:'September – December 2026',
     col: TERM_COLORS.autumn, open: false,
     topics: [
-      { id:'placevalue', label:'Place Value', col: TOPIC_PALETTE[0],
+      { id:'placevalue', label:'Place Value', col: TOPIC_PALETTE[0], poolKey:'P5.AUT.PV', poolFile:'pools/p5_aut_placevalue.js',
         steps: [
-          { label:'Roman numerals to 1,000', content: P5_PV1 },
+          { label:'Roman numerals to 1,000', content: P5_PV1, poolStep:'P5.AUT.PV.S01', stepNumber: 1 },
           { label:'Numbers to 10,000', content: P5_PV2 },
           { label:'Numbers to 100,000', content: P5_PV3 },
           { label:'Numbers to 1,000,000', content: P5_PV4 },
