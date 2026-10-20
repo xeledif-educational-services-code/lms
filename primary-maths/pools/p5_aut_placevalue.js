@@ -24,159 +24,109 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
         /* ===== CORE 10 (From Lesson) ===== */
         { id:'P5.AUT.PV.S01.Q0001', v:1, concept:'pv1.read', level:'n', difficulty:1,
           stem:'What number is VII?', options:['6','7','8'], correct:1, check:'7' },
-
         { id:'P5.AUT.PV.S01.Q0002', v:1, concept:'pv1.subtract', level:'n', difficulty:2,
           stem:'What number is XL?', options:['60','40','90'], correct:1, check:'40' },
-
         { id:'P5.AUT.PV.S01.Q0003', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 24 as a Roman numeral.', options:['XXIIV','XXIV','XIVX'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0004', v:1, concept:'pv1.subtract', level:'n', difficulty:3,
           stem:'What number is CD?', options:['600','500','400'], correct:2, check:'400' },
-
         { id:'P5.AUT.PV.S01.Q0005', v:1, concept:'pv1.subtract', level:'n', difficulty:2,
           stem:'Write 90 as a Roman numeral.', options:['LXL','XXXXL','XC'], correct:2 },
-
         { id:'P5.AUT.PV.S01.Q0006', v:1, concept:'pv1.real-life', level:'n', difficulty:1,
           stem:'A film is called "Episode IX". Which episode is it?', options:['8','9','11'], correct:1, check:'9' },
-
         { id:'P5.AUT.PV.S01.Q0007', v:1, concept:'pv1.read', level:'n', difficulty:2,
           stem:'What number is CCCXLV?', options:['345','335','355'], correct:0, check:'345' },
-
         { id:'P5.AUT.PV.S01.Q0008', v:1, concept:'pv1.read', level:'n', difficulty:1,
           stem:'Which Roman numeral equals 500?', options:['C','L','D'], correct:2 },
-
         { id:'P5.AUT.PV.S01.Q0009', v:1, concept:'pv1.real-life', level:'t', difficulty:2,
           stem:"A clock's hour hand points at IV. What o'clock is it?", options:["3 o'clock","4 o'clock","5 o'clock"], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0010', v:1, concept:'pv1.reasoning', level:'b', difficulty:3,
           stem:'A museum sign reads DCCCLXXXVIII. How old is the exhibit? (Hint: D + CCC + LXXX + VIII)', options:['888','838','788'], correct:0, check:'888' },
-
         /* ===== BATCH A — The Addition Rule (Q0011–Q0018) ===== */
         { id:'P5.AUT.PV.S01.Q0011', v:1, concept:'pv1.add', level:'n', difficulty:1,
           stem:'What number is VI?', options:['4','5','6'], correct:2, check:'6' },
-
         { id:'P5.AUT.PV.S01.Q0012', v:1, concept:'pv1.add', level:'n', difficulty:1,
           stem:'What number is LX?', options:['40','50','60'], correct:2, check:'60' },
-
         { id:'P5.AUT.PV.S01.Q0013', v:1, concept:'pv1.add', level:'n', difficulty:1,
           stem:'What number is CX?', options:['90','100','110'], correct:2, check:'110' },
-
         { id:'P5.AUT.PV.S01.Q0014', v:1, concept:'pv1.add', level:'n', difficulty:2,
           stem:'What number is MCC?', options:['1,200','1,100','1,000'], correct:0, check:'1200' },
-
         { id:'P5.AUT.PV.S01.Q0015', v:1, concept:'pv1.add', level:'n', difficulty:2,
           stem:'What number is DL?', options:['450','500','550'], correct:2, check:'550' },
-
         { id:'P5.AUT.PV.S01.Q0016', v:1, concept:'pv1.add', level:'n', difficulty:2,
           stem:'Write 15 as a Roman numeral.', options:['VX','XV','XXV'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0017', v:1, concept:'pv1.add', level:'t', difficulty:3,
           stem:'Write 1,050 as a Roman numeral.', options:['ML','LM','CML'], correct:0 },
-
         { id:'P5.AUT.PV.S01.Q0018', v:1, concept:'pv1.add', level:'t', difficulty:3,
           stem:'What number is MMDCLXVI?', options:['2,666','2,166','2,660'], correct:0, check:'2666' },
-
         /* ===== BATCH B — Writing Rules & Subtraction (Q0019–Q0035) ===== */
         { id:'P5.AUT.PV.S01.Q0019', v:1, concept:'pv1.write', level:'n', difficulty:1,
           stem:'Write 9 as a Roman numeral.', options:['VIIII','IX','XI'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0020', v:1, concept:'pv1.write', level:'n', difficulty:1,
           stem:'Write 40 as a Roman numeral.', options:['XXXX','XL','LX'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0021', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 45 as a Roman numeral.', options:['VL','XLV','XXXXV'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0022', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 150 as a Roman numeral.', options:['CL','LC','CXXL'], correct:0 },
-
         { id:'P5.AUT.PV.S01.Q0023', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 400 as a Roman numeral.', options:['CCCC','CD','DC'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0024', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 900 as a Roman numeral.', options:['DCCCC','CM','MC'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0025', v:1, concept:'pv1.subtract', level:'n', difficulty:1,
           stem:'What number is IV?', options:['4','5','6'], correct:0, check:'4' },
-
         { id:'P5.AUT.PV.S01.Q0026', v:1, concept:'pv1.subtract', level:'n', difficulty:1,
           stem:'What number is IX?', options:['11','9','10'], correct:1, check:'9' },
-
         { id:'P5.AUT.PV.S01.Q0027', v:1, concept:'pv1.subtract', level:'n', difficulty:2,
           stem:'What number is XC?', options:['110','90','100'], correct:1, check:'90' },
-
         { id:'P5.AUT.PV.S01.Q0028', v:1, concept:'pv1.subtract', level:'n', difficulty:2,
           stem:'What number is CM?', options:['900','1100','1000'], correct:0, check:'900' },
-
         { id:'P5.AUT.PV.S01.Q0029', v:1, concept:'pv1.subtract', level:'t', difficulty:3,
           stem:'Write 44 as a Roman numeral.', options:['XXXXIV','XLIV','XLIIII'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0030', v:1, concept:'pv1.subtract', level:'t', difficulty:3,
           stem:'Write 99 as a Roman numeral.', options:['IC','XCIX','LXXXXIX'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0031', v:1, concept:'pv1.subtract', level:'t', difficulty:3,
           stem:'Write 490 as a Roman numeral.', options:['XD','CDXC','CDLXXXX'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0032', v:1, concept:'pv1.write', level:'n', difficulty:1,
           stem:'Write 7 as a Roman numeral.', options:['V','VII','VI'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0033', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 60 as a Roman numeral.', options:['XL','LX','LXX'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0034', v:1, concept:'pv1.write', level:'n', difficulty:2,
           stem:'Write 200 as a Roman numeral.', options:['CC','DD','LL'], correct:0 },
-
         { id:'P5.AUT.PV.S01.Q0035', v:1, concept:'pv1.write', level:'n', difficulty:3,
           stem:'Write 1,000 as a Roman numeral.', options:['D','M','C'], correct:1 },
-
         /* ===== BATCH C — Real Life & Reasoning (Q0036–Q0050) ===== */
         { id:'P5.AUT.PV.S01.Q0036', v:1, concept:'pv1.real-life', level:'n', difficulty:1,
           stem:'A King is named Henry VIII. Which Henry is this?', options:['The 6th','The 7th','The 8th'], correct:2, check:'8' },
-
         { id:'P5.AUT.PV.S01.Q0037', v:1, concept:'pv1.real-life', level:'n', difficulty:1,
           stem:'Which Roman numeral is missing from a standard clock face?', options:['IV (4)','IX (9)','VIIII (4)'], correct:2 },
-
         { id:'P5.AUT.PV.S01.Q0038', v:1, concept:'pv1.real-life', level:'n', difficulty:2,
           stem:'The Super Bowl is labelled Super Bowl LV. Which number is this?', options:['45','50','55'], correct:2, check:'55' },
-
         { id:'P5.AUT.PV.S01.Q0039', v:1, concept:'pv1.real-life', level:'n', difficulty:2,
           stem:'A building was built in the year MMXII. What year is that?', options:['2002','2012','2020'], correct:1, check:'2012' },
-
         { id:'P5.AUT.PV.S01.Q0040', v:1, concept:'pv1.real-life', level:'t', difficulty:2,
           stem:'A film sequel is called "Rocky IV". If the first film came out in 1976, what number sequel is this?', options:['The 3rd','The 4th','The 5th'], correct:1, check:'4' },
-
         { id:'P5.AUT.PV.S01.Q0041', v:1, concept:'pv1.reasoning', level:'n', difficulty:2,
           stem:'Which is the correct way to write 4?', options:['IIII','IV','VX'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0042', v:1, concept:'pv1.reasoning', level:'n', difficulty:2,
           stem:'Why do we write 90 as XC and not LXL?', options:['You should not subtract L from X','The Romans did not have an L','XC is shorter'], correct:0 },
-
         { id:'P5.AUT.PV.S01.Q0043', v:1, concept:'pv1.reasoning', level:'t', difficulty:3,
           stem:'Which of these Roman numerals is INVALID?', options:['MCMXCIV','XXXX','CDXL'], correct:1 },
-
         { id:'P5.AUT.PV.S01.Q0044', v:1, concept:'pv1.reasoning', level:'t', difficulty:3,
           stem:'Which Roman numeral is the LARGEST?', options:['DCC','CM','MCC'], correct:2 },
-
         { id:'P5.AUT.PV.S01.Q0045', v:1, concept:'pv1.read', level:'n', difficulty:2,
           stem:'What number is MCM?', options:['1900','2100','1100'], correct:0, check:'1900' },
-
         { id:'P5.AUT.PV.S01.Q0046', v:1, concept:'pv1.read', level:'n', difficulty:3,
           stem:'What number is CMXCIV?', options:['994','1094','984'], correct:0, check:'994' },
-
         { id:'P5.AUT.PV.S01.Q0047', v:1, concept:'pv1.read', level:'n', difficulty:2,
           stem:'What number is LXX?', options:['50','70','110'], correct:1, check:'70' },
-
         { id:'P5.AUT.PV.S01.Q0048', v:1, concept:'pv1.read', level:'n', difficulty:3,
           stem:'What number is MMM?', options:['300','3000','3300'], correct:1, check:'3000' },
-
         { id:'P5.AUT.PV.S01.Q0049', v:1, concept:'pv1.subtract', level:'t', difficulty:3,
           stem:'A pupil writes 49 as IL. Why is this wrong?', options:['You must only subtract powers of 10 (I, X, C)','49 is a prime number','You cannot use I in subtraction'], correct:0 },
-
         { id:'P5.AUT.PV.S01.Q0050', v:1, concept:'pv1.write', level:'b', difficulty:3,
           stem:'Write the year 2024 as a Roman numeral.', options:['MMXXIV','MMXXIVX','MMMXXIV'], correct:0 }
       ]
     },
-
     'P5.AUT.PV.S02': {
       label: 'Numbers to 10,000',
       lesson: 'P5_PV2',
@@ -194,34 +144,24 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
         /* ===== CORE 10 (From Lesson) ===== */
         { id:'P5.AUT.PV.S02.Q0001', v:1, concept:'pv2.counting', level:'n', difficulty:1,
           stem:'What is 10 × 1,000?', options:['10,000','1,000','100,000'], correct:0, check:'10000' },
-
         { id:'P5.AUT.PV.S02.Q0002', v:1, concept:'pv2.place', level:'n', difficulty:1,
           stem:'In 8,253, what does the digit 8 represent?', options:['8,000','800','80'], correct:0, check:'8000' },
-
         { id:'P5.AUT.PV.S02.Q0003', v:1, concept:'pv2.partition', level:'n', difficulty:2,
           stem:'4,000 + 300 + 20 + 9 = ?', options:['4,329','4,239','3,429'], correct:0, check:'4329' },
-
         { id:'P5.AUT.PV.S02.Q0004', v:1, concept:'pv2.zero', level:'n', difficulty:2,
           stem:'Which number has 6 thousands and 5 ones?', options:['6,005','6,500','6,050'], correct:0, check:'6005' },
-
         { id:'P5.AUT.PV.S02.Q0005', v:1, concept:'pv2.counting', level:'n', difficulty:1,
           stem:'Continue the count: 2,000, 3,000, 4,000, ___', options:['5,000','6,000','4,100'], correct:0, check:'5000' },
-
         { id:'P5.AUT.PV.S02.Q0006', v:1, concept:'pv2.counting', level:'n', difficulty:1,
           stem:'Write ten thousand in figures.', options:['10,000','1,000','100,000'], correct:0, check:'10000' },
-
         { id:'P5.AUT.PV.S02.Q0007', v:1, concept:'pv2.value', level:'n', difficulty:2,
           stem:'What is the value of the 9 in 7,090?', options:['90','900','9'], correct:0, check:'90' },
-
         { id:'P5.AUT.PV.S02.Q0008', v:1, concept:'pv2.counting', level:'n', difficulty:2,
           stem:'10,000 − 1,000 = ?', options:['9,000','1,009','11,000'], correct:0, check:'9000' },
-
         { id:'P5.AUT.PV.S02.Q0009', v:1, concept:'pv2.partition', level:'t', difficulty:2,
           stem:'THINK DEEPER: I am a 4-digit number. My thousands digit is 5, hundreds digit is 2, tens digit is 0 and ones digit is 7. What am I?', options:['5,207','5,270','5,027'], correct:0, check:'5207' },
-
         { id:'P5.AUT.PV.S02.Q0010', v:1, concept:'pv2.real-life', level:'b', difficulty:3,
           stem:'BOSS LEVEL: A warehouse packs 1,000 pencils per box. There are 7 boxes, 4 packs of 100 and 3 loose pencils. How many pencils?', options:['7,403','7,430','7,304'], correct:0, check:'7403' },
-
         /* ===== BATCH A — Place Value & The Zero (Q0011–Q0026) ===== */
         { id:'P5.AUT.PV.S02.Q0011', v:1, concept:'pv2.place', level:'n', difficulty:1,
           stem:'What is the value of the digit 5 in 5,342?', options:['5','50','5,000'], correct:2, check:'5000' },
@@ -237,7 +177,6 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'What is the next number after 9,999?', options:['9,100','10,000','100,000'], correct:1, check:'10000' },
         { id:'P5.AUT.PV.S02.Q0017', v:1, concept:'pv2.place', level:'n', difficulty:1,
           stem:'How many digits are in the number 10,000?', options:['4','5','6'], correct:1, check:'5' },
-        
         { id:'P5.AUT.PV.S02.Q0018', v:1, concept:'pv2.value', level:'n', difficulty:2,
           stem:'What is the value of the digit 2 in 7,280?', options:['2','200','20'], correct:1, check:'200' },
         { id:'P5.AUT.PV.S02.Q0019', v:1, concept:'pv2.value', level:'n', difficulty:2,
@@ -246,7 +185,6 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'In 3,762, the digit 7 is worth how much?', options:['7','70','700'], correct:2, check:'700' },
         { id:'P5.AUT.PV.S02.Q0021', v:1, concept:'pv2.value', level:'t', difficulty:3,
           stem:'In the number 1,050, what is the value of the 5?', options:['5','50','500'], correct:1, check:'50' },
-
         { id:'P5.AUT.PV.S02.Q0022', v:1, concept:'pv2.zero', level:'n', difficulty:2,
           stem:'Which number has a zero in the hundreds column?', options:['3,045','4,301','1,206'], correct:0 },
         { id:'P5.AUT.PV.S02.Q0023', v:1, concept:'pv2.zero', level:'n', difficulty:2,
@@ -257,7 +195,6 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'If you remove the zero from 3,056, what number is left?', options:['356','3,560','3,060'], correct:0, check:'356' },
         { id:'P5.AUT.PV.S02.Q0026', v:1, concept:'pv2.zero', level:'t', difficulty:3,
           stem:'Why is the zero important in the number 7,405?', options:['It holds the hundreds place empty','It makes the number bigger','It does nothing'], correct:0 },
-
         /* ===== BATCH B — Partitioning & Counting (Q0027–Q0039) ===== */
         { id:'P5.AUT.PV.S02.Q0027', v:1, concept:'pv2.partition', level:'n', difficulty:1,
           stem:'What is 8,000 + 0 + 60 + 4?', options:['8,604','8,064','8,640'], correct:1, check:'8064' },
@@ -271,7 +208,6 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'Which of these is the correct partition for 1,090?', options:['1,000 + 90','1,000 + 900','100 + 90'], correct:0 },
         { id:'P5.AUT.PV.S02.Q0032', v:1, concept:'pv2.partition', level:'n', difficulty:2,
           stem:'What number is 3 thousands and 4 ones?', options:['3,040','3,004','3,400'], correct:1, check:'3004' },
-
         { id:'P5.AUT.PV.S02.Q0033', v:1, concept:'pv2.counting', level:'n', difficulty:1,
           stem:'Count on in thousands: 5,000, 6,000, 7,000, ___', options:['8,000','7,100','9,000'], correct:0, check:'8000' },
         { id:'P5.AUT.PV.S02.Q0034', v:1, concept:'pv2.counting', level:'n', difficulty:2,
@@ -286,7 +222,6 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'10 lots of 1,000 is ___', options:['1,000','10,000','100,000'], correct:1, check:'10000' },
         { id:'P5.AUT.PV.S02.Q0039', v:1, concept:'pv2.zero', level:'n', difficulty:2,
           stem:'Which number has a zero in the tens column?', options:['2,407','3,560','1,050'], correct:0 },
-
         /* ===== BATCH C — Real Life & Reasoning (Q0040–Q0050) ===== */
         { id:'P5.AUT.PV.S02.Q0040', v:1, concept:'pv2.partition', level:'n', difficulty:2,
           stem:'What is 7,000 + 50 + 8?', options:['7,058','7,508','7,580'], correct:0, check:'7058' },
@@ -300,7 +235,6 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'Tomi says "10,000 is just 1,000 with a zero added". Is she right?', options:['Yes, 10 × 1,000 = 10,000','No, 10,000 is smaller','No, 10,000 is a million'], correct:0 },
         { id:'P5.AUT.PV.S02.Q0045', v:1, concept:'pv2.real-life', level:'n', difficulty:2,
           stem:'A car costs £7,500. What is the value of the 5?', options:['5','50','500'], correct:2, check:'500' },
-        
         { id:'P5.AUT.PV.S02.Q0046', v:1, concept:'pv2.reasoning', level:'t', difficulty:3,
           stem:'Which is the LARGEST number?', options:['4,099','4,909','4,990'], correct:2 },
         { id:'P5.AUT.PV.S02.Q0047', v:1, concept:'pv2.reasoning', level:'t', difficulty:3,
@@ -311,6 +245,264 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'I am a number between 6,000 and 7,000. My digits add up to 11. I have a 4 in the tens column. What am I?', options:['6,340','6,240','6,042'], correct:0 },
         { id:'P5.AUT.PV.S02.Q0050', v:1, concept:'pv2.real-life', level:'b', difficulty:3,
           stem:'A shop has 4 boxes of 1,000 stickers, 5 packs of 100, 0 single stickers, and 8 loose stickers. How many stickers?', options:['4,508','4,580','4,050'], correct:0, check:'4508' }
+      ]
+    },
+    'P5.AUT.PV.S03': {
+      label: 'Numbers to 100,000',
+      lesson: 'P5_PV3',
+      targetSize: 50,
+      concepts: [
+        { id:'pv3.place',       name:'Understanding place value to 100,000',                    target:10 },
+        { id:'pv3.value',       name:'Finding the value of a specific digit',                   target:7  },
+        { id:'pv3.partition',   name:'Partitioning and recombining large numbers',              target:10 },
+        { id:'pv3.zero',        name:'Hero zeros in large numbers',                             target:6  },
+        { id:'pv3.counting',    name:'Counting in ten-thousands and the ×10 machine',           target:9  },
+        { id:'pv3.real-life',   name:'Real-life problems and reasoning with 5-digit numbers',   target:8  }
+      ],
+      questions: [
+        /* ===== CORE 10 (From Lesson) ===== */
+        { id:'P5.AUT.PV.S03.Q0001', v:1, concept:'pv3.counting', level:'n', difficulty:1,
+          stem:'10 × 10,000 = ?', options:['100,000','10,000','1,000,000'], correct:0, check:'100000' },
+        { id:'P5.AUT.PV.S03.Q0002', v:1, concept:'pv3.value', level:'n', difficulty:2,
+          stem:'What is the value of the 7 in 73,500?', options:['70,000','7,000','700'], correct:0, check:'70000' },
+        { id:'P5.AUT.PV.S03.Q0003', v:1, concept:'pv3.partition', level:'n', difficulty:2,
+          stem:'50,000 + 6,000 + 300 + 4 = ?', options:['56,304','50,634','56,340'], correct:0, check:'56304' },
+        { id:'P5.AUT.PV.S03.Q0004', v:1, concept:'pv3.zero', level:'n', difficulty:2,
+          stem:'Which number is eighty thousand and six?', options:['80,006','86,000','8,006'], correct:0, check:'80006' },
+        { id:'P5.AUT.PV.S03.Q0005', v:1, concept:'pv3.counting', level:'n', difficulty:1,
+          stem:'Count on in 10,000s from 40,000. What comes next?', options:['50,000','41,000','60,000'], correct:0, check:'50000' },
+        { id:'P5.AUT.PV.S03.Q0006', v:1, concept:'pv3.place', level:'n', difficulty:1,
+          stem:'How many digits does 100,000 have?', options:['6','5','7'], correct:0, check:'6' },
+        { id:'P5.AUT.PV.S03.Q0007', v:1, concept:'pv3.counting', level:'n', difficulty:1,
+          stem:'Write one hundred thousand in figures.', options:['100,000','10,000','1,000,000'], correct:0, check:'100000' },
+        { id:'P5.AUT.PV.S03.Q0008', v:1, concept:'pv3.counting', level:'n', difficulty:2,
+          stem:'100,000 − 10,000 = ?', options:['90,000','99,000','10,000'], correct:0, check:'90000' },
+        { id:'P5.AUT.PV.S03.Q0009', v:1, concept:'pv3.partition', level:'t', difficulty:3,
+          stem:'THINK DEEPER: My ten-thousands digit is 9, all other digits are 0 except 5 tens. What number am I?', options:['90,050','95,000','90,005'], correct:0, check:'90050' },
+        { id:'P5.AUT.PV.S03.Q0010', v:1, concept:'pv3.real-life', level:'b', difficulty:3,
+          stem:'BOSS LEVEL: A club sells 10,000 tickets a day for 8 days, then 2,500 more. How many tickets sold?', options:['82,500','80,250','85,200'], correct:0, check:'82500' },
+        /* ===== BATCH A — Place Value & Value (Q0011–Q0027) ===== */
+        { id:'P5.AUT.PV.S03.Q0011', v:1, concept:'pv3.place', level:'n', difficulty:1,
+          stem:'Which column is the digit 4 in for the number 45,000?', options:['Ten thousands','Thousands','Hundreds'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0012', v:1, concept:'pv3.place', level:'n', difficulty:1,
+          stem:'In 82,901, which digit is in the hundreds column?', options:['9','8','2'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0013', v:1, concept:'pv3.place', level:'n', difficulty:2,
+          stem:'Which number has a 7 in the ten-thousands column?', options:['72,450','27,450','47,250'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0014', v:1, concept:'pv3.place', level:'n', difficulty:2,
+          stem:'What is the next column after ten-thousands?', options:['Hundred thousands','Millions','Thousands'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0015', v:1, concept:'pv3.place', level:'n', difficulty:2,
+          stem:'How many ten-thousands are in 50,000?', options:['5','50','500'], correct:0, check:'5' },
+        { id:'P5.AUT.PV.S03.Q0016', v:1, concept:'pv3.place', level:'t', difficulty:3,
+          stem:'Which digit is in the ten-thousands column of 104,500?', options:['0','1','4'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0017', v:1, concept:'pv3.value', level:'n', difficulty:2,
+          stem:'What is the value of the 8 in 18,250?', options:['8,000','800','80,000'], correct:0, check:'8000' },
+        { id:'P5.AUT.PV.S03.Q0018', v:1, concept:'pv3.value', level:'n', difficulty:2,
+          stem:'What is the value of the 5 in 60,500?', options:['500','50','5,000'], correct:0, check:'500' },
+        { id:'P5.AUT.PV.S03.Q0019', v:1, concept:'pv3.value', level:'n', difficulty:2,
+          stem:'In 94,100, what is the 9 worth?', options:['90,000','9,000','900'], correct:0, check:'90000' },
+        { id:'P5.AUT.PV.S03.Q0020', v:1, concept:'pv3.value', level:'n', difficulty:2,
+          stem:'In 32,045, what is the value of the 3?', options:['30,000','3,000','300,000'], correct:0, check:'30000' },
+        { id:'P5.AUT.PV.S03.Q0021', v:1, concept:'pv3.value', level:'t', difficulty:3,
+          stem:'Which digit is worth 60,000 in 367,200?', options:['6','7','3'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0022', v:1, concept:'pv3.zero', level:'n', difficulty:2,
+          stem:'Which number is sixty thousand and forty?', options:['60,040','60,400','6,040'], correct:0, check:'60040' },
+        { id:'P5.AUT.PV.S03.Q0023', v:1, concept:'pv3.zero', level:'n', difficulty:2,
+          stem:'Which number is twenty thousand, four hundred and one?', options:['20,401','24,001','20,041'], correct:0, check:'20401' },
+        { id:'P5.AUT.PV.S03.Q0024', v:1, concept:'pv3.zero', level:'n', difficulty:3,
+          stem:'Write 70,003 in words.', options:['Seventy thousand and three','Seventy thousand and thirty','Seven thousand and three'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0025', v:1, concept:'pv3.zero', level:'n', difficulty:3,
+          stem:'Which number has a zero in the thousands column?', options:['60,702','67,020','6,720'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0026', v:1, concept:'pv3.zero', level:'t', difficulty:3,
+          stem:'If you remove the zero from 50,302, what number is left?', options:['5,302','53,020','50,320'], correct:0, check:'5302' },
+        /* ===== BATCH B — Partitioning & Counting (Q0027–Q0040) ===== */
+        { id:'P5.AUT.PV.S03.Q0027', v:1, concept:'pv3.partition', level:'n', difficulty:1,
+          stem:'What is 90,000 + 3,000 + 200 + 40 + 5?', options:['93,245','92,345','9,324'], correct:0, check:'93245' },
+        { id:'P5.AUT.PV.S03.Q0028', v:1, concept:'pv3.partition', level:'n', difficulty:1,
+          stem:'What is 40,000 + 5,000 + 0 + 20 + 0?', options:['45,020','45,200','40,520'], correct:0, check:'45020' },
+        { id:'P5.AUT.PV.S03.Q0029', v:1, concept:'pv3.partition', level:'n', difficulty:2,
+          stem:'Partition 78,905.', options:['70,000 + 8,000 + 900 + 5','70,000 + 800 + 90 + 5','7,000 + 800 + 90 + 5'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0030', v:1, concept:'pv3.partition', level:'n', difficulty:2,
+          stem:'Partition 60,040.', options:['60,000 + 40','60,000 + 400','6,000 + 40'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0031', v:1, concept:'pv3.partition', level:'t', difficulty:3,
+          stem:'Which of these is the correct partition for 150,000?', options:['100,000 + 50,000','10,000 + 50,000','1,000 + 50,000'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0032', v:1, concept:'pv3.partition', level:'n', difficulty:2,
+          stem:'Which number is made of 5 ten-thousands, 2 thousands and 0 ones?', options:['52,000','5,200','520,000'], correct:0, check:'52000' },
+        { id:'P5.AUT.PV.S03.Q0033', v:1, concept:'pv3.counting', level:'n', difficulty:1,
+          stem:'Count on in 10,000s: 70,000, 80,000, 90,000, ___', options:['100,000','91,000','1,000,000'], correct:0, check:'100000' },
+        { id:'P5.AUT.PV.S03.Q0034', v:1, concept:'pv3.counting', level:'n', difficulty:1,
+          stem:'Count back in 10,000s: 30,000, 20,000, 10,000, ___', options:['0','9,000','1,000'], correct:0, check:'0' },
+        { id:'P5.AUT.PV.S03.Q0035', v:1, concept:'pv3.counting', level:'n', difficulty:2,
+          stem:'Which calculation gives 100,000?', options:['10 × 10,000','10 × 1,000','10 × 100,000'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0036', v:1, concept:'pv3.counting', level:'n', difficulty:2,
+          stem:'20,000 more than 50,000 is ___', options:['70,000','52,000','700,000'], correct:0, check:'70000' },
+        { id:'P5.AUT.PV.S03.Q0037', v:1, concept:'pv3.counting', level:'t', difficulty:3,
+          stem:'A car factory builds 10,000 cars a month. How many in a 9-month year?', options:['90,000','9,000','900,000'], correct:0, check:'90000' },
+        { id:'P5.AUT.PV.S03.Q0038', v:1, concept:'pv3.counting', level:'n', difficulty:1,
+          stem:'What is one more than 99,999?', options:['100,000','100,009','99,999'], correct:0, check:'100000' },
+        { id:'P5.AUT.PV.S03.Q0039', v:1, concept:'pv3.value', level:'n', difficulty:2,
+          stem:'In 7,350, what is the value of the 3?', options:['300','3,000','30'], correct:0, check:'300' },
+        { id:'P5.AUT.PV.S03.Q0040', v:1, concept:'pv3.partition', level:'n', difficulty:2,
+          stem:'What is 30,000 + 0 + 500 + 0 + 8?', options:['30,508','30,058','3,508'], correct:0, check:'30508' },
+        /* ===== BATCH C — Real Life & Reasoning (Q0041–Q0050) ===== */
+        { id:'P5.AUT.PV.S03.Q0041', v:1, concept:'pv3.real-life', level:'n', difficulty:1,
+          stem:'A stadium holds 9 ten-thousands of fans. How many is that?', options:['90,000','9,000','900,000'], correct:0, check:'90000' },
+        { id:'P5.AUT.PV.S03.Q0042', v:1, concept:'pv3.real-life', level:'n', difficulty:2,
+          stem:'A book has 80,405 pages. What is the value of the 4?', options:['400','4,000','40'], correct:0, check:'400' },
+        { id:'P5.AUT.PV.S03.Q0043', v:1, concept:'pv3.real-life', level:'n', difficulty:2,
+          stem:'A town has 40,000 people. Another has 10,000 more. What is the total?', options:['50,000','44,000','500,000'], correct:0, check:'50000' },
+        { id:'P5.AUT.PV.S03.Q0044', v:1, concept:'pv3.real-life', level:'t', difficulty:3,
+          stem:'Chidi says "100,000 is ten times bigger than 10,000". Is he right?', options:['Yes, 10 × 10,000 = 100,000','No, it is two times bigger','No, they are equal'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0045', v:1, concept:'pv3.real-life', level:'n', difficulty:2,
+          stem:'A car costs £40,500. What is the value of the 4?', options:['40,000','4,000','400'], correct:0, check:'40000' },
+        { id:'P5.AUT.PV.S03.Q0046', v:1, concept:'pv3.real-life', level:'b', difficulty:3,
+          stem:'A warehouse has 6 boxes of 10,000 pencils, 2 boxes of 100 and 7 single pencils. How many pencils?', options:['60,207','62,007','60,027'], correct:0, check:'60207' },
+        { id:'P5.AUT.PV.S03.Q0047', v:1, concept:'pv3.real-life', level:'t', difficulty:3,
+          stem:'Which is the LARGEST number?', options:['99,999','100,000','90,000'], correct:1 },
+        { id:'P5.AUT.PV.S03.Q0048', v:1, concept:'pv3.real-life', level:'t', difficulty:3,
+          stem:'Which is the SMALLEST number?', options:['50,005','50,500','55,000'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0049', v:1, concept:'pv3.real-life', level:'n', difficulty:2,
+          stem:'Which statement is TRUE?', options:['100,000 > 10,000','10,000 > 100,000','100,000 = 10,000'], correct:0 },
+        { id:'P5.AUT.PV.S03.Q0050', v:1, concept:'pv3.real-life', level:'t', difficulty:3,
+          stem:'I am a number between 80,000 and 90,000. My thousands digit is 2. My tens digit is 9. All other digits are 0. What am I?', options:['82,090','82,900','80,290'], correct:0, check:'82090' }
+      ]
+    },
+    'P5.AUT.PV.S04': {
+      label: 'Numbers to 1,000,000',
+      lesson: 'P5_PV4',
+      targetSize: 50,
+      concepts: [
+        { id:'pv4.place',       name:'Understanding place value to 1,000,000',                  target:10 },
+        { id:'pv4.value',       name:'Finding the value of a specific digit',                   target:6  },
+        { id:'pv4.partition',   name:'Partitioning and recombining numbers to 1,000,000',       target:9  },
+        { id:'pv4.zero',        name:'Hero zeros in 6- and 7-digit numbers',                    target:6  },
+        { id:'pv4.counting',    name:'Counting in hundred-thousands and the ×10 machine',       target:9  },
+        { id:'pv4.comparing',   name:'Comparing and ordering numbers',                          target:5  },
+        { id:'pv4.real-life',   name:'Real-life problems and reasoning',                        target:5  }
+      ],
+      questions: [
+        /* ===== CORE 10 (From Lesson) ===== */
+        // ** Note: If you have the actual 10 exercises for P5_PV4, replace the stems/options
+        //    in Q0001–Q0010 with the exact text from the lesson. Below is a representative
+        //    set aligned to the concepts described in your lesson text. **
+        { id:'P5.AUT.PV.S04.Q0001', v:1, concept:'pv4.counting', level:'n', difficulty:1,
+          stem:'10 × 100,000 = ?', options:['1,000,000','100,000','10,000'], correct:0, check:'1000000' },
+
+        { id:'P5.AUT.PV.S04.Q0002', v:1, concept:'pv4.value', level:'n', difficulty:2,
+          stem:'What is the value of the 3 in 340,000?', options:['300,000','30,000','3,000'], correct:0, check:'300000' },
+
+        { id:'P5.AUT.PV.S04.Q0003', v:1, concept:'pv4.partition', level:'n', difficulty:2,
+          stem:'800,000 + 40,000 + 5,000 + 200 + 30 + 6 = ?', options:['845,236','845,326','804,536'], correct:0, check:'845236' },
+
+        { id:'P5.AUT.PV.S04.Q0004', v:1, concept:'pv4.zero', level:'n', difficulty:2,
+          stem:'Which number is one million and twenty?', options:['1,000,020','1,200,000','1,002,000'], correct:0, check:'1000020' },
+
+        { id:'P5.AUT.PV.S04.Q0005', v:1, concept:'pv4.counting', level:'n', difficulty:1,
+          stem:'Count on in 100,000s: 400,000, 500,000, 600,000, ___', options:['700,000','610,000','60,000'], correct:0, check:'700000' },
+
+        { id:'P5.AUT.PV.S04.Q0006', v:1, concept:'pv4.place', level:'n', difficulty:1,
+          stem:'How many digits does 1,000,000 have?', options:['7','6','8'], correct:0, check:'7' },
+
+        { id:'P5.AUT.PV.S04.Q0007', v:1, concept:'pv4.counting', level:'n', difficulty:1,
+          stem:'Write one million in figures.', options:['1,000,000','100,000','10,000,000'], correct:0, check:'1000000' },
+
+        { id:'P5.AUT.PV.S04.Q0008', v:1, concept:'pv4.counting', level:'n', difficulty:2,
+          stem:'1,000,000 − 100,000 = ?', options:['900,000','990,000','100,000'], correct:0, check:'900000' },
+
+        { id:'P5.AUT.PV.S04.Q0009', v:1, concept:'pv4.partition', level:'t', difficulty:3,
+          stem:'THINK DEEPER: I have 7 hundred-thousands, 0 ten-thousands, 4 thousands and 2 tens. What number am I?', options:['704,020','740,020','704,200'], correct:0, check:'704020' },
+
+        { id:'P5.AUT.PV.S04.Q0010', v:1, concept:'pv4.real-life', level:'b', difficulty:3,
+          stem:'BOSS LEVEL: A city has 6 hundred-thousands of people and another 350,000. What is the total population?', options:['950,000','650,000','935,000'], correct:0, check:'950000' },
+
+        /* ===== BATCH A — Place Value & Value (Q0011–Q0022) ===== */
+        { id:'P5.AUT.PV.S04.Q0011', v:1, concept:'pv4.place', level:'n', difficulty:1,
+          stem:'Which column is the 7 in for the number 750,000?', options:['Hundred thousands','Ten thousands','Millions'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0012', v:1, concept:'pv4.place', level:'n', difficulty:1,
+          stem:'In 384,201, which digit is in the millions column?', options:['3','8','0'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0013', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'Which number has a 5 in the hundred-thousands column?', options:['520,300','253,000','352,000'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0014', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'What is the next column after hundred-thousands?', options:['Millions','Ten millions','Thousands'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0015', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'How many hundred-thousands are in 700,000?', options:['7','70','700'], correct:0, check:'7' },
+        { id:'P5.AUT.PV.S04.Q0016', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'In 1,000,000, how many digits are zeros?', options:['6','5','7'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0017', v:1, concept:'pv4.place', level:'n', difficulty:1,
+          stem:'Which column is the 1 in for 1,000,000?', options:['Millions','Hundred thousands','Ten thousands'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0018', v:1, concept:'pv4.place', level:'t', difficulty:3,
+          stem:'Which digit is in the hundred-thousands column of 3,845,000?', options:['8','3','4'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0019', v:1, concept:'pv4.place', level:'t', difficulty:3,
+          stem:'What is the largest 6-digit number?', options:['999,999','999,000','100,000'], correct:0, check:'999999' },
+        { id:'P5.AUT.PV.S04.Q0020', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'What is the smallest 7-digit number?', options:['1,000,000','100,000','111,111'], correct:0, check:'1000000' },
+        { id:'P5.AUT.PV.S04.Q0021', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'Which number is ten times bigger than 90,000?', options:['900,000','90,000','9,000,000'], correct:0, check:'900000' },
+        { id:'P5.AUT.PV.S04.Q0022', v:1, concept:'pv4.place', level:'n', difficulty:2,
+          stem:'Which number is one hundred times bigger than 10,000?', options:['1,000,000','100,000','10,000'], correct:0, check:'1000000' },
+
+        /* ===== BATCH B — Value, Zero, Partitioning & Counting (Q0023–Q0040) ===== */
+        { id:'P5.AUT.PV.S04.Q0023', v:1, concept:'pv4.value', level:'n', difficulty:2,
+          stem:'What is the value of the 5 in 250,000?', options:['50,000','500,000','5,000'], correct:0, check:'50000' },
+        { id:'P5.AUT.PV.S04.Q0024', v:1, concept:'pv4.value', level:'n', difficulty:2,
+          stem:'What is the value of the 9 in 1,900,000?', options:['900,000','90,000','9,000,000'], correct:0, check:'900000' },
+        { id:'P5.AUT.PV.S04.Q0025', v:1, concept:'pv4.value', level:'n', difficulty:2,
+          stem:'In 307,500, what is the 3 worth?', options:['300,000','30,000','3,000'], correct:0, check:'300000' },
+        { id:'P5.AUT.PV.S04.Q0026', v:1, concept:'pv4.value', level:'t', difficulty:3,
+          stem:'Which digit is worth 40,000 in 1,340,500?', options:['4','3','5'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0027', v:1, concept:'pv4.value', level:'n', difficulty:2,
+          stem:'In 1,050,000, what is the 5 worth?', options:['50,000','500,000','5,000'], correct:0, check:'50000' },
+        { id:'P5.AUT.PV.S04.Q0028', v:1, concept:'pv4.value', level:'n', difficulty:2,
+          stem:'In 82,350, what is the value of the 2?', options:['2,000','20,000','200'], correct:0, check:'2000' },
+
+        { id:'P5.AUT.PV.S04.Q0029', v:1, concept:'pv4.zero', level:'n', difficulty:2,
+          stem:'Which number is one hundred thousand and five?', options:['100,005','1,050,000','100,500'], correct:0, check:'100005' },
+        { id:'P5.AUT.PV.S04.Q0030', v:1, concept:'pv4.zero', level:'n', difficulty:2,
+          stem:'Which number is three hundred thousand, two hundred and seven?', options:['300,207','320,007','300,270'], correct:0, check:'300207' },
+        { id:'P5.AUT.PV.S04.Q0031', v:1, concept:'pv4.zero', level:'n', difficulty:3,
+          stem:'Write 1,040,000 in words.', options:['One million and forty thousand','One million and four thousand','One hundred and four thousand'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0032', v:1, concept:'pv4.zero', level:'n', difficulty:3,
+          stem:'Which number has a zero in the ten-thousands column?', options:['705,200','750,000','700,520'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0033', v:1, concept:'pv4.zero', level:'t', difficulty:3,
+          stem:'How many zeros are in the number one million?', options:['6','5','7'], correct:0, check:'6' },
+        { id:'P5.AUT.PV.S04.Q0034', v:1, concept:'pv4.zero', level:'t', difficulty:3,
+          stem:'If you remove the zeros from 500,700, what number is left?', options:['57','5,700','570,000'], correct:0, check:'57' },
+
+        { id:'P5.AUT.PV.S04.Q0035', v:1, concept:'pv4.partition', level:'n', difficulty:2,
+          stem:'What is 500,000 + 40,000 + 3,000 + 0 + 40 + 5?', options:['543,045','540,345','5,434,500'], correct:0, check:'543045' },
+        { id:'P5.AUT.PV.S04.Q0036', v:1, concept:'pv4.partition', level:'n', difficulty:2,
+          stem:'Partition 1,020,000.', options:['1,000,000 + 20,000','1,000,000 + 200,000','100,000 + 20,000'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0037', v:1, concept:'pv4.partition', level:'n', difficulty:2,
+          stem:'Which is the correct partition for 810,500?', options:['800,000 + 10,000 + 500','800,000 + 100,000 + 500','80,000 + 10,000 + 500'], correct:0 },
+
+        { id:'P5.AUT.PV.S04.Q0038', v:1, concept:'pv4.counting', level:'n', difficulty:1,
+          stem:'Count on in 100,000s: 700,000, 800,000, 900,000, ___', options:['1,000,000','910,000','900,100'], correct:0, check:'1000000' },
+        { id:'P5.AUT.PV.S04.Q0039', v:1, concept:'pv4.counting', level:'n', difficulty:2,
+          stem:'200,000 more than 500,000 is ___', options:['700,000','520,000','2,500,000'], correct:0, check:'700000' },
+        { id:'P5.AUT.PV.S04.Q0040', v:1, concept:'pv4.counting', level:'n', difficulty:2,
+          stem:'Which calculation gives 1,000,000?', options:['10 × 100,000','10 × 10,000','100 × 10,000'], correct:0 },
+
+        /* ===== BATCH C — Comparing & Reasoning (Q0041–Q0050) ===== */
+        { id:'P5.AUT.PV.S04.Q0041', v:1, concept:'pv4.comparing', level:'n', difficulty:2,
+          stem:'Which is the LARGEST number?', options:['1,000,000','999,999','1,100,000'], correct:2 },
+        { id:'P5.AUT.PV.S04.Q0042', v:1, concept:'pv4.comparing', level:'n', difficulty:2,
+          stem:'Which is the SMALLEST number?', options:['900,000','899,999','901,000'], correct:1 },
+        { id:'P5.AUT.PV.S04.Q0043', v:1, concept:'pv4.comparing', level:'n', difficulty:2,
+          stem:'Which statement is TRUE?', options:['1,000,000 > 999,999','999,999 > 1,000,000','1,000,000 = 999,999'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0044', v:1, concept:'pv4.comparing', level:'t', difficulty:3,
+          stem:'Order these from smallest to largest: 605,000, 650,000, 600,500.', options:['600,500 · 605,000 · 650,000','605,000 · 600,500 · 650,000','650,000 · 605,000 · 600,500'], correct:0 },
+        { id:'P5.AUT.PV.S04.Q0045', v:1, concept:'pv4.comparing', level:'t', difficulty:3,
+          stem:'Which number is between 789,000 and 790,000?', options:['789,500','788,500','790,500'], correct:0 },
+
+        { id:'P5.AUT.PV.S04.Q0046', v:1, concept:'pv4.real-life', level:'n', difficulty:2,
+          stem:'A town has 250,000 people. Another has 400,000. What is the total?', options:['650,000','600,000','550,000'], correct:0, check:'650000' },
+        { id:'P5.AUT.PV.S04.Q0047', v:1, concept:'pv4.real-life', level:'n', difficulty:2,
+          stem:'A shop sells 100,000 sweets a day. How many in a 10-day period?', options:['1,000,000','10,000,000','100,000'], correct:0, check:'1000000' },
+        { id:'P5.AUT.PV.S04.Q0048', v:1, concept:'pv4.real-life', level:'t', difficulty:3,
+          stem:'A stadium has 985,000 seats and 15,000 are empty. How many are taken?', options:['970,000','995,000','960,000'], correct:0, check:'970000' },
+        { id:'P5.AUT.PV.S04.Q0049', v:1, concept:'pv4.real-life', level:'t', difficulty:3,
+          stem:'I am a number between 800,000 and 900,000. My ten-thousands digit is 5. All other digits are 0 except 3 ones. What am I?', options:['850,003','805,003','850,300'], correct:0, check:'850003' },
+        { id:'P5.AUT.PV.S04.Q0050', v:1, concept:'pv4.real-life', level:'b', difficulty:3,
+          stem:'BOSS LEVEL: A charity raised 4 hundred-thousand pounds, plus 5 ten-thousand, plus 2 thousand, plus 3 hundreds. How much in total?', options:['452,300','450,300','425,300'], correct:0, check:'452300' }
       ]
     }
   }
