@@ -13150,7 +13150,320 @@ ${asExCard(12,[
 
 
  
-
+/* ============================================================
+   PRIMARY 5 — SPRING — PERIMETER & AREA (topic id 'perarea')
+   LESSONS 1 AND 2  +  PLACEHOLDERS 3–9  +  SCHEME BLOCK
+   8 worked examples + 10 exercises per lesson.
+ 
+   HOW TO INSTALL
+   1. Paste SECTION A (helpers), B (lessons) and C (placeholders)
+      ABOVE `const SCHEME_P5` in index.html.
+   2. In SCHEME_P5 → Spring Term, replace the old one-line
+        { id:'perarea', label:'Perimeter & Area', ... },
+      with SECTION D.
+   Needs (already installed): asHeader, asWarm, asExCard, steps(), exQ().
+   Helper names all start with "pa" so they cannot clash with
+   existing functions.
+   ============================================================ */
+ 
+ 
+/* ================= SECTION A — HELPERS ================= */
+ 
+/* Clockwise rectangle in grid units: width w, height h */
+function paRectPts(w,h){ return [[0,0],[w,0],[w,h],[0,h]]; }
+ 
+/* Grid drawing of any rectilinear shape.
+   pts  = vertices in grid units, listed CLOCKWISE on screen (y points down).
+   o    = { u:30 (px per unit), count:true (number every unit edge 1,2,3…),
+            fill:'#CCFBF1' or null, fillOp:0.55, start:true, maxW:420, caption:'' }
+   Every unit length on the boundary gets a numbered badge placed OUTSIDE the
+   shape, so pupils can literally count the perimeter. */
+function paGrid(pts,o){
+  o=o||{};
+  const u=o.u||30, m=36, count=o.count!==false;
+  const mx=Math.max(...pts.map(p=>p[0])), my=Math.max(...pts.map(p=>p[1]));
+  const W=mx*u+2*m, H=my*u+2*m+(o.caption?22:0);
+  const X=v=>m+v*u, Y=v=>m+v*u;
+  const cols=['#0F766E','#B45309','#BE185D','#6D28D9','#1D4ED8','#C2410C'];
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:${Math.min(W,o.maxW||420)}px;width:100%;height:auto;">`;
+  for(let i=0;i<=mx;i++) s+=`<line x1="${X(i)}" y1="${Y(0)}" x2="${X(i)}" y2="${Y(my)}" stroke="#D1D5DB" stroke-width="1"/>`;
+  for(let j=0;j<=my;j++) s+=`<line x1="${X(0)}" y1="${Y(j)}" x2="${X(mx)}" y2="${Y(j)}" stroke="#D1D5DB" stroke-width="1"/>`;
+  if(o.fill!==null) s+=`<polygon points="${pts.map(p=>X(p[0])+','+Y(p[1])).join(' ')}" fill="${o.fill||'#CCFBF1'}" fill-opacity="${o.fillOp===undefined?0.55:o.fillOp}"/>`;
+  let n=1;
+  pts.forEach((p,i)=>{
+    const q=pts[(i+1)%pts.length];
+    const dx=Math.sign(q[0]-p[0]), dy=Math.sign(q[1]-p[1]);
+    const L=Math.abs(q[0]-p[0])+Math.abs(q[1]-p[1]);
+    const c=cols[i%cols.length];
+    s+=`<line x1="${X(p[0])}" y1="${Y(p[1])}" x2="${X(q[0])}" y2="${Y(q[1])}" stroke="${c}" stroke-width="4.5" stroke-linecap="round"/>`;
+    if(count){
+      for(let k=0;k<L;k++){
+        const cx=p[0]+dx*(k+0.5), cy=p[1]+dy*(k+0.5);
+        const bx=X(cx)+dy*14, by=Y(cy)-dx*14;
+        s+=`<circle cx="${bx}" cy="${by}" r="9" fill="${c}"/><text x="${bx}" y="${by+3.2}" text-anchor="middle" font-size="${n>9?8:9.5}" font-weight="800" fill="#fff">${n}</text>`;
+        n++;
+      }
+    }
+  });
+  if(count && o.start!==false){
+    s+=`<circle cx="${X(pts[0][0])}" cy="${Y(pts[0][1])}" r="5.5" fill="#16A34A" stroke="#fff" stroke-width="1.5"/>
+        <text x="${X(pts[0][0])-20}" y="${Y(pts[0][1])-20}" text-anchor="middle" font-size="9" font-weight="800" fill="#166534">START</text>`;
+  }
+  if(o.caption) s+=`<text x="${W/2}" y="${H-6}" text-anchor="middle" font-size="11.5" font-weight="800" fill="#B45309">${o.caption}</text>`;
+  return s+'</svg>';
+}
+ 
+/* Rectangle with measured side labels, equal-side tick marks and right-angle squares.
+   o = { unit:'cm', maxL:220, labels:{top,bottom,left,right} overrides,
+         ghost:['bottom','right'] (labels shown faint/italic = "same as opposite side") } */
+function paRectDim(l,w,o){
+  o=o||{};
+  const unit=o.unit||'cm', sc=(o.maxL||220)/Math.max(l,w);
+  const RW=l*sc, RH=w*sc, mx=58, my=40;
+  const W=RW+2*mx, H=RH+2*my, x0=mx, y0=my, x1=mx+RW, y1=my+RH;
+  const L=Object.assign({top:l+' '+unit,bottom:l+' '+unit,left:w+' '+unit,right:w+' '+unit},o.labels||{});
+  const g=o.ghost||[];
+  const lab=(side,x,y,a)=>`<text x="${x}" y="${y}" text-anchor="${a}" font-size="13" font-weight="800" fill="${g.includes(side)?'#6B7280':'#0F766E'}" ${g.includes(side)?'font-style="italic" opacity="0.85"':''}>${L[side]}</text>`;
+  const k=10, xm=(x0+x1)/2, ym=(y0+y1)/2;
+  let s=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:${Math.max(W,200)}px;width:100%;height:auto;">`;
+  s+=`<rect x="${x0}" y="${y0}" width="${RW}" height="${RH}" fill="${o.fill||'#CCFBF1'}" stroke="#0F766E" stroke-width="3"/>`;
+  [[x0+k,y0,x0+k,y0+k,x0,y0+k],[x1-k,y0,x1-k,y0+k,x1,y0+k],[x1-k,y1,x1-k,y1-k,x1,y1-k],[x0+k,y1,x0+k,y1-k,x0,y1-k]].forEach(a=>{
+    s+=`<polyline points="${a[0]},${a[1]} ${a[2]},${a[3]} ${a[4]},${a[5]}" fill="none" stroke="#0F766E" stroke-width="1.6"/>`;
+  });
+  if(o.ticks!==false){
+    s+=`<line x1="${xm}" y1="${y0-5}" x2="${xm}" y2="${y0+5}" stroke="#B45309" stroke-width="2.2"/><line x1="${xm}" y1="${y1-5}" x2="${xm}" y2="${y1+5}" stroke="#B45309" stroke-width="2.2"/>`;
+    [-3,3].forEach(d=>{ s+=`<line x1="${x0-5}" y1="${ym+d}" x2="${x0+5}" y2="${ym+d}" stroke="#BE185D" stroke-width="2.2"/><line x1="${x1-5}" y1="${ym+d}" x2="${x1+5}" y2="${ym+d}" stroke="#BE185D" stroke-width="2.2"/>`; });
+  }
+  s+=lab('top',xm,y0-12,'middle')+lab('bottom',xm,y1+22,'middle')+lab('left',x0-12,ym+4,'end')+lab('right',x1+12,ym+4,'start');
+  return s+'</svg>';
+}
+ 
+/* Any convex polygon with labelled sides.
+   pts    = vertices in your own units (any order round the shape)
+   labels = one label per edge: edge i joins pts[i] to pts[i+1]; null = no label
+   o      = { s:20 (px per unit), ticks:false, right:[vertexIndex…], letters:['A','B',…] } */
+function paPoly(pts,labels,o){
+  o=o||{};
+  const s=o.s||20, m=o.m||50;
+  const minx=Math.min(...pts.map(p=>p[0])), miny=Math.min(...pts.map(p=>p[1]));
+  const maxx=Math.max(...pts.map(p=>p[0])), maxy=Math.max(...pts.map(p=>p[1]));
+  const P=pts.map(p=>[(p[0]-minx)*s+m,(p[1]-miny)*s+m]);
+  const W=(maxx-minx)*s+2*m, H=(maxy-miny)*s+2*m;
+  const cx=P.reduce((a,p)=>a+p[0],0)/P.length, cy=P.reduce((a,p)=>a+p[1],0)/P.length;
+  let t=`<svg viewBox="0 0 ${W} ${H}" class="shape-svg" style="max-width:${Math.max(W,200)}px;width:100%;height:auto;">`;
+  t+=`<polygon points="${P.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="#FEF3C7" stroke="#B45309" stroke-width="3" stroke-linejoin="round"/>`;
+  (o.right||[]).forEach(i=>{
+    const p=P[i],a=P[(i+P.length-1)%P.length],b=P[(i+1)%P.length];
+    const ua=[a[0]-p[0],a[1]-p[1]],la=Math.hypot(...ua),ub=[b[0]-p[0],b[1]-p[1]],lb=Math.hypot(...ub),k=11;
+    const A=[p[0]+ua[0]/la*k,p[1]+ua[1]/la*k],B=[A[0]+ub[0]/lb*k,A[1]+ub[1]/lb*k],C=[p[0]+ub[0]/lb*k,p[1]+ub[1]/lb*k];
+    t+=`<polyline points="${A.join(',')} ${B.join(',')} ${C.join(',')}" fill="none" stroke="#B45309" stroke-width="1.6"/>`;
+  });
+  P.forEach((p,i)=>{
+    const q=P[(i+1)%P.length], mxp=(p[0]+q[0])/2, myp=(p[1]+q[1])/2;
+    let vx=mxp-cx, vy=myp-cy; const vl=Math.hypot(vx,vy)||1; vx/=vl; vy/=vl;
+    if(o.ticks){ const ex=q[0]-p[0],ey=q[1]-p[1],el=Math.hypot(ex,ey); t+=`<line x1="${mxp-ey/el*5}" y1="${myp+ex/el*5}" x2="${mxp+ey/el*5}" y2="${myp-ex/el*5}" stroke="#BE185D" stroke-width="2.2"/>`; }
+    if(labels && labels[i]) t+=`<text x="${(mxp+vx*20).toFixed(1)}" y="${(myp+vy*20+4).toFixed(1)}" text-anchor="middle" font-size="12.5" font-weight="800" fill="#92400E">${labels[i]}</text>`;
+    t+=`<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="3.5" fill="#B45309"/>`;
+    if(o.letters) t+=`<text x="${(p[0]+(p[0]-cx)/Math.hypot(p[0]-cx,p[1]-cy)*13).toFixed(1)}" y="${(p[1]+(p[1]-cy)/Math.hypot(p[0]-cx,p[1]-cy)*13+4).toFixed(1)}" text-anchor="middle" font-size="12" font-weight="800" fill="#4C1D95">${o.letters[i]}</text>`;
+  });
+  return t+'</svg>';
+}
+ 
+ 
+/* ================= SECTION B — LESSONS ================= */
+ 
+/* ---------- STEP 1 : What is perimeter? ---------- */
+const P5_PA1 = `
+${asHeader('PA1','Step 1 — What is Perimeter?','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — The Distance Around</div>
+  ${asWarm('A farmer wants to put a fence <strong>all the way round</strong> his field. How much fencing does he need? He must measure the distance around the <strong>outside edge</strong> — walking once round and ending back where he started. That distance is called the <strong>perimeter</strong>. (<em>peri</em> = around, <em>metron</em> = measure.)')}
+ 
+  <div class="card-body"><strong>Concrete:</strong> take a piece of string and lay it round the edge of your exercise book. Straighten the string and measure it — that length is the perimeter of the book. On a grid we can count the <strong>unit lengths</strong> along the edge instead. Start at the green dot and count every edge piece:</div>
+  ${paGrid(paRectPts(4,3),{u:34,caption:'Perimeter of a 4 by 3 rectangle = 14 unit lengths'})}
+ 
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Definition</div><div class="s-body" style="color:#085041;"><strong>Perimeter</strong> is the total distance around the outside of a 2-D shape. To find it, <strong>add the lengths of all the sides</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📏 Units of length</div><div class="s-body" style="color:#633806;">Perimeter is a <strong>length</strong>, so we use mm, cm, m or km — never square units. A fence round a garden: <strong>m</strong>. A frame round a photo: <strong>cm</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Counting squares inside</div><div class="s-body" style="color:#712B13;">Counting the squares <em>inside</em> a shape gives its <strong>area</strong>, not its perimeter. Perimeter only counts the <strong>edge</strong>.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Missing or double-counting</div><div class="s-body" style="color:#712B13;">Forgetting a side, or counting a corner twice, gives the wrong answer. Start at a marked point, go round <strong>once</strong>, and stop when you are back.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Counting the perimeter of a rectangle on a grid</div>
+  ${asWarm('Count each unit length once as you walk round the edge. Which numbers are on each side?')}
+  ${paGrid(paRectPts(5,3),{u:34,caption:'5 by 3 rectangle'})}
+  ${steps([['Top side','5','5 unit lengths'],['Right side','+ 3','3 unit lengths'],['Bottom side','+ 5','5 unit lengths'],['Left side','+ 3','3 unit lengths'],['PERIMETER','= 16 units','the last badge says 16 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Perimeter and area are different questions</div>
+  ${asWarm('The same 5 by 3 rectangle can answer <strong>two</strong> different questions. Which one asks about the edge, and which asks about the inside?')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="flex:1;min-width:210px;text-align:center;">${paGrid(paRectPts(5,3),{u:26,maxW:230})}<div style="font-size:12px;font-weight:700;color:#085041;">Perimeter — count the <em>edge</em><br/>= 16 units (a length)</div></div>
+    <div style="flex:1;min-width:210px;text-align:center;">${paGrid(paRectPts(5,3),{u:26,count:false,fill:'#FCD34D',fillOp:0.7,maxW:230})}<div style="font-size:12px;font-weight:700;color:#92400E;">Area — count the <em>squares inside</em><br/>= 15 squares (a surface)</div></div>
+  </div>
+  ${steps([['Perimeter','16 units','distance round the outside'],['Area','15 squares','space covered inside'],['Remember','different things','we study area from Step 5']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — An L-shape on a grid</div>
+  ${asWarm('Perimeter works for any shape, not just rectangles. Walk round this staircase shape and count every unit length.')}
+  ${paGrid([[0,0],[3,0],[3,2],[5,2],[5,4],[0,4]],{u:32,caption:'L-shaped (staircase) polygon'})}
+  ${steps([['Top','3','across'],['Down','+ 2','right side'],['Across','+ 2','step'],['Down','+ 2','right side'],['Bottom','+ 5','back along'],['Left','+ 4','up to START'],['PERIMETER','= 18 units','3+2+2+2+5+4']])}
+  <div class="card-body" style="margin-top:8px;">💡 <strong>Pattern to spot:</strong> this shape is built inside a 5 by 4 rectangle, and 2 × (5 + 4) = 18 too! We will use this trick in Step 3.</div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — Measuring the sides of a triangle</div>
+  ${asWarm('On a grid we count. For a shape with <strong>measured sides</strong> we add the lengths.')}
+  ${paPoly([[0,8],[6,8],[0,0]],['6 cm','10 cm','8 cm'],{s:22,right:[0],letters:['A','B','C']})}
+  ${steps([['Side AB','6 cm','bottom'],['Side BC','+ 10 cm','slanted side'],['Side CA','+ 8 cm','left side'],['PERIMETER','= 24 cm','6 + 10 + 8']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — An irregular pentagon</div>
+  ${asWarm('An <strong>irregular</strong> polygon has sides of different lengths. We still just add them all. (Not drawn to scale.)')}
+  ${paPoly([[100,10],[170,60],[150,140],[50,140],[30,60]],['5 cm','7 cm','6 cm','7 cm','5 cm'],{s:1.2})}
+  ${steps([['Add in order','5 + 7 + 6 + 7 + 5','go round once, tick each side'],['Pair up','5 + 5 = 10 · 7 + 7 = 14','then 14 + 10 + 6'],['PERIMETER','= 30 cm','five sides, five numbers']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — A regular polygon (all sides equal)</div>
+  ${asWarm('In a <strong>regular</strong> polygon every side is the same length, so we can multiply instead of adding six times. The pink tick marks mean &ldquo;equal sides&rdquo;.')}
+  ${paPoly(Array.from({length:6},(_,i)=>{const a=i*Math.PI/3-Math.PI/2;return [60*Math.cos(a),60*Math.sin(a)];}),['4 cm',null,null,null,null,null],{s:1.3,ticks:true})}
+  ${steps([['Number of sides','6','a hexagon'],['Length of each side','4 cm','all equal'],['PERIMETER','6 × 4 = 24 cm','same as 4+4+4+4+4+4']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Real life: walking round a triangular plot</div>
+  ${asWarm('Mr Bello walks once round his triangular vegetable plot. How far does he walk?')}
+  ${paPoly([[0,9],[12,9],[0,0]],['12 m','15 m','9 m'],{s:14,right:[0]})}
+  ${steps([['Sides','12 m, 15 m, 9 m','all in metres'],['Add','12 + 15 + 9','= 36'],['ANSWER','36 m','the unit is metres — it is a length ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Reasoning: same perimeter, different shapes</div>
+  ${asWarm('Rectangle <strong>A</strong> is 4 by 4. Rectangle <strong>B</strong> is 6 by 2. Do they have the same perimeter?')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:170px;">${paGrid(paRectPts(4,4),{u:24,count:false,maxW:170})}<div style="font-size:12px;font-weight:700;color:#085041;">A: 4 + 4 + 4 + 4 = 16</div></div>
+    <div style="text-align:center;flex:1;min-width:190px;">${paGrid(paRectPts(6,2),{u:24,count:false,maxW:200,fill:'#FBCFE8'})}<div style="font-size:12px;font-weight:700;color:#9D174D;">B: 6 + 2 + 6 + 2 = 16</div></div>
+  </div>
+  ${steps([['A','16 units',''],['B','16 units',''],['Conclusion','equal perimeters','but A covers 16 squares and B only 12!']])}
+  <div class="card-body" style="margin-top:8px;">💡 Shapes that look very different can have the same perimeter — and the same perimeter does <strong>not</strong> mean the same area.</div>
+</div>
+ 
+${asExCard(1,[
+ exQ(1,'What does the perimeter of a shape measure?',['The distance around the outside','The space inside the shape','The number of corners'],0),
+ exQ(2,'A rectangle on a grid is 4 units wide and 2 units tall. What is its perimeter?',['12 units','8 units','6 units'],0),
+ exQ(3,'A triangle has sides 7 cm, 8 cm and 9 cm. What is its perimeter?',['24 cm','21 cm','25 cm'],0),
+ exQ(4,'Which unit is best for the perimeter of a football pitch?',['metres (m)','square centimetres (cm²)','square metres (m²)'],0),
+ exQ(5,'A regular pentagon has sides of 6 cm. What is its perimeter?',['30 cm','36 cm','11 cm'],0),
+ exQ(6,'Ade says the perimeter of a 6 by 1 rectangle is 6 because there are 6 squares. What is his mistake?',['He found the area; the perimeter is 14','He should have said 12','He is correct'],0),
+ exQ(7,'A square has sides of 9 cm. What is its perimeter?',['36 cm','18 cm','81 cm'],0),
+ exQ(8,'A pentagon has sides 3 cm, 4 cm, 3 cm, 4 cm and 2 cm. What is its perimeter?',['16 cm','12 cm','14 cm'],0),
+ exQ(9,'THINK DEEPER: Can two different shapes have exactly the same perimeter?',['Yes — for example a 4 by 4 and a 6 by 2 rectangle both have perimeter 16','No — each perimeter belongs to one shape only','Only if they have the same area'],0,'t'),
+ exQ(10,'BOSS LEVEL: A 42 cm ribbon fits exactly once round a regular hexagon. How long is each side?',['7 cm','6 cm','8 cm'],0,'b')])}`;
+ 
+ 
+/* ---------- STEP 2 : Perimeter of rectangles ---------- */
+const P5_PA2 = `
+${asHeader('PA2','Step 2 — Perimeter of Rectangles','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+ 
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Pairs of Equal Sides</div>
+  ${asWarm('In a rectangle, <strong>opposite sides are equal</strong>. So if you know the <strong>length</strong> and the <strong>width</strong>, you already know all four sides! The orange tick marks show the two long sides are equal; the pink double ticks show the two short sides are equal. The little squares are right angles.')}
+  ${paRectDim(7,3)}
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method A — add all four</div><div class="s-body" style="color:#085041;">P = l + w + l + w &nbsp;&nbsp; 7 + 3 + 7 + 3 = <strong>20 cm</strong></div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method B — 2 × (l + w)</div><div class="s-body" style="color:#633806;">Add one length and one width, then <strong>double</strong>: 2 × (7 + 3) = 2 × 10 = <strong>20 cm</strong></div></div>
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#4C1D95;">📋 Method C — 2l + 2w</div><div class="s-body" style="color:#4C1D95;">Double each: (2 × 7) + (2 × 3) = 14 + 6 = <strong>20 cm</strong></div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Only two sides</div><div class="s-body" style="color:#712B13;">7 + 3 = 10 is only <em>half</em> the journey. A rectangle has <strong>four</strong> sides — remember to double.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Multiplying l × w</div><div class="s-body" style="color:#712B13;">7 × 3 = 21 is the <strong>area</strong> (in cm²), not the perimeter. Perimeter <em>adds</em>.</div></div>
+  </div>
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 1 — Adding all four sides: 9 cm by 4 cm</div>
+  ${asWarm('Write down the length of every side, then add. Do not forget the sides that are not labelled!')}
+  ${paRectDim(9,4)}
+  ${steps([['Top','9 cm',''],['Right','+ 4 cm',''],['Bottom','+ 9 cm',''],['Left','+ 4 cm',''],['PERIMETER','= 26 cm','9 + 4 + 9 + 4']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 2 — Only two sides are labelled</div>
+  ${asWarm('The grey italic labels were <em>not given</em> in the question. We know them because opposite sides are equal.')}
+  ${paRectDim(12,5,{ghost:['bottom','right']})}
+  ${steps([['Given','12 cm and 5 cm','length and width'],['Opposite sides','12 cm and 5 cm','bottom = top, right = left'],['Add','12 + 5 + 12 + 5','= 34'],['ANSWER','34 cm','']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 3 — Using 2 × (l + w): a field 15 m by 8 m</div>
+  ${asWarm('Why does the shortcut work? Going once along a length and once along a width is <strong>half</strong> the journey — doubling gives the whole perimeter.')}
+  ${paRectDim(15,8,{unit:'m'})}
+  ${steps([['Add l + w','15 + 8','= 23 m (half way round)'],['Double','2 × 23','= 46 m'],['Check',`(2 × 15) + (2 × 8)`,'= 30 + 16 = 46 m ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 4 — A square is a special rectangle</div>
+  ${asWarm('All four sides of a square are equal, so there is an even faster rule: <strong>4 × side</strong>.')}
+  ${paRectDim(7,7,{maxL:150})}
+  ${steps([['Side length','7 cm','all four equal'],['4 × side','4 × 7','= 28 cm'],['Check','2 × (7 + 7)','= 28 cm ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 5 — Finding a missing side from the perimeter</div>
+  ${asWarm('A rectangle has a perimeter of <strong>36 cm</strong>. Its length is <strong>11 cm</strong>. What is its width? Work <em>backwards</em>!')}
+  ${paRectDim(11,7,{labels:{left:'? cm',right:'? cm'},ghost:['right']})}
+  ${steps([['Halve the perimeter','36 ÷ 2','= 18 cm (one l + one w)'],['Take away the length','18 − 11','= 7 cm'],['ANSWER','width = 7 cm','check: 2 × (11 + 7) = 36 ✓']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 6 — Same perimeter, different rectangles</div>
+  ${asWarm('All four rectangles below have a perimeter of <strong>16 cm</strong> (so l + w = 8). Do they all cover the same space?')}
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:flex-end;">
+    ${[[7,1],[6,2],[5,3],[4,4]].map(d=>`<div style="text-align:center;flex:1;min-width:120px;">${paGrid(paRectPts(d[0],d[1]),{u:15,count:false,maxW:150,fill:'#99F6E4'})}<div style="font-size:11px;font-weight:800;color:#085041;">${d[0]} × ${d[1]}<br/><span style="color:#92400E;">area ${d[0]*d[1]}</span></div></div>`).join('')}
+  </div>
+  ${steps([['l + w','= 8','every time'],['Perimeter','2 × 8 = 16 cm','all the same'],['Area','7, 12, 15, 16','the closer to a square, the bigger the area']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 7 — Mixed units: convert first!</div>
+  ${asWarm('A rectangular mat is <strong>1 m 20 cm</strong> long and <strong>80 cm</strong> wide. Find its perimeter. You must use the <strong>same unit</strong> for every side.')}
+  ${paRectDim(120,80,{unit:'cm',labels:{top:'1 m 20 cm',bottom:'1 m 20 cm'},maxL:200})}
+  ${steps([['Convert','1 m 20 cm = 120 cm','1 m = 100 cm'],['l + w','120 + 80','= 200 cm'],['Double','2 × 200','= 400 cm'],['ANSWER','400 cm = 4 m','100 cm = 1 m']])}
+</div>
+ 
+<div class="card">
+  <div class="card-title">Example 8 — Real life: fencing a garden</div>
+  ${asWarm('Mrs Okafor fences a rectangular garden <strong>18 m</strong> by <strong>12 m</strong>. Fencing costs <strong>£5 per metre</strong>. How much does she pay?')}
+  ${paRectDim(18,12,{unit:'m',fill:'#BBF7D0'})}
+  ${steps([['Perimeter','2 × (18 + 12)','= 2 × 30 = 60 m'],['Cost','60 × £5','= £300'],['ANSWER','£300','one step finds the length, one step finds the cost']])}
+</div>
+ 
+${asExCard(2,[
+ exQ(1,'What is the perimeter of a rectangle 8 cm long and 3 cm wide?',['22 cm','24 cm','11 cm'],0),
+ exQ(2,'Use 2 × (l + w) to find the perimeter of a rectangle with l = 15 cm and w = 6 cm.',['42 cm','21 cm','90 cm'],0),
+ exQ(3,'A square has sides of 12 m. What is its perimeter?',['48 m','24 m','144 m'],0),
+ exQ(4,'A rectangle has a perimeter of 30 m and a length of 9 m. What is its width?',['6 m','12 m','21 m'],0),
+ exQ(5,'Which rectangle has the greatest perimeter?',['10 cm by 2 cm','6 cm by 5 cm','7 cm by 4 cm'],0),
+ exQ(6,'A rectangle is 1 m 50 cm long and 70 cm wide. What is its perimeter in centimetres?',['440 cm','220 cm','2,220 cm'],0),
+ exQ(7,'A rectangular playground is 25 m by 14 m. Tola runs once round it. How far does she run?',['78 m','39 m','350 m'],0),
+ exQ(8,'Kemi says the perimeter of a 9 cm by 4 cm rectangle is 9 + 4 = 13 cm. What is her mistake?',['She added only two sides; the perimeter is 26 cm','She should have multiplied 9 × 4 = 36 cm','She is correct'],0),
+ exQ(9,'THINK DEEPER: A rectangle has a perimeter of 20 cm and whole-number sides. How many different rectangles are possible? (Count 2 by 8 and 8 by 2 as the same.)',['5','4','9'],0,'t'),
+ exQ(10,'BOSS LEVEL: A garden is 14 m by 9 m. Fencing costs £6 per metre, but a 2 m gate needs no fencing. How much is the fencing?',['£264','£276','£138'],0,'b')])}`;
+ 
+ 
+/* ================= SECTION C — PLACEHOLDERS (steps 3–9) ================= */
+const P5_PA3 = null; // Perimeter of rectilinear shapes
+const P5_PA4 = null; // Find missing lengths
+const P5_PA5 = null; // What is area?
+const P5_PA6 = null; // Calculate area by counting squares
+const P5_PA7 = null; // Area of rectangles
+const P5_PA8 = null; // Area of compound shapes
+const P5_PA9 = null; // Compare area and perimeter
 
 
 
@@ -13289,7 +13602,18 @@ const SCHEME_P5 = [
           { label:'Percentages as decimals', content: P5_DP11 },
           { label:'Find simple percentages of quantities', content: P5_DP12 }
         ]},
-      { id:'perarea', label:'Perimeter & Area', col: TOPIC_PALETTE[1], steps:['What is perimeter?','Perimeter of rectangles','Perimeter of rectilinear shapes','Find missing lengths','What is area?','Calculate area by counting squares','Area of rectangles','Area of compound shapes','Compare area and perimeter'].map(s=>({label:s,content:null}))},
+            { id:'perarea', label:'Perimeter & Area', col: TOPIC_PALETTE[1],
+        steps: [
+          { label:'What is perimeter?',             content: P5_PA1 },
+          { label:'Perimeter of rectangles',        content: P5_PA2 },
+          { label:'Perimeter of rectilinear shapes',content: P5_PA3 },
+          { label:'Find missing lengths',           content: P5_PA4 },
+          { label:'What is area?',                  content: P5_PA5 },
+          { label:'Calculate area by counting squares', content: P5_PA6 },
+          { label:'Area of rectangles',             content: P5_PA7 },
+          { label:'Area of compound shapes',        content: P5_PA8 },
+          { label:'Compare area and perimeter',     content: P5_PA9 }
+        ]},
       { id:'stats', label:'Statistics', col: TOPIC_PALETTE[4], steps:['Read tables','Interpret tables','Read line graphs','Interpret line graphs','Solve comparison problems from line graphs','Complete tables','Read timetables','Interpret timetables'].map(s=>({label:s,content:null}))},
     ]},
   { id:'summer', emoji:'☀️', label:'Summer Term', meta:'April – July 2027', col: TERM_COLORS.summer, open:false,
