@@ -13,9 +13,9 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV1',
       targetSize: 50,
       concepts: [
-        { id:'pv1.read',        name:'Reading Roman numerals',                              target:10 },
-        { id:'pv1.write',       name:'Writing Roman numerals',                              target:10 },
-        { id:'pv1.subtract',    name:'The subtraction rule (IV, IX, XL, XC, CD, CM)',       target:10 },
+        { id:'pv1.read',        name:'Reading Roman numerals',                              target:7  },
+        { id:'pv1.write',       name:'Writing Roman numerals',                              target:12 },
+        { id:'pv1.subtract',    name:'The subtraction rule (IV, IX, XL, XC, CD, CM)',       target:11 },
         { id:'pv1.add',         name:'The addition rule (VI, LX, CX, etc.)',                target:8  },
         { id:'pv1.real-life',   name:'Roman numerals in real life (clocks, dates, names)',  target:7  },
         { id:'pv1.reasoning',   name:'Comparing, ordering and spotting errors',             target:5  }
@@ -132,12 +132,12 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV2',
       targetSize: 50,
       concepts: [
-        { id:'pv2.place',       name:'Understanding place value (thousands, hundreds, tens, ones)', target:10 },
+        { id:'pv2.place',       name:'Understanding place value (thousands, hundreds, tens, ones)', target:8  },
         { id:'pv2.value',       name:'Finding the value of a specific digit',                       target:5  },
-        { id:'pv2.partition',   name:'Partitioning and recombining numbers',                        target:10 },
-        { id:'pv2.zero',        name:'The role of zero (hero zero)',                                target:6  },
-        { id:'pv2.counting',    name:'Counting in thousands and the ×10 machine',                   target:9  },
-        { id:'pv2.real-life',   name:'Real-life problems and reasoning with 4-digit numbers',       target:6  },
+        { id:'pv2.partition',   name:'Partitioning and recombining numbers',                        target:9  },
+        { id:'pv2.zero',        name:'The role of zero (hero zero)',                                target:7  },
+        { id:'pv2.counting',    name:'Counting in thousands and the ×10 machine',                   target:10 },
+        { id:'pv2.real-life',   name:'Real-life problems and reasoning with 4-digit numbers',       target:7  },
         { id:'pv2.reasoning',   name:'Comparing, ordering and reasoning',                           target:4  }
       ],
       questions: [
@@ -252,12 +252,12 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV3',
       targetSize: 50,
       concepts: [
-        { id:'pv3.place',       name:'Understanding place value to 100,000',                    target:10 },
+        { id:'pv3.place',       name:'Understanding place value to 100,000',                    target:7  },
         { id:'pv3.value',       name:'Finding the value of a specific digit',                   target:7  },
-        { id:'pv3.partition',   name:'Partitioning and recombining large numbers',              target:10 },
+        { id:'pv3.partition',   name:'Partitioning and recombining large numbers',              target:9  },
         { id:'pv3.zero',        name:'Hero zeros in large numbers',                             target:6  },
-        { id:'pv3.counting',    name:'Counting in ten-thousands and the ×10 machine',           target:9  },
-        { id:'pv3.real-life',   name:'Real-life problems and reasoning with 5-digit numbers',   target:8  }
+        { id:'pv3.counting',    name:'Counting in ten-thousands and the ×10 machine',           target:10 },
+        { id:'pv3.real-life',   name:'Real-life problems and reasoning with 5-digit numbers',   target:11 }
       ],
       questions: [
         /* ===== CORE 10 (From Lesson) ===== */
@@ -371,13 +371,13 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV4',
       targetSize: 50,
       concepts: [
-        { id:'pv4.place',       name:'Understanding place value to 1,000,000',                  target:10 },
-        { id:'pv4.value',       name:'Finding the value of a specific digit',                   target:6  },
-        { id:'pv4.partition',   name:'Partitioning and recombining numbers to 1,000,000',       target:9  },
-        { id:'pv4.zero',        name:'Hero zeros in 6- and 7-digit numbers',                    target:6  },
-        { id:'pv4.counting',    name:'Counting in hundred-thousands and the ×10 machine',       target:9  },
+        { id:'pv4.place',       name:'Understanding place value to 1,000,000',                  target:13 },
+        { id:'pv4.value',       name:'Finding the value of a specific digit',                   target:7  },
+        { id:'pv4.partition',   name:'Partitioning and recombining numbers to 1,000,000',       target:5  },
+        { id:'pv4.zero',        name:'Hero zeros in 6- and 7-digit numbers',                    target:7  },
+        { id:'pv4.counting',    name:'Counting in hundred-thousands and the ×10 machine',       target:7  },
         { id:'pv4.comparing',   name:'Comparing and ordering numbers',                          target:5  },
-        { id:'pv4.real-life',   name:'Real-life problems and reasoning',                        target:5  }
+        { id:'pv4.real-life',   name:'Real-life problems and reasoning',                        target:6  }
       ],
       questions: [
         /* ===== CORE 10 (From Lesson) ===== */
@@ -510,11 +510,11 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV5',
       targetSize: 50,
       concepts: [
-        { id:'pv5.comma',       name:'Placing the comma correctly (3 digits back)',              target:9  },
-        { id:'pv5.read',        name:'Reading a number aloud (figures → words)',                 target:9  },
+        { id:'pv5.comma',       name:'Placing the comma correctly (3 digits back)',              target:10 },
+        { id:'pv5.read',        name:'Reading a number aloud (figures → words)',                 target:8  },
         { id:'pv5.write',       name:'Writing a number (words → figures)',                       target:9  },
-        { id:'pv5.zero',        name:'Reading zeros correctly (hero zeros and "and")',           target:8  },
-        { id:'pv5.multi-comma', name:'Numbers with two commas (millions)',                        target:5  },
+        { id:'pv5.zero',        name:'Reading zeros correctly (hero zeros and "and")',           target:7  },
+        { id:'pv5.multi-comma', name:'Numbers with two commas (millions)',                       target:6  },
         { id:'pv5.real-life',   name:'Real-life reading and writing (prices, distances)',        target:5  },
         { id:'pv5.reasoning',   name:'Spotting errors and choosing the best representation',     target:5  }
       ],
@@ -633,13 +633,13 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV6',
       targetSize: 50,
       concepts: [
-        { id:'pv6.value',       name:'Finding the value of a digit (digit × column)',            target:10 },
-        { id:'pv6.digit',       name:'Identifying which digit sits in a given column',          target:9  },
-        { id:'pv6.partition',   name:'Partitioning and recombining by column value',            target:10 },
+        { id:'pv6.value',       name:'Finding the value of a digit (digit × column)',            target:13 },
+        { id:'pv6.digit',       name:'Identifying which digit sits in a given column',          target:11 },
+        { id:'pv6.partition',   name:'Partitioning and recombining by column value',            target:11 },
         { id:'pv6.comparing',   name:'Comparing values of two digits in a number',              target:6  },
-        { id:'pv6.zero',        name:'Hero zeros and their effect on value',                    target:6  },
-        { id:'pv6.scaling',     name:'Scaling a digit by moving columns (×10 / ×100 / ×1,000)',target:5  },
-        { id:'pv6.real-life',   name:'Real-life place-value problems',                          target:4  }
+        { id:'pv6.zero',        name:'Hero zeros and their effect on value',                    target:5  },
+        { id:'pv6.scaling',     name:'Scaling a digit by moving columns (×10 / ×100 / ×1,000)',target:3  },
+        { id:'pv6.real-life',   name:'Real-life place-value problems',                          target:1  }
       ],
       questions: [
         /* ===== CORE 10 (from lesson P5_PV6) ===== */
@@ -759,11 +759,11 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV7',
       targetSize: 50,
       concepts: [
-        { id:'pv7.meaning',     name:'What 10ⁿ means (10 × 10 × … n times)',                    target:10 },
-        { id:'pv7.zeros',       name:'The index counts the zeros in the answer',                target:9  },
-        { id:'pv7.write',       name:'Writing a power as a number and vice versa',              target:9  },
+        { id:'pv7.meaning',     name:'What 10ⁿ means (10 × 10 × … n times)',                    target:12 },
+        { id:'pv7.zeros',       name:'The index counts the zeros in the answer',                target:10 },
+        { id:'pv7.write',       name:'Writing a power as a number and vice versa',              target:10 },
         { id:'pv7.multiply',    name:'Multiplying a number by a power of 10 (digits shift left)',target:8 },
-        { id:'pv7.divide',      name:'Dividing a number by a power of 10 (digits shift right)', target:8 },
+        { id:'pv7.divide',      name:'Dividing a number by a power of 10 (digits shift right)', target:4 },
         { id:'pv7.add-sub',     name:'Adding and subtracting powers of 10',                     target:6  }
       ],
       questions: [
@@ -881,13 +881,13 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV8',
       targetSize: 50,
       concepts: [
-        { id:'pv8.add-more',    name:'Adding a power of ten (+, more)',                          target:10 },
-        { id:'pv8.sub-less',    name:'Subtracting a power of ten (−, less)',                     target:10 },
+        { id:'pv8.add-more',    name:'Adding a power of ten (+, more)',                          target:14 },
+        { id:'pv8.sub-less',    name:'Subtracting a power of ten (−, less)',                     target:13 },
         { id:'pv8.identify',    name:'Which column changes for a given jump',                    target:6  },
-        { id:'pv8.chain',       name:'Chained jumps (two or more operations)',                   target:8  },
-        { id:'pv8.boundary',    name:'Crossing a boundary / cascading digits',                   target:6  },
-        { id:'pv8.real-life',   name:'Real-life problems and reasoning with jumps',              target:6  },
-        { id:'pv8.reverse',     name:'Reverse problems (what change was made?)',                 target:4  }
+        { id:'pv8.chain',       name:'Chained jumps (two or more operations)',                   target:6  },
+        { id:'pv8.boundary',    name:'Crossing a boundary / cascading digits',                   target:4  },
+        { id:'pv8.real-life',   name:'Real-life problems and reasoning with jumps',              target:4  },
+        { id:'pv8.reverse',     name:'Reverse problems (what change was made?)',                 target:3  }
       ],
       questions: [
         /* ===== CORE 10 (from lesson P5_PV8) ===== */
@@ -1008,13 +1008,13 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV9',
       targetSize: 50,
       concepts: [
-        { id:'pv9.standard',    name:'Standard partitioning (each digit × column)',              target:10 },
+        { id:'pv9.standard',    name:'Standard partitioning (each digit × column)',              target:11 },
         { id:'pv9.zero',        name:'Partitioning with zeros (skipped columns)',                target:8  },
-        { id:'pv9.flexible',    name:'Flexible partitioning (any split that adds back)',        target:8  },
-        { id:'pv9.missing',     name:'Finding a missing part',                                   target:8  },
-        { id:'pv9.recombine',   name:'Recombining partitioned parts',                            target:8  },
+        { id:'pv9.flexible',    name:'Flexible partitioning (any split that adds back)',        target:10 },
+        { id:'pv9.missing',     name:'Finding a missing part',                                   target:10 },
+        { id:'pv9.recombine',   name:'Recombining partitioned parts',                            target:5  },
         { id:'pv9.validity',    name:'Checking whether a partition adds back',                   target:4  },
-        { id:'pv9.real-life',   name:'Real-life partitioning problems',                          target:4  }
+        { id:'pv9.real-life',   name:'Real-life partitioning problems',                          target:2  }
       ],
       questions: [
         /* ===== CORE 10 (from lesson P5_PV9) ===== */
@@ -1115,9 +1115,9 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
           stem:'Which part is missing: 240,000 = 200,000 + ___ + 0?', options:['40,000','4,000','400'], correct:0, check:'40000' },
 
         { id:'P5.AUT.PV.S09.Q0045', v:1, concept:'pv9.recombine', level:'n', difficulty:2,
-          stem:'400,000 + 30,000 + 500 + 60 + 3 = ?', options:['430,563','403,563','4,305,63'], correct:0, check:'430563' },
+          stem:'400,000 + 30,000 + 500 + 60 + 3 = ?', options:['430,563','403,563','4,305,63'], correct:0 },
         { id:'P5.AUT.PV.S09.Q0046', v:1, concept:'pv9.recombine', level:'n', difficulty:2,
-          stem:'300,000 + 20,000 + 7,000 + 800 + 9 = ?', options:['327,809','32,780,9','327,890'], correct:0, check:'327809' },
+         stem:'300,000 + 20,000 + 7,000 + 800 + 9 = ?', options:['327,809','32,780,9','327,890'], correct:0 },
         { id:'P5.AUT.PV.S09.Q0047', v:1, concept:'pv9.recombine', level:'n', difficulty:2,
           stem:'500,000 + 0 + 0 + 0 + 0 + 8 = ?', options:['500,008','5,008','500,080'], correct:0, check:'500008' },
         { id:'P5.AUT.PV.S09.Q0048', v:1, concept:'pv9.validity', level:'n', difficulty:2,
@@ -1134,13 +1134,13 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
       lesson: 'P5_PV10',
       targetSize: 50,
       concepts: [
-        { id:'pv10.position',   name:'Reading a position on a marked line',                       target:10 },
-        { id:'pv10.interval',   name:'Working out the interval between marks',                    target:9  },
-        { id:'pv10.midpoint',   name:'Midpoint, quarter point, three-quarter point',              target:8  },
-        { id:'pv10.estimate',   name:'Estimating a number between marks',                         target:8  },
+        { id:'pv10.position',   name:'Reading a position on a marked line',                       target:7  },
+        { id:'pv10.interval',   name:'Working out the interval between marks',                    target:15 },
+        { id:'pv10.midpoint',   name:'Midpoint, quarter point, three-quarter point',              target:9  },
+        { id:'pv10.estimate',   name:'Estimating a number between marks',                         target:7  },
         { id:'pv10.zoom',       name:'Zooming (zoomed-in lines with smaller intervals)',          target:6  },
-        { id:'pv10.distance',   name:'Distance between two marks (subtract)',                     target:5  },
-        { id:'pv10.real-life',  name:'Real-life distance and position problems',                  target:4  }
+        { id:'pv10.distance',   name:'Distance between two marks (subtract)',                     target:4  },
+        { id:'pv10.real-life',  name:'Real-life distance and position problems',                  target:2  }
       ],
       questions: [
         /* ===== CORE 10 (from lesson P5_PV10) ===== */
