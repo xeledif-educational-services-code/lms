@@ -21,8 +21,14 @@ const err  = m => { errors++;   console.log('  ✗ ERROR   ' + m); };
 const warn = m => { warnings++; console.log('  ! warning ' + m); };
 
 /* numeric value of an option such as "£23.50", "4,500", "0.05316", "150 cm" */
+// function num(optText){
+//   const m = String(optText).replace(/,/g, '').match(/-?\d+(\.\d+)?/);
+//   return m ? parseFloat(m[0]) : NaN;
+// }
+
 function num(optText){
-  const m = String(optText).replace(/,/g, '').match(/-?\d+(\.\d+)?/);
+  const s = String(optText).replace(/,/g, '').replace(/\u2212/g, '-').replace(/[£$]/g, '');
+  const m = s.match(/-?\d+(\.\d+)?/);
   return m ? parseFloat(m[0]) : NaN;
 }
 
