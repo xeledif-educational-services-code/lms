@@ -1254,6 +1254,139 @@ window.XELEDIF_POOLS['P5.AUT.PV'] = {
         { id:'P5.AUT.PV.S10.Q0050', v:1, concept:'pv10.real-life', level:'b', difficulty:3,
           stem:'A car travels from 250,000 m to 750,000 m on a straight road. Write the distance it travelled in words.', options:['Five hundred thousand metres','Five hundred metres','Five thousand metres'], correct:0 }
       ]
+    },
+
+    'P5.AUT.PV.S11': {
+      label: 'Compare numbers to 100,000',
+      lesson: 'P5_PV11',
+      targetSize: 50,
+      concepts: [
+        { id:'pv11.digits',   name:'Comparing by number of digits',                      target:7  },
+        { id:'pv11.leftmost', name:'Comparing column by column from the left',           target:10 },
+        { id:'pv11.symbol',   name:'Choosing the correct symbol (<, > or =)',            target:10 },
+        { id:'pv11.extreme',  name:'Finding the greatest or smallest number',            target:7  },
+        { id:'pv11.equal',    name:'Equal numbers and partitioned forms',                target:5  },
+        { id:'pv11.build',    name:'Building the biggest or smallest number from digits',target:6  },
+        { id:'pv11.real-life',name:'Real-life comparing and finding the difference',     target:5  }
+      ],
+      questions: [
+        /* ===== CORE 10 (from lesson P5_PV11) ===== */
+        { id:'P5.AUT.PV.S11.Q0001', v:1, concept:'pv11.symbol', level:'n', difficulty:2,
+          stem:'Which symbol completes: 34,521 ___ 34,512?', options:['<','>','='], correct:1 },
+        { id:'P5.AUT.PV.S11.Q0002', v:1, concept:'pv11.digits', level:'n', difficulty:1,
+          stem:'Which number is bigger: 8,999 or 42,000?', options:['8,999','42,000','They are equal'], correct:1 },
+        { id:'P5.AUT.PV.S11.Q0003', v:1, concept:'pv11.symbol', level:'n', difficulty:1,
+          stem:'Which symbol completes: 56,700 ___ 56,700?', options:['<','>','='], correct:2 },
+        { id:'P5.AUT.PV.S11.Q0004', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'Which number is greater: 90,450 or 90,405?', options:['90,450','90,405','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0005', v:1, concept:'pv11.digits', level:'n', difficulty:2,
+          stem:'A 4-digit number compared with a 5-digit number (no leading zeros) is always…', options:['Smaller','Bigger','Impossible to tell'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0006', v:1, concept:'pv11.symbol', level:'n', difficulty:2,
+          stem:'Which symbol completes: 23,456 ___ 23,465?', options:['<','>','='], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0007', v:1, concept:'pv11.real-life', level:'n', difficulty:2,
+          stem:'Stadium A holds 48,300 fans. Stadium B holds 48,030 fans. Which holds more?', options:['Stadium A','Stadium B','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0008', v:1, concept:'pv11.digits', level:'n', difficulty:2,
+          stem:'Which symbol completes: 67,000 ___ 6,700?', options:['<','>','='], correct:1 },
+        { id:'P5.AUT.PV.S11.Q0009', v:1, concept:'pv11.build', level:'t', difficulty:3,
+          stem:'THINK DEEPER: Using the digits 7, 2, 9, 4, 5 once each, what is the BIGGEST possible number?', options:['97,542','79,542','95,742'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0010', v:1, concept:'pv11.real-life', level:'b', difficulty:3,
+          stem:'BOSS LEVEL: Company A earned £82,650 profit. Company B earned £82,605 profit. How much more did Company A earn?', options:['£45','£54','£450'], correct:0, check:'82650-82605' },
+
+        /* ===== BATCH A — Number of digits (Q0011–Q0014) ===== */
+        { id:'P5.AUT.PV.S11.Q0011', v:1, concept:'pv11.digits', level:'n', difficulty:1,
+          stem:'Which number is greater: 9,999 or 10,000?', options:['10,000','9,999','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0012', v:1, concept:'pv11.digits', level:'t', difficulty:2,
+          stem:'Which of these is ALWAYS bigger than 9,999?', options:['Any 5-digit number','Any 4-digit number','Any 3-digit number'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0013', v:1, concept:'pv11.digits', level:'n', difficulty:1,
+          stem:'Which number is smaller: 7,654 or 12,345?', options:['7,654','12,345','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0014', v:1, concept:'pv11.digits', level:'t', difficulty:2,
+          stem:'Why is 9,876 smaller than 10,234?', options:['9,876 has fewer digits','9 is a smaller digit than 1','The comma changes the value'], correct:0 },
+
+        /* ===== BATCH A — March from the left (Q0015–Q0023) ===== */
+        { id:'P5.AUT.PV.S11.Q0015', v:1, concept:'pv11.leftmost', level:'n', difficulty:1,
+          stem:'Which number is greater: 73,462 or 73,642?', options:['73,642','73,462','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0016', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'Which number is smaller: 58,190 or 58,109?', options:['58,109','58,190','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0017', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'Comparing 41,235 and 41,253, which column decides the winner?', options:['Tens','Hundreds','Ones'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0018', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'Comparing 85,300 and 85,310, which column is the first one that differs?', options:['Tens','Hundreds','Ones'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0019', v:1, concept:'pv11.leftmost', level:'t', difficulty:2,
+          stem:'Which number is greater: 29,999 or 30,001?', options:['30,001','29,999','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0020', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'Which number is smaller: 64,008 or 64,080?', options:['64,008','64,080','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0021', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'Which number is greater: 50,001 or 49,999?', options:['50,001','49,999','They are equal'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0022', v:1, concept:'pv11.leftmost', level:'b', difficulty:3,
+          stem:'Aisha says 31,478 is bigger than 31,748 because 8 is bigger than 4. What is her mistake?',
+          options:['She compared the ones digit first; marching from the left, the hundreds digits (4 and 7) differ first','She is right','She should have counted the digits first'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0023', v:1, concept:'pv11.leftmost', level:'n', difficulty:2,
+          stem:'In 52,816 and 52,861 the first three columns match. Which number is bigger?', options:['52,861','52,816','They are equal'], correct:0 },
+
+        /* ===== BATCH B — Symbols (Q0024–Q0030) ===== */
+        { id:'P5.AUT.PV.S11.Q0024', v:1, concept:'pv11.symbol', level:'n', difficulty:1,
+          stem:'Which symbol completes: 45,200 ___ 45,020?', options:['<','>','='], correct:1 },
+        { id:'P5.AUT.PV.S11.Q0025', v:1, concept:'pv11.symbol', level:'n', difficulty:1,
+          stem:'Which symbol completes: 12,345 ___ 12,354?', options:['<','>','='], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0026', v:1, concept:'pv11.symbol', level:'n', difficulty:2,
+          stem:'Which symbol completes: 80,000 ___ 79,999?', options:['<','>','='], correct:1 },
+        { id:'P5.AUT.PV.S11.Q0027', v:1, concept:'pv11.symbol', level:'n', difficulty:2,
+          stem:'Which symbol completes: 3,900 ___ 39,000?', options:['<','>','='], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0028', v:1, concept:'pv11.symbol', level:'n', difficulty:2,
+          stem:'Which symbol completes: 60,000 + 5,000 ___ 65,000?', options:['<','>','='], correct:2 },
+        { id:'P5.AUT.PV.S11.Q0029', v:1, concept:'pv11.symbol', level:'n', difficulty:2,
+          stem:'Which symbol completes: 91,308 ___ 91,380?', options:['<','>','='], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0030', v:1, concept:'pv11.symbol', level:'t', difficulty:3,
+          stem:'Which comparison is TRUE?', options:['56,780 > 56,870','56,780 < 56,870','56,780 = 56,870'], correct:1 },
+
+        /* ===== BATCH B — Greatest and smallest (Q0031–Q0037) ===== */
+        { id:'P5.AUT.PV.S11.Q0031', v:1, concept:'pv11.extreme', level:'n', difficulty:2,
+          stem:'Which is the GREATEST: 45,210, 45,120 or 45,201?', options:['45,210','45,120','45,201'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0032', v:1, concept:'pv11.extreme', level:'n', difficulty:2,
+          stem:'Which is the SMALLEST: 63,400, 63,040 or 63,004?', options:['63,004','63,040','63,400'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0033', v:1, concept:'pv11.extreme', level:'n', difficulty:2,
+          stem:'Which is the GREATEST: 9,870, 19,870 or 8,970?', options:['19,870','9,870','8,970'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0034', v:1, concept:'pv11.extreme', level:'n', difficulty:2,
+          stem:'Which is the SMALLEST: 72,500, 7,250 or 27,500?', options:['7,250','72,500','27,500'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0035', v:1, concept:'pv11.extreme', level:'t', difficulty:3,
+          stem:'Which is the LARGEST: 38,905, 38,950 or 38,590?', options:['38,950','38,905','38,590'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0036', v:1, concept:'pv11.extreme', level:'t', difficulty:3,
+          stem:'Which list goes from SMALLEST to LARGEST?', options:['4,999 · 40,009 · 40,090','40,090 · 40,009 · 4,999','40,009 · 4,999 · 40,090'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0037', v:1, concept:'pv11.extreme', level:'t', difficulty:3,
+          stem:'Which is the GREATEST: 99,909, 99,990 or 99,099?', options:['99,990','99,909','99,099'], correct:0 },
+
+        /* ===== BATCH C — Equal and partitioned forms (Q0038–Q0042) ===== */
+        { id:'P5.AUT.PV.S11.Q0038', v:1, concept:'pv11.equal', level:'n', difficulty:2,
+          stem:'Which symbol completes: 40,000 + 3,000 + 200 ___ 43,200?', options:['<','>','='], correct:2 },
+        { id:'P5.AUT.PV.S11.Q0039', v:1, concept:'pv11.equal', level:'t', difficulty:3,
+          stem:'Which symbol completes: 70,000 + 600 + 5 ___ 70,650?', options:['<','>','='], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0040', v:1, concept:'pv11.equal', level:'n', difficulty:2,
+          stem:'Which is equal to 58,000?', options:['50,000 + 8,000','50,000 + 800','5,000 + 8,000'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0041', v:1, concept:'pv11.equal', level:'n', difficulty:2,
+          stem:'Which number is equal to 90,000 + 9?', options:['90,009','90,090','99,000'], correct:0, check:'90000+9' },
+        { id:'P5.AUT.PV.S11.Q0042', v:1, concept:'pv11.equal', level:'b', difficulty:3,
+          stem:'Which symbol completes: 20,000 + 5,000 + 40 ___ 25,400?', options:['<','>','='], correct:0 },
+
+        /* ===== BATCH C — Building numbers from digits (Q0043–Q0047) ===== */
+        { id:'P5.AUT.PV.S11.Q0043', v:1, concept:'pv11.build', level:'n', difficulty:2,
+          stem:'Using the digits 3, 8, 1, 6, 4 once each, what is the BIGGEST 5-digit number?', options:['86,431','83,641','86,413'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0044', v:1, concept:'pv11.build', level:'n', difficulty:2,
+          stem:'Using the digits 3, 8, 1, 6, 4 once each, what is the SMALLEST 5-digit number?', options:['13,468','14,368','13,486'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0045', v:1, concept:'pv11.build', level:'t', difficulty:3,
+          stem:'Using the digits 5, 0, 7, 2, 9 once each, what is the SMALLEST 5-digit number? (A number cannot start with 0.)', options:['20,579','02,579','25,079'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0046', v:1, concept:'pv11.build', level:'n', difficulty:2,
+          stem:'Using the digits 5, 0, 7, 2, 9 once each, what is the BIGGEST 5-digit number?', options:['97,520','97,502','95,720'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0047', v:1, concept:'pv11.build', level:'t', difficulty:3,
+          stem:'Using the digits 4, 0, 9, 4, 1 once each, what is the BIGGEST 5-digit number?', options:['94,410','94,401','94,140'], correct:0 },
+
+        /* ===== BATCH C — Real life (Q0048–Q0050) ===== */
+        { id:'P5.AUT.PV.S11.Q0048', v:1, concept:'pv11.real-life', level:'n', difficulty:1,
+          stem:'A school has 36,420 books and a library has 36,240 books. Which has more?', options:['The school','The library','They have the same'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0049', v:1, concept:'pv11.real-life', level:'n', difficulty:2,
+          stem:'Car A costs £28,950. Car B costs £29,050. Which car is cheaper?', options:['Car A','Car B','They cost the same'], correct:0 },
+        { id:'P5.AUT.PV.S11.Q0050', v:1, concept:'pv11.real-life', level:'b', difficulty:3,
+          stem:'BOSS LEVEL: Town P has 45,800 people and Town Q has 45,080 people. How many more people live in Town P?', options:['720','780','7,200'], correct:0, check:'45800-45080' }
+      ]
     }
   }
 };
