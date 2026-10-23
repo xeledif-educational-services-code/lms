@@ -3625,7 +3625,7 @@ ${asHeader('AS9','Step 9 — Checking Using Inverse Operations','CPA Mastery App
   ${asCol({a:'45635',b:'37465',op:'+',res:'83100',under:['1','1','1','1',''],title:'CHECK: 45,635 + 37,465 — we NEED 83,000… but we get 83,100!'})}
   ${steps([['Check','45,635 + 37,465 = 83,100','but Priya started with 83,000!'],['Compare','83,100 vs 83,000','the check is 100 too big — the answer is WRONG ✗'],['Hunt','work the column again','83,000 − 37,465: exchange through the zeros (the nines trick)…'],['CORRECT ANSWER','45,535','check: 45,535 + 37,465 = 83,000 ✓ now it lands back on the start!']])}
   ${asCol({a:'83000',b:'37465',op:'−',res:'45535',over:['7','12','9','9','10'],strike:[true,true,true,true,true],title:'The correct subtraction: the nines trick gives 45,535'})}
-  <div class="card-body" style="margin-top:6px;">💡 Priya&rsquo;s mistake: she forgot to knock the ten-thousands down when the exchange rippled through the zeros (7 should become 6 after lending, but she kept 7 → answer 100 too big).</div>
+  <div class="card-body" style="margin-top:6px;">💡 Priya&rsquo;s mistake: the hundreds digit had already lent a ten to the tens column, so it should have been <strong>9</strong>, not 10. She did 10 − 4 = 6 instead of 9 − 4 = 5, which made her answer exactly 100 too big.</div>
 </div>
 
 <div class="card">
@@ -13521,13 +13521,14 @@ const SCHEME_P5 = [
           { label:'Column addition with exchange',               content: P5_AS5, poolStep:'P5.AUT.AS.S05', stepNumber: 5 },
           { label:'Column subtraction with exchange',            content: P5_AS6, poolStep:'P5.AUT.AS.S06', stepNumber: 6 },
 
-          { label:'Efficient written methods', content: P5_AS7 },
-          { label:'Estimating answers', content: P5_AS8 },
-          { label:'Checking using inverse operations', content: P5_AS9 },
+          { label:'Efficient written methods',        content: P5_AS7, poolStep:'P5.AUT.AS.S07', stepNumber: 7 },
+          { label:'Estimating answers',               content: P5_AS8, poolStep:'P5.AUT.AS.S08', stepNumber: 8 },
+          { label:'Checking using inverse operations',content: P5_AS9, poolStep:'P5.AUT.AS.S09', stepNumber: 9 },
 
           { label:'Find missing numbers', content: P5_AS10 },
           { label:'Multi-step addition problems', content: P5_AS11 },
           { label:'Multi-step subtraction problems', content: P5_AS12 },
+
           { label:'Problems involving addition and subtraction', content: P5_AS13 },
           { label:'Reasoning with addition and subtraction', content: P5_AS14 }
         ]},
