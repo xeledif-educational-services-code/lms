@@ -3951,8 +3951,188 @@ ${asExCard(12,[
  exQ(10,'BOSS LEVEL: A festival has 200,000 tickets. 64,350 are sold on Day 1 and 71,825 on Day 2. Then 12,000 EXTRA tickets are released. How many tickets are now unsold?',['75,825','51,825','63,825'],0,'b')])}`;
 
 
-const P5_AS13 = null; // Problems involving addition and subtraction
-const P5_AS14 = null; // Reasoning with addition and subtraction
+/* ============================================================
+   PRIMARY 5 — ADDITION & SUBTRACTION — LESSONS 13 AND 14
+   INSTALL: delete `const P5_AS13 = null;` and `const P5_AS14 = null;`
+   then paste this whole file BELOW P5_AS12 (above SCHEME_P5).
+   Uses: asHeader, asWarm, asBar, asJump, asPV, asCol, asExCard,
+         steps(), numLine(), exQ().
+
+   asCol reminder:
+     under[i] = digit written BELOW the column that RECEIVES an exchange
+     over[i]  = the NEW value of the top digit AFTER exchanging
+   ============================================================ */
+
+
+/* ============================================================
+   STEP 13 : Problems involving addition and subtraction
+   ============================================================ */
+const P5_AS13 = `
+${asHeader('AS13','Step 13 — Problems Involving Addition and Subtraction','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Becoming a Problem Detective</div>
+  ${asWarm('Real problems rarely shout &ldquo;ADD ME!&rdquo; or &ldquo;SUBTRACT ME!&rdquo;. They hide the mathematics inside stories. Your job is to <strong>read like a detective</strong>: find the numbers, decide what is happening to them, and only then calculate.')}
+
+  <div class="card-body"><strong>Pictorial:</strong> every problem is one of these three shapes. Learn to spot the shape and the operation chooses itself:</div>
+  <div class="strategy-grid" style="margin-top:6px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">➕ PARTS JOINING → ADD</div><div class="s-body" style="color:#0C447C;">&ldquo;altogether&rdquo;, &ldquo;in total&rdquo;, &ldquo;combined&rdquo; — two or more parts make a whole.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">➖ PART REMOVED → SUBTRACT</div><div class="s-body" style="color:#633806;">&ldquo;left&rdquo;, &ldquo;remaining&rdquo;, &ldquo;how many more needed&rdquo; — a part is taken from a whole.</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">⇄ COMPARING → SUBTRACT</div><div class="s-body" style="color:#3C3489;">&ldquo;how many more/fewer&rdquo;, &ldquo;the difference&rdquo;, &ldquo;taller/shorter by&rdquo; — find the GAP between two numbers.</div></div>
+  </div>
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The 4-step detective routine</div><div class="s-body" style="color:#085041;">1) <strong>Read</strong> twice — underline the numbers and the question. 2) <strong>Sketch</strong> a bar model: which is the whole? 3) <strong>Choose</strong> the operation(s), one step at a time. 4) <strong>Answer the question asked</strong> — and check it makes sense.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Answering the wrong question</div><div class="s-body" style="color:#712B13;">Many problems ask for something <em>indirect</em>: &ldquo;how many MORE on Sunday than Saturday&rdquo; needs a SUBTRACTION even though the story mentioned two big numbers. Always re-read the actual question before you stop.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Using every number you see</div><div class="s-body" style="color:#712B13;">Stories often include <strong>irrelevant information</strong> on purpose (a price, an age, a distance). Using a number just because it is there is the classic trap. Only use numbers the <em>question</em> needs.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 3 — One giant step</div><div class="s-body" style="color:#712B13;">Two-step problems are TWO SMALL questions wearing a coat. Split them: solve step 1, write its answer down, then solve step 2. Never try to hold everything in your head.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — A two-step journey: 45,600 − 12,850 + 8,400</div>
+  ${asWarm('A warehouse holds <strong>45,600</strong> apples. <strong>12,850</strong> are loaded onto lorries, and later <strong>8,400</strong> arrive from the orchard. How many apples are in the warehouse now?')}
+  <div class="card-body"><strong>Detective notes:</strong> 12,850 leaves (➖) … 8,400 arrives (➕). Two steps, in the order the story tells them.</div>
+  ${asJump(['45,600','32,750','41,150'],['−12,850','+8,400'],'Pictorial: follow the journey — take away, then add back')}
+  ${steps([['Step 1 — apples leave','45,600 − 12,850','= 32,750 left'],['Step 2 — apples arrive','32,750 + 8,400','= 41,150 now'],['ANSWER','41,150 apples','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> 12,850 out and 8,400 in means the total should DROP by about 4,450. It did: 45,600 → 41,150 ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The comparison shape: City A and City B recycling</div>
+  ${asWarm('City A recycled <strong>56,380 kg</strong> of paper. City B recycled <strong>18,975 kg less</strong> than City A. How much did the two cities recycle ALTOGETHER?')}
+  <div class="card-body"><strong>Detective notes:</strong> the question asks for a TOTAL (➕) — but we do not know City B yet! &ldquo;18,975 less&rdquo; is a comparison (➖). Two steps, two different operations.</div>
+  ${asBar('Step 1 — find City B (the smaller part)', '56,380', [['18,975 less means…',19,'#FAECE7','#D85A30','#712B13'],['City B = ?',37.4,'#E1F5EE','#1D9E75','#085041']])}
+  ${asCol({a:'56380',b:'18975',op:'−',res:'37405',over:['4','15','13','7','10'],strike:[true,true,true,true,true],title:'Step 1: City B recycled 56,380 − 18,975'})}
+  ${steps([['Step 1','56,380 − 18,975','= 37,405 kg (City B)'],['Step 2 — altogether','56,380 + 37,405','= 93,785 kg'],['ANSWER','93,785 kg of paper','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Sense check:</strong> the total must be a bit less than double 56,380 (which is 112,760). 93,785 is — because City B is smaller ✓</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A whole split three ways: the library books</div>
+  ${asWarm('A library owns <strong>52,000</strong> books: <strong>18,450</strong> are fiction and <strong>12,380</strong> are reference. The rest are non-fiction. How many non-fiction books are there?')}
+  <div class="card-body"><strong>Stage 1 — shrink the whole:</strong> take away the fiction.</div>
+  ${asBar('Stage 1: 52,000 − fiction', '52,000', [['fiction: 18,450',18.5,'#FAEEDA','#BA7517','#633806'],['everything else: ?',33.5,'#E1F5EE','#1D9E75','#085041']])}
+  ${steps([['Stage 1','52,000 − 18,450','= 33,550 books that are not fiction'],['Stage 2 — split the rest','33,550 − 12,380 (reference)','= 21,170 non-fiction'],['ANSWER','21,170 non-fiction books','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Full-proof check:</strong> do all three parts rebuild the whole? 18,450 + 12,380 + 21,170 = 52,000 ✓ — if the parts do not rejoin to the whole, something is wrong.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — The irrelevant number: the sponsored walk</div>
+  ${asWarm('A school raised <strong>£14,280</strong> on day 1 of a sponsored walk and <strong>£9,650</strong> on day 2. The target was <strong>£20,000</strong>, and <strong>480 pupils</strong> took part. By how much did the school beat its target?')}
+  <div class="card-body"><strong>Detective notes — line up the suspects:</strong></div>
+  <div style="display:flex;flex-direction:column;gap:6px;margin:8px 0;">
+    <div style="background:#EAF3DE;border:1.5px solid #C0DD97;border-radius:10px;padding:8px 12px;font-size:13px;color:#27500A;"><strong>NEEDED ✓</strong> £14,280 and £9,650 (the amounts raised) and £20,000 (the target)</div>
+    <div style="background:#FAECE7;border:1.5px solid #F0997B;border-radius:10px;padding:8px 12px;font-size:13px;color:#712B13;text-decoration:line-through;"><strong>NOT NEEDED ✗</strong> 480 pupils — interesting, but the question never asks about pupils!</div>
+  </div>
+  ${asBar('Part-whole: money raised vs target', '£23,930 raised', [['target: £20,000',20,'#EEEDFE','#7F77DD','#3C3489'],['beat the target by: ?',3.9,'#EAF3DE','#639922','#27500A']])}
+  ${steps([['Step 1 — total raised','£14,280 + £9,650','= £23,930'],['Step 2 — compare with target','£23,930 − £20,000','= £3,930 over'],['ANSWER','the school beat its target by £3,930','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Money going both ways: Mum&rsquo;s wallet</div>
+  ${asWarm('Mum has <strong>£500</strong>. She spends <strong>£178</strong> on groceries and <strong>£96</strong> on fuel. Then she returns a <strong>£45</strong> jacket for a refund. How much does she have now?')}
+  <div class="card-body"><strong>Detective notes:</strong> spending ➖ ➖, refund ➕. Follow the journey in story order.</div>
+  ${asJump(['£500','£322','£226','£271'],['−£178','−£96','+£45'],'Pictorial: two spends, then money comes back')}
+  ${steps([['Step 1 — groceries','£500 − £178','= £322'],['Step 2 — fuel','£322 − £96','= £226'],['Step 3 — refund','£226 + £45','= £271'],['ANSWER','Mum has £271 left','']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Shortcut check:</strong> total change = −£178 − £96 + £45 = −£229. Does £500 − £229 = £271? ✓ Same answer, quicker check.</div>
+</div>
+
+${asExCard(13,[
+ exQ(1,'A water tank holds 60,000 litres. 18,450 litres are used, then 9,875 litres are pumped back in. How much water is in the tank now?',['51,425 litres','50,425 litres','51,525 litres'],0),
+ exQ(2,'A concert hall has 18,250 seats per night. 12,380 tickets are sold for night 1 and 14,950 for night 2. How many seats are unsold across both nights?',['9,170','8,170','9,270'],0),
+ exQ(3,'Liam scored 24,380 points and Jo scored 18,950. How many MORE points did Liam score? Which calculation answers it?',['24,380 − 18,950','24,380 + 18,950','18,950 + 24,380'],0),
+ exQ(4,'Farm A produced 38,460 eggs. Farm B produced 12,750 fewer eggs than Farm A. How many eggs did the two farms produce altogether?',['64,170','51,210','25,710'],0),
+ exQ(5,'A cinema sold 8,450 adult tickets and 6,275 child tickets. Each ticket cost £8. How many tickets were sold in total?',['14,725','16,725','£118,400'],0),
+ exQ(6,'Sara had £800. She spent £245 on a bike and £138 on a helmet, then earned £120 babysitting. How much does she have now?',['£537','£657','£417'],0),
+ exQ(7,'A school needs 25,000 cans for a recycling challenge. Classes have collected 9,860 and 8,450. How many more cans are needed?',['6,690','7,690','6,590'],0),
+ exQ(8,'Is 38,450 + 27,950 more or less than 70,000? Work it out exactly.',['Less — the exact total is 66,400','More — the exact total is 71,400','Exactly 70,000'],0),
+ exQ(9,'THINK DEEPER: &ldquo;A shop had 5,000 pens. It sold some and 1,250 remain. Each pen costs £2.&rdquo; To find HOW MANY pens were sold, which information do you need?',['5,000 and 1,250 — the £2 price is irrelevant','£2 and 1,250 — the 5,000 is irrelevant','All three numbers are needed'],0,'t'),
+ exQ(10,'BOSS LEVEL: A theme park welcomed 48,260 visitors: 27,950 adults, 8,460 seniors, and the rest children. How many children visited? Then: how many more adults than children visited?',['11,850 children; 16,100 more adults','11,850 children; 12,100 more adults','12,850 children; 15,100 more adults'],0,'b')])}`;
+
+
+/* ============================================================
+   STEP 14 : Reasoning with addition and subtraction
+   ============================================================ */
+const P5_AS14 = `
+${asHeader('AS14','Step 14 — Reasoning with Addition and Subtraction','CPA Mastery Approach · 5 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Thinking Like a Mathematician</div>
+  ${asWarm('So far you have <em>calculated</em>. Now you will <strong>reason</strong>: make predictions, test claims, hunt for counterexamples, and decide whether something is <strong>always, sometimes or never</strong> true. This is the step where mathematics starts to feel like detective work — and it needs almost no calculating at all!')}
+
+  <div class="card-body"><strong>Pictorial:</strong> reasoning usually starts with a <strong>conjecture</strong> — a claim like &ldquo;the sum will be even&rdquo;. Then you test it:</div>
+  <div class="strategy-grid" style="margin-top:6px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">1️⃣ ALWAYS</div><div class="s-body" style="color:#0C447C;">True every single time. To prove it, you need an <strong>argument</strong> (not just examples).</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">2️⃣ SOMETIMES</div><div class="s-body" style="color:#633806;">True in some cases, false in others. Show ONE example of each.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">3️⃣ NEVER</div><div class="s-body" style="color:#712B13;">False every time — OR the claim is wrong and one <strong>counterexample</strong> is enough to prove it!</div></div>
+  </div>
+
+  <div class="strategy-grid" style="margin-top:10px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 The reasoning toolbox</div><div class="s-body" style="color:#085041;">• <strong>Test</strong> with easy numbers first — big numbers obey the same rules.<br>• <strong>Look at structure</strong> (e.g. only the ones digit decides odd/even).<br>• <strong>One counterexample</strong> kills a &ldquo;always&rdquo; claim.<br>• <strong>Prove</strong> an &ldquo;always&rdquo; by explaining WHY.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — &ldquo;It worked 5 times, so it is always true&rdquo;</div><div class="s-body" style="color:#712B13;">Five examples are not a proof. A claim about ALL numbers needs a reason that covers every case. Testing finds patterns; only an <em>argument</em> proves them.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — &ldquo;Big numbers behave differently&rdquo;</div><div class="s-body" style="color:#712B13;">Odd and even, place value and exchanges work the SAME in 5-digit numbers as in 1-digit numbers. If a pattern works for 3 + 5, it works for 30,000 + 50,000. Test small, argue big.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — ALWAYS / SOMETIMES / NEVER: is a 5-digit + 5-digit sum always 6 digits?</div>
+  ${asWarm('Make a prediction before you look: two 5-digit numbers join — can the total ever reach 6 digits?')}
+  ${asBar('Case 1: small-ish numbers', '70,000 (still 5 digits)', [['30,000',30,'#E6F1FB','#378ADD','#0C447C'],['40,000',40,'#FAEEDA','#BA7517','#633806']])}
+  ${asBar('Case 2: bigger numbers', '110,000 (6 digits!)', [['60,000',60,'#E6F1FB','#378ADD','#0C447C'],['50,000',50,'#FAEEDA','#BA7517','#633806']])}
+  ${steps([['Test 1','30,000 + 40,000','= 70,000 → 5 digits'],['Test 2','60,000 + 50,000','= 110,000 → 6 digits!'],['The boundary','40,000 + 60,000','= 100,000 → exactly 6 digits'],['VERDICT','SOMETIMES','the sum is 6 digits exactly when it reaches 100,000']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The real rule</div><div class="s-body" style="color:#27500A;">Two 5-digit numbers sum to 6 digits <strong>exactly when the total is 100,000 or more</strong>. The size of the individual numbers does not matter — only the total crossing the 100,000 boundary.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The ones-digit rules: odd and even without calculating</div>
+  ${asWarm('Predict first: 12,345 + 27,863 — will the answer be odd or even? You do NOT need to add the whole numbers!')}
+  <div class="card-body"><strong>The key insight:</strong> only the ONES digit decides odd or even. 12,345 ends in 5 (odd); 27,863 ends in 3 (odd). odd + odd: 5 + 3 = 8 → even. Predict: the total is EVEN.</div>
+  ${asCol({a:'12345',b:'27863',op:'+',res:'40208',under:['','1','1','1',''],title:'The check: 12,345 + 27,863 — look only at the ones column'})}
+  ${steps([['Prediction','odd + odd → even','5 + 3 = 8'],['Verify','12,345 + 27,863 = 40,208','ends in 8 — EVEN ✓ prediction confirmed'],['Test 2','12,345 + 27,864','5 + 4 = 9 → predict ODD → 40,209 ✓']])}
+  <div class="strategy-grid" style="margin-top:8px;">
+    <div class="strategy-card" style="background:#E6F1FB;border-color:#B5D4F4;"><div class="s-title" style="color:#0C447C;">even + even</div><div class="s-body" style="color:#0C447C;">= even<br>(0+0=0, 2+4=6…)</div></div>
+    <div class="strategy-card" style="background:#EEEDFE;border-color:#CECBF6;"><div class="s-title" style="color:#3C3489;">odd + odd</div><div class="s-body" style="color:#3C3489;">= even<br>(5+3=8, 7+9=16…)</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">odd + even</div><div class="s-body" style="color:#633806;">= odd<br>(5+4=9, 3+0=3…)</div></div>
+  </div>
+  <div class="card-body" style="margin-top:8px;">🎯 <strong>Why it always works:</strong> a number is odd or even <em>because of its ones digit</em>. Adding changes the total by the sum of the ones digits, so only that column matters — for numbers of ANY size.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — The counterexample hunt: is subtraction commutative?</div>
+  ${asWarm('Kai says: &ldquo;Subtraction works in any order, just like addition — a − b is the same as b − a.&rdquo; Test his claim with real numbers before you judge!')}
+  ${steps([['Test','50,000 − 20,000','= 30,000'],['Swap the order','20,000 − 50,000','impossible! You cannot take away more than you have (in positive numbers)'],['Second test','90,000 − 10,000 = 80,000 · 10,000 − 90,000','impossible again'],['VERDICT','NEVER (for positive numbers)','a − b = b − a is only true when a = b (then both are 0)']])}
+  ${asJump(['50,000','20,000'],['−30,000'],'One direction works…')}
+  <div class="card-body" style="margin-top:6px;">💡 Addition is commutative (a + b = b + a, ALWAYS) because joining parts has no order. Subtraction is about <em>removing</em> — order is built into the meaning. This is why the inverse check (Step 9) must rebuild the WHOLE, not just swap two numbers.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — The sum-and-difference puzzle: two numbers, two clues</div>
+  ${asWarm('Two numbers add to <strong>80,000</strong>. Their difference is <strong>12,000</strong>. Can you find both numbers WITHOUT guessing?')}
+  <div class="card-body"><strong>Pictorial trick:</strong> if you ADD the difference to the sum, the smaller number &ldquo;cancels out&rdquo; and you get <em>double</em> the bigger number.</div>
+  ${asBar('Trick: sum + difference = 2 × bigger number', '80,000 + 12,000 = 92,000', [['bigger number',46,'#E6F1FB','#378ADD','#0C447C'],['bigger number again',46,'#E6F1FB','#378ADD','#0C447C']])}
+  ${steps([['Add the clues','80,000 + 12,000','= 92,000 (= 2 × the bigger number)'],['Halve it','92,000 ÷ 2','= 46,000 (the bigger number)'],['Find the smaller','80,000 − 46,000','= 34,000'],['PROOF','46,000 + 34,000 = 80,000 ✓ · 46,000 − 34,000 = 12,000 ✓','both clues satisfied!']])}
+  <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ Why the trick works</div><div class="s-body" style="color:#27500A;">sum = bigger + smaller; difference = bigger − smaller. Adding them: (bigger + smaller) + (bigger − smaller) = 2 × bigger — the smallers wipe each other out! Subtracting the clues instead gives 2 × smaller.</div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — ALWAYS / SOMETIMES / NEVER: round-then-add vs add-then-round</div>
+  ${asWarm('Does the ORDER of rounding and adding matter? Two tests will tell.')}
+  ${steps([['Test A — exact first','4,860 + 3,740 = 8,600 → rounds to 9,000','round first: 5,000 + 4,000 = 9,000 — SAME ✓'],['Test B — exact first','1,240 + 1,260 = 2,500 → rounds to 3,000','round first: 1,000 + 1,000 = 2,000 — DIFFERENT! ✗'],['VERDICT','SOMETIMES','rounding first usually lands close, but both numbers rounding down (or up) together can drag the estimate away from rounding the true total']])}
+  <div class="card-body" style="margin-top:6px;">💡 <strong>Connection to Step 8:</strong> this is exactly why your teacher says an estimate is &ldquo;about right&rdquo;, not &ldquo;exact&rdquo;. Two different reasonable routines can give two different estimates — and both are still useful for catching big mistakes.</div>
+</div>
+
+${asExCard(14,[
+ exQ(1,'True or false: &ldquo;The sum of two even numbers is always even.&rdquo;',['True — even ones digits (0, 2, 4, 6, 8) always add to an even digit','False — it can sometimes be odd','True — but only for numbers below 10,000'],0),
+ exQ(2,'ALWAYS / SOMETIMES / NEVER: &ldquo;The difference between two 5-digit numbers is a 4-digit number.&rdquo;',['Sometimes — it can be 1 digit (10,001 − 10,000 = 1) or 5 digits (99,999 − 10,000 = 89,999)','Always','Never'],0),
+ exQ(3,'Tia claims: &ldquo;If you add two numbers, the answer is always bigger than both of them.&rdquo; Which counterexample proves her wrong?',['12,000 + 0 = 12,000','12,000 + 1 = 12,001','12,000 + 5 = 12,005'],0),
+ exQ(4,'Without fully calculating: is 23,456 + 38,975 odd or even?',['Odd — the ones digits give 6 + 5 = 11, and 11 is odd','Even — the numbers are too big to be odd','Even — 4 + 9 = 13'],0),
+ exQ(5,'Two numbers add to 100,000 and their difference is 20,000. What are the numbers?',['60,000 and 40,000','70,000 and 30,000','80,000 and 20,000'],0),
+ exQ(6,'Is a + b = b + a true for any two numbers?',['Yes — addition is commutative; order never matters','No — it only works for numbers under 1,000','No — order matters in addition'],0),
+ exQ(7,'&ldquo;Rounding each number first ALWAYS gives the same estimate as rounding the exact total.&rdquo; True or false?',['False — e.g., 1,240 + 1,260 = 2,500 (rounds to 3,000) but rounding first gives 1,000 + 1,000 = 2,000','True — rounding commutes with addition','True — estimates are always exact'],0),
+ exQ(8,'The sum of two numbers is even. Must both numbers be even?',['No — two odd numbers also add to an even total (e.g., 12,345 + 27,863 = 40,208)','Yes — an even sum needs two even addends','Yes — unless one of them is zero'],0),
+ exQ(9,'THINK DEEPER: Kai says: &ldquo;To get a 6-digit answer from two 5-digit numbers, BOTH numbers must be at least 50,000.&rdquo; Test 49,999 + 50,001 and judge.',['He is wrong — 49,999 + 50,001 = 100,000 and 49,999 &lt; 50,000; you only need the TOTAL to reach 100,000','He is right — both must be 50,000 or more','He is wrong — you need both numbers above 99,999'],0,'t'),
+ exQ(10,'BOSS LEVEL: Mathemagic! Take a number, reverse its digits, subtract the smaller from the larger. Is the answer ALWAYS divisible by 9? Test: 85,241 − 24,158 = 61,083 (digit sum 18 ✓) and 90,000 − 9 = 89,991 (digit sum 36 ✓). Conclusion?',['Yes — the digit sum of the answer is always a multiple of 9, which means the number is divisible by 9','No — it only works for 85,241','Yes — because subtraction reverses digits back'],0,'b')])}`;
 
 
 
@@ -13528,8 +13708,8 @@ const SCHEME_P5 = [
           { label:'Multi-step addition problems', content: P5_AS11 },
           { label:'Multi-step subtraction problems', content: P5_AS12 },
 
-          { label:'Problems involving addition and subtraction', content: P5_AS13 },
-          { label:'Reasoning with addition and subtraction', content: P5_AS14 }
+        { label:'Problems involving addition and subtraction', content: P5_AS13, poolStep:'P5.AUT.AS.S13', stepNumber: 13 },
+        { label:'Reasoning with addition and subtraction',     content: P5_AS14, poolStep:'P5.AUT.AS.S14', stepNumber: 14 }
         ]},
       { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],open: false, poolKey:'P5.AUT.MA', poolFile:'pools/p5_aut_03_multiplydivide.js',
         steps: [
@@ -13537,16 +13717,19 @@ const SCHEME_P5 = [
           { label:'Common multiples', content: P5_MDA2, poolStep:'P5.AUT.MA.S02', stepNumber:2 },
           { label:'Factors',          content: P5_MDA3, poolStep:'P5.AUT.MA.S03', stepNumber:3 },
 
-          { label:'Factor pairs', content: P5_MDA4 },
+          { label:'Factor pairs', content: P5_MDA4, },
           { label:'Common factors', content: P5_MDA5 },
           { label:'Prime numbers', content: P5_MDA6 },
           { label:'Prime factors', content: P5_MDA7 },
+
           { label:'Composite numbers', content: P5_MDA8 },
           { label:'Square numbers', content: P5_MDA9 },
           { label:'Cube numbers', content: P5_MDA10 },
+
           { label:'Squared notation (²)', content: P5_MDA11 },
           { label:'Cubed notation (³)', content: P5_MDA12 },
           { label:'Recognise divisibility patterns', content: P5_MDA13 },
+
           { label:'Multiplication facts and related division facts', content: P5_MDA14 },
           { label:'Mental multiplication strategies', content: P5_MDA15 },
           { label:'Mental division strategies', content: P5_MDA16 }

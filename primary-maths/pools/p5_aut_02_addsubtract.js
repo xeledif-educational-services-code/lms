@@ -1381,7 +1381,537 @@ window.XELEDIF_POOLS['P5.AUT.AS'] = {
           stem:'BOSS LEVEL: Zane says, "To check a − b = c, I work out a − c and should get b." Mia says, "I work out c + b and should get a." Who is right?',
           options:['Both — a − c = b and c + b = a are both valid checks','Only Zane','Only Mia'], correct:0 }
       ]
-    }
+    },
+    'P5.AUT.AS.S13': {
+    label: 'Problems involving addition and subtraction',
+    lesson: 'P5_AS13',
+    targetSize: 59,
+
+    concepts: [
+      { id:'as13.two-step',    name:'Two-step problems (add then subtract, in story order)', target:12 },
+      { id:'as13.comparison',  name:'Comparison shape: "how many more/fewer", differences',   target:9 },
+      { id:'as13.part-whole',  name:'Part-whole: altogether / remaining / missing part',       target:10 },
+      { id:'as13.irrelevant',  name:'Spotting irrelevant information',                        target:8 },
+      { id:'as13.money',       name:'Money problems (spend, refund, change)',                 target:8 },
+      { id:'as13.bar-model',   name:'Choosing the right calculation / bar model reasoning',   target:6 },
+      { id:'as13.reasoning',   name:'Reasoning and checking (sense checks, multi-part)',      target:6 }
+    ],
+
+    questions: [
+      /* ===== CORE 10 — lesson exercises, in order (Q0001–Q0010) ===== */
+      { id:'P5.AUT.AS.S13.Q0001', v:1, concept:'as13.two-step', level:'n', difficulty:2,
+        stem:'A water tank holds 60,000 litres. 18,450 litres are used, then 9,875 litres are pumped back in. How much water is in the tank now?',
+        options:['51,425 litres','50,425 litres','51,525 litres'], correct:0, check:'60000-18450+9875' },
+
+      { id:'P5.AUT.AS.S13.Q0002', v:1, concept:'as13.two-step', level:'n', difficulty:2,
+        stem:'A concert hall has 18,250 seats per night. 12,380 tickets are sold for night 1 and 14,950 for night 2. How many seats are unsold across both nights?',
+        options:['9,170','8,170','9,270'], correct:0, check:'18250*2-12380-14950' },
+
+      { id:'P5.AUT.AS.S13.Q0003', v:1, concept:'as13.comparison', level:'n', difficulty:1,
+        stem:'Liam scored 24,380 points and Jo scored 18,950. How many MORE points did Liam score? Which calculation answers it?',
+        options:['24,380 − 18,950','24,380 + 18,950','18,950 + 24,380'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0004', v:1, concept:'as13.two-step', level:'n', difficulty:3,
+        stem:'Farm A produced 38,460 eggs. Farm B produced 12,750 fewer eggs than Farm A. How many eggs did the two farms produce altogether?',
+        options:['64,170','51,210','25,710'], correct:0, check:'38460+(38460-12750)' },
+
+      { id:'P5.AUT.AS.S13.Q0005', v:1, concept:'as13.irrelevant', level:'n', difficulty:2,
+        stem:'A cinema sold 8,450 adult tickets and 6,275 child tickets. Each ticket cost £8. How many tickets were sold in total?',
+        options:['14,725','16,725','£118,400'], correct:0, check:'8450+6275' },
+
+      { id:'P5.AUT.AS.S13.Q0006', v:1, concept:'as13.money', level:'n', difficulty:2,
+        stem:'Sara had £800. She spent £245 on a bike and £138 on a helmet, then earned £120 babysitting. How much does she have now?',
+        options:['£537','£657','£417'], correct:0, check:'800-245-138+120' },
+
+      { id:'P5.AUT.AS.S13.Q0007', v:1, concept:'as13.part-whole', level:'n', difficulty:2,
+        stem:'A school needs 25,000 cans for a recycling challenge. Classes have collected 9,860 and 8,450. How many more cans are needed?',
+        options:['6,690','7,690','6,590'], correct:0, check:'25000-9860-8450' },
+
+      { id:'P5.AUT.AS.S13.Q0008', v:1, concept:'as13.reasoning', level:'t', difficulty:2,
+        stem:'Is 38,450 + 27,950 more or less than 70,000? Work it out exactly.',
+        options:['Less — the exact total is 66,400','More — the exact total is 71,400','Exactly 70,000'], correct:0, check:'38450+27950' },
+
+      { id:'P5.AUT.AS.S13.Q0009', v:1, concept:'as13.irrelevant', level:'t', difficulty:2,
+        stem:'"A shop had 5,000 pens. It sold some and 1,250 remain. Each pen costs £2." To find HOW MANY pens were sold, which information do you need?',
+        options:['5,000 and 1,250 — the £2 price is irrelevant','£2 and 1,250 — the 5,000 is irrelevant','All three numbers are needed'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0010', v:1, concept:'as13.two-step', level:'b', difficulty:3,
+        stem:'A theme park welcomed 48,260 visitors: 27,950 adults, 8,460 seniors, and the rest children. How many children visited? Then: how many more adults than children visited?',
+        options:['11,850 children; 16,100 more adults','11,850 children; 12,100 more adults','12,850 children; 15,100 more adults'], correct:0 },
+
+      /* ===== two-step (Q0011–Q0018) ===== */
+      { id:'P5.AUT.AS.S13.Q0011', v:1, concept:'as13.two-step', level:'n', difficulty:2,
+        stem:'A warehouse holds 45,600 apples. 12,850 are loaded onto lorries, and later 8,400 arrive from the orchard. How many apples are in the warehouse now?',
+        options:['41,150','40,150','49,150'], correct:0, check:'45600-12850+8400' },
+
+      { id:'P5.AUT.AS.S13.Q0012', v:1, concept:'as13.two-step', level:'n', difficulty:2,
+        stem:'A bus has 62 passengers. 18 get off at the first stop and 9 get on. How many passengers are on the bus now?',
+        options:['53','71','35'], correct:0, check:'62-18+9' },
+
+      { id:'P5.AUT.AS.S13.Q0013', v:1, concept:'as13.two-step', level:'n', difficulty:2,
+        stem:'A library has 12,400 books. 3,250 are lent out, then 1,850 are returned. How many books are in the library now?',
+        options:['11,000','10,000','12,000'], correct:0, check:'12400-3250+1850' },
+
+      { id:'P5.AUT.AS.S13.Q0014', v:1, concept:'as13.two-step', level:'n', difficulty:2,
+        stem:'A shop had 3,500 items. It sold 1,275 on Monday and 980 on Tuesday. How many items remain?',
+        options:['1,245','1,145','2,245'], correct:0, check:'3500-1275-980' },
+
+      { id:'P5.AUT.AS.S13.Q0015', v:1, concept:'as13.two-step', level:'t', difficulty:3,
+        stem:'A tank has 25,000 L of water. On day 1, 8,750 L are used; on day 2, 6,500 L are used, and 4,200 L of rain are collected. How much water is in the tank now?',
+        options:['13,950 L','14,950 L','22,650 L'], correct:0, check:'25000-8750-6500+4200' },
+
+      { id:'P5.AUT.AS.S13.Q0016', v:1, concept:'as13.two-step', level:'t', difficulty:3,
+        stem:'A school has 45,280 books. 12,650 are given away and 8,900 are bought. How many books does the school have now?',
+        options:['41,530','40,530','49,530'], correct:0, check:'45280-12650+8900' },
+
+      { id:'P5.AUT.AS.S13.Q0017', v:1, concept:'as13.two-step', level:'b', difficulty:3,
+        stem:'A runner runs 24,500 m in week 1. In week 2 she runs 3,750 m more than week 1, and in week 3 she runs 5,200 m less than week 2. How far does she run in weeks 2 and 3 altogether?',
+        options:['51,300 m','45,300 m','52,050 m'], correct:0, check:'(24500+3750)+(24500+3750-5200)' },
+
+      { id:'P5.AUT.AS.S13.Q0018', v:1, concept:'as13.two-step', level:'b', difficulty:3,
+        stem:'A shop has 120,000 items. Week 1 it sells 34,500; week 2 it sells 28,750; week 3 it receives 15,400 new items. How many items does the shop have now?',
+        options:['72,150','71,150','87,550'], correct:0, check:'120000-34500-28750+15400' },
+
+      /* ===== comparison (Q0019–Q0026) ===== */
+      { id:'P5.AUT.AS.S13.Q0019', v:1, concept:'as13.comparison', level:'n', difficulty:1,
+        stem:'Amara has 62,450 stickers. Chidi has 62,540. How many more does Chidi have?',
+        options:['90','900','9'], correct:0, check:'62540-62450' },
+
+      { id:'P5.AUT.AS.S13.Q0020', v:1, concept:'as13.comparison', level:'n', difficulty:2,
+        stem:'Town A has 45,300 people; Town B has 42,150. How many more people live in Town A?',
+        options:['3,150','3,250','2,150'], correct:0, check:'45300-42150' },
+
+      { id:'P5.AUT.AS.S13.Q0021', v:1, concept:'as13.comparison', level:'n', difficulty:2,
+        stem:'A car costs £28,500; another costs £24,750. How much more is the first car?',
+        options:['£3,750','£3,850','£4,750'], correct:0, check:'28500-24750' },
+
+      { id:'P5.AUT.AS.S13.Q0022', v:1, concept:'as13.comparison', level:'n', difficulty:2,
+        stem:'A runner did 62,500 steps on Monday and 62,050 on Tuesday. How many more steps on Monday?',
+        options:['450','540','4,500'], correct:0, check:'62500-62050' },
+
+      { id:'P5.AUT.AS.S13.Q0023', v:1, concept:'as13.comparison', level:'t', difficulty:3,
+        stem:'City A recycled 56,380 kg of paper. City B recycled 18,975 kg less. How much did City B recycle?',
+        options:['37,405 kg','38,405 kg','75,355 kg'], correct:0, check:'56380-18975' },
+
+      { id:'P5.AUT.AS.S13.Q0024', v:1, concept:'as13.comparison', level:'t', difficulty:3,
+        stem:'A shop sold 74,600 books in January and 74,060 in February. Which month sold more, and by how many?',
+        options:['January, by 540','February, by 540','January, by 450'], correct:0,},
+
+      { id:'P5.AUT.AS.S13.Q0025', v:1, concept:'as13.comparison', level:'b', difficulty:3,
+        stem:'A farmer has 82,650 apples and 82,605 oranges. How many more apples than oranges does she have?',
+        options:['45','54','450'], correct:0, check:'82650-82605' },
+
+      { id:'P5.AUT.AS.S13.Q0026', v:1, concept:'as13.comparison', level:'b', difficulty:3,
+        stem:'A company earned £82,650 profit; another earned £82,605. How much more did the first earn?',
+        options:['£45','£54','£450'], correct:0, check:'82650-82605' },
+
+      /* ===== part-whole (Q0027–Q0035) ===== */
+      { id:'P5.AUT.AS.S13.Q0027', v:1, concept:'as13.part-whole', level:'n', difficulty:1,
+        stem:'A box has 12,500 red beads and 8,450 blue beads. How many beads altogether?',
+        options:['20,950','21,050','4,050'], correct:0, check:'12500+8450' },
+
+      { id:'P5.AUT.AS.S13.Q0028', v:1, concept:'as13.part-whole', level:'n', difficulty:1,
+        stem:'A library owns 52,000 books: 18,450 fiction, 12,380 reference, and the rest non-fiction. How many are non-fiction?',
+        options:['21,170','22,170','21,070'], correct:0, check:'52000-18450-12380' },
+
+      { id:'P5.AUT.AS.S13.Q0029', v:1, concept:'as13.part-whole', level:'n', difficulty:2,
+        stem:'A school has 25,000 pupils in two buildings. One building has 12,350. How many pupils are in the other?',
+        options:['12,650','12,750','13,650'], correct:0, check:'25000-12350' },
+
+      { id:'P5.AUT.AS.S13.Q0030', v:1, concept:'as13.part-whole', level:'n', difficulty:2,
+        stem:'A shop had some eggs. It sold 14,500, and 8,250 remain. How many did it start with?',
+        options:['22,750','21,750','6,250'], correct:0, check:'14500+8250' },
+
+      { id:'P5.AUT.AS.S13.Q0031', v:1, concept:'as13.part-whole', level:'n', difficulty:2,
+        stem:'A club has 18,600 members: 9,850 adults, 5,750 juniors, and the rest children. How many children?',
+        options:['3,000','2,000','8,750'], correct:0, check:'18600-9850-5750' },
+
+      { id:'P5.AUT.AS.S13.Q0032', v:1, concept:'as13.part-whole', level:'t', difficulty:3,
+        stem:'A tank holds 60,000 L. It is emptied by 18,450 L and then filled with 9,875 L. How much water is there now?',
+        options:['51,425 L','50,425 L','51,525 L'], correct:0, check:'60000-18450+9875' },
+
+      { id:'P5.AUT.AS.S13.Q0033', v:1, concept:'as13.part-whole', level:'t', difficulty:3,
+        stem:'A shop has 45,000 items: 18,600 A, 12,250 B and the rest C. How many C items are there?',
+        options:['14,150','15,150','14,050'], correct:0, check:'45000-18600-12250' },
+
+      { id:'P5.AUT.AS.S13.Q0034', v:1, concept:'as13.part-whole', level:'b', difficulty:3,
+        stem:'A school collected 38,000 cans in term 1: 15,850 in week 1, 12,950 in week 2, and the rest in week 3. How many cans in week 3?',
+        options:['9,200','9,100','8,200'], correct:0, check:'38000-15850-12950' },
+
+      { id:'P5.AUT.AS.S13.Q0035', v:1, concept:'as13.part-whole', level:'b', difficulty:3,
+        stem:'A library has 45,000 books: 21,450 fiction, 12,380 reference, and the rest non-fiction. How many non-fiction?',
+        options:['11,170','11,070','10,170'], correct:0, check:'45000-21450-12380' },
+
+      /* ===== irrelevant (Q0036–Q0041) ===== */
+      { id:'P5.AUT.AS.S13.Q0036', v:1, concept:'as13.irrelevant', level:'n', difficulty:2,
+        stem:'A school raised £14,280 on day 1 and £9,650 on day 2. The target was £20,000. 480 pupils took part. By how much did the school beat its target?',
+        options:['£3,930','£4,930','£23,930'], correct:0, check:'14280+9650-20000' },
+
+      { id:'P5.AUT.AS.S13.Q0037', v:1, concept:'as13.irrelevant', level:'n', difficulty:2,
+        stem:'A bus travelled 250 km on Monday with 42 passengers. On Tuesday it travelled 180 km with 37 passengers. How much further did the bus travel on Monday?',
+        options:['70 km','288 km','67 km'], correct:0, check:'250-180' },
+
+      { id:'P5.AUT.AS.S13.Q0038', v:1, concept:'as13.irrelevant', level:'t', difficulty:3,
+        stem:'A shop has 5,000 pens. It sold some and 1,250 remain. Each pen costs £2. How many pens were sold?',
+        options:['3,750','6,250','2,500'], correct:0, check:'5000-1250' },
+
+      { id:'P5.AUT.AS.S13.Q0039', v:1, concept:'as13.irrelevant', level:'t', difficulty:3,
+        stem:'A cinema sold 8,450 adult and 6,275 child tickets. Each ticket cost £8. How many tickets were sold?',
+        options:['14,725','16,725','118,400'], correct:0, check:'8450+6275' },
+
+      { id:'P5.AUT.AS.S13.Q0040', v:1, concept:'as13.irrelevant', level:'b', difficulty:3,
+        stem:'A park had 12,500 visitors in May. In June it had 15,750 visitors. 850 of them were children. How many MORE visitors in June than in May?',
+        options:['3,250','2,400','3,400'], correct:0, check:'15750-12500' },
+
+      { id:'P5.AUT.AS.S13.Q0041', v:1, concept:'as13.irrelevant', level:'b', difficulty:3,
+        stem:'A school raised £12,480 from a fair and £8,960 from a quiz. 320 pupils took part. How much did the school raise in total?',
+        options:['£21,440','£21,340','£20,440'], correct:0, check:'12480+8960' },
+
+      /* ===== money (Q0042–Q0048) ===== */
+      { id:'P5.AUT.AS.S13.Q0042', v:1, concept:'as13.money', level:'n', difficulty:1,
+        stem:'Mum has £500. She spends £178 on groceries. How much does she have left?',
+        options:['£322','£332','£422'], correct:0, check:'500-178' },
+
+      { id:'P5.AUT.AS.S13.Q0043', v:1, concept:'as13.money', level:'n', difficulty:2,
+        stem:'Mum has £500. She spends £178 on groceries and £96 on fuel. How much does she have left?',
+        options:['£226','£236','£326'], correct:0, check:'500-178-96' },
+
+      { id:'P5.AUT.AS.S13.Q0044', v:1, concept:'as13.money', level:'n', difficulty:2,
+        stem:'Sara had £800. She spent £245 on a bike and £138 on a helmet. How much does she have left?',
+        options:['£417','£527','£407'], correct:0, check:'800-245-138' },
+
+      { id:'P5.AUT.AS.S13.Q0045', v:1, concept:'as13.money', level:'t', difficulty:3,
+        stem:'Mum has £500. She spends £178 and £96, then gets a £45 refund. How much does she have now?',
+        options:['£271','£281','£361'], correct:0, check:'500-178-96+45' },
+
+      { id:'P5.AUT.AS.S13.Q0046', v:1, concept:'as13.money', level:'t', difficulty:3,
+        stem:'A shopper has £600. She spends £278 on groceries, gets a £24 refund, then spends £85. How much is left?',
+        options:['£261','£271','£351'], correct:0, check:'600-278+24-85' },
+
+      { id:'P5.AUT.AS.S13.Q0047', v:1, concept:'as13.money', level:'b', difficulty:3,
+        stem:'Ali had £1,500. He paid £540 rent, £218 bills and £125 food. How much did he have left?',
+        options:['£617','£627','£717'], correct:0, check:'1500-540-218-125' },
+
+      { id:'P5.AUT.AS.S13.Q0048', v:1, concept:'as13.money', level:'b', difficulty:3,
+        stem:'A family budgeted £2,500 for a holiday. They spent £1,285 on flights, £620 on a hotel and £315 on food. How much was left?',
+        options:['£280','£290','£380'], correct:0, check:'2500-1285-620-315' },
+
+      /* ===== bar-model (Q0049–Q0054) ===== */
+      { id:'P5.AUT.AS.S13.Q0049', v:1, concept:'as13.bar-model', level:'n', difficulty:1,
+        stem:'A bar model shows a whole of 12,500 split into 8,400 and ?. What is the missing part?',
+        options:['4,100','4,200','20,900'], correct:0, check:'12500-8400' },
+
+      { id:'P5.AUT.AS.S13.Q0050', v:1, concept:'as13.bar-model', level:'n', difficulty:2,
+        stem:'A problem says: "How many more on Sunday than Saturday?" Which operation is needed?',
+        options:['Subtraction','Addition','Multiplication'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0051', v:1, concept:'as13.bar-model', level:'n', difficulty:2,
+        stem:'A problem says: "How many altogether?" Which operation is needed?',
+        options:['Addition','Subtraction','Multiplication'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0052', v:1, concept:'as13.bar-model', level:'t', difficulty:3,
+        stem:'A bar model shows a whole of 45,000 split into three parts: 18,600, 12,250 and ?. What is the missing part?',
+        options:['14,150','15,150','14,050'], correct:0, check:'45000-18600-12250' },
+
+      { id:'P5.AUT.AS.S13.Q0053', v:1, concept:'as13.bar-model', level:'b', difficulty:3,
+        stem:'A problem says: "A shop sold 14,500 apples. It sold 3,250 more pears. How many pieces of fruit did it sell?" What is the FIRST step?',
+        options:['Add 3,250 to 14,500 to find pears','Subtract 3,250 from 14,500','Multiply 14,500 by 3,250'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0054', v:1, concept:'as13.bar-model', level:'b', difficulty:3,
+        stem:'A problem says: "The total is 82,000. One part is 35,600. What is the other?" Which equation matches?',
+        options:['82,000 − 35,600 = 46,400','82,000 + 35,600 = 117,600','35,600 − 82,000 = 46,400'], correct:0 },
+
+      /* ===== reasoning (Q0055–Q0059) ===== */
+      { id:'P5.AUT.AS.S13.Q0055', v:1, concept:'as13.reasoning', level:'n', difficulty:2,
+        stem:'Is 38,450 + 27,950 more or less than 70,000?',
+        options:['Less — the exact total is 66,400','More — the exact total is 71,400','Exactly 70,000'], correct:0, check:'38450+27950' },
+
+      { id:'P5.AUT.AS.S13.Q0056', v:1, concept:'as13.reasoning', level:'t', difficulty:3,
+        stem:'A pupil says: "45,600 − 12,850 + 8,400 = 45,600 − (12,850 + 8,400)." Is the pupil correct?',
+        options:['No — the two signs act in order, so it is 32,750 + 8,400 = 41,150','Yes — we always add the numbers being subtracted first','Yes — subtraction and addition commute'], correct:0},
+
+      { id:'P5.AUT.AS.S13.Q0057', v:1, concept:'as13.reasoning', level:'t', difficulty:3,
+        stem:'A pupil estimates 18,450 + 9,875 as 20,000 + 10,000 = 30,000. Is this estimate useful?',
+        options:['Yes — it is close enough to check the exact answer','No — estimates must be exact','No — rounding first always gives the wrong answer'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0058', v:1, concept:'as13.reasoning', level:'b', difficulty:3,
+        stem:'Kai solves 60,000 − 18,450 + 9,875 = 51,425. Which check confirms the answer?',
+        options:['51,425 − 9,875 + 18,450 = 60,000','51,425 + 9,875 + 18,450 = 60,000','51,425 − 9,875 − 18,450 = 60,000'], correct:0 },
+
+      { id:'P5.AUT.AS.S13.Q0059', v:1, concept:'as13.reasoning', level:'b', difficulty:3,
+        stem:'Two pupils solve 60,000 − 18,450 + 9,875. One gets 51,425; the other gets 31,675. Which answer is correct, and what mistake did the other make?',
+        options:['51,425 is correct; the other added 18,450 and 9,875 first','31,675 is correct; the other subtracted wrong','Both are correct; the problem is ambiguous'], correct:0, check:'60000-18450+9875' }
+    ]
+  },
+
+  'P5.AUT.AS.S14': {
+  label: 'Reasoning with addition and subtraction',
+  lesson: 'P5_AS14',
+  targetSize: 60,
+
+  concepts: [
+    { id:'as14.always-sometimes-never', name:'ALWAYS / SOMETIMES / NEVER claims',                 target:10 },
+    { id:'as14.odd-even',               name:'Odd/even reasoning from the ones digit',             target:10 },
+    { id:'as14.counterexample',         name:'Counterexamples and testing claims',                 target:10 },
+    { id:'as14.commutativity',          name:'Commutativity of +, and NOT of −',                   target:7 },
+    { id:'as14.sum-difference',         name:'Sum-and-difference puzzles (two clues)',            target:7 },
+    { id:'as14.rounding',               name:'Round-then-add vs add-then-round',                   target:7 },
+    { id:'as14.patterns',               name:'Number patterns and divisibility reasoning',         target:5 },
+    { id:'as14.real-life',              name:'Reasoning inside real-life problems',                target:4 }
+  ],
+
+  questions: [
+    /* ===== CORE 10 — lesson exercises (Q0001–Q0010) ===== */
+    { id:'P5.AUT.AS.S14.Q0001', v:1, concept:'as14.always-sometimes-never', level:'n', difficulty:1,
+      stem:'True or false: "The sum of two even numbers is always even."',
+      options:['True — even ones digits (0, 2, 4, 6, 8) always add to an even digit','False — it can sometimes be odd','True — but only for numbers below 10,000'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0002', v:1, concept:'as14.always-sometimes-never', level:'n', difficulty:2,
+      stem:'ALWAYS / SOMETIMES / NEVER: "The difference between two 5-digit numbers is a 4-digit number."',
+      options:['Sometimes — it can be 1 digit (10,001 − 10,000 = 1) or 5 digits (99,999 − 10,000 = 89,999)','Always','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0003', v:1, concept:'as14.counterexample', level:'n', difficulty:2,
+      stem:'Tia claims: "If you add two numbers, the answer is always bigger than both of them." Which counterexample proves her wrong?',
+      options:['12,000 + 0 = 12,000','12,000 + 1 = 12,001','12,000 + 5 = 12,005'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0004', v:1, concept:'as14.odd-even', level:'n', difficulty:2,
+      stem:'Without fully calculating: is 23,456 + 38,975 odd or even?',
+      options:['Odd — the ones digits give 6 + 5 = 11, and 11 is odd','Even — the numbers are too big to be odd','Even — 4 + 9 = 13'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0005', v:1, concept:'as14.sum-difference', level:'n', difficulty:3,
+      stem:'Two numbers add to 100,000 and their difference is 20,000. What are the numbers?',
+      options:['60,000 and 40,000','70,000 and 30,000','80,000 and 20,000'], correct:0, check:'(100000+20000)/2' },
+
+    { id:'P5.AUT.AS.S14.Q0006', v:1, concept:'as14.commutativity', level:'n', difficulty:1,
+      stem:'Is a + b = b + a true for any two numbers?',
+      options:['Yes — addition is commutative; order never matters','No — it only works for numbers under 1,000','No — order matters in addition'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0007', v:1, concept:'as14.rounding', level:'n', difficulty:3,
+      stem:'"Rounding each number first ALWAYS gives the same estimate as rounding the exact total." True or false?',
+      options:['False — e.g., 1,240 + 1,260 = 2,500 (rounds to 3,000) but rounding first gives 1,000 + 1,000 = 2,000','True — rounding commutes with addition','True — estimates are always exact'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0008', v:1, concept:'as14.odd-even', level:'t', difficulty:3,
+      stem:'The sum of two numbers is even. Must both numbers be even?',
+      options:['No — two odd numbers also add to an even total (e.g., 12,345 + 27,863 = 40,208)','Yes — an even sum needs two even addends','Yes — unless one of them is zero'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0009', v:1, concept:'as14.counterexample', level:'t', difficulty:3,
+      stem:'Kai says: "To get a 6-digit answer from two 5-digit numbers, BOTH numbers must be at least 50,000." Test 49,999 + 50,001 and judge.',
+      options:['He is wrong — 49,999 + 50,001 = 100,000 and 49,999 < 50,000; you only need the TOTAL to reach 100,000','He is right — both must be 50,000 or more','He is wrong — you need both numbers above 99,999'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0010', v:1, concept:'as14.patterns', level:'b', difficulty:3,
+      stem:'Mathemagic! Take a number, reverse its digits, subtract the smaller from the larger. Is the answer ALWAYS divisible by 9? Test: 85,241 − 24,158 = 61,083 (digit sum 18 ✓) and 90,000 − 9 = 89,991 (digit sum 36 ✓). Conclusion?',
+      options:['Yes — the digit sum of the answer is always a multiple of 9, which means the number is divisible by 9','No — it only works for 85,241','Yes — because subtraction reverses digits back'], correct:0 },
+
+    /* ===== always-sometimes-never (Q0011–Q0018) ===== */
+    { id:'P5.AUT.AS.S14.Q0011', v:1, concept:'as14.always-sometimes-never', level:'n', difficulty:2,
+      stem:'ALWAYS / SOMETIMES / NEVER: "The sum of two 5-digit numbers is a 6-digit number."',
+      options:['Sometimes — only when the total is 100,000 or more','Always','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0012', v:1, concept:'as14.always-sometimes-never', level:'n', difficulty:1,
+      stem:'ALWAYS / SOMETIMES / NEVER: "The sum of two odd numbers is odd."',
+      options:['Never — odd + odd is always even','Always','Sometimes'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0013', v:1, concept:'as14.always-sometimes-never', level:'n', difficulty:2,
+      stem:'ALWAYS / SOMETIMES / NEVER: "The difference between two numbers is smaller than the bigger number."',
+      options:['Sometimes — if the smaller number is 0, the difference equals the bigger number','Always','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0014', v:1, concept:'as14.always-sometimes-never', level:'n', difficulty:2,
+      stem:'ALWAYS / SOMETIMES / NEVER: "Adding two numbers always gives a bigger number than subtracting them (for the same two numbers)."',
+      options:['Always — since a − b = a + (−b), the addition result is larger','Sometimes','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0015', v:1, concept:'as14.always-sometimes-never', level:'t', difficulty:3,
+      stem:'ALWAYS / SOMETIMES / NEVER: "The sum of three odd numbers is odd."',
+      options:['Always — odd + odd = even, and even + odd = odd','Sometimes','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0016', v:1, concept:'as14.always-sometimes-never', level:'t', difficulty:3,
+      stem:'ALWAYS / SOMETIMES / NEVER: "If a + b is even and a is even, then b is even."',
+      options:['Always — even + odd would give an odd sum','Sometimes','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0017', v:1, concept:'as14.always-sometimes-never', level:'b', difficulty:3,
+      stem:'ALWAYS / SOMETIMES / NEVER: "For two 3-digit numbers, their sum has more digits than either of them."',
+      options:['Sometimes — e.g., 100 + 100 = 200 has the same 3 digits; 999 + 1 = 1,000 has more','Always','Never'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0018', v:1, concept:'as14.always-sometimes-never', level:'b', difficulty:3,
+      stem:'ALWAYS / SOMETIMES / NEVER: "For two whole numbers a and b, if a + b is odd then one of a or b is odd and the other is even."',
+      options:['Always — odd + even = odd, and all other combinations give an even sum','Sometimes','Never'], correct:0 },
+
+    /* ===== odd-even (Q0019–Q0026) ===== */
+    { id:'P5.AUT.AS.S14.Q0019', v:1, concept:'as14.odd-even', level:'n', difficulty:1,
+      stem:'Without calculating, is 45,672 + 12,348 odd or even?',
+      options:['Even — ones digits 2 + 8 = 10','Odd — the numbers are large','Even — but only because of the thousands'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0020', v:1, concept:'as14.odd-even', level:'n', difficulty:1,
+      stem:'Without calculating, is 34,567 + 12,346 odd or even?',
+      options:['Odd — ones digits 7 + 6 = 13','Even — because both numbers are big','Odd — but only for numbers above 10,000'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0021', v:1, concept:'as14.odd-even', level:'n', difficulty:2,
+      stem:'A number ends in 8. Another ends in 3. Is their sum odd or even?',
+      options:['Odd — 8 + 3 = 11','Even — because 8 is even','Cannot tell without full calculation'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0022', v:1, concept:'as14.odd-even', level:'n', difficulty:2,
+      stem:'Is 99,994 + 33,336 odd or even?',
+      options:['Even — 4 + 6 = 10','Odd — 99,994 is even but 33,336 is odd','Cannot tell without full calculation'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0023', v:1, concept:'as14.odd-even', level:'t', difficulty:3,
+      stem:'Is 40,207 − 18,653 odd or even?',
+      options:['Even — 7 − 3 = 4','Odd — subtracting makes it odd','Even — because 40,207 is odd'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0024', v:1, concept:'as14.odd-even', level:'t', difficulty:3,
+      stem:'A number ends in 7. Which of these will be ODD?',
+      options:['The number + 4','The number + 5','The number + 1'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0025', v:1, concept:'as14.odd-even', level:'b', difficulty:3,
+      stem:'Two 5-digit numbers add to an ODD total. Which statement MUST be true?',
+      options:['One number ends in an odd digit and the other in an even digit','Both end in odd digits','Both end in even digits'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0026', v:1, concept:'as14.odd-even', level:'b', difficulty:3,
+      stem:'Three consecutive integers always add to a multiple of 3. What is true about 3 consecutive even numbers?',
+      options:['Their sum is always even and always a multiple of 6','Their sum is always odd','Their sum is never a multiple of 3'], correct:0 },
+
+    /* ===== counterexample (Q0027–Q0034) ===== */
+    { id:'P5.AUT.AS.S14.Q0027', v:1, concept:'as14.counterexample', level:'n', difficulty:2,
+      stem:'Kai claims: "If you add two numbers, the sum is always greater than either." Which counterexample shows this is false?',
+      options:['5 + 0 = 5','5 + 1 = 6','5 + 5 = 10'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0028', v:1, concept:'as14.counterexample', level:'n', difficulty:2,
+      stem:'A pupil says: "The sum of two 4-digit numbers is always 5 digits." Which counterexample disproves this?',
+      options:['2,000 + 3,000 = 5,000 (4 digits)','4,000 + 5,000 = 9,000 (4 digits)','5,000 + 6,000 = 11,000 (5 digits)'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0029', v:1, concept:'as14.counterexample', level:'n', difficulty:2,
+      stem:'A pupil says: "Subtracting a number always makes the answer smaller." Which counterexample disproves it?',
+      options:['8 − (−3) = 11','8 − 3 = 5','8 − 8 = 0'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0030', v:1, concept:'as14.counterexample', level:'t', difficulty:3,
+      stem:'Kai says: "If I subtract 1 from any number, the number of digits stays the same." Which counterexample disproves him?',
+      options:['10,000 − 1 = 9,999 (5 digits → 4 digits)','100 − 1 = 99','50,000 − 1 = 49,999'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0031', v:1, concept:'as14.counterexample', level:'t', difficulty:3,
+      stem:'A pupil says: "If a + b = c + d, then a = c and b = d." Which counterexample disproves it?',
+      options:['2 + 7 = 4 + 5 = 9, but 2 ≠ 4 and 7 ≠ 5','1 + 2 = 2 + 1 but 1 = 2 is false','3 + 3 = 3 + 3 but 3 = 3'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0032', v:1, concept:'as14.counterexample', level:'b', difficulty:3,
+      stem:'Mia says: "The sum of three 5-digit numbers is always at least 5 digits." Is she right?',
+      options:['Yes — the smallest is 10,000 + 10,000 + 10,000 = 30,000 (5 digits)','No — 1 + 1 + 1 = 3 (1 digit)','No — the sum can have 4 digits'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0033', v:1, concept:'as14.counterexample', level:'b', difficulty:3,
+      stem:'Ben says: "Multiplying is just repeated addition, so addition is more powerful." Is his reasoning correct?',
+      options:['No — multiplication is repeated addition of the SAME number, but addition can combine any two, so neither replaces the other','Yes — repeated addition covers every case','No — addition is not repeated multiplication'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0034', v:1, concept:'as14.counterexample', level:'b', difficulty:3,
+      stem:'A pupil says: "If a > b, then a + c > b + c is always true for any whole number c." Is this correct?',
+      options:['Yes — adding the same amount to both sides keeps the inequality','No — it fails when c = 0','No — it fails when c is very large'], correct:0 },
+
+    /* ===== commutativity (Q0035–Q0040) ===== */
+    { id:'P5.AUT.AS.S14.Q0035', v:1, concept:'as14.commutativity', level:'n', difficulty:1,
+      stem:'Is subtraction commutative — that is, is a − b always equal to b − a?',
+      options:['No — only when a = b','Yes — always','Yes — for numbers above 100'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0036', v:1, concept:'as14.commutativity', level:'n', difficulty:2,
+      stem:'Test: 50,000 − 20,000 vs 20,000 − 50,000. What do you notice?',
+      options:['The first is 30,000, the second is negative — subtraction is not commutative','Both are 30,000','Both are 0'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0037', v:1, concept:'as14.commutativity', level:'n', difficulty:2,
+      stem:'Which statement is TRUE?',
+      options:['Addition is commutative; subtraction is NOT','Both addition and subtraction are commutative','Neither is commutative'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0038', v:1, concept:'as14.commutativity', level:'t', difficulty:3,
+      stem:'Which equation is TRUE for all a and b?',
+      options:['a + b = b + a','a − b = b − a','a ÷ b = b ÷ a'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0039', v:1, concept:'as14.commutativity', level:'b', difficulty:3,
+      stem:'A pupil writes 3 + 5 + 7 = 3 + 7 + 5. Is the equality valid?',
+      options:['Yes — addition is commutative, so the order of addends does not matter','No — only adjacent terms can be swapped','Yes — but only if there are two terms'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0040', v:1, concept:'as14.commutativity', level:'b', difficulty:3,
+      stem:'A pupil writes 20 − 8 + 3 = 20 − 3 + 8. Are these equal?',
+      options:['No — the first is 15, the second is 25','Yes — addition and subtraction commute','Yes — for small numbers only'], correct:0, check:'20-8+3' },
+
+    /* ===== sum-difference (Q0041–Q0046) ===== */
+    { id:'P5.AUT.AS.S14.Q0041', v:1, concept:'as14.sum-difference', level:'n', difficulty:2,
+      stem:'Two numbers add to 80,000 and differ by 12,000. What is the BIGGER number?',
+      options:['46,000','40,000','44,000'], correct:0, check:'(80000+12000)/2' },
+
+    { id:'P5.AUT.AS.S14.Q0042', v:1, concept:'as14.sum-difference', level:'n', difficulty:2,
+      stem:'Two numbers add to 80,000 and differ by 12,000. What is the SMALLER number?',
+      options:['34,000','40,000','36,000'], correct:0, check:'(80000-12000)/2' },
+
+    { id:'P5.AUT.AS.S14.Q0043', v:1, concept:'as14.sum-difference', level:'n', difficulty:3,
+      stem:'Two numbers add to 100,000 and differ by 20,000. What are they?',
+      options:['60,000 and 40,000','50,000 and 50,000','80,000 and 20,000'], correct:0, check:'(100000+20000)/2' },
+
+    { id:'P5.AUT.AS.S14.Q0044', v:1, concept:'as14.sum-difference', level:'t', difficulty:3,
+      stem:'Two numbers add to 50,000 and differ by 8,000. What is the bigger number?',
+      options:['29,000','21,000','28,000'], correct:0, check:'(50000+8000)/2' },
+
+    { id:'P5.AUT.AS.S14.Q0045', v:1, concept:'as14.sum-difference', level:'b', difficulty:3,
+      stem:'Two numbers add to 24,500 and differ by 3,500. What is the smaller number?',
+      options:['10,500','14,000','10,000'], correct:0, check:'(24500-3500)/2' },
+
+    { id:'P5.AUT.AS.S14.Q0046', v:1, concept:'as14.sum-difference', level:'b', difficulty:3,
+      stem:'A pupil solves "sum 100,000; difference 20,000" as 50,000 and 50,000. What mistake did the pupil make?',
+      options:['Ignored the difference — the correct pair is 60,000 and 40,000','Added the clues instead of subtracting','Used the wrong formula'], correct:0 },
+
+    /* ===== rounding (Q0047–Q0052) ===== */
+    { id:'P5.AUT.AS.S14.Q0047', v:1, concept:'as14.rounding', level:'n', difficulty:2,
+      stem:'Round 4,860 and 3,740 to the nearest 1,000, then add. What is the estimate?',
+      options:['9,000','8,000','10,000'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0048', v:1, concept:'as14.rounding', level:'n', difficulty:2,
+      stem:'Round the exact total 4,860 + 3,740 = 8,600 to the nearest 1,000. What do you get?',
+      options:['9,000','8,000','10,000'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0049', v:1, concept:'as14.rounding', level:'n', difficulty:3,
+      stem:'Round 1,240 and 1,260 to the nearest 1,000, then add. What is the estimate?',
+      options:['2,000','3,000','1,000'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0050', v:1, concept:'as14.rounding', level:'t', difficulty:3,
+      stem:'1,240 + 1,260 = 2,500. Rounded to the nearest 1,000, what is the exact total?',
+      options:['3,000','2,000','4,000'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0051', v:1, concept:'as14.rounding', level:'b', difficulty:3,
+      stem:'Two estimates for 1,240 + 1,260 differ (round first = 2,000; round exact = 3,000). Why?',
+      options:['Rounding first dragged both numbers DOWN, but the true total crossed the rounding boundary UP','Both numbers were too small','Estimates are random'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0052', v:1, concept:'as14.rounding', level:'b', difficulty:3,
+      stem:'Is "round each number first, then add" ALWAYS equal to "add the exact numbers, then round"?',
+      options:['No — sometimes they differ (e.g., 1,240 + 1,260)','Yes — rounding always commutes with addition','Yes — for all two-digit numbers'], correct:0 },
+
+    /* ===== patterns (Q0053–Q0056) ===== */
+    { id:'P5.AUT.AS.S14.Q0053', v:1, concept:'as14.patterns', level:'n', difficulty:2,
+      stem:'85,241 − 24,158 = 61,083. Add the digits of 61,083: 6+1+0+8+3 = ?',
+      options:['18','16','20'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0054', v:1, concept:'as14.patterns', level:'n', difficulty:2,
+      stem:'Why does reversing digits and subtracting give a multiple of 9?',
+      options:['Because digit-sum divisibility works: the digit sum of the answer is always a multiple of 9','Because 9 is the biggest digit','Because subtraction always gives 9s'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0055', v:1, concept:'as14.patterns', level:'t', difficulty:3,
+      stem:'Which of these sums is guaranteed to be a multiple of 9?',
+      options:['58,320 + 24,165 (each digit-sum is a multiple of 9)','58,320 + 24,155 (digit sums are 18 and 14)','58,320 + 24,164'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0056', v:1, concept:'as14.patterns', level:'b', difficulty:3,
+      stem:'A pupil notices that adding a number to its reverse gives a palindrome (11 + 11 = 22, 123 + 321 = 444). Is this ALWAYS true?',
+      options:['No — 89 + 98 = 187, not a palindrome (though 187 + 781 = 968; needs more steps)','Yes — for every 2-digit number','Yes — for every 3-digit number'], correct:0 },
+
+    /* ===== real-life (Q0057–Q0060) ===== */
+    { id:'P5.AUT.AS.S14.Q0057', v:1, concept:'as14.real-life', level:'n', difficulty:2,
+      stem:'A farmer has 3,724 sheep and 4,850 cows. Without calculating, will the total be odd or even?',
+      options:['Even — 4 + 0 = 4, so the total ends in even','Odd — the numbers are large','Even — because cows are bigger'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0058', v:1, concept:'as14.real-life', level:'n', difficulty:2,
+      stem:'A library lent 42,175 books in January and 41,290 in February. Without calculating, was the total in the two months more or less than 80,000?',
+      options:['More — the ones-digit sum is odd, and the totals are each near 40,000','Less — February is shorter','Cannot be estimated without calculating'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0059', v:1, concept:'as14.real-life', level:'t', difficulty:3,
+      stem:'A school raised £14,280 on day 1 and £9,650 on day 2. Without calculating exactly, did the school beat its £20,000 target?',
+      options:['Yes — 14,280 + 9,650 ≈ 24,000 > 20,000','No — the totals are close to 20,000','Cannot be estimated without calculating'], correct:0 },
+
+    { id:'P5.AUT.AS.S14.Q0060', v:1, concept:'as14.real-life', level:'b', difficulty:3,
+      stem:'Two shops claim: "We sold MORE than the other shop." Shop A says 42,185; Shop B says 41,985. A pupil reasons: "Both claims cannot be true." Is that correct?',
+      options:['Correct — only one shop can have sold more; the bigger number is 42,185','Wrong — both are true','Correct — the shops might both be right'], correct:0 }
+  ]
+}
+    
 
   }
 };
