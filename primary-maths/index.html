@@ -13520,7 +13520,6 @@ const SCHEME_P5 = [
           { label:'Subtract numbers with more than four digits', content: P5_AS4, poolStep:'P5.AUT.AS.S04', stepNumber: 4 },
           { label:'Column addition with exchange',               content: P5_AS5, poolStep:'P5.AUT.AS.S05', stepNumber: 5 },
           { label:'Column subtraction with exchange',            content: P5_AS6, poolStep:'P5.AUT.AS.S06', stepNumber: 6 },
-
           { label:'Efficient written methods',        content: P5_AS7, poolStep:'P5.AUT.AS.S07', stepNumber: 7 },
           { label:'Estimating answers',               content: P5_AS8, poolStep:'P5.AUT.AS.S08', stepNumber: 8 },
           { label:'Checking using inverse operations',content: P5_AS9, poolStep:'P5.AUT.AS.S09', stepNumber: 9 },
@@ -13532,11 +13531,12 @@ const SCHEME_P5 = [
           { label:'Problems involving addition and subtraction', content: P5_AS13 },
           { label:'Reasoning with addition and subtraction', content: P5_AS14 }
         ]},
-      { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],open: false,
+      { id:'multdivA', label:'Multiplication & Division A', col: TOPIC_PALETTE[3],open: false, poolKey:'P5.AUT.MA', poolFile:'pools/p5_aut_03_multiplydivide.js',
         steps: [
-          { label:'Multiples', content: P5_MDA1 },
-          { label:'Common multiples', content: P5_MDA2 },
-          { label:'Factors', content: P5_MDA3 },
+          { label:'Multiples',        content: P5_MDA1, poolStep:'P5.AUT.MA.S01', stepNumber:1 },
+          { label:'Common multiples', content: P5_MDA2, poolStep:'P5.AUT.MA.S02', stepNumber:2 },
+          { label:'Factors',          content: P5_MDA3, poolStep:'P5.AUT.MA.S03', stepNumber:3 },
+
           { label:'Factor pairs', content: P5_MDA4 },
           { label:'Common factors', content: P5_MDA5 },
           { label:'Prime numbers', content: P5_MDA6 },
