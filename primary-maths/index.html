@@ -3253,10 +3253,10 @@ ${asHeader('AS5','Step 5 — Column Addition with Exchange','CPA Mastery Approac
 </div>
 
 <div class="card">
-  <div class="card-title">Example 4 — MISSING DIGIT DETECTIVE · 28,643 + ▢4,758 = 76,401</div>
+  <div class="card-title">Example 4 — MISSING DIGIT DETECTIVE · 28,643 + ▢7,758 = 76,401</div>
   ${asWarm('A digit has gone missing! Work through each column <em>backwards</em> and the missing digit has nowhere to hide.')}
   <div class="card-body">Cover the top number with your hand and ask, column by column: <em>&ldquo;What must the missing digit be?&rdquo;</em></div>
-  ${steps([['Ones','3 + 8 = 11 → write 1 ✓','the answer ends in 1 — good, this column works'],['Tens','4 + 5 + 1 = 10 → write 0 ✓','also works — and it exchanges 1'],['Hundreds','6 + 7 + 1 = 14 → write 4 ✓','works — exchanges another 1'],['Thousands','8 + 5 + 1 = 14 → write 4','so far so good… but the answer shows… wait!'],['Ten thousands','2 + ▢ + 1 = 7','▢ = 4! The missing digit is FOUR']])}
+  ${steps([['Ones','3 + 8 = 11 → write 1 ✓','the answer ends in 1 — good, this column works'],['Tens','4 + 5 + 1 = 10 → write 0 ✓','also works — and it exchanges 1'],['Hundreds','6 + 7 + 1 = 14 → write 4 ✓','works — exchanges another 1'],['Thousands','8 + 7 + 1 = 16','write 6, exchange 1'],['Ten thousands','2 + ▢ + 1 = 7','▢ = 4! The missing digit is FOUR']])}
   ${asCol({a:'28643',b:'47758',op:'+',res:'76401',under:['1','1','1','1',''],hi:[0],title:'The missing digit was 4: 28,643 + 47,758 = 76,401'})}
   <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 76,401 − 47,758 = 28,643 ✓</div>
 </div>
@@ -3324,8 +3324,8 @@ ${asHeader('AS6','Step 6 — Column Subtraction with Exchange','CPA Mastery Appr
   ${asWarm('The top number has TWO zeros in the middle. You cannot exchange from a zero — so the exchange must travel all the way from the ten thousands. Watch closely!')}
   <div class="card-body"><strong>Estimate:</strong> 60,000 − 28,000 ≈ 32,000.</div>
   <div class="card-body"><strong>Concrete idea:</strong> 60,402 is 6 ten-thousands and 4 hundreds and 2 ones. To subtract in the ones and tens columns, one ten-thousand must unpack step by step: 1 ten thousand → 10 thousands → 9 thousands + 1 hundred → 9 hundreds + 1 ten → 9 tens + 10 ones… the middle digits all become NINES.</div>
-  ${asCol({a:'60402',b:'27538',op:'−',res:'32864',over:['5','9','13','9','14'],strike:[true,true,true,true,true],title:'The nines trick: zeros in the middle all become 9'})}
-  ${steps([['Ones','2 &lt; 8 → exchange','tens is 0 — keep moving left… hundreds 4 → 3, tens 0 → 10, then tens gives 1 on: tens 10 → 9, ones 2 → 14; 14 − 8 = 6'],['Tens','9 − 3','= 6'],['Hundreds','3 &lt; 5 → exchange','thousands is 0 — keep moving left… ten thousands 6 → 5, thousands 0 → 10, gives 1 on: thousands 10 → 9, hundreds 3 → 13; 13 − 5 = 8'],['Thousands','9 − 7','= 2'],['Ten thousands','5 − 2','= 3'],['ANSWER','32,864','close to 32,000 ✓']])}
+  ${asCol({a:'60402',b:'27538',op:'−',res:'32864',over:['5','9','13','9','12'],strike:[true,true,true,true,true],title:'The nines trick: zeros in the middle all become 9'})}
+  ${steps([['Ones','2 &lt; 8 → exchange','tens is 0 — keep moving left… hundreds 4 → 3, tens 0 → 10, then tens gives 1 on: tens 10 → 9, ones 2 → 12; 12 − 8 = 4'],['Tens','9 − 3','= 6'],['Hundreds','3 &lt; 5 → exchange','thousands is 0 — keep moving left… ten thousands 6 → 5, thousands 0 → 10, gives 1 on: thousands 10 → 9, hundreds 3 → 13; 13 − 5 = 8'],['Thousands','9 − 7','= 2'],['Ten thousands','5 − 2','= 3'],['ANSWER','32,864','close to 32,000 ✓']])}
   <div class="strategy-grid" style="margin-top:8px;"><div class="strategy-card" style="background:#EAF3DE;border-color:#C0DD97;"><div class="s-title" style="color:#27500A;">✅ The nines trick</div><div class="s-body" style="color:#27500A;">When an exchange ripples through one or more zeros, every zero becomes a <strong>9</strong>, the digit that lends becomes <strong>1 smaller</strong>, and the column that asked for help gets <strong>10 + its own digit</strong>. Memorise this pattern and zero-trap questions become easy!</div></div></div>
   <div class="card-body" style="margin-top:6px;">💡 <strong>Check:</strong> 32,864 + 27,538 = 60,402 ✓</div>
 </div>
@@ -13517,12 +13517,15 @@ const SCHEME_P5 = [
           { label:'Mental addition and subtraction strategies',      content: P5_AS1, poolStep:'P5.AUT.AS.S01', stepNumber: 1 },
           { label:'Add and subtract multiples of 10, 100 and 1,000', content: P5_AS2, poolStep:'P5.AUT.AS.S02', stepNumber: 2 },
           { label:'Add numbers with more than four digits',          content: P5_AS3, poolStep:'P5.AUT.AS.S03', stepNumber: 3 },
+
           { label:'Subtract numbers with more than four digits', content: P5_AS4 },
           { label:'Column addition with exchange', content: P5_AS5 },
           { label:'Column subtraction with exchange', content: P5_AS6 },
+
           { label:'Efficient written methods', content: P5_AS7 },
           { label:'Estimating answers', content: P5_AS8 },
           { label:'Checking using inverse operations', content: P5_AS9 },
+
           { label:'Find missing numbers', content: P5_AS10 },
           { label:'Multi-step addition problems', content: P5_AS11 },
           { label:'Multi-step subtraction problems', content: P5_AS12 },
