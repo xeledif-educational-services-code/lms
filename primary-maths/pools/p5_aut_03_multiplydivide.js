@@ -564,7 +564,9 @@ window.XELEDIF_POOLS['P5.AUT.MA'] = {
         { id:'P5.AUT.MA.S06.Q0020', v:1, concept:'ma6.identify', level:'n', difficulty:1, stem:'Find the prime number in this list.', options:['7','4','6'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0021', v:1, concept:'ma6.identify', level:'n', difficulty:1, stem:'Which of these numbers is NOT prime?', options:['21','17','13'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0022', v:1, concept:'ma6.identify', level:'n', difficulty:1, stem:'Which of these is a prime number?', options:['3','6','9'], correct:0 },
-        { id:'P5.AUT.MA.S06.Q0023', v:1, concept:'ma6.identify', level:'n', difficulty:2, stem:'Find the prime number in this list.', options:['23','25','27'], correct:0 },
+
+        { id:'P5.AUT.MA.S06.Q0023', v:1, concept:'ma6.identify', level:'n', difficulty:2, stem:'Which of these is a prime number between 20 and 30?', options:['23','25','27'], correct:0 },
+
         { id:'P5.AUT.MA.S06.Q0024', v:1, concept:'ma6.identify', level:'t', difficulty:3, stem:'Which list has exactly two prime numbers?', options:['4, 7, 9, 11','2, 5, 8, 13','3, 6, 9, 12'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0025', v:1, concept:'ma6.identify', level:'t', difficulty:3, stem:'Which number is composite?', options:['33','31','29'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0026', v:1, concept:'ma6.identify', level:'b', difficulty:3, stem:'Which of these numbers is a prime number greater than 50?', options:['53','51','57'], correct:0 },
@@ -586,7 +588,9 @@ window.XELEDIF_POOLS['P5.AUT.MA'] = {
         { id:'P5.AUT.MA.S06.Q0042', v:1, concept:'ma6.special', level:'b', difficulty:3, stem:'Which number is both even and prime?', options:['2','4','6'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0043', v:1, concept:'ma6.tricky', level:'n', difficulty:2, stem:'Is 51 a prime number?', options:['No, 3 × 17 = 51','Yes','No, 5 × 10 = 50'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0044', v:1, concept:'ma6.tricky', level:'n', difficulty:2, stem:'Is 91 a prime number?', options:['No, 7 × 13 = 91','Yes','No, 9 × 10 = 90'], correct:0 },
-        { id:'P5.AUT.MA.S06.Q0045', v:1, concept:'ma6.tricky', level:'t', difficulty:3, stem:'Which of these numbers is prime?', options:['87','89','91'], correct:1 },
+
+        { id:'P5.AUT.MA.S06.Q0045', v:1, concept:'ma6.tricky', level:'t', difficulty:3, stem:'Which number in the eighties is prime?', options:['87','89','91'], correct:1 },
+
         { id:'P5.AUT.MA.S06.Q0046', v:1, concept:'ma6.tricky', level:'t', difficulty:3, stem:'Tomi says "Any number ending in 1 is prime". Is she right?', options:['No, 21 = 3 × 7 is not prime','Yes, 11, 31, 41 are all prime','No, 51 = 3 × 17 is not prime'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0047', v:1, concept:'ma6.tricky', level:'b', difficulty:3, stem:'Is 57 a prime number?', options:['No, 3 × 19 = 57','Yes','No, 5 × 11 = 55'], correct:0 },
         { id:'P5.AUT.MA.S06.Q0048', v:1, concept:'ma6.tricky', level:'b', difficulty:3, stem:'Is 97 a prime number?', options:['Yes','No, 7 × 13 = 91','No, 3 × 32 = 96'], correct:0 },
@@ -1022,7 +1026,499 @@ window.XELEDIF_POOLS['P5.AUT.MA'] = {
         { id:'P5.AUT.MA.S10.Q0060', v:1, concept:'ma10.reasoning', level:'b', difficulty:3,
           stem:'Which of these cubes is even?', options:['4 × 4 × 4','3 × 3 × 3','5 × 5 × 5'], correct:0 }
       ]
+    },
+
+        'P5.AUT.MA.S11': {
+      label: 'Squared notation (²)',
+      lesson: 'P5_MDA11',
+      targetSize: 50,
+      concepts: [
+        { id:'ma11.definition',   name:'What n² means and how to read it',                          target:8 },
+        { id:'ma11.read-write',   name:'Translate between notation and multiplication',              target:10 },
+        { id:'ma11.calculate',    name:'Calculate squares (up to 15² and multiples of 10)',          target:10 },
+        { id:'ma11.vs-double',    name:'Squared is not doubled; squaring vs multiplying by 2',      target:6 },
+        { id:'ma11.combine',      name:'Add and subtract squares in expressions',                    target:6 },
+        { id:'ma11.find-base',    name:'Find the base from a square (▢² = 81)',                     target:5 },
+        { id:'ma11.real-life',    name:'Real-life areas of squares',                                 target:3 },
+        { id:'ma11.reasoning',    name:'Spot mistakes and compare with other expressions',           target:2 }
+      ],
+      questions: [
+        /* ===== definition (Q0011–Q0018) ===== */
+        { id:'P5.AUT.MA.S11.Q0011', v:1, concept:'ma11.definition', level:'n', difficulty:1, stem:'What does 4² mean?', options:['4 × 4','4 × 2','4 + 4'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0012', v:1, concept:'ma11.definition', level:'n', difficulty:1, stem:'How do we read 6²?', options:['Six squared','Six times two','Six plus two'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0013', v:1, concept:'ma11.definition', level:'n', difficulty:1, stem:'What does the small 2 in 7² tell you?', options:['Use 7 twice in a multiplication','Add 2 to 7','Multiply 7 by 2'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0014', v:1, concept:'ma11.definition', level:'n', difficulty:2, stem:'Which number is the BASE in 9²?', options:['9','2','11'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0015', v:1, concept:'ma11.definition', level:'n', difficulty:2, stem:'Which number is the INDEX in 15²?', options:['2','15','17'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0016', v:1, concept:'ma11.definition', level:'t', difficulty:3, stem:'Why is the notation called "squared"?', options:['Because n × n makes a square of tiles','Because the answer is always an odd number','Because we add 2'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0017', v:1, concept:'ma11.definition', level:'t', difficulty:3, stem:'Which expression means the same as n²?', options:['n × n','n + n','n × 2'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0018', v:1, concept:'ma11.definition', level:'b', difficulty:3, stem:'A pupil says "4² means 4 × 2". What is the correct value of 4²?', options:['16','8','6'], correct:0 },
+
+        /* ===== read-write (Q0019–Q0028) ===== */
+        { id:'P5.AUT.MA.S11.Q0019', v:1, concept:'ma11.read-write', level:'n', difficulty:1, stem:'Write 5 × 5 in squared notation.', options:['5²','5 × 2','2⁵'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0020', v:1, concept:'ma11.read-write', level:'n', difficulty:1, stem:'Write 8 × 8 in squared notation.', options:['8²','8 × 2','8⁸'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0021', v:1, concept:'ma11.read-write', level:'n', difficulty:1, stem:'Write 10² as a multiplication.', options:['10 × 10','10 × 2','10 + 10'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0022', v:1, concept:'ma11.read-write', level:'n', difficulty:2, stem:'Write 12 × 12 in squared notation.', options:['12²','12 × 2','24²'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0023', v:1, concept:'ma11.read-write', level:'n', difficulty:2, stem:'Write 11² as a multiplication.', options:['11 × 11','11 × 2','11 + 11'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0024', v:1, concept:'ma11.read-write', level:'t', difficulty:3, stem:'Which is NOT equal to 6²?', options:['6 × 2','6 × 6','36'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0025', v:1, concept:'ma11.read-write', level:'t', difficulty:3, stem:'Which expression is longer but equal to 9²?', options:['9 × 9','9 × 2','9 + 2'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0026', v:1, concept:'ma11.read-write', level:'b', difficulty:3, stem:'Write 7 × 7 × 1 in the simplest squared form.', options:['7²','7³','7 × 7'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0027', v:1, concept:'ma11.read-write', level:'b', difficulty:3, stem:'What is the base and index of 20²?', options:['Base 20, index 2','Base 2, index 20','Base 40, index 2'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0028', v:1, concept:'ma11.read-write', level:'t', difficulty:3, stem:'Which two expressions are equal?', options:['3² and 3 × 3','3² and 3 × 2','3² and 3 + 3'], correct:0 },
+
+        /* ===== calculate (Q0029–Q0038) ===== */
+        { id:'P5.AUT.MA.S11.Q0029', v:1, concept:'ma11.calculate', level:'n', difficulty:1, stem:'What is 2²?', options:['4','2','22'], correct:0, check:'2*2' },
+        { id:'P5.AUT.MA.S11.Q0030', v:1, concept:'ma11.calculate', level:'n', difficulty:1, stem:'What is 3²?', options:['9','6','33'], correct:0, check:'3*3' },
+        { id:'P5.AUT.MA.S11.Q0031', v:1, concept:'ma11.calculate', level:'n', difficulty:1, stem:'What is 5²?', options:['25','10','55'], correct:0, check:'5*5' },
+        { id:'P5.AUT.MA.S11.Q0032', v:1, concept:'ma11.calculate', level:'n', difficulty:2, stem:'What is 7²?', options:['49','14','77'], correct:0, check:'7*7' },
+        { id:'P5.AUT.MA.S11.Q0033', v:1, concept:'ma11.calculate', level:'n', difficulty:2, stem:'What is 9²?', options:['81','18','99'], correct:0, check:'9*9' },
+        { id:'P5.AUT.MA.S11.Q0034', v:1, concept:'ma11.calculate', level:'n', difficulty:2, stem:'What is 12²?', options:['144','24','122'], correct:0, check:'12*12' },
+        { id:'P5.AUT.MA.S11.Q0035', v:1, concept:'ma11.calculate', level:'t', difficulty:3, stem:'What is 20²?', options:['400','40','4,000'], correct:0, check:'20*20' },
+        { id:'P5.AUT.MA.S11.Q0036', v:1, concept:'ma11.calculate', level:'t', difficulty:3, stem:'What is 50²?', options:['2,500','100','250'], correct:0, check:'50*50' },
+        { id:'P5.AUT.MA.S11.Q0037', v:1, concept:'ma11.calculate', level:'b', difficulty:3, stem:'What is 15²?', options:['225','30','150'], correct:0, check:'15*15' },
+        { id:'P5.AUT.MA.S11.Q0038', v:1, concept:'ma11.calculate', level:'b', difficulty:3, stem:'What is 30²?', options:['900','60','90'], correct:0, check:'30*30' },
+
+        /* ===== vs-double (Q0039–Q0044) ===== */
+        { id:'P5.AUT.MA.S11.Q0039', v:1, concept:'ma11.vs-double', level:'n', difficulty:1, stem:'Which is bigger: 4² or 4 × 2?', options:['4² = 16','4 × 2 = 8','They are equal'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0040', v:1, concept:'ma11.vs-double', level:'n', difficulty:1, stem:'What is the difference between 6² and 6 × 2?', options:['24 (36 − 12)','36','12'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0041', v:1, concept:'ma11.vs-double', level:'n', difficulty:2, stem:'Ben says 5² = 10. What mistake did he make?', options:['He doubled 5 instead of squaring it','He forgot the index','He added 5 and 5'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0042', v:1, concept:'ma11.vs-double', level:'t', difficulty:3, stem:'Which of these equals 9 × 2?', options:['18','9²','81'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0043', v:1, concept:'ma11.vs-double', level:'t', difficulty:3, stem:'Which of these is NOT equal to 4 + 4?', options:['4²','4 × 2','2 × 4'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0044', v:1, concept:'ma11.vs-double', level:'b', difficulty:3, stem:'For which number are n² and n × 2 equal?', options:['2','3','4'], correct:0 },
+
+        /* ===== combine (Q0045–Q0050) ===== */
+        { id:'P5.AUT.MA.S11.Q0045', v:1, concept:'ma11.combine', level:'n', difficulty:2, stem:'What is 2² + 3²?', options:['13','25','10'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0046', v:1, concept:'ma11.combine', level:'n', difficulty:2, stem:'What is 5² − 3²?', options:['16','4','22'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0047', v:1, concept:'ma11.combine', level:'t', difficulty:3, stem:'What is 4² + 4²?', options:['32','64','16'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0048', v:1, concept:'ma11.combine', level:'t', difficulty:3, stem:'What is 10² − 6²?', options:['64','16','36'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0049', v:1, concept:'ma11.combine', level:'b', difficulty:3, stem:'What is 1² + 2² + 3²?', options:['14','36','9'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0050', v:1, concept:'ma11.combine', level:'b', difficulty:3, stem:'What is 3² + 4²? (Notice: the answer is another square!)', options:['25','49','12'], correct:0 },
+
+        /* ===== find-base (Q0051–Q0055) ===== */
+        { id:'P5.AUT.MA.S11.Q0051', v:1, concept:'ma11.find-base', level:'n', difficulty:1, stem:'▢² = 9. What is the base?', options:['3','9','4.5'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0052', v:1, concept:'ma11.find-base', level:'n', difficulty:1, stem:'▢² = 16. What is the base?', options:['4','8','16'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0053', v:1, concept:'ma11.find-base', level:'t', difficulty:3, stem:'▢² = 81. What is the base?', options:['9','8','40.5'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0054', v:1, concept:'ma11.find-base', level:'t', difficulty:3, stem:'▢² = 144. What is the base?', options:['12','14','24'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0055', v:1, concept:'ma11.find-base', level:'b', difficulty:3, stem:'A square has an area of 49 cm². What is the length of one side?', options:['7 cm','49 cm','24.5 cm'], correct:0 },
+
+        /* ===== real-life (Q0056–Q0058) ===== */
+        { id:'P5.AUT.MA.S11.Q0056', v:1, concept:'ma11.real-life', level:'n', difficulty:2, stem:'A square has sides of 6 cm. What is its area?', options:['36 cm²','12 cm²','24 cm²'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0057', v:1, concept:'ma11.real-life', level:'t', difficulty:3, stem:'A tiled floor is a perfect square using 100 tiles. How many tiles on each side?', options:['10','50','20'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0058', v:1, concept:'ma11.real-life', level:'b', difficulty:3, stem:'A garden has an area of 81 m² and is a square. What is the perimeter?', options:['36 m','81 m','18 m'], correct:0 },
+
+        /* ===== reasoning (Q0059–Q0060) ===== */
+        { id:'P5.AUT.MA.S11.Q0059', v:1, concept:'ma11.reasoning', level:'t', difficulty:3, stem:'Mia says 3² + 4² = 7². Is she right?', options:['No — 9 + 16 = 25, not 49','Yes — 3 + 4 = 7','No — 3² + 4² = 14'], correct:0 },
+        { id:'P5.AUT.MA.S11.Q0060', v:1, concept:'ma11.reasoning', level:'b', difficulty:3, stem:'Which is greater: 5² or 4 × 6?', options:['5² (25 is greater than 24)','4 × 6 (24 is greater than 25)','They are equal'], correct:0 }
+      ]
+    },
+    'P5.AUT.MA.S12': {
+      label: 'Cubed notation (³)',
+      lesson: 'P5_MDA12',
+      targetSize: 50,
+      concepts: [
+        { id:'ma12.definition',  name:'What n³ means and how to read it',                          target:8 },
+        { id:'ma12.read-write',  name:'Translate between notation and multiplication',              target:10 },
+        { id:'ma12.calculate',   name:'Calculate cubes (up to 10³ and multiples of 10)',            target:10 },
+        { id:'ma12.vs-triple',   name:'Cubed is not multiplied by 3',                               target:6 },
+        { id:'ma12.sq-vs-cube',  name:'Compare squares and cubes of the same number',               target:6 },
+        { id:'ma12.combine',     name:'Add and subtract squares and cubes',                         target:4 },
+        { id:'ma12.find-base',   name:'Find the base from a cube (▢³ = 64)',                        target:3 },
+        { id:'ma12.reasoning',   name:'Spot mistakes, the 1³ + 2³ + 3³ pattern',                    target:3 }
+      ],
+      questions: [
+        /* ===== definition (Q0011–Q0018) ===== */
+        { id:'P5.AUT.MA.S12.Q0011', v:1, concept:'ma12.definition', level:'n', difficulty:1, stem:'What does 3³ mean?', options:['3 × 3 × 3','3 × 3','3 × 3 × 2'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0012', v:1, concept:'ma12.definition', level:'n', difficulty:1, stem:'How do we read 4³?', options:['Four cubed','Four squared','Four to the two'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0013', v:1, concept:'ma12.definition', level:'n', difficulty:1, stem:'What does the small 3 in 5³ tell you?', options:['Use 5 three times in a multiplication','Add 3 to 5','Multiply 5 by 3'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0014', v:1, concept:'ma12.definition', level:'n', difficulty:2, stem:'Which number is the BASE in 7³?', options:['7','3','10'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0015', v:1, concept:'ma12.definition', level:'n', difficulty:2, stem:'Which number is the INDEX in 6³?', options:['3','6','9'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0016', v:1, concept:'ma12.definition', level:'t', difficulty:3, stem:'Why is the notation called "cubed"?', options:['Because n × n × n is the number of small cubes in a big cube','Because the answer is always 3 digits','Because we add three numbers'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0017', v:1, concept:'ma12.definition', level:'t', difficulty:3, stem:'Which expression means the same as n³?', options:['n × n × n','n + n + n','n × 3'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0018', v:1, concept:'ma12.definition', level:'b', difficulty:3, stem:'A pupil says "4³ means 4 × 3". What is the correct value of 4³?', options:['64','12','16'], correct:0 },
+
+        /* ===== read-write (Q0019–Q0028) ===== */
+        { id:'P5.AUT.MA.S12.Q0019', v:1, concept:'ma12.read-write', level:'n', difficulty:1, stem:'Write 2 × 2 × 2 in cubed notation.', options:['2³','2 × 3','3²'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0020', v:1, concept:'ma12.read-write', level:'n', difficulty:1, stem:'Write 5 × 5 × 5 in cubed notation.', options:['5³','5 × 3','5²'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0021', v:1, concept:'ma12.read-write', level:'n', difficulty:1, stem:'Write 3³ as a multiplication.', options:['3 × 3 × 3','3 × 3','3 × 2'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0022', v:1, concept:'ma12.read-write', level:'n', difficulty:2, stem:'Write 10 × 10 × 10 in cubed notation.', options:['10³','10 × 3','10²'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0023', v:1, concept:'ma12.read-write', level:'n', difficulty:2, stem:'Write 4³ as a multiplication.', options:['4 × 4 × 4','4 × 4','4 × 3'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0024', v:1, concept:'ma12.read-write', level:'t', difficulty:3, stem:'Which is NOT equal to 6³?', options:['6 × 3','6 × 6 × 6','216'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0025', v:1, concept:'ma12.read-write', level:'t', difficulty:3, stem:'Which expression is longer but equal to 9³?', options:['9 × 9 × 9','9 × 9','9 × 3'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0026', v:1, concept:'ma12.read-write', level:'b', difficulty:3, stem:'Write 7 × 7 × 7 × 1 × 1 in the simplest cubed form.', options:['7³','7 × 7','7²'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0027', v:1, concept:'ma12.read-write', level:'b', difficulty:3, stem:'What is the base and index of 20³?', options:['Base 20, index 3','Base 3, index 20','Base 60, index 3'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0028', v:1, concept:'ma12.read-write', level:'t', difficulty:3, stem:'Which two expressions are equal?', options:['2³ and 2 × 2 × 2','2³ and 2 × 3','2³ and 2 + 2 + 2'], correct:0 },
+
+        /* ===== calculate (Q0029–Q0038) ===== */
+        { id:'P5.AUT.MA.S12.Q0029', v:1, concept:'ma12.calculate', level:'n', difficulty:1, stem:'What is 1³?', options:['1','3','0'], correct:0, check:'1*1*1' },
+        { id:'P5.AUT.MA.S12.Q0030', v:1, concept:'ma12.calculate', level:'n', difficulty:1, stem:'What is 2³?', options:['8','6','4'], correct:0, check:'2*2*2' },
+        { id:'P5.AUT.MA.S12.Q0031', v:1, concept:'ma12.calculate', level:'n', difficulty:1, stem:'What is 3³?', options:['27','9','6'], correct:0, check:'3*3*3' },
+        { id:'P5.AUT.MA.S12.Q0032', v:1, concept:'ma12.calculate', level:'n', difficulty:2, stem:'What is 4³?', options:['64','12','16'], correct:0, check:'4*4*4' },
+        { id:'P5.AUT.MA.S12.Q0033', v:1, concept:'ma12.calculate', level:'n', difficulty:2, stem:'What is 5³?', options:['125','15','25'], correct:0, check:'5*5*5' },
+        { id:'P5.AUT.MA.S12.Q0034', v:1, concept:'ma12.calculate', level:'n', difficulty:2, stem:'What is 10³?', options:['1,000','30','100'], correct:0, check:'10*10*10' },
+        { id:'P5.AUT.MA.S12.Q0035', v:1, concept:'ma12.calculate', level:'t', difficulty:3, stem:'What is 6³?', options:['216','18','36'], correct:0, check:'6*6*6' },
+        { id:'P5.AUT.MA.S12.Q0036', v:1, concept:'ma12.calculate', level:'t', difficulty:3, stem:'What is 20³?', options:['8,000','60','400'], correct:0, check:'20*20*20' },
+        { id:'P5.AUT.MA.S12.Q0037', v:1, concept:'ma12.calculate', level:'b', difficulty:3, stem:'What is 7³?', options:['343','21','49'], correct:0, check:'7*7*7' },
+        { id:'P5.AUT.MA.S12.Q0038', v:1, concept:'ma12.calculate', level:'b', difficulty:3, stem:'What is 30³?', options:['27,000','90','900'], correct:0, check:'30*30*30' },
+
+        /* ===== vs-triple (Q0039–Q0044) ===== */
+        { id:'P5.AUT.MA.S12.Q0039', v:1, concept:'ma12.vs-triple', level:'n', difficulty:1, stem:'Which is bigger: 3³ or 3 × 3?', options:['3³ = 27','3 × 3 = 9','They are equal'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0040', v:1, concept:'ma12.vs-triple', level:'n', difficulty:1, stem:'What is the difference between 4³ and 4 × 3?', options:['52 (64 − 12)','64','12'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0041', v:1, concept:'ma12.vs-triple', level:'n', difficulty:2, stem:'Ben says 5³ = 15. What mistake did he make?', options:['He multiplied 5 by the index 3','He squared 5 instead','He added 5 and 10'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0042', v:1, concept:'ma12.vs-triple', level:'t', difficulty:3, stem:'Which of these equals 8 × 3?', options:['24','8³','512'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0043', v:1, concept:'ma12.vs-triple', level:'t', difficulty:3, stem:'Which of these is NOT equal to 5 + 5 + 5?', options:['5³','5 × 3','15'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0044', v:1, concept:'ma12.vs-triple', level:'b', difficulty:3, stem:'For which number are n³ and n × 3 equal?', options:['3','2','4'], correct:0 },
+
+        /* ===== sq-vs-cube (Q0045–Q0050) ===== */
+        { id:'P5.AUT.MA.S12.Q0045', v:1, concept:'ma12.sq-vs-cube', level:'n', difficulty:1, stem:'Which is bigger: 2³ or 3²?', options:['3² = 9','2³ = 8','They are equal'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0046', v:1, concept:'ma12.sq-vs-cube', level:'n', difficulty:2, stem:'Which is bigger: 4³ or 5²?', options:['4³ = 64','5² = 25','They are equal'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0047', v:1, concept:'ma12.sq-vs-cube', level:'t', difficulty:3, stem:'Which is bigger: 3³ or 5²?', options:['5² = 25','3³ = 27','They are equal'], correct:1 },
+        { id:'P5.AUT.MA.S12.Q0048', v:1, concept:'ma12.sq-vs-cube', level:'t', difficulty:3, stem:'For which number n is n² equal to n³?', options:['1','2','3'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0049', v:1, concept:'ma12.sq-vs-cube', level:'b', difficulty:3, stem:'Which number is BOTH a square and a cube (other than 1)?', options:['64','27','16'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0050', v:1, concept:'ma12.sq-vs-cube', level:'b', difficulty:3, stem:'Which statement is true?', options:['A bigger index does not always mean a bigger answer','A bigger index always means a bigger answer','n³ is always smaller than n²'], correct:0 },
+
+        /* ===== combine (Q0051–Q0054) ===== */
+        { id:'P5.AUT.MA.S12.Q0051', v:1, concept:'ma12.combine', level:'n', difficulty:2, stem:'What is 2³ + 3²?', options:['17','13','15'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0052', v:1, concept:'ma12.combine', level:'n', difficulty:2, stem:'What is 3³ − 3²?', options:['18','0','6'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0053', v:1, concept:'ma12.combine', level:'t', difficulty:3, stem:'What is 4³ − 4²?', options:['48','0','16'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0054', v:1, concept:'ma12.combine', level:'t', difficulty:3, stem:'What is 5³ + 5²?', options:['150','250','100'], correct:0 },
+
+        /* ===== find-base (Q0055–Q0057) ===== */
+        { id:'P5.AUT.MA.S12.Q0055', v:1, concept:'ma12.find-base', level:'n', difficulty:1, stem:'▢³ = 8. What is the base?', options:['2','4','8'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0056', v:1, concept:'ma12.find-base', level:'t', difficulty:3, stem:'▢³ = 27. What is the base?', options:['3','9','13.5'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0057', v:1, concept:'ma12.find-base', level:'b', difficulty:3, stem:'▢³ = 64. What is the base?', options:['4','8','32'], correct:0 },
+
+        /* ===== reasoning (Q0058–Q0060) ===== */
+        { id:'P5.AUT.MA.S12.Q0058', v:1, concept:'ma12.reasoning', level:'n', difficulty:2, stem:'Tia says 3³ = 9 because 3 × 3 = 9. What is the correct value of 3³?', options:['27','9','6'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0059', v:1, concept:'ma12.reasoning', level:'t', difficulty:3, stem:'What is 1³ + 2³?', options:['9','8','7'], correct:0 },
+        { id:'P5.AUT.MA.S12.Q0060', v:1, concept:'ma12.reasoning', level:'b', difficulty:3, stem:'What is 1³ + 2³ + 3³? (Notice: the answer is another square!)', options:['36','27','9'], correct:0 }
+      ]
+    },
+
+       'P5.AUT.MA.S13': {
+      label: 'Recognise divisibility patterns',
+      lesson: 'P5_MDA13',
+      targetSize: 50,
+      concepts: [
+        { id:'ma13.div-2-5-10', name:'Divisible by 2, 5 and 10 (last digit)',                  target:8 },
+        { id:'ma13.div-3-9',    name:'Divisible by 3 and 9 (digit sum)',                       target:10 },
+        { id:'ma13.div-4-8',    name:'Divisible by 4 and 8 (last 2 or 3 digits)',              target:8 },
+        { id:'ma13.div-6',      name:'Divisible by 6 (combine 2 and 3 tests)',                 target:6 },
+        { id:'ma13.div-25-100', name:'Divisible by 25 and 100 (last two digits)',              target:6 },
+        { id:'ma13.multi',      name:'Apply several tests to the same number',                 target:6 },
+        { id:'ma13.real-life',  name:'Teams, money and sharing in real life',                  target:3 },
+        { id:'ma13.reasoning',  name:'Missing digits and true/false reasoning',                target:3 }
+      ],
+      questions: [
+        /* ===== div-2-5-10 (Q0011–Q0018) ===== */
+        { id:'P5.AUT.MA.S13.Q0011', v:1, concept:'ma13.div-2-5-10', level:'n', difficulty:1, stem:'Which number is divisible by 2?', options:['3,478','3,477','3,475'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0012', v:1, concept:'ma13.div-2-5-10', level:'n', difficulty:1, stem:'Which number is divisible by 5?', options:['8,365','8,362','8,363'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0013', v:1, concept:'ma13.div-2-5-10', level:'n', difficulty:1, stem:'Which number is divisible by 10?', options:['2,340','2,345','2,344'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0014', v:1, concept:'ma13.div-2-5-10', level:'n', difficulty:2, stem:'Which number is divisible by 2 but NOT by 5?', options:['3,478','3,470','3,465'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0015', v:1, concept:'ma13.div-2-5-10', level:'n', difficulty:2, stem:'Which number is divisible by 5 but NOT by 10?', options:['8,365','8,360','8,362'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0016', v:1, concept:'ma13.div-2-5-10', level:'t', difficulty:3, stem:'A number ends in 0. Which divisors must it have?', options:['2, 5 and 10','2 only','5 only'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0017', v:1, concept:'ma13.div-2-5-10', level:'t', difficulty:3, stem:'Which statement is TRUE about every multiple of 10?', options:['It is a multiple of 2 and of 5','It is an odd number','It is a multiple of 4'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0018', v:1, concept:'ma13.div-2-5-10', level:'b', difficulty:3, stem:'A number is divisible by 2 and by 5. Which of these could it be?', options:['3,470','3,472','3,475'], correct:0 },
+
+        /* ===== div-3-9 (Q0019–Q0028) ===== */
+        { id:'P5.AUT.MA.S13.Q0019', v:1, concept:'ma13.div-3-9', level:'n', difficulty:1, stem:'Which number is divisible by 3?', options:['2,145','2,146','2,147'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0020', v:1, concept:'ma13.div-3-9', level:'n', difficulty:1, stem:'What is the digit sum of 5,832?', options:['18','19','15'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0021', v:1, concept:'ma13.div-3-9', level:'n', difficulty:1, stem:'A number has digit sum 15. Is it divisible by 3?', options:['Yes','No','Only if it is odd'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0022', v:1, concept:'ma13.div-3-9', level:'n', difficulty:2, stem:'Which number is divisible by 9?', options:['5,832','5,830','5,835'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0023', v:1, concept:'ma13.div-3-9', level:'n', difficulty:2, stem:'A number has digit sum 12. Is it divisible by 9?', options:['No','Yes','Only if it is even'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0024', v:1, concept:'ma13.div-3-9', level:'n', difficulty:2, stem:'What is the digit sum of 4,251?', options:['12','10','13'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0025', v:1, concept:'ma13.div-3-9', level:'t', difficulty:3, stem:'Which of these is divisible by both 3 and 9?', options:['7,128','4,255','1,004'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0026', v:1, concept:'ma13.div-3-9', level:'t', difficulty:3, stem:'Which is divisible by 3 but NOT by 9?', options:['4,251','5,832','7,128'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0027', v:1, concept:'ma13.div-3-9', level:'b', difficulty:3, stem:'Why does the digit-sum test work for 9?', options:['Because every power of 10 leaves remainder 1 when divided by 9','Because 9 is odd','Because the digits are small'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0028', v:1, concept:'ma13.div-3-9', level:'b', difficulty:3, stem:'Every number divisible by 9 is also divisible by 3. Why?', options:['Because 9 = 3 × 3','Because 9 is bigger than 3','Because 9 is odd'], correct:0 },
+
+        /* ===== div-4-8 (Q0029–Q0036) ===== */
+        { id:'P5.AUT.MA.S13.Q0029', v:1, concept:'ma13.div-4-8', level:'n', difficulty:1, stem:'Which part of the number do you look at to test for 4?', options:['The last two digits','The last digit','The first two digits'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0030', v:1, concept:'ma13.div-4-8', level:'n', difficulty:1, stem:'Is 5,316 divisible by 4?', options:['Yes — 16 ÷ 4 = 4','No — the last digit is 6','No — the digit sum is 15'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0031', v:1, concept:'ma13.div-4-8', level:'n', difficulty:2, stem:'Which number is divisible by 4?', options:['5,316','5,314','5,318'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0032', v:1, concept:'ma13.div-4-8', level:'n', difficulty:2, stem:'Is 7,314 divisible by 4?', options:['No — 14 is not divisible by 4','Yes — it is even','Yes — 7+3+1+4 = 15'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0033', v:1, concept:'ma13.div-4-8', level:'t', difficulty:3, stem:'Which part of the number do you look at to test for 8?', options:['The last three digits','The last two digits','The last digit'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0034', v:1, concept:'ma13.div-4-8', level:'t', difficulty:3, stem:'Is 5,128 divisible by 8?', options:['Yes — 128 ÷ 8 = 16','No — the last digit is 8','No — the digit sum is 16'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0035', v:1, concept:'ma13.div-4-8', level:'b', difficulty:3, stem:'A number is divisible by 4 but NOT by 8. Which could it be?', options:['5,124','5,128','5,120'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0036', v:1, concept:'ma13.div-4-8', level:'b', difficulty:3, stem:'Why is every number divisible by 8 also divisible by 4?', options:['Because 8 = 4 × 2','Because 8 is bigger than 4','Because 8 is even'], correct:0 },
+
+        /* ===== div-6 (Q0037–Q0042) ===== */
+        { id:'P5.AUT.MA.S13.Q0037', v:1, concept:'ma13.div-6', level:'n', difficulty:1, stem:'To test for divisibility by 6, which two tests must BOTH pass?', options:['2 and 3','2 and 4','3 and 9'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0038', v:1, concept:'ma13.div-6', level:'n', difficulty:2, stem:'Is 348 divisible by 6?', options:['Yes — even, and 3+4+8 = 15','No — the digit sum is 15','No — 348 is not even'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0039', v:1, concept:'ma13.div-6', level:'n', difficulty:2, stem:'Which number is divisible by 6?', options:['348','452','735'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0040', v:1, concept:'ma13.div-6', level:'t', difficulty:3, stem:'Why is 452 NOT divisible by 6?', options:['It is even, but 4+5+2 = 11 fails the 3 test','It is odd','It ends in 2'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0041', v:1, concept:'ma13.div-6', level:'t', difficulty:3, stem:'Why is 735 NOT divisible by 6?', options:['It passes the 3 test, but it is odd','Its digit sum is not in the 3 times table','It ends in 5'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0042', v:1, concept:'ma13.div-6', level:'b', difficulty:3, stem:'Which number is divisible by 6 but NOT by 9?', options:['348','846','954'], correct:0 },
+
+        /* ===== div-25-100 (Q0043–Q0048) ===== */
+        { id:'P5.AUT.MA.S13.Q0043', v:1, concept:'ma13.div-25-100', level:'n', difficulty:1, stem:'Which last two digits show a number is divisible by 25?', options:['00, 25, 50 or 75','10, 20, 30 or 40','any two even digits'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0044', v:1, concept:'ma13.div-25-100', level:'n', difficulty:2, stem:'Which number is divisible by 25?', options:['3,675','3,672','3,677'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0045', v:1, concept:'ma13.div-25-100', level:'n', difficulty:2, stem:'Which number is divisible by 100?', options:['4,500','4,550','4,505'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0046', v:1, concept:'ma13.div-25-100', level:'t', difficulty:3, stem:'Is 2,850 divisible by 100?', options:['No — it does not end in 00','Yes — the last two digits are 50','Yes — it is even'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0047', v:1, concept:'ma13.div-25-100', level:'t', difficulty:3, stem:'Which number is divisible by 25 but NOT by 100?', options:['3,675','4,500','2,000'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0048', v:1, concept:'ma13.div-25-100', level:'b', difficulty:3, stem:'A number ends in 50. Which divisors must it have?', options:['2, 5, 10 and 25','2 and 5 only','5 only'], correct:0 },
+
+        /* ===== multi (Q0049–Q0054) ===== */
+        { id:'P5.AUT.MA.S13.Q0049', v:1, concept:'ma13.multi', level:'n', difficulty:2, stem:'Is 7,128 divisible by 5?', options:['No — it does not end in 0 or 5','Yes — the digit sum is 18','Yes — it is even'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0050', v:1, concept:'ma13.multi', level:'n', difficulty:2, stem:'Which of these is 7,128 divisible by?', options:['9','5','10'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0051', v:1, concept:'ma13.multi', level:'t', difficulty:3, stem:'Is 7,128 divisible by 8?', options:['Yes — 128 ÷ 8 = 16','No — the last digit is 8','No — the digit sum is 18'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0052', v:1, concept:'ma13.multi', level:'t', difficulty:3, stem:'Is 7,128 divisible by 6?', options:['Yes — even, and digit sum 18','No — it is not divisible by 4','No — it ends in 8'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0053', v:1, concept:'ma13.multi', level:'b', difficulty:3, stem:'Which divisor does NOT work for 7,128?', options:['5','3','9'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0054', v:1, concept:'ma13.multi', level:'b', difficulty:3, stem:'7,128 ÷ 8 = 891. What does that tell you about 7,128 ÷ 4?', options:['It is also exact — every multiple of 8 is a multiple of 4','It has a remainder','It equals 891 too'], correct:0 },
+
+        /* ===== real-life (Q0055–Q0057) ===== */
+        { id:'P5.AUT.MA.S13.Q0055', v:1, concept:'ma13.real-life', level:'n', difficulty:2, stem:'252 pupils are split into equal teams of 4. How many teams?', options:['63','56','64'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0056', v:1, concept:'ma13.real-life', level:'t', difficulty:3, stem:'£4,350 is shared equally between 25 people. How much does each get?', options:['£174','£435','£87'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0057', v:1, concept:'ma13.real-life', level:'b', difficulty:3, stem:'A shop has 1,260 pencils to pack into equal boxes. Which box size will NOT work?', options:['8','6','5'], correct:0 },
+
+        /* ===== reasoning (Q0058–Q0060) ===== */
+        { id:'P5.AUT.MA.S13.Q0058', v:1, concept:'ma13.reasoning', level:'t', difficulty:3, stem:'4,5▢2 is divisible by 9. Which digit completes it?', options:['7','2','9'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0059', v:1, concept:'ma13.reasoning', level:'t', difficulty:3, stem:'True or false: "Every number divisible by 2 is also divisible by 4."', options:['False — 6 is divisible by 2 but not by 4','True — 2 × 2 = 4','False — no number is divisible by 4'], correct:0 },
+        { id:'P5.AUT.MA.S13.Q0060', v:1, concept:'ma13.reasoning', level:'b', difficulty:3, stem:'True or false: "Every number divisible by 4 is also divisible by 2."', options:['True — 4 = 2 × 2','False — 12 is divisible by 4 but not by 2','False — only even squares work'], correct:0 }
+      ]
+    },
+    
+    'P5.AUT.MA.S14': {
+      label: 'Multiplication facts and related division facts',
+      lesson: 'P5_MDA14',
+      targetSize: 50,
+      concepts: [
+        { id:'ma14.fact-family', name:'Recognise and complete fact families (2 × and 2 ÷)',        target:10 },
+        { id:'ma14.inverse',     name:'Use the inverse to find the missing number',                 target:10 },
+        { id:'ma14.recall',      name:'Fast recall of multiplication facts to 12 × 12',              target:10 },
+        { id:'ma14.scale',       name:'Scale facts by 10 and 100',                                   target:6 },
+        { id:'ma14.derive',      name:'Derive facts you do not know from ones you do',              target:6 },
+        { id:'ma14.word',        name:'Word problems: decide × or ÷',                               target:4 },
+        { id:'ma14.reasoning',   name:'Division order, square families, spotting errors',            target:4 }
+      ],
+      questions: [
+        /* ===== fact-family (Q0011–Q0020) ===== */
+        { id:'P5.AUT.MA.S14.Q0011', v:1, concept:'ma14.fact-family', level:'n', difficulty:1, stem:'Which fact is in the same family as 3 × 4 = 12?', options:['12 ÷ 3 = 4','12 ÷ 4 = 4','3 + 4 = 12'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0012', v:1, concept:'ma14.fact-family', level:'n', difficulty:1, stem:'Which fact is in the same family as 5 × 6 = 30?', options:['30 ÷ 6 = 5','30 ÷ 5 = 5','6 − 5 = 1'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0013', v:1, concept:'ma14.fact-family', level:'n', difficulty:1, stem:'7 × 8 = 56. What is 56 ÷ 8?', options:['7','8','48'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0014', v:1, concept:'ma14.fact-family', level:'n', difficulty:2, stem:'The numbers 6, 7 and 42 make a fact family. Which is NOT a fact in it?', options:['42 + 7 = 49','6 × 7 = 42','42 ÷ 6 = 7'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0015', v:1, concept:'ma14.fact-family', level:'n', difficulty:2, stem:'The numbers 4, 9 and 36 make a fact family. How many facts does it have?', options:['4','2','1'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0016', v:1, concept:'ma14.fact-family', level:'t', difficulty:3, stem:'8 × 8 = 64. How many facts are in this family?', options:['2','4','8'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0017', v:1, concept:'ma14.fact-family', level:'t', difficulty:3, stem:'Which fact completes the family 9 × 7 = 63?', options:['63 ÷ 7 = 9','63 ÷ 9 = 9','63 − 9 = 54'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0018', v:1, concept:'ma14.fact-family', level:'t', difficulty:3, stem:'Why does a square-number family (like 6 × 6 = 36) have only two facts?', options:['Because the two factors are the same number','Because squares are odd','Because 6 has only two factors'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0019', v:1, concept:'ma14.fact-family', level:'b', difficulty:3, stem:'The fact family uses 4 facts. I know 3: 7 × 6 = 42, 6 × 7 = 42 and 42 ÷ 7 = 6. Which is the fourth?', options:['42 ÷ 6 = 7','6 + 7 = 13','42 ÷ 42 = 1'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0020', v:1, concept:'ma14.fact-family', level:'b', difficulty:3, stem:'Which two facts come from the same family?', options:['9 × 4 = 36 and 36 ÷ 9 = 4','9 × 4 = 36 and 9 + 4 = 13','9 × 4 = 36 and 36 ÷ 4 = 4'], correct:0 },
+
+        /* ===== inverse (Q0021–Q0030) ===== */
+        { id:'P5.AUT.MA.S14.Q0021', v:1, concept:'ma14.inverse', level:'n', difficulty:1, stem:'▢ × 6 = 54. What is the missing number?', options:['9','8','10'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0022', v:1, concept:'ma14.inverse', level:'n', difficulty:1, stem:'▢ × 7 = 42. What is the missing number?', options:['6','7','8'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0023', v:1, concept:'ma14.inverse', level:'n', difficulty:2, stem:'72 ÷ ▢ = 9. What is the missing number?', options:['8','9','7'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0024', v:1, concept:'ma14.inverse', level:'n', difficulty:2, stem:'▢ ÷ 8 = 7. What is the missing number?', options:['56','15','1'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0025', v:1, concept:'ma14.inverse', level:'n', difficulty:2, stem:'54 ÷ 6 = ▢. What is the missing number?', options:['9','8','48'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0026', v:1, concept:'ma14.inverse', level:'t', difficulty:3, stem:'9 × ▢ = 108. What is the missing number?', options:['12','11','99'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0027', v:1, concept:'ma14.inverse', level:'t', difficulty:3, stem:'▢ ÷ 12 = 8. What is the missing number?', options:['96','20','4'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0028', v:1, concept:'ma14.inverse', level:'t', difficulty:3, stem:'Which calculation finds the missing number in ▢ × 11 = 88?', options:['88 ÷ 11','88 × 11','88 − 11'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0029', v:1, concept:'ma14.inverse', level:'b', difficulty:3, stem:'7 × ▢ = 63 and ▢ ÷ 9 = 7. Is the missing number the same?', options:['Yes — both are 9','No — one is 9 and the other is 63','No — one is 7 and the other is 8'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0030', v:1, concept:'ma14.inverse', level:'b', difficulty:3, stem:'▢ ÷ 6 = 12. Which fact checks the answer?', options:['12 × 6 = 72','12 + 6 = 18','12 ÷ 6 = 2'], correct:0 },
+
+        /* ===== recall (Q0031–Q0040) ===== */
+        { id:'P5.AUT.MA.S14.Q0031', v:1, concept:'ma14.recall', level:'n', difficulty:1, stem:'What is 6 × 7?', options:['42','36','48'], correct:0, check:'6*7' },
+        { id:'P5.AUT.MA.S14.Q0032', v:1, concept:'ma14.recall', level:'n', difficulty:1, stem:'What is 8 × 9?', options:['72','64','81'], correct:0, check:'8*9' },
+        { id:'P5.AUT.MA.S14.Q0033', v:1, concept:'ma14.recall', level:'n', difficulty:1, stem:'What is 12 × 4?', options:['48','44','52'], correct:0, check:'12*4' },
+        { id:'P5.AUT.MA.S14.Q0034', v:1, concept:'ma14.recall', level:'n', difficulty:2, stem:'What is 56 ÷ 8?', options:['7','8','6'], correct:0, check:'56/8' },
+        { id:'P5.AUT.MA.S14.Q0035', v:1, concept:'ma14.recall', level:'n', difficulty:2, stem:'What is 63 ÷ 9?', options:['7','8','9'], correct:0, check:'63/9' },
+        { id:'P5.AUT.MA.S14.Q0036', v:1, concept:'ma14.recall', level:'n', difficulty:2, stem:'What is 11 × 7?', options:['77','71','84'], correct:0, check:'11*7' },
+        { id:'P5.AUT.MA.S14.Q0037', v:1, concept:'ma14.recall', level:'t', difficulty:3, stem:'What is 12 × 12?', options:['144','124','132'], correct:0, check:'12*12' },
+        { id:'P5.AUT.MA.S14.Q0038', v:1, concept:'ma14.recall', level:'t', difficulty:3, stem:'Which division fact is correct?', options:['63 ÷ 7 = 9','63 ÷ 7 = 8','63 ÷ 9 = 8'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0039', v:1, concept:'ma14.recall', level:'b', difficulty:3, stem:'What is 132 ÷ 11?', options:['12','11','13'], correct:0, check:'132/11' },
+        { id:'P5.AUT.MA.S14.Q0040', v:1, concept:'ma14.recall', level:'b', difficulty:3, stem:'Which pair of facts both give 84?', options:['12 × 7 and 84 ÷ 7','12 × 7 and 7 × 7','7 × 12 and 84 ÷ 12'], correct:0 },
+
+        /* ===== scale (Q0041–Q0046) ===== */
+        { id:'P5.AUT.MA.S14.Q0041', v:1, concept:'ma14.scale', level:'n', difficulty:1, stem:'6 × 7 = 42. What is 60 × 7?', options:['420','4,200','42'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0042', v:1, concept:'ma14.scale', level:'n', difficulty:2, stem:'6 × 7 = 42. What is 6 × 70?', options:['420','4,200','49'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0043', v:1, concept:'ma14.scale', level:'n', difficulty:2, stem:'6 × 7 = 42. What is 600 × 7?', options:['4,200','420','42,000'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0044', v:1, concept:'ma14.scale', level:'t', difficulty:3, stem:'42 ÷ 7 = 6. What is 420 ÷ 7?', options:['60','600','6'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0045', v:1, concept:'ma14.scale', level:'t', difficulty:3, stem:'42 ÷ 7 = 6. What is 4,200 ÷ 70?', options:['60','600','6'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0046', v:1, concept:'ma14.scale', level:'b', difficulty:3, stem:'42 ÷ 6 = 7. What is 4,200 ÷ 6?', options:['700','70','7,000'], correct:0 },
+
+        /* ===== derive (Q0047–Q0052) ===== */
+        { id:'P5.AUT.MA.S14.Q0047', v:1, concept:'ma14.derive', level:'n', difficulty:1, stem:'If you know 2 × 7 = 14, how do you find 4 × 7?', options:['Double 14 to get 28','Add 2 to 14','Half of 14 is 7'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0048', v:1, concept:'ma14.derive', level:'n', difficulty:2, stem:'If 10 × 8 = 80, what is 5 × 8?', options:['40','85','58'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0049', v:1, concept:'ma14.derive', level:'n', difficulty:2, stem:'If 10 × 6 = 60, what is 9 × 6?', options:['54','51','66'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0050', v:1, concept:'ma14.derive', level:'t', difficulty:3, stem:'If 10 × 7 = 70, what is 12 × 7?', options:['84','77','72'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0051', v:1, concept:'ma14.derive', level:'t', difficulty:3, stem:'If 10 × 8 = 80, what is 11 × 8?', options:['88','81','78'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0052', v:1, concept:'ma14.derive', level:'b', difficulty:3, stem:'12 × 7 = 84. So what is 84 ÷ 12?', options:['7','12','72'], correct:0 },
+
+        /* ===== word (Q0053–Q0056) ===== */
+        { id:'P5.AUT.MA.S14.Q0053', v:1, concept:'ma14.word', level:'n', difficulty:1, stem:'Tickets cost £9 each. £108 is collected. How many tickets were sold?', options:['12','11','13'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0054', v:1, concept:'ma14.word', level:'n', difficulty:2, stem:'A baker makes 72 buns and packs 8 in a bag. How many bags?', options:['9','8','64'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0055', v:1, concept:'ma14.word', level:'t', difficulty:3, stem:'7 boxes hold 8 pencils each. How many pencils?', options:['56','15','48'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0056', v:1, concept:'ma14.word', level:'b', difficulty:3, stem:'A tray holds 6 rows of 9 cakes. Two cakes are eaten. How many are left?', options:['52','54','48'], correct:0 },
+
+        /* ===== reasoning (Q0057–Q0060) ===== */
+        { id:'P5.AUT.MA.S14.Q0057', v:1, concept:'ma14.reasoning', level:'n', difficulty:2, stem:'Sana says 72 ÷ 8 = 7 because 7 × 8 = 56. What is the correct answer?', options:['9','7','8'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0058', v:1, concept:'ma14.reasoning', level:'t', difficulty:3, stem:'Which statement is true?', options:['Multiplication can be done in any order, but division cannot','Division can be done in any order','Both can be done in any order'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0059', v:1, concept:'ma14.reasoning', level:'t', difficulty:3, stem:'13 × 4 = 52. What is 26 × 4?', options:['104','56','78'], correct:0 },
+        { id:'P5.AUT.MA.S14.Q0060', v:1, concept:'ma14.reasoning', level:'b', difficulty:3, stem:'42 ÷ 7 = 6. Use this to work out 4,200 ÷ 70.', options:['60','600','6'], correct:0 }
+      ]
+    },
+
+        'P5.AUT.MA.S15': {
+      label: 'Mental multiplication strategies',
+      lesson: 'P5_MDA15',
+      targetSize: 50,
+      concepts: [
+        { id:'ma15.scale',      name:'Scale a known fact by 10 and 100',                          target:6 },
+        { id:'ma15.partition',  name:'Partition the number into tens/ones/hundreds and add',       target:10 },
+        { id:'ma15.double',     name:'Double & halve (× 2, × 4, × 8, halve-double)',             target:6 },
+        { id:'ma15.ten-hundred',name:'Use 10 and 100 (× 5, × 20, × 25, × 50)',                    target:8 },
+        { id:'ma15.near',       name:'Near multiples: round, multiply, then adjust',              target:8 },
+        { id:'ma15.factors',    name:'Break into factors and re-order for friendly pairs',         target:6 },
+        { id:'ma15.choose',     name:'Choose the best strategy and spot errors',                   target:6 }
+      ],
+      questions: [
+        /* ===== scale (Q0011–Q0016) ===== */
+        { id:'P5.AUT.MA.S15.Q0011', v:1, concept:'ma15.scale', level:'n', difficulty:1, stem:'6 × 8 = 48. What is 60 × 8?', options:['480','84','4,800'], correct:0, check:'60*8' },
+        { id:'P5.AUT.MA.S15.Q0012', v:1, concept:'ma15.scale', level:'n', difficulty:1, stem:'6 × 8 = 48. What is 600 × 8?', options:['4,800','480','48,000'], correct:0, check:'600*8' },
+        { id:'P5.AUT.MA.S15.Q0013', v:1, concept:'ma15.scale', level:'n', difficulty:2, stem:'4 × 7 = 28. What is 40 × 7?', options:['280','47','2,800'], correct:0, check:'40*7' },
+        { id:'P5.AUT.MA.S15.Q0014', v:1, concept:'ma15.scale', level:'n', difficulty:2, stem:'9 × 7 = 63. What is 90 × 70?', options:['6,300','630','63,000'], correct:0, check:'90*70' },
+        { id:'P5.AUT.MA.S15.Q0015', v:1, concept:'ma15.scale', level:'t', difficulty:3, stem:'5 × 6 = 30. What is 500 × 60?', options:['30,000','3,000','300,000'], correct:0, check:'500*60' },
+        { id:'P5.AUT.MA.S15.Q0016', v:1, concept:'ma15.scale', level:'b', difficulty:3, stem:'A pupil writes 40 × 80 = 320. What is the correct answer?', options:['3,200','320','32,000'], correct:0, check:'40*80' },
+
+        /* ===== partition (Q0017–Q0026) ===== */
+        { id:'P5.AUT.MA.S15.Q0017', v:1, concept:'ma15.partition', level:'n', difficulty:1, stem:'Use partitioning to work out 23 × 4.', options:['92','83','812'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0018', v:1, concept:'ma15.partition', level:'n', difficulty:1, stem:'What is 30 × 6?', options:['180','36','18'], correct:0, check:'30*6' },
+        { id:'P5.AUT.MA.S15.Q0019', v:1, concept:'ma15.partition', level:'n', difficulty:2, stem:'Use partitioning to work out 47 × 6.', options:['282','247','267'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0020', v:1, concept:'ma15.partition', level:'n', difficulty:2, stem:'Use partitioning to work out 34 × 6.', options:['204','184','244'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0021', v:1, concept:'ma15.partition', level:'t', difficulty:3, stem:'Use partitioning to work out 126 × 5.', options:['630','530','730'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0022', v:1, concept:'ma15.partition', level:'t', difficulty:3, stem:'Use partitioning to work out 215 × 4.', options:['860','815','1,060'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0023', v:1, concept:'ma15.partition', level:'t', difficulty:3, stem:'What is the first step for 36 × 5 using partitioning?', options:['30 × 5 = 150, then 6 × 5 = 30','3 × 5 = 15, then 6 × 5 = 30','36 × 5 = 30 + 15'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0024', v:1, concept:'ma15.partition', level:'b', difficulty:3, stem:'Jin says 23 × 4 = 80 + 3 = 83. What did he do wrong?', options:['He forgot to multiply the 3 by 4','He multiplied 20 × 4 wrongly','He added instead of multiplied'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0025', v:1, concept:'ma15.partition', level:'b', difficulty:3, stem:'Use partitioning to work out 156 × 3.', options:['468','436','456'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0026', v:1, concept:'ma15.partition', level:'n', difficulty:2, stem:'Use partitioning to work out 15 × 8.', options:['120','95','110'], correct:0 },
+
+        /* ===== double (Q0027–Q0032) ===== */
+        { id:'P5.AUT.MA.S15.Q0027', v:1, concept:'ma15.double', level:'n', difficulty:1, stem:'Double, then double again, to work out 35 × 4.', options:['140','120','39'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0028', v:1, concept:'ma15.double', level:'n', difficulty:1, stem:'Double 25 twice to work out 25 × 4.', options:['100','50','75'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0029', v:1, concept:'ma15.double', level:'n', difficulty:2, stem:'Double three times to work out 25 × 8.', options:['200','100','400'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0030', v:1, concept:'ma15.double', level:'t', difficulty:3, stem:'Halve 16 and double 25 to work out 16 × 25.', options:['400','200','800'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0031', v:1, concept:'ma15.double', level:'t', difficulty:3, stem:'Which calculation has the same answer as 16 × 25?', options:['4 × 100','8 × 25','32 × 12'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0032', v:1, concept:'ma15.double', level:'b', difficulty:3, stem:'If you halve one factor and double the other, what happens to the product?', options:['It stays the same','It doubles','It halves'], correct:0 },
+
+        /* ===== ten-hundred (Q0033–Q0040) ===== */
+        { id:'P5.AUT.MA.S15.Q0033', v:1, concept:'ma15.ten-hundred', level:'n', difficulty:1, stem:'What is a quick way to multiply a number by 5?', options:['Multiply by 10, then halve','Multiply by 2, then halve','Multiply by 10, then double'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0034', v:1, concept:'ma15.ten-hundred', level:'n', difficulty:1, stem:'What is 38 × 5?', options:['190','180','205'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0035', v:1, concept:'ma15.ten-hundred', level:'n', difficulty:2, stem:'What is 46 × 20?', options:['920','92','9,200'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0036', v:1, concept:'ma15.ten-hundred', level:'n', difficulty:2, stem:'What is 24 × 25? (Hint: 24 × 100 ÷ 4)', options:['600','48','500'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0037', v:1, concept:'ma15.ten-hundred', level:'n', difficulty:2, stem:'What is 18 × 50?', options:['900','90','9,000'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0038', v:1, concept:'ma15.ten-hundred', level:'t', difficulty:3, stem:'Which is a quick way to multiply by 25?', options:['Multiply by 100, then divide by 4','Multiply by 10, then halve','Multiply by 5, then double'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0039', v:1, concept:'ma15.ten-hundred', level:'b', difficulty:3, stem:'What is 32 × 25?', options:['800','700','900'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0040', v:1, concept:'ma15.ten-hundred', level:'b', difficulty:3, stem:'What is 64 × 50?', options:['3,200','1,600','6,400'], correct:0 },
+
+        /* ===== near (Q0041–Q0048) ===== */
+        { id:'P5.AUT.MA.S15.Q0041', v:1, concept:'ma15.near', level:'n', difficulty:1, stem:'Use 20 × 6 to work out 19 × 6.', options:['114','126','120'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0042', v:1, concept:'ma15.near', level:'n', difficulty:1, stem:'Use 40 × 5 to work out 41 × 5.', options:['205','195','215'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0043', v:1, concept:'ma15.near', level:'n', difficulty:2, stem:'Use 100 × 4 to work out 99 × 4.', options:['396','404','386'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0044', v:1, concept:'ma15.near', level:'n', difficulty:2, stem:'Use 100 × 7 to work out 102 × 7.', options:['714','686','704'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0045', v:1, concept:'ma15.near', level:'t', difficulty:3, stem:'Use 100 × 5 to work out 98 × 5.', options:['490','510','480'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0046', v:1, concept:'ma15.near', level:'t', difficulty:3, stem:'Which calculation works out 39 × 8 with near multiples?', options:['40 × 8 − 8','40 × 8 + 8','39 × 10 − 39'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0047', v:1, concept:'ma15.near', level:'b', difficulty:3, stem:'Is 7 × 98 more or less than 700?', options:['Less — 98 is less than 100, so 686','More — the answer is over 700','Equal — the answer is exactly 700'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0048', v:1, concept:'ma15.near', level:'b', difficulty:3, stem:'What is 51 × 6 using a near multiple?', options:['306','300','316'], correct:0 },
+
+        /* ===== factors (Q0049–Q0054) ===== */
+        { id:'P5.AUT.MA.S15.Q0049', v:1, concept:'ma15.factors', level:'n', difficulty:2, stem:'Work out 15 × 12 by using factors (15 × 3 × 4).', options:['180','160','150'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0050', v:1, concept:'ma15.factors', level:'n', difficulty:2, stem:'Work out 25 × 36 by using factors (25 × 4 × 9).', options:['900','700','800'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0051', v:1, concept:'ma15.factors', level:'t', difficulty:3, stem:'Re-order 4 × 17 × 25 to make a friendly pair. What is the answer?', options:['1,700','170','1,070'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0052', v:1, concept:'ma15.factors', level:'t', difficulty:3, stem:'Work out 14 × 15 by grouping 2 × 15 first.', options:['210','200','180'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0053', v:1, concept:'ma15.factors', level:'b', difficulty:3, stem:'Re-order 8 × 23 × 125 to make a friendly pair. What is the answer?', options:['23,000','2,300','230,000'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0054', v:1, concept:'ma15.factors', level:'b', difficulty:3, stem:'Which pair of numbers makes 100 when multiplied together?', options:['4 and 25','8 and 20','5 and 50'], correct:0 },
+
+        /* ===== choose (Q0055–Q0060) ===== */
+        { id:'P5.AUT.MA.S15.Q0055', v:1, concept:'ma15.choose', level:'n', difficulty:2, stem:'Which strategy is best for 98 × 5?', options:['Near multiples (100 × 5 − 2 × 5)','Doubling twice','Partitioning into tens and ones'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0056', v:1, concept:'ma15.choose', level:'n', difficulty:2, stem:'Which strategy is best for 24 × 25?', options:['Use 100 and ÷ 4','Partition 25 into 20 + 5','Halve and double'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0057', v:1, concept:'ma15.choose', level:'t', difficulty:3, stem:'Which strategy is best for 16 × 25?', options:['Halve and double to reach 4 × 100','Partition 16 into 10 + 6','Near multiples'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0058', v:1, concept:'ma15.choose', level:'t', difficulty:3, stem:'Estimate to check: 48 × 5 is closest to…', options:['250','200','300'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0059', v:1, concept:'ma15.choose', level:'b', difficulty:3, stem:'A pupil writes 47 × 6 = 240 + 6 = 246. What is the correct answer?', options:['282','246','288'], correct:0 },
+        { id:'P5.AUT.MA.S15.Q0060', v:1, concept:'ma15.choose', level:'b', difficulty:3, stem:'Which calculation is NOT correct?', options:['23 × 4 = 83','19 × 6 = 114','99 × 4 = 396'], correct:0 }
+      ]
+    },
+
+        'P5.AUT.MA.S16': {
+      label: 'Mental division strategies',
+      lesson: 'P5_MDA16',
+      targetSize: 50,
+      concepts: [
+        { id:'ma16.known',       name:'Use a known fact and scale it',                             target:6 },
+        { id:'ma16.div-10-100',  name:'Divide by 10, 100 and 1,000 (shift digits)',                target:6 },
+        { id:'ma16.partition',   name:'Partition the number into parts that divide easily',        target:10 },
+        { id:'ma16.halve',       name:'Halve repeatedly (÷ 2, ÷ 4, ÷ 8)',                           target:6 },
+        { id:'ma16.factors',     name:'Divide in two steps using factors',                          target:8 },
+        { id:'ma16.special',     name:'Divide by 5, 25 and multiples of 10',                        target:6 },
+        { id:'ma16.chunking',    name:'Chunking and remainders',                                    target:4 },
+        { id:'ma16.reasoning',   name:'Real life, checking by multiplying, spotting errors',        target:4 }
+      ],
+      questions: [
+        /* ===== known (Q0011–Q0016) ===== */
+        { id:'P5.AUT.MA.S16.Q0011', v:1, concept:'ma16.known', level:'n', difficulty:1, stem:'54 ÷ 6 = 9. What is 540 ÷ 6?', options:['90','9','900'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0012', v:1, concept:'ma16.known', level:'n', difficulty:1, stem:'72 ÷ 8 = 9. What is 720 ÷ 8?', options:['90','9','900'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0013', v:1, concept:'ma16.known', level:'n', difficulty:2, stem:'54 ÷ 6 = 9. What is 5,400 ÷ 60?', options:['90','9','900'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0014', v:1, concept:'ma16.known', level:'n', difficulty:2, stem:'36 ÷ 4 = 9. What is 3,600 ÷ 4?', options:['900','90','9,000'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0015', v:1, concept:'ma16.known', level:'t', difficulty:3, stem:'54 ÷ 6 = 9. What is 5,400 ÷ 9?', options:['600','60','6,000'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0016', v:1, concept:'ma16.known', level:'b', difficulty:3, stem:'Cancel zeros to work out 4,800 ÷ 60.', options:['80','8','800'], correct:0 },
+
+        /* ===== div-10-100 (Q0017–Q0022) ===== */
+        { id:'P5.AUT.MA.S16.Q0017', v:1, concept:'ma16.div-10-100', level:'n', difficulty:1, stem:'What is 4,500 ÷ 10?', options:['450','45','45,000'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0018', v:1, concept:'ma16.div-10-100', level:'n', difficulty:1, stem:'What is 4,500 ÷ 100?', options:['45','450','4,500'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0019', v:1, concept:'ma16.div-10-100', level:'n', difficulty:2, stem:'What is 36,000 ÷ 1,000?', options:['36','360','3,600'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0020', v:1, concept:'ma16.div-10-100', level:'n', difficulty:2, stem:'What is 7,200 ÷ 100?', options:['72','720','7'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0021', v:1, concept:'ma16.div-10-100', level:'t', difficulty:3, stem:'Dividing by 10 moves each digit how many places?', options:['One place to the right','One place to the left','Two places to the right'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0022', v:1, concept:'ma16.div-10-100', level:'b', difficulty:3, stem:'Which calculation gives 480?', options:['4,800 ÷ 10','4,800 ÷ 100','48,000 ÷ 100'], correct:0 },
+
+        /* ===== partition (Q0023–Q0032) ===== */
+        { id:'P5.AUT.MA.S16.Q0023', v:1, concept:'ma16.partition', level:'n', difficulty:1, stem:'Use partitioning (80 + 16) to work out 96 ÷ 4.', options:['24','20','36'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0024', v:1, concept:'ma16.partition', level:'n', difficulty:1, stem:'Work out 84 ÷ 4 by partitioning (80 + 4).', options:['21','24','20'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0025', v:1, concept:'ma16.partition', level:'n', difficulty:2, stem:'Work out 156 ÷ 6 by partitioning (120 + 36).', options:['26','36','20'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0026', v:1, concept:'ma16.partition', level:'n', difficulty:2, stem:'Work out 108 ÷ 4 by partitioning (100 + 8).', options:['27','28','26'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0027', v:1, concept:'ma16.partition', level:'t', difficulty:3, stem:'Which is a good partition for 96 ÷ 4?', options:['80 + 16','90 + 6','96 + 0'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0028', v:1, concept:'ma16.partition', level:'t', difficulty:3, stem:'Work out 224 ÷ 4 by partitioning (200 + 24).', options:['56','54','58'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0029', v:1, concept:'ma16.partition', level:'t', difficulty:3, stem:'Work out 135 ÷ 5 by partitioning (100 + 35).', options:['27','25','30'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0030', v:1, concept:'ma16.partition', level:'b', difficulty:3, stem:'Jin says 96 ÷ 4 = 20 + 16 = 36. What went wrong?', options:['He forgot to divide the 16','He added 96 + 4','He doubled 96'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0031', v:1, concept:'ma16.partition', level:'b', difficulty:3, stem:'Work out 288 ÷ 8 by partitioning (240 + 48).', options:['36','34','38'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0032', v:1, concept:'ma16.partition', level:'n', difficulty:2, stem:'What is the answer to 72 ÷ 3 by partitioning (60 + 12)?', options:['24','23','26'], correct:0 },
+
+        /* ===== halve (Q0033–Q0038) ===== */
+        { id:'P5.AUT.MA.S16.Q0033', v:1, concept:'ma16.halve', level:'n', difficulty:1, stem:'Halve twice to work out 148 ÷ 4.', options:['37','74','32'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0034', v:1, concept:'ma16.halve', level:'n', difficulty:1, stem:'Halve once to work out 96 ÷ 2.', options:['48','42','24'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0035', v:1, concept:'ma16.halve', level:'n', difficulty:2, stem:'Halve three times to work out 136 ÷ 8.', options:['17','34','68'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0036', v:1, concept:'ma16.halve', level:'t', difficulty:3, stem:'How many times do you halve to divide by 8?', options:['Three times','Twice','Once'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0037', v:1, concept:'ma16.halve', level:'b', difficulty:3, stem:'Halve twice to work out 172 ÷ 4.', options:['43','86','46'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0038', v:1, concept:'ma16.halve', level:'b', difficulty:3, stem:'Which calculation does NOT give the same answer as 136 ÷ 8?', options:['136 ÷ 2','68 ÷ 4','34 ÷ 2'], correct:0 },
+
+        /* ===== factors (Q0039–Q0046) ===== */
+        { id:'P5.AUT.MA.S16.Q0039', v:1, concept:'ma16.factors', level:'n', difficulty:1, stem:'Divide by 2 and then by 3 to work out 156 ÷ 6.', options:['26','52','78'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0040', v:1, concept:'ma16.factors', level:'n', difficulty:2, stem:'Divide by 3 and then by 4 to work out 144 ÷ 12.', options:['12','24','36'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0041', v:1, concept:'ma16.factors', level:'n', difficulty:2, stem:'Divide by 3 and then by 5 to work out 180 ÷ 15.', options:['12','15','20'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0042', v:1, concept:'ma16.factors', level:'n', difficulty:2, stem:'Divide by 10 and then by 2 to work out 640 ÷ 20.', options:['32','64','16'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0043', v:1, concept:'ma16.factors', level:'t', difficulty:3, stem:'To divide by 6 in two steps, which two factors should you divide by?', options:['2 and 3','3 and 3','2 and 4'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0044', v:1, concept:'ma16.factors', level:'t', difficulty:3, stem:'To divide by 12 in two steps, which two factors should you divide by?', options:['3 and 4','2 and 5','6 and 6'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0045', v:1, concept:'ma16.factors', level:'b', difficulty:3, stem:'Work out 2,400 ÷ 40 by dividing by 10, then by 4.', options:['60','6','600'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0046', v:1, concept:'ma16.factors', level:'b', difficulty:3, stem:'Work out 288 ÷ 24 by dividing by 4, then by 6.', options:['12','14','16'], correct:0 },
+
+        /* ===== special (Q0047–Q0052) ===== */
+        { id:'P5.AUT.MA.S16.Q0047', v:1, concept:'ma16.special', level:'n', difficulty:1, stem:'Which is a quick way to divide by 5?', options:['Double, then divide by 10','Halve, then divide by 10','Divide by 10, then halve'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0048', v:1, concept:'ma16.special', level:'n', difficulty:2, stem:'What is 85 ÷ 5?', options:['17','16','18'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0049', v:1, concept:'ma16.special', level:'n', difficulty:2, stem:'What is 360 ÷ 40?', options:['9','36','90'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0050', v:1, concept:'ma16.special', level:'n', difficulty:2, stem:'What is 2,400 ÷ 60?', options:['40','4','400'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0051', v:1, concept:'ma16.special', level:'t', difficulty:3, stem:'What is 700 ÷ 25? (Hint: × 4, then ÷ 100)', options:['28','35','27'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0052', v:1, concept:'ma16.special', level:'b', difficulty:3, stem:'What is 1,200 ÷ 25?', options:['48','40','52'], correct:0 },
+
+        /* ===== chunking (Q0053–Q0056) ===== */
+        { id:'P5.AUT.MA.S16.Q0053', v:1, concept:'ma16.chunking', level:'n', difficulty:2, stem:'Use chunking (10 + 10 + 6) to work out 156 ÷ 6.', options:['26','36','20'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0054', v:1, concept:'ma16.chunking', level:'n', difficulty:2, stem:'Use chunking to work out 187 ÷ 11 (10 × 11 + 7 × 11).', options:['17','18','16'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0055', v:1, concept:'ma16.chunking', level:'t', difficulty:3, stem:'What is 47 ÷ 6?', options:['7 remainder 5','7 remainder 1','8 remainder 1'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0056', v:1, concept:'ma16.chunking', level:'b', difficulty:3, stem:'What is 85 ÷ 7?', options:['12 remainder 1','12 remainder 3','11 remainder 8'], correct:0 },
+
+        /* ===== reasoning (Q0057–Q0060) ===== */
+        { id:'P5.AUT.MA.S16.Q0057', v:1, concept:'ma16.reasoning', level:'n', difficulty:2, stem:'A school buys 252 books in packs of 12. How many packs?', options:['21','22','24'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0058', v:1, concept:'ma16.reasoning', level:'t', difficulty:3, stem:'364 pupils go on a trip. Each coach holds 28 pupils. How many coaches are needed?', options:['13','12','14'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0059', v:1, concept:'ma16.reasoning', level:'t', difficulty:3, stem:'£156 is shared equally between 6 people. How much does each get?', options:['£26','£25','£30'], correct:0 },
+        { id:'P5.AUT.MA.S16.Q0060', v:1, concept:'ma16.reasoning', level:'b', difficulty:3, stem:'252 ÷ 12 = 21. Which calculation checks the answer?', options:['21 × 12 = 252','21 + 12 = 33','21 ÷ 12 = 1.75'], correct:0 }
+      ]
     }
+
   }
 };
 
