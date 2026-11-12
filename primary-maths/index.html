@@ -13669,8 +13669,205 @@ ${asExCard(2,[
 
 
 /* ================= SECTION C — PLACEHOLDERS (steps 3–9) ================= */
-const P5_PA3 = null; // Perimeter of rectilinear shapes
-const P5_PA4 = null; // Find missing lengths
+/* ---------- STEP 3 : Perimeter of rectilinear shapes ---------- */
+const P5_PA3 = `
+${asHeader('PA3','Step 3 — Perimeter of Rectilinear Shapes','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Shapes Made of Rectangles</div>
+  ${asWarm('A <strong>rectilinear</strong> shape is made only from rectangles joined together — every corner is a right angle. The "staircase" and the "L" and the "T" and the "plus" are all rectilinear. Even though they have more than four sides, we can still find their perimeter by walking once round the <strong>edge</strong>.')}
+  <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:150px;">${paGrid([[0,0],[3,0],[3,2],[5,2],[5,4],[0,4]],{u:26,count:false,maxW:170})}<div style="font-size:11px;font-weight:700;color:#085041;">L-shape</div></div>
+    <div style="text-align:center;flex:1;min-width:150px;">${paGrid([[0,0],[2,0],[2,2],[4,2],[4,4],[0,4]],{u:26,count:false,maxW:170,fill:'#FBCFE8'})}<div style="font-size:11px;font-weight:700;color:#9D174D;">staircase</div></div>
+    <div style="text-align:center;flex:1;min-width:150px;">${paGrid([[0,0],[4,0],[4,1],[5,1],[5,3],[4,3],[4,4],[0,4]],{u:24,count:false,maxW:180,fill:'#FDE68A'})}<div style="font-size:11px;font-weight:700;color:#92400E;">T-shape</div></div>
+  </div>
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Method A — walk once round the edge</div><div class="s-body" style="color:#085041;">Start at a marked corner, add every side in order, and <strong>stop when you get back</strong>. Same rule as Step 1 — just with more sides.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Method B — the bounding rectangle trick</div><div class="s-body" style="color:#633806;">A rectilinear shape fits inside a rectangle. Its perimeter is often <strong>the same as that rectangle</strong>. Example: an L in a 5 by 4 box → perimeter = 2 × (5 + 4) = 18.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 1 — Going inside</div><div class="s-body" style="color:#712B13;">Do not add the internal line where two rectangles meet. That line is <em>inside</em> the shape and is <strong>not</strong> part of the perimeter.</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert 2 — Missing the step</div><div class="s-body" style="color:#712B13;">The <strong>step</strong> (the short side where the shape juts in or out) must be counted. Forgetting it is the commonest mistake.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — An L-shape: count the edge</div>
+  ${asWarm('Walk round this staircase and count each unit length. Watch the two small vertical steps on the right!')}
+  ${paGrid([[0,0],[3,0],[3,2],[5,2],[5,4],[0,4]],{u:34,caption:'L-shape inside a 5 by 4 box'})}
+  ${steps([['Top','3',''],['Down','+ 2','right side'],['Across','+ 2','the step'],['Down','+ 2','right side'],['Bottom','+ 5',''],['Left','+ 4','back to START'],['PERIMETER','= 18 units','3+2+2+2+5+4']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — The bounding rectangle trick</div>
+  ${asWarm('The L-shape above sits inside a 5 by 4 rectangle. What is the perimeter of that rectangle? Is it the same as the L?')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:170px;">${paGrid([[0,0],[3,0],[3,2],[5,2],[5,4],[0,4]],{u:24,count:false,maxW:190,fill:'#FCD34D'})}<div style="font-size:11px;font-weight:700;color:#92400E;">L-shape: 18 units</div></div>
+    <div style="text-align:center;flex:1;min-width:170px;">${paGrid(paRectPts(5,4),{u:24,count:false,maxW:190,fill:null,start:false})}<div style="font-size:11px;font-weight:700;color:#085041;">Rectangle: 2 × (5 + 4) = 18 units</div></div>
+  </div>
+  ${steps([['Bounding rectangle','5 by 4',''],['Perimeter','2 × (5 + 4)','= 18'],['Conclusion','same answer','cutting a corner and stepping back the same amount keeps the perimeter']])}
+  <div class="card-body" style="margin-top:8px;">💡 This trick works whenever the shape has been made by <strong>cutting a rectangular bite out of a corner</strong>. It does <em>not</em> always work (see Example 5).</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — A staircase shape</div>
+  ${asWarm('Each step down is the same as each step across — can you see a pattern?')}
+  ${paGrid([[0,0],[2,0],[2,2],[4,2],[4,4],[0,4]],{u:34,caption:'staircase inside a 4 by 4 box'})}
+  ${steps([['Top','2',''],['Down','+ 2',''],['Across','+ 2',''],['Down','+ 2',''],['Bottom','+ 4',''],['Left','+ 4',''],['PERIMETER','= 16 units','2+2+2+2+4+4']])}
+  <div class="card-body" style="margin-top:8px;">The bounding rectangle is 4 by 4, perimeter 2 × (4 + 4) = 16 — same again!</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Same-shape, same-perimeter (the L moved around)</div>
+  ${asWarm('This is the same L-shape as Example 1, but drawn in a different place on the grid. Do the numbers change?')}
+  ${paGrid([[1,0],[4,0],[4,2],[6,2],[6,4],[1,4]],{u:30,caption:'the same L, shifted right by 1 unit'})}
+  ${steps([['Sides','3, 2, 2, 2, 5, 4','same as Example 1'],['PERIMETER','= 18 units','position on the grid does not matter']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — A T-shape (the trick does NOT work here)</div>
+  ${asWarm('This T-shape sits inside a 5 by 4 rectangle. Its perimeter is <strong>not</strong> 18. Why?')}
+  ${paGrid([[0,0],[4,0],[4,1],[5,1],[5,3],[4,3],[4,4],[0,4]],{u:34,caption:'T-shape inside a 5 by 4 box'})}
+  ${steps([['Top','4',''],['Down','+ 1','right side'],['Across','+ 1','arm out'],['Down','+ 2','right arm'],['Across','+ 1','back in'],['Down','+ 1',''],['Bottom','+ 4',''],['Left','+ 4',''],['PERIMETER','= 18 units','4+1+1+2+1+1+4+4 — still 18!']])}
+  <div class="card-body" style="margin-top:8px;">💡 Surprise: for this T-shape the trick <em>does</em> work — because every cut-out has a matching step-back. The trick fails only when the shape has a <strong>deeper cut-out</strong> than the amount it steps back. See the next example.</div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — A shape where the trick fails</div>
+  ${asWarm('A U-shape has a deep cut-out. Add its sides carefully — do <strong>not</strong> use the bounding-rectangle trick here.')}
+  ${paGrid([[0,0],[2,0],[2,3],[4,3],[4,0],[6,0],[6,5],[0,5]],{u:26,caption:'U-shape (the bite is 2 units deep)'})}
+  ${steps([['Bottom','6',''],['Up','+ 5','right'],['Left','+ 2','top-right'],['Down','+ 3','into the U'],['Right','+ 2','inside the U'],['Up','+ 3','out of the U'],['Left','+ 2','top-left'],['Down','+ 5','left'],['PERIMETER','= 28 units','6+5+2+3+2+3+2+5']])}
+  <div class="card-body" style="margin-top:8px;">Bounding rectangle: 6 by 5 → 22. Actual perimeter: 28. The trick <strong>fails</strong> here because the cut-out is deeper than the step-back. <strong>Always add the sides.</strong></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Same perimeter, different rectilinear shape</div>
+  ${asWarm('Two rectilinear shapes with the same perimeter but very different areas.')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:180px;">${paGrid([[0,0],[3,0],[3,1],[5,1],[5,4],[0,4]],{u:22,count:false,maxW:200,fill:'#BBF7D0'})}<div style="font-size:11px;font-weight:800;color:#085041;">Perimeter = 18, Area = 13</div></div>
+    <div style="text-align:center;flex:1;min-width:180px;">${paGrid([[0,0],[4,0],[4,2],[5,2],[5,4],[0,4]],{u:22,count:false,maxW:210,fill:'#FBCFE8'})}<div style="font-size:11px;font-weight:800;color:#9D174D;">Perimeter = 18, Area = 13</div></div>
+  </div>
+  ${steps([['Shape 1','perimeter 18, area 13',''],['Shape 2','perimeter 18, area 13',''],['Conclusion','same perimeter, same area, different shapes','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Real life: a lawn inside a fence</div>
+  ${asWarm('A rectangular lawn 12 m by 8 m has a <strong>square shed</strong> 3 m by 3 m built into one corner. How much fencing is needed to go round the remaining lawn?')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:180px;">${paGrid([[0,0],[12,0],[12,8],[0,8]],{u:15,count:false,maxW:220,fill:'#BBF7D0'})}<div style="font-size:11px;font-weight:700;color:#085041;">full lawn: 40 m</div></div>
+    <div style="text-align:center;flex:1;min-width:180px;">${paGrid([[0,0],[12,0],[12,5],[3,5],[3,8],[0,8]],{u:15,count:false,maxW:220,fill:'#FDE68A'})}<div style="font-size:11px;font-weight:700;color:#92400E;">shed cut from corner</div></div>
+  </div>
+  ${steps([['Full rectangle','2 × (12 + 8) = 40 m',''],['Cut the shed','corner cut and step-back match','no change to perimeter'],['Fencing','40 m','the cut corner does not change the total fence']])}
+  <div class="card-body" style="margin-top:8px;">💡 A cut <em>from a corner</em> keeps the perimeter the same. A cut <em>from the middle of an edge</em> (like the U-shape in Example 6) makes it longer.</div>
+</div>
+
+${asExCard(3,[
+ exQ(1,'What is a rectilinear shape?',['A shape made only from rectangles, with all right angles','Any shape with straight sides','A shape with curved edges'],0),
+ exQ(2,'An L-shape is drawn inside a 4 by 3 rectangle by cutting a 1 by 1 square out of the top-right corner. What is the perimeter of the L-shape?',['14 units','12 units','10 units'],0),
+ exQ(3,'A staircase is drawn inside a 6 by 2 rectangle. What is its perimeter?',['16 units','12 units','8 units'],0),
+ exQ(4,'A U-shape has these side lengths in order: 6, 5, 2, 3, 2, 3, 2, 5. What is its perimeter?',['28 units','22 units','32 units'],0),
+ exQ(5,'Why does the bounding-rectangle trick work for an L-shape cut from a corner?',['Because the cut-out and the step-back match, so the perimeter is unchanged','Because the area stays the same','Because L-shapes are always rectangles'],0),
+ exQ(6,'A pupil says the perimeter of the L-shape in Q2 is 12 because the rectangle is 4 by 3. Is the pupil right?',['No — the L-shape perimeter is 14, the rectangle perimeter is also 14 but the L is not the same shape','Yes — the L is the same as the rectangle','Only if the cut is 2 by 2'],0),
+ exQ(7,'A T-shape with a 1 by 2 arm on top of a 4 by 3 body. What is its perimeter?',['18 units','16 units','20 units'],0),
+ exQ(8,'A square of side 5 has a 1 by 1 square removed from the <em>middle of one edge</em>. What is the new perimeter?',['24 units','20 units','22 units'],0),
+ exQ(9,'THINK DEEPER: Two rectilinear shapes both have a perimeter of 20 units but different areas. Is that possible?',['Yes — the U-shape (28 units in the example) is a reminder that perimeters change easily while areas do not','No — same perimeter always gives same area','Only for rectangles'],0,'t'),
+ exQ(10,'BOSS LEVEL: A lawn 14 m by 10 m has a 4 by 4 square shed built into one corner. How many metres of fencing go round the remaining lawn?',['48 m','44 m','52 m'],0,'b')])}`;
+
+
+/* ---------- STEP 4 : Find missing lengths ---------- */
+const P5_PA4 = `
+${asHeader('PA4','Step 4 — Find Missing Lengths','CPA Mastery Approach · 8 Worked Examples · 10 Exercises · Primary 5')}
+
+<div class="card" style="border-color:#1D9E75;">
+  <div class="card-title" style="color:#085041;">1. Concrete &amp; Pictorial Stage — Working Backwards</div>
+  ${asWarm('Sometimes a rectangle or rectilinear shape is drawn with one side labelled "?" . Because <strong>opposite sides of a rectangle are equal</strong>, and because a rectilinear shape is <strong>made from rectangles</strong>, we can work out any missing side from the ones we know.')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:200px;">${paRectDim(11,7,{labels:{left:'? cm',right:'? cm'},ghost:['right']})}<div style="font-size:11px;font-weight:700;color:#085041;">opposite sides are equal</div></div>
+    <div style="text-align:center;flex:1;min-width:200px;">${paGrid([[0,0],[4,0],[4,2],[7,2],[7,5],[0,5]],{u:24,count:false,maxW:230,fill:'#FDE68A'})}<div style="font-size:11px;font-weight:700;color:#92400E;">missing side from the shape's totals</div></div>
+  </div>
+  <div class="strategy-grid" style="margin-top:12px;">
+    <div class="strategy-card" style="background:#E1F5EE;border-color:#9FE1CB;"><div class="s-title" style="color:#085041;">📋 Rule 1 — opposite sides match</div><div class="s-body" style="color:#085041;">In any rectangle, the two lengths are equal and the two widths are equal. If you know one, you know the other.</div></div>
+    <div class="strategy-card" style="background:#FAEEDA;border-color:#FAC775;"><div class="s-title" style="color:#633806;">📋 Rule 2 — total height = sum of verticals</div><div class="s-body" style="color:#633806;">On a rectilinear shape, the total height on one side equals the sum of the vertical edges on the opposite side.</div></div>
+    <div class="strategy-card" style="background:#EDE9FE;border-color:#C4B5FD;"><div class="s-title" style="color:#4C1D95;">📋 Rule 3 — total width = sum of horizontals</div><div class="s-body" style="color:#4C1D95;">The total width on the bottom equals the sum of the horizontal top edges (and vice versa).</div></div>
+    <div class="strategy-card" style="background:#FAECE7;border-color:#F0997B;"><div class="s-title" style="color:#712B13;">⚠️ Misconception Alert</div><div class="s-body" style="color:#712B13;">A missing side is <strong>not</strong> found by halving the perimeter unless you already know all the other sides. Work from the shapes you can see.</div></div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">Example 1 — A rectangle with a missing length</div>
+  ${asWarm('A rectangle has a perimeter of 36 cm and a width of 7 cm. What is its length?')}
+  ${paRectDim(11,7,{labels:{left:'7 cm',right:'7 cm',top:'? cm',bottom:'? cm'},ghost:['right']})}
+  ${steps([['Halve the perimeter','36 ÷ 2 = 18','one length + one width'],['Take away the width','18 − 7 = 11',''],['ANSWER','length = 11 cm','check: 2 × (11 + 7) = 36 ✓']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 2 — Missing side of a rectangle from three given sides</div>
+  ${asWarm('A rectangle has three sides 12 cm, 5 cm and 12 cm. What is the fourth side?')}
+  ${paRectDim(12,5,{labels:{bottom:'? cm'},ghost:['bottom']})}
+  ${steps([['Top','12 cm',''],['Right','5 cm',''],['Bottom','? — opposite to top','so 12 cm'],['ANSWER','12 cm','opposite sides are equal']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 3 — Rectilinear shape: the missing vertical</div>
+  ${asWarm('This L-shape has a total height of 9 cm on the left. The two vertical edges on the right are 4 cm and ?. What is ??')}
+  ${paGrid([[0,0],[4,0],[4,4],[7,4],[7,9],[0,9]],{u:22,count:false,maxW:240,fill:'#FDE68A'})}
+  ${steps([['Left side total','9 cm',''],['Right side verticals','4 + ?',''],['Solve','4 + ? = 9','? = 5 cm'],['ANSWER','5 cm','the right side must add up to the same total as the left']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 4 — Rectilinear shape: the missing horizontal</div>
+  ${asWarm('Same L-shape. The bottom is 7 cm long. The two horizontal top edges are 4 cm and ?. What is ??')}
+  ${paGrid([[0,0],[4,0],[4,4],[7,4],[7,9],[0,9]],{u:22,count:false,maxW:240,fill:'#BBF7D0'})}
+  ${steps([['Bottom total','7 cm',''],['Top horizontals','4 + ?',''],['Solve','4 + ? = 7','? = 3 cm'],['ANSWER','3 cm','the top must add up to the same total as the bottom']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 5 — Working from the perimeter of an L-shape</div>
+  ${asWarm('The perimeter of this L-shape is 26 cm. Three of its sides are 8 cm, 4 cm and 3 cm. Find the fourth and fifth sides.')}
+  ${paGrid([[0,0],[8,0],[8,4],[5,4],[5,7],[0,7]],{u:22,count:false,maxW:240,fill:'#FBCFE8'})}
+  ${steps([['Known sides','8 + 4 + 3 = 15 cm',''],['Remaining perimeter','26 − 15 = 11 cm',''],['Match tops and bottoms','top = 8, bottom = 5 + x → x = 3',''],['Match left and right','left = 7, right = 4 + y → y = 3',''],['Check','8 + 4 + 3 + 3 + 3 + 5 = 26 ✓','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 6 — Same perimeter, working backwards</div>
+  ${asWarm('A rectangle and a square both have a perimeter of 40 cm. What is the side of the square? What are some possible rectangles?')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:170px;">${paRectDim(10,10,{maxL:140,labels:{top:'? cm'}})}<div style="font-size:11px;font-weight:700;color:#085041;">square: 4 × side = 40</div></div>
+    <div style="text-align:center;flex:1;min-width:180px;">${paRectDim(15,5,{maxL:160,labels:{top:'15 cm',left:'5 cm'}})}<div style="font-size:11px;font-weight:700;color:#9D174D;">rectangle: 2 × (15 + 5) = 40</div></div>
+  </div>
+  ${steps([['Square','4 × side = 40 → side = 10 cm',''],['Rectangle','l + w = 20','so (15, 5), (16, 4), (14, 6) … all work']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 7 — Missing side from area (preview of Step 7)</div>
+  ${asWarm('A rectangle has an area of 48 cm² and a length of 8 cm. What is its width? (You will do more of this in Step 7.)')}
+  ${paRectDim(8,6,{maxL:180,labels:{top:'8 cm',right:'? cm'},ghost:['right']})}
+  ${steps([['Area formula','area = length × width',''],['Substitute','48 = 8 × ?',''],['Divide','48 ÷ 8 = 6',''],['ANSWER','width = 6 cm','']])}
+</div>
+
+<div class="card">
+  <div class="card-title">Example 8 — Real life: fencing round the remaining garden</div>
+  ${asWarm('A garden is 15 m by 10 m. A square shed 4 m by 4 m is built in one corner. Find the perimeter of the remaining lawn.')}
+  <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;">
+    <div style="text-align:center;flex:1;min-width:170px;">${paGrid([[0,0],[15,0],[15,10],[0,10]],{u:14,count:false,maxW:210,fill:'#BBF7D0'})}<div style="font-size:11px;font-weight:700;color:#085041;">full garden: 50 m</div></div>
+    <div style="text-align:center;flex:1;min-width:180px;">${paGrid([[0,0],[15,0],[15,6],[4,6],[4,10],[0,10]],{u:14,count:false,maxW:220,fill:'#FDE68A'})}<div style="font-size:11px;font-weight:700;color:#92400E;">shed cut from corner</div></div>
+  </div>
+  ${steps([['Garden perimeter','2 × (15 + 10) = 50 m',''],['Corner cut','step-back matches cut','no change'],['Remaining lawn','50 m','same as the full garden']])}
+  <div class="card-body" style="margin-top:8px;">💡 A corner cut does not change the perimeter. A middle-edge cut (like a U-shape) <em>increases</em> the perimeter by twice the depth of the cut.</div>
+</div>
+
+${asExCard(4,[
+ exQ(1,'A rectangle has a perimeter of 30 cm and a width of 4 cm. What is its length?',['11 cm','15 cm','7.5 cm'],0),
+ exQ(2,'A rectangle has three sides 9 cm, 4 cm and 9 cm. What is the fourth side?',['4 cm','9 cm','13 cm'],0),
+ exQ(3,'An L-shape has a total height of 10 cm on the left. The two vertical edges on the right are 3 cm and ?. What is ??',['7 cm','13 cm','3 cm'],0),
+ exQ(4,'An L-shape has a bottom edge of 9 cm. The top horizontals are 5 cm and ?. What is ??',['4 cm','14 cm','5 cm'],0),
+ exQ(5,'A square has a perimeter of 36 cm. What is its side length?',['9 cm','6 cm','18 cm'],0),
+ exQ(6,'A rectangle has a perimeter of 24 cm and a length of 8 cm. What is its width?',['4 cm','8 cm','16 cm'],0),
+ exQ(7,'A rectangle has an area of 42 cm² and a width of 6 cm. What is its length?',['7 cm','8 cm','36 cm'],0),
+ exQ(8,'A U-shape has a perimeter of 30 cm. Three known sides are 8 cm, 5 cm and 3 cm. What is the sum of the remaining five sides?',['14 cm','19 cm','22 cm'],0),
+ exQ(9,'THINK DEEPER: A rectangle and a square both have a perimeter of 24 cm. The rectangle is 8 cm long. What is the rectangle\'s width and what is the square\'s side?',['Rectangle width 4 cm, square side 6 cm','Rectangle width 6 cm, square side 4 cm','Rectangle width 3 cm, square side 5 cm'],0,'t'),
+ exQ(10,'BOSS LEVEL: A garden is 20 m by 12 m. A square shed 5 m by 5 m is built into one corner. What is the perimeter of the remaining lawn?',['64 m','54 m','74 m'],0,'b')])}`;
+
+
+
 const P5_PA5 = null; // What is area?
 const P5_PA6 = null; // Calculate area by counting squares
 const P5_PA7 = null; // Area of rectangles
@@ -13754,10 +13951,10 @@ const SCHEME_P5 = [
         steps: [
           { label:'What is a fraction?', content: P5_FA1, poolStep:'P5.AUT.FA.S01', stepNumber: 1 },
           { label:'Equivalent fractions', content: P5_FA2, poolStep:'P5.AUT.FA.S02', stepNumber: 2 },
-          { label:'Simplifying fractions', content: P5_FA3 },
-          { label:'Improper fractions', content: P5_FA4 },
-          { label:'Mixed numbers', content: P5_FA5 },
-          { label:'Convert improper fractions to mixed numbers', content: P5_FA6 },
+          { label:'Simplifying fractions', content: P5_FA3, poolStep:'P5.AUT.FA.S03', stepNumber: 3 },
+          { label:'Improper fractions', content: P5_FA4, poolStep:'P5.AUT.FA.S04', stepNumber: 4 },
+          { label:'Mixed numbers', content: P5_FA5, poolStep:'P5.AUT.FA.S05', stepNumber: 5 },
+          { label:'Convert improper fractions to mixed numbers', content: P5_FA6, poolStep:'P5.AUT.FA.S06', stepNumber: 6 },
           { label:'Convert mixed numbers to improper fractions', content: P5_FA7 },
           { label:'Compare fractions', content: P5_FA8 },
           { label:'Order fractions', content: P5_FA9 },
@@ -13820,8 +14017,8 @@ const SCHEME_P5 = [
         steps: [
           { label:'What is perimeter?',             content: P5_PA1, poolStep:'P5.SPR.PA.S01', stepNumber:1 },
           { label:'Perimeter of rectangles',        content: P5_PA2, poolStep:'P5.SPR.PA.S02', stepNumber:2 },
-          { label:'Perimeter of rectilinear shapes',content: P5_PA3 },
-          { label:'Find missing lengths',           content: P5_PA4 },
+          { label:'Perimeter of rectilinear shapes', content: P5_PA3, poolStep:'P5.SPR.PA.S03', stepNumber:3 },
+          { label:'Find missing lengths',            content: P5_PA4, poolStep:'P5.SPR.PA.S04', stepNumber:4 },
           { label:'What is area?',                  content: P5_PA5 },
           { label:'Calculate area by counting squares', content: P5_PA6 },
           { label:'Area of rectangles',             content: P5_PA7 },
