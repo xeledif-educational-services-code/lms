@@ -331,6 +331,36 @@ function parentReportHtml(key) {
       '</table>';
   }).join('');
 
+      // ─── Recommended next steps: bulleted when 2+ items, inline for 1 ───
+  const nextStepsHtml = (() => {
+    const buildList = (intro, items, outro) => {
+      if (items.length === 1) {
+        return '<p>' + intro + ' <strong>' + items[0] + '</strong>. ' + outro + '</p>';
+      }
+      return '<p>' + intro + '</p>' +
+        '<ul>' +
+        items.map(x => '<li><strong>' + x + '</strong></li>').join('') +
+        '</ul>' +
+        '<p>' + outro + '</p>';
+    };
+
+    if (struggling.length) {
+      return buildList(
+        'Revisit the lesson examples for these topics:',
+        struggling,
+        'Then complete another Practice Zone session — a little and often (10 minutes a day) works best.'
+      );
+    }
+    if (developing.length) {
+      return buildList(
+        'Keep practising these topics:',
+        developing,
+        'A few more Practice Zone sessions should make them secure.'
+      );
+    }
+    return '<p>Keep up the good work! Continue with Practice Zone sessions to stay sharp.</p>';
+  })();
+
   // ─── HTML shell: identical styling and structure as before ──────────
   return `<!doctype html><html><head><meta charset="utf-8"><title>Progress report — ${esc(name)}</title><style>
       body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:800px;margin:24px auto;padding:0 18px;color:#1a1a1a;line-height:1.5}
@@ -350,7 +380,7 @@ function parentReportHtml(key) {
       ${few.length ? `<p class="muted">Not enough practice yet to judge (at least ${MIN_Q} different questions are needed): ${few.join('; ')}.</p>` : ''}
       ${stepTables ? '<h2>Skill-by-skill</h2>' + stepTables : '<p class="muted">No lesson activity recorded yet for this period.</p>'}
       <h2>Recommended next steps</h2>
-      <p>${struggling.length ? 'Revisit the lesson examples for: ' + struggling.join('; ') + '. Then complete another Practice Zone session — a little and often (10 minutes a day) works best.' : developing.length ? 'Keep practising: ' + developing.join('; ') + '. A few more Practice Zone sessions should make these secure.' : 'Keep up the good work! Continue with Practice Zone sessions to stay sharp.'}</p>
+      ${nextStepsHtml}
       <h2>Teacher's comment</h2><div class="comment" contenteditable="true"></div>
       <p class="muted" style="margin-top:22px">How skills are rated: a skill is rated only after at least ${MIN_Q} different questions. <b>Confident</b> = ${SECURE_FROM * 100}% or more right first time; <b>Getting there</b> = ${STRUGGLING_BELOW * 100}–${SECURE_FROM * 100 - 1}%; <b>Needs support</b> = under ${STRUGGLING_BELOW * 100}%.</p>
     </body></html>`;
