@@ -1562,6 +1562,151 @@ concepts: [
       stem:'A number line starts at 2 and is divided into fifths. A pupil calls the 3rd tick after 2 simply 3/5. What is the correct position?',
       options:['2 3/5','3/5','2 2/5'], correct:0 }
   ]
+},
+
+
+
+
+'P5.AUT.FA.S11': {
+  label: 'Fractions greater than one',
+  lesson: 'P5_FA11',
+  targetSize: 50,
+  concepts: [
+    { id: 'fa11.convert', target: 10 },
+    { id: 'fa11.represent', target: 8 },
+    { id: 'fa11.count', target: 6 },
+    { id: 'fa11.compare', target: 6 },
+    { id: 'fa11.measure', target: 6 },
+    { id: 'fa11.context', target: 8 },
+    { id: 'fa11.reasoning', target: 6 }
+  ],
+  questions: [
+    { id:'P5.AUT.FA.S11.Q0001', v:1, concept:'fa11.convert', level:'n', difficulty:1, stem:'Which improper fraction is the same as 1 3/4?', options:['7/4','5/4','13/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0002', v:1, concept:'fa11.count', level:'n', difficulty:1, stem:'Count in thirds: 2/3, 1, 1 1/3, 1 2/3, ___. What comes next?', options:['2','1 3/3','2 1/3'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0003', v:1, concept:'fa11.context', level:'n', difficulty:1, stem:'Seven bars are shared equally between 4 pupils. How much does each pupil get?', options:['1 3/4 bars','1 1/4 bars','4/7 of a bar'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0004', v:1, concept:'fa11.measure', level:'n', difficulty:1, stem:'How many minutes are in 2 1/4 hours?', options:['135 minutes','125 minutes','140 minutes'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0005', v:1, concept:'fa11.compare', level:'n', difficulty:2, stem:'Which is greater: 11/6 or 1 3/4?', options:['11/6','1 3/4','They are equal'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0006', v:1, concept:'fa11.count', level:'n', difficulty:1, stem:'How many halves are there in 4 1/2?', options:['9','8','5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0007', v:1, concept:'fa11.reasoning', level:'n', difficulty:2, stem:'Which is the odd one out: 7/4, 1 3/4, 14/8, 1 2/3?', options:['1 2/3','14/8','7/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0008', v:1, concept:'fa11.count', level:'n', difficulty:1, stem:'Count in three quarters: 3/4, 1 1/2, 2 1/4, 3, ___. What comes next?', options:['3 3/4','3 1/4','4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0009', v:1, concept:'fa11.context', level:'t', difficulty:2, stem:'Seven chocolate bars are shared equally between 5 pupils. How much does each pupil get?', options:['1 2/5 bars','1 1/5 bars','5/7 of a bar'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0010', v:1, concept:'fa11.reasoning', level:'b', difficulty:3, stem:'A sequence starts at 1/2 and goes up by 3/4 each time: 1/2, 1 1/4, 2, 2 3/4, ... What is the 6th term?', options:['4 1/4','3 1/2','5'], correct:0 },
+
+    { id:'P5.AUT.FA.S11.Q0011', v:1, concept:'fa11.convert', level:'n', difficulty:1, stem:'Change 2 1/3 into an improper fraction.', options:['7/3','5/3','6/3'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0012', v:1, concept:'fa11.convert', level:'n', difficulty:1, stem:'Change 3 2/5 into an improper fraction.', options:['17/5','15/5','13/5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0013', v:1, concept:'fa11.convert', level:'n', difficulty:1, stem:'Which mixed number is equal to 9/4?', options:['2 1/4','1 3/4','2 3/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0014', v:1, concept:'fa11.convert', level:'n', difficulty:1, stem:'Change 4 2/7 into an improper fraction.', options:['30/7','28/7','26/7'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0015', v:1, concept:'fa11.convert', level:'n', difficulty:2, stem:'Which mixed number is equal to 17/6?', options:['2 5/6','2 1/6','3 1/6'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0016', v:1, concept:'fa11.represent', level:'n', difficulty:1, stem:'What does 9/4 represent as a mixed number?', options:['2 1/4','1 2/4','2 3/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0017', v:1, concept:'fa11.represent', level:'n', difficulty:1, stem:'Which improper fraction represents 2 whole bars and 3 fifths?', options:['13/5','10/5','8/5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0018', v:1, concept:'fa11.represent', level:'n', difficulty:1, stem:'How many quarters make 1 whole?', options:['4','3','5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0019', v:1, concept:'fa11.count', level:'n', difficulty:1, stem:'What comes next when counting in fifths: 4/5, 1, 1 1/5, ___?', options:['1 2/5','1 1/5','2'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0020', v:1, concept:'fa11.compare', level:'n', difficulty:2, stem:'Which is greater: 7/3 or 2 1/4?', options:['7/3','2 1/4','They are equal'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0021', v:1, concept:'fa11.measure', level:'n', difficulty:1, stem:'How many centimetres are in 1 1/2 metres?', options:['150 cm','120 cm','105 cm'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0022', v:1, concept:'fa11.context', level:'n', difficulty:1, stem:'A child eats 1 whole pizza and 2/8 of another. What fraction of a pizza is that altogether?', options:['10/8','9/8','8/10'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0023', v:1, concept:'fa11.convert', level:'n', difficulty:2, stem:'Change 5 3/8 into an improper fraction.', options:['43/8','40/8','38/8'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0024', v:1, concept:'fa11.represent', level:'n', difficulty:1, stem:'Which number is between 2 and 3?', options:['2 2/5','1 4/5','3 1/5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0025', v:1, concept:'fa11.count', level:'n', difficulty:2, stem:'Count forward by halves from 2 1/2. What is the next number?', options:['3','2 2/3','3 1/2'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0026', v:1, concept:'fa11.compare', level:'n', difficulty:2, stem:'Which is smaller: 9/4 or 2 1/3?', options:['9/4','2 1/3','They are equal'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0027', v:1, concept:'fa11.measure', level:'n', difficulty:2, stem:'How many millilitres are in 2 1/2 litres?', options:['2,500 ml','2,050 ml','250 ml'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0028', v:1, concept:'fa11.context', level:'n', difficulty:1, stem:'A ribbon is 3 1/4 metres long. Which improper fraction gives its length in quarters?', options:['13/4 m','12/4 m','10/4 m'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0029', v:1, concept:'fa11.convert', level:'n', difficulty:2, stem:'Change 6 4/5 into an improper fraction.', options:['34/5','30/5','32/5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0030', v:1, concept:'fa11.represent', level:'n', difficulty:2, stem:'Which statement is true about 11/4?', options:['It is 2 3/4','It is 1 3/4','It is 3 1/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0031', v:1, concept:'fa11.compare', level:'n', difficulty:2, stem:'Which is greater: 13/5 or 2 1/2?', options:['13/5','2 1/2','They are equal'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0032', v:1, concept:'fa11.context', level:'n', difficulty:2, stem:'A jug holds 1 3/4 litres. How many quarter-litres is this?', options:['7','6','5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0033', v:1, concept:'fa11.measure', level:'n', difficulty:2, stem:'How many minutes are in 1 1/2 hours?', options:['90','75','120'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0034', v:1, concept:'fa11.reasoning', level:'n', difficulty:2, stem:'Which pair names the same amount?', options:['2 1/3 and 7/3','2 1/3 and 6/3','1 2/3 and 7/3'], correct:0 },
+
+    { id:'P5.AUT.FA.S11.Q0035', v:1, concept:'fa11.convert', level:'t', difficulty:2, stem:'A mixed number has whole number 4 and denominator 7. Its improper numerator is 31. What is its numerator in the mixed number?', options:['3','4','5'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0036', v:1, concept:'fa11.represent', level:'t', difficulty:2, stem:'Which improper fraction is exactly halfway between 2 and 3?', options:['5/2','7/2','3/2'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0037', v:1, concept:'fa11.count', level:'t', difficulty:2, stem:'Starting at 1/4, count forward in quarters. What is the 9th number?', options:['2 1/4','2','1 3/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0038', v:1, concept:'fa11.compare', level:'t', difficulty:2, stem:'Arrange 9/4, 2 1/8 and 5/2 from smallest to largest.', options:['2 1/8, 9/4, 5/2','9/4, 2 1/8, 5/2','5/2, 9/4, 2 1/8'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0039', v:1, concept:'fa11.measure', level:'t', difficulty:2, stem:'A walk is 1 3/4 km in the morning and 1 1/2 km in the afternoon. How far is the afternoon walk shorter?', options:['1/4 km','1/2 km','3/4 km'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0040', v:1, concept:'fa11.context', level:'t', difficulty:2, stem:'Three children each receive 1 1/2 cakes. How many cakes are shared altogether?', options:['4 1/2','3 1/2','5 1/2'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0041', v:1, concept:'fa11.convert', level:'t', difficulty:2, stem:'A fraction greater than one has denominator 9 and numerator 26. Write it as a mixed number.', options:['2 8/9','2 7/9','3 1/9'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0042', v:1, concept:'fa11.reasoning', level:'t', difficulty:2, stem:'A pupil says 15/6 is less than 2 because 15 is less than 12. What is the correct response?', options:['15/6 is greater than 2 because 12/6 equals 2','The pupil is correct','15/6 equals 2'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0043', v:1, concept:'fa11.context', level:'t', difficulty:2, stem:'A baker uses 2 1/4 kg of flour on Monday and 1 3/4 kg on Tuesday. How much flour is used?', options:['4 kg','3 1/2 kg','4 1/2 kg'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0044', v:1, concept:'fa11.represent', level:'t', difficulty:2, stem:'Which improper fraction is equal to 3 whole ones and 5 sixths?', options:['23/6','18/6','20/6'], correct:0 },
+
+    { id:'P5.AUT.FA.S11.Q0045', v:1, concept:'fa11.convert', level:'b', difficulty:3, stem:'A mixed number is 7 5/8. What is its improper fraction, and what remainder is obtained when it is converted back?', options:['61/8; remainder 5','56/8; remainder 5','61/8; remainder 7'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0046', v:1, concept:'fa11.compare', level:'b', difficulty:3, stem:'Which is greatest: 17/6, 2 4/5 or 11/4?', options:['2 4/5','17/6','11/4'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0047', v:1, concept:'fa11.context', level:'b', difficulty:3, stem:'A container holds 2 2/3 litres. How many 1/3-litre cups can be filled?', options:['8','7','6'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0048', v:1, concept:'fa11.reasoning', level:'b', difficulty:3, stem:'A number is greater than 3 but less than 4 and is written in ninths. Which could it be?', options:['31/9','26/9','36/9'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0049', v:1, concept:'fa11.measure', level:'b', difficulty:3, stem:'A race is 5 1/2 km long. A runner has completed 3 3/4 km. How much remains?', options:['1 3/4 km','2 1/4 km','1 1/2 km'], correct:0 },
+    { id:'P5.AUT.FA.S11.Q0050', v:1, concept:'fa11.context', level:'b', difficulty:3, stem:'Four equal lengths are each 1 3/8 m. What is their total length?', options:['5 1/2 m','4 3/8 m','5 3/8 m'], correct:0 }
+  ]
+},
+
+
+
+'P5.AUT.FA.S12': {
+  label: 'Add fractions with the same denominator',
+  lesson: 'P5_FA12',
+  targetSize: 50,
+  concepts: [
+    { id: 'fa12.add-basic', target: 10 },
+    { id: 'fa12.cross-whole', target: 8 },
+    { id: 'fa12.simplify', target: 8 },
+    { id: 'fa12.three-addends', target: 6 },
+    { id: 'fa12.context', target: 7 },
+    { id: 'fa12.misconception', target: 5 },
+    { id: 'fa12.missing-number', target: 6 }
+  ],
+  questions: [
+    { id:'P5.AUT.FA.S12.Q0001', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Calculate 3/8 + 2/8.', options:['5/8','5/16','6/8'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0002', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Calculate 2/9 + 5/9.', options:['7/9','7/18','10/9'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0003', v:1, concept:'fa12.cross-whole', level:'n', difficulty:1, stem:'Calculate 4/7 + 5/7. Give your answer as a mixed number.', options:['1 2/7','9/14','1 5/7'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0004', v:1, concept:'fa12.simplify', level:'n', difficulty:2, stem:'Calculate 5/6 + 4/6. Give your answer as a mixed number in its simplest form.', options:['1 1/2','1 3/6','9/12'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0005', v:1, concept:'fa12.simplify', level:'n', difficulty:1, stem:'Calculate 3/10 + 1/10. Give your answer in its simplest form.', options:['2/5','4/20','4/10'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0006', v:1, concept:'fa12.three-addends', level:'n', difficulty:2, stem:'Calculate 2/9 + 4/9 + 5/9. Give your answer as a mixed number.', options:['1 2/9','11/27','1 1/9'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0007', v:1, concept:'fa12.context', level:'n', difficulty:1, stem:'Ngozi drinks 3/8 L of water at break and 7/8 L at lunch. How much does she drink altogether?', options:['1 1/4 L','10/16 L','1 1/8 L'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0008', v:1, concept:'fa12.misconception', level:'n', difficulty:1, stem:'Tolu says 1/5 + 2/5 = 3/10. Is he right?', options:['No — add the numerators and keep the denominator: 3/5','Yes — add the tops and add the bottoms','No — the answer is 3/0'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0009', v:1, concept:'fa12.missing-number', level:'t', difficulty:2, stem:'5/12 + ?/12 = 1 whole. What is the missing numerator?', options:['7','5','12'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0010', v:1, concept:'fa12.context', level:'b', difficulty:3, stem:'Chef Bola uses 5/8 kg, 7/8 kg and 6/8 kg of rice in three recipes. How much rice is that in total, as a mixed number in its simplest form?', options:['2 1/4 kg','1 3/4 kg','18/24 kg'], correct:0 },
+
+    { id:'P5.AUT.FA.S12.Q0011', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Calculate 1/6 + 4/6.', options:['5/6','5/12','4/6'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0012', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Calculate 3/11 + 5/11.', options:['8/11','8/22','15/11'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0013', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'What is 2/13 + 6/13?', options:['8/13','8/26','12/13'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0014', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Add 4/15 and 3/15.', options:['7/15','7/30','12/15'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0015', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Calculate 5/12 + 2/12.', options:['7/12','7/24','10/12'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0016', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'What is 1/9 + 6/9?', options:['7/9','7/18','6/9'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0017', v:1, concept:'fa12.add-basic', level:'n', difficulty:2, stem:'Calculate 7/20 + 8/20.', options:['15/20','15/40','56/20'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0018', v:1, concept:'fa12.add-basic', level:'n', difficulty:1, stem:'Add 2/10 and 5/10.', options:['7/10','7/20','10/10'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0019', v:1, concept:'fa12.cross-whole', level:'n', difficulty:1, stem:'Calculate 5/8 + 6/8.', options:['1 3/8','1 1/8','11/16'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0020', v:1, concept:'fa12.cross-whole', level:'n', difficulty:1, stem:'Calculate 7/10 + 6/10 as a mixed number.', options:['1 3/10','1 2/10','13/20'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0021', v:1, concept:'fa12.cross-whole', level:'n', difficulty:2, stem:'What is 8/9 + 5/9?', options:['1 4/9','1 3/9','13/18'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0022', v:1, concept:'fa12.cross-whole', level:'n', difficulty:1, stem:'Add 3/4 and 3/4. Give the answer as a mixed number.', options:['1 1/2','1 2/4','6/8'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0023', v:1, concept:'fa12.simplify', level:'n', difficulty:1, stem:'Simplify the answer to 2/12 + 4/12.', options:['1/2','6/24','3/12'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0024', v:1, concept:'fa12.simplify', level:'n', difficulty:2, stem:'Calculate 4/15 + 2/15 and simplify.', options:['2/5','6/30','3/5'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0025', v:1, concept:'fa12.simplify', level:'n', difficulty:1, stem:'What is 3/14 + 5/14 in its simplest form?', options:['4/7','8/28','2/7'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0026', v:1, concept:'fa12.simplify', level:'n', difficulty:2, stem:'Calculate 6/18 + 3/18 and simplify.', options:['1/2','9/36','2/3'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0027', v:1, concept:'fa12.three-addends', level:'n', difficulty:1, stem:'Calculate 1/8 + 2/8 + 3/8.', options:['6/8','6/24','5/8'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0028', v:1, concept:'fa12.three-addends', level:'n', difficulty:2, stem:'Add 3/10 + 2/10 + 4/10.', options:['9/10','9/30','24/10'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0029', v:1, concept:'fa12.context', level:'n', difficulty:1, stem:'Ada walks 2/7 km in the morning and 3/7 km in the afternoon. How far does she walk altogether?', options:['5/7 km','5/14 km','6/7 km'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0030', v:1, concept:'fa12.context', level:'n', difficulty:1, stem:'A bottle contains 4/10 L of juice. Another 3/10 L is poured in. How much juice is there now?', options:['7/10 L','7/20 L','12/10 L'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0031', v:1, concept:'fa12.context', level:'n', difficulty:2, stem:'A tailor uses 5/12 m of blue cloth and 4/12 m of red cloth. How much cloth is used?', options:['3/4 m','9/24 m','1/2 m'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0032', v:1, concept:'fa12.missing-number', level:'n', difficulty:1, stem:'Find the missing numerator: ?/9 + 2/9 = 7/9.', options:['5','4','6'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0033', v:1, concept:'fa12.missing-number', level:'n', difficulty:1, stem:'Complete the addition: 3/8 + ?/8 = 6/8.', options:['3','2','4'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0034', v:1, concept:'fa12.misconception', level:'n', difficulty:2, stem:'A pupil calculates 2/7 + 3/7 = 5/14. What should the pupil have done?', options:['Kept the denominator 7, giving 5/7','Changed the denominator to 14','Multiplied 2 by 3'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0035', v:1, concept:'fa12.cross-whole', level:'n', difficulty:2, stem:'Calculate 11/12 + 4/12 as a mixed number.', options:['1 1/4','1 3/12','1 4/12'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0036', v:1, concept:'fa12.simplify', level:'n', difficulty:2, stem:'Calculate 5/16 + 7/16 and simplify the answer.', options:['3/4','12/32','2/4'], correct:0 },
+
+    { id:'P5.AUT.FA.S12.Q0037', v:1, concept:'fa12.missing-number', level:'t', difficulty:2, stem:'Find the missing numerator: 5/11 + ?/11 = 1.', options:['6','5','11'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0038', v:1, concept:'fa12.three-addends', level:'t', difficulty:2, stem:'Calculate 5/12 + 4/12 + 7/12. Give the answer as a mixed number in simplest form.', options:['1 1/3','1 4/12','1 2/3'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0039', v:1, concept:'fa12.cross-whole', level:'t', difficulty:2, stem:'A fraction addition gives 14/9. What is the answer as a mixed number?', options:['1 5/9','1 4/9','2 5/9'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0040', v:1, concept:'fa12.simplify', level:'t', difficulty:2, stem:'Two fractions with denominator 18 add to 12/18. What is the simplest form of the answer?', options:['2/3','3/9','6/18'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0041', v:1, concept:'fa12.context', level:'t', difficulty:2, stem:'A tank is 5/8 full. Another 6/8 of a tank is poured in. How much water is there, measured in tankfuls?', options:['1 3/8 tankfuls','1 1/8 tankfuls','11/16 tankfuls'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0042', v:1, concept:'fa12.misconception', level:'t', difficulty:2, stem:'Musa says 4/9 + 3/9 = 7/18. Explain the error.', options:['He added the denominators; they should stay as 9','He should subtract the numerators','He should multiply both denominators'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0043', v:1, concept:'fa12.missing-number', level:'t', difficulty:2, stem:'Find the missing fraction: ?/10 + 3/10 = 9/10.', options:['6/10','5/10','7/10'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0044', v:1, concept:'fa12.three-addends', level:'t', difficulty:2, stem:'Add 7/15 + 5/15 + 6/15. Give your answer as a mixed number.', options:['1 1/5','1 2/5','18/45'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0045', v:1, concept:'fa12.context', level:'t', difficulty:2, stem:'A family drinks 3/8 L, 5/8 L and 4/8 L of juice during the day. How much do they drink altogether?', options:['1 1/2 L','1 2/8 L','12/24 L'], correct:0 },
+
+    { id:'P5.AUT.FA.S12.Q0046', v:1, concept:'fa12.cross-whole', level:'b', difficulty:3, stem:'Three fractions with denominator 7 add to 18/7. What is their total as a mixed number?', options:['2 4/7','2 3/7','1 4/7'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0047', v:1, concept:'fa12.missing-number', level:'b', difficulty:3, stem:'The sum of two fractions with denominator 12 is 1 1/4. One fraction is 8/12. What is the other fraction?', options:['7/12','6/12','5/12'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0048', v:1, concept:'fa12.three-addends', level:'b', difficulty:3, stem:'Three equal fractions with denominator 8 have a total of 15/8. What is the numerator of each fraction?', options:['5','4','6'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0049', v:1, concept:'fa12.context', level:'b', difficulty:3, stem:'A baker uses 7/12 kg of flour for one batch and 11/12 kg for another. How much flour is used altogether, in simplest mixed-number form?', options:['1 1/2 kg','1 2/12 kg','1 3/4 kg'], correct:0 },
+    { id:'P5.AUT.FA.S12.Q0050', v:1, concept:'fa12.misconception', level:'b', difficulty:3, stem:'A pupil says 5/8 + 6/8 = 11/16. Which explanation proves the pupil is wrong?', options:['The pieces are eighths, so the total is 11/8 = 1 3/8','The answer must be 11/16 because both denominators are 8','The answer is 30/8 because 5 × 6 = 30'], correct:0 }
+  ]
 }
 
 
