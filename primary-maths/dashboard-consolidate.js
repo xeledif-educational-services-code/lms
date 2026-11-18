@@ -219,19 +219,120 @@
   /* ============================================================
      Parent report (printable)
      ============================================================ */
-  function parentReportHtml(key) {
-    const groups = groupRecords(readAll()), recs = groups[key] || [];
-    const name = displayName(key, recs), rep = conceptReport(recs), cs = allConcepts(rep);
-    let q = 0, ft = 0, nReg = 0, nPrac = 0;
-    recs.forEach(r => { kindOf(r) === 'practice' ? nPrac++ : nReg++; const ex = Object.values(r.exercises || {}); q += ex.length; ft += ex.filter(e => e.firstTry === true).length; });
-    const pct = q ? Math.round(100 * ft / q) : 0;
-    const names = st => cs.filter(c => c.status === st).map(c => esc(c.name));
-    const list = a => a.length ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>' : '<p class="muted">None yet.</p>';
-    const struggling = names('struggling'), developing = names('developing'), secure = names('secure'), few = names('few');
-    const stepTables = rep.steps.map(s => `<h3>${esc(s.label)}</h3><table><tr><th>Skill</th><th>How it is going</th><th>First-try</th><th>Different questions tried</th></tr>
-      ${s.concepts.map(c => { const st = STATUS[c.status];
-        return `<tr><td>${esc(c.name)}</td><td style="background:${st.bg};color:${st.fg};font-weight:700;">${st.icon} ${st.say}</td><td>${c.acc == null ? '—' : Math.round(c.acc * 100) + '%'}</td><td>${c.distinct}</td></tr>`; }).join('')}</table>`).join('');
-    return `<!doctype html><html><head><meta charset="utf-8"><title>Progress report — ${esc(name)}</title><style>
+function parentReportHtml(key) {
+  const groups = groupRecords(readAll());
+  const recs   = groups[key] || [];
+  const name   = displayName(key, recs);
+
+  // ─── Overview totals (unchanged — this is why these already populate) ───
+  let q = 0, ft = 0, nReg = 0, nPrac = 0;
+  recs.forEach(r => {
+    kindOf(r) === 'practice' ? nPrac++ : nReg++;
+    const ex = Object.values(r.exercises || {});
+    q  += ex.length;
+    ft += ex.filter(e => e.firstTry === true).length;
+  });
+  const pct = q ? Math.round(100 * ft / q) : 0;
+
+  // ─── NEW: per-step rollup from the attempt records themselves ──────
+  // Every record carries `firstTryCorrect` and `answered` (written by
+  // ProgressStore.recordAttempt in index.html). Summing across attempts
+  // gives us per-step totals without needing a pool file.
+  const stepMap = {};
+  recs.forEach(rec => {
+    const info    = (typeof parseStepId === 'function') ? parseStepId(rec.stepId) : null;
+    const stepKey = (info && info.stepKey) || rec.stepId || 'unknown';
+
+    const S = stepMap[stepKey] || (stepMap[stepKey] = {
+      stepKey,
+      label:      rec.stepLabel || stepKey,
+      term:       rec.term       || '',
+      topic:      rec.topic      || '',
+      stepNumber: rec.stepNumber || 0,
+      firstTry:   0,   // first-try correct
+      answered:   0,   // total questions attempted
+      distinct:   new Set()  // distinct question numbers across attempts
+    });
+
+    S.firstTry += rec.firstTryCorrect || 0;
+    S.answered += rec.answered        || 0;
+
+    Object.keys(rec.exercises || {}).forEach(num => S.distinct.add(num));
+  });
+
+  // Classify each step using the SAME thresholds as the footer.
+  //   secure     = acc >= SECURE_FROM
+  //   struggling = acc <  STRUGGLING_BELOW
+  //   developing = in between
+  //   few        = fewer than MIN_Q distinct questions
+  const stepRows = Object.values(stepMap).map(s => {
+    const acc = s.answered ? (s.firstTry / s.answered) : null;
+    const distinct = s.distinct.size;
+    let status;
+    if (distinct < MIN_Q) {
+      status = 'few';
+    } else if (acc >= SECURE_FROM) {
+      status = 'secure';
+    } else if (acc < STRUGGLING_BELOW) {
+      status = 'struggling';
+    } else {
+      status = 'developing';
+    }
+    return { ...s, acc, distinct, status };
+  });
+
+  // Human-readable label for a step (used in the three bullet lists)
+  const labelOf = s =>
+    (s.term  ? esc(s.term)  + ' · ' : '') +
+    (s.topic ? esc(s.topic) + ' · ' : '') +
+    'Step ' + (s.stepNumber || '?') + ' · ' + esc(s.label);
+
+  const byStatus = st => stepRows
+    .filter(s => s.status === st)
+    .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
+    .map(labelOf);
+
+  const struggling = byStatus('struggling');
+  const developing = byStatus('developing');
+  const secure     = byStatus('secure');
+  const few        = byStatus('few');
+
+  const list = a => a.length
+    ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>'
+    : '<p class="muted">None yet.</p>';
+
+  // ─── Skill-by-skill table: one section per term/topic, one row per step ──
+  // Group stepRows by term + topic so the output resembles the old
+  // per-topic table, with "Skill" = lesson step.
+  const grouped = {};
+  stepRows.forEach(s => {
+    const g = (s.term || '') + '||' + (s.topic || '');
+    (grouped[g] || (grouped[g] = { term: s.term, topic: s.topic, rows: [] })).rows.push(s);
+  });
+
+  const stepTables = Object.values(grouped).map(g => {
+    const heading = [g.term, g.topic].filter(Boolean).join(' · ') || 'Lessons';
+    const rows = g.rows
+      .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
+      .map(s => {
+        const st = STATUS[s.status] || STATUS.few || { icon: '•', bg: '#f3f4f6', fg: '#333', say: '—' };
+        return '<tr>' +
+          '<td>' + labelOf(s) + '</td>' +
+          '<td style="background:' + st.bg + ';color:' + st.fg + ';font-weight:700;">' +
+            st.icon + ' ' + st.say + '</td>' +
+          '<td>' + (s.acc == null ? '—' : Math.round(s.acc * 100) + '%') + '</td>' +
+          '<td>' + s.distinct + '</td>' +
+        '</tr>';
+      }).join('');
+    return '<h3>' + esc(heading) + '</h3>' +
+      '<table>' +
+        '<tr><th>Skill</th><th>How it is going</th><th>First-try</th><th>Different questions tried</th></tr>' +
+        rows +
+      '</table>';
+  }).join('');
+
+  // ─── HTML shell: identical styling and structure as before ──────────
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Progress report — ${esc(name)}</title><style>
       body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:800px;margin:24px auto;padding:0 18px;color:#1a1a1a;line-height:1.5}
       h1{font-size:24px;margin:0} h2{font-size:17px;border-bottom:2px solid #1D9E75;padding-bottom:4px;margin-top:26px;color:#085041} h3{font-size:14px;margin:16px 0 6px}
       .muted{color:#777;font-size:13px} .grid{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0} .box{flex:1 1 150px;background:#F0FAF6;border:1px solid #9FE1CB;border-radius:10px;padding:10px;text-align:center}
@@ -240,20 +341,20 @@
       @media print{.noprint{display:none} body{margin:0}}</style></head><body>
       <div class="noprint" style="text-align:right;margin-bottom:8px"><button onclick="window.print()">🖨 Print / Save as PDF</button></div>
       <h1>Monthly Progress Report</h1>
-      <p><b>${esc(name)}</b> · Primary 5 Mathematics · Xeledif Educational Services<br><span class="muted">Period: ${esc(periodText())} · Report date: ${fmtDate(Date.now())}</span></p>
+      <p><b>${esc(name)}</b> · Primary 5 Mathematics · Xeledif Educational Services<br><span class="muted">Period: ${esc(typeof periodText === 'function' ? periodText() : 'all recorded activity')} · Report date: ${typeof fmtDate === 'function' ? fmtDate(Date.now()) : new Date().toLocaleDateString('en-GB')}</span></p>
       <h2>Overview</h2>
       <div class="grid"><div class="box"><b>${q}</b>questions answered</div><div class="box"><b>${pct}%</b>right first time</div><div class="box"><b>${nReg}</b>lesson exercise attempts</div><div class="box"><b>${nPrac}</b>Practice Zone sessions</div></div>
       <h2>Strengths</h2>${list(secure)}
       <h2>Areas to focus on</h2>
       <p><b>Needs support:</b></p>${list(struggling)}<p><b>Getting there:</b></p>${list(developing)}
       ${few.length ? `<p class="muted">Not enough practice yet to judge (at least ${MIN_Q} different questions are needed): ${few.join('; ')}.</p>` : ''}
-      ${rep.steps.length ? '<h2>Skill-by-skill</h2>' + stepTables : '<p class="muted">No Practice Zone data yet for this period.</p>'}
+      ${stepTables ? '<h2>Skill-by-skill</h2>' + stepTables : '<p class="muted">No lesson activity recorded yet for this period.</p>'}
       <h2>Recommended next steps</h2>
       <p>${struggling.length ? 'Revisit the lesson examples for: ' + struggling.join('; ') + '. Then complete another Practice Zone session — a little and often (10 minutes a day) works best.' : developing.length ? 'Keep practising: ' + developing.join('; ') + '. A few more Practice Zone sessions should make these secure.' : 'Keep up the good work! Continue with Practice Zone sessions to stay sharp.'}</p>
       <h2>Teacher's comment</h2><div class="comment" contenteditable="true"></div>
       <p class="muted" style="margin-top:22px">How skills are rated: a skill is rated only after at least ${MIN_Q} different questions. <b>Confident</b> = ${SECURE_FROM * 100}% or more right first time; <b>Getting there</b> = ${STRUGGLING_BELOW * 100}–${SECURE_FROM * 100 - 1}%; <b>Needs support</b> = under ${STRUGGLING_BELOW * 100}%.</p>
     </body></html>`;
-  }
+}
   function openParentReport(key) {
     const w = window.open('', '_blank');
     if (!w) { alert('Please allow pop-ups for this page to open the report.'); return; }
