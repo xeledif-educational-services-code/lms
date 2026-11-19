@@ -211,6 +211,35 @@
   #mcq-tracker { bottom: 62px !important; right: 12px !important; }
 }
 
+/* ─── Back to Top button ─── */
+#back-to-top {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;                    /* left, so it doesn't clash with #mcq-tracker on the right */
+  z-index: 9997;                 /* below tracker (9999) and finish-btn (9998) */
+  padding: 9px 14px;
+  border-radius: 22px;
+  border: none;
+  background: rgba(91,33,182,0.92);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease, background .15s;
+}
+#back-to-top.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#back-to-top:hover { background: #4C1D95; }
+#back-to-top:active { transform: translateY(1px); }
+
+@media (max-width: 480px) {
+  #back-to-top { bottom: 14px; left: 12px; padding: 8px 12px; font-size: 11px; }
+}
+
 </style>
 
 <!-- Firebase SDK (compat build) -->
@@ -14463,5 +14492,34 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').classList.add('active
 document.querySelector('.level-tab[data-color="#5B21B6"]').style.background = '#5B21B6';
 document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white';
 </script>
+
+
+<button id="back-to-top" type="button" aria-label="Back to top">↑ Top</button>
+
+<script>
+/* ─── Back to Top ─── */
+(function () {
+  const btn = document.getElementById('back-to-top');
+  if (!btn) return;
+
+  const SHOW_AFTER = 400;   // px scrolled before the button appears
+  let visible = false;
+
+  function onScroll() {
+    const shouldShow = window.scrollY > SHOW_AFTER;
+    if (shouldShow === visible) return;
+    visible = shouldShow;
+    btn.classList.toggle('show', shouldShow);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();   // in case the page loads already scrolled (e.g. via anchor link)
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+</script>
+
 </body>
 </html>
