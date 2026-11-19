@@ -21,6 +21,18 @@
 
   const SESSION = 10;
 
+    /* ── render any "a b/c" or "b/c" pattern in plain text as stacked fractions ──
+     Used for question stems and option labels. HTML-bearing strings are
+     returned untouched so the function is safe to call on pre-built markup. */
+  function renderFractions(text) {
+    if (typeof text !== 'string') return String(text == null ? '' : text);
+    if (/<[a-z][\s\S]*>/i.test(text)) return text;
+    const frac = (n, d) => '<span class="frac"><span class="num">' + n + '</span><span class="den">' + d + '</span></span>';
+    return text
+      .replace(/(\d+)\s+(\d+)\/(\d+)/g, (_, w, n, d) => w + frac(n, d))
+      .replace(/(?<![\d\/])(\d+)\/(\d+)(?![\d\/])/g, (_, n, d) => frac(n, d));
+  }
+
   /* ---------------- styles (injected once) ---------------- */
   const CSS = `
   .pz-panel{margin:18px 0 6px;border:2px solid #1D9E75;border-radius:16px;background:linear-gradient(180deg,#F0FAF6,#fff);padding:16px;font-family:inherit;color:#1a1a1a;}
@@ -64,6 +76,11 @@
   .pz-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 12px;}
   .pz-chip{font-size:12px;font-weight:700;padding:4px 10px;border-radius:12px;background:#FAEEDA;color:#633806;border:1px solid #FAC775;}
   .pz-actions{display:flex;gap:10px;flex-wrap:wrap;}
+  .frac{display:inline-flex;flex-direction:column;vertical-align:middle;text-align:center;line-height:1.05;font-size:.85em;margin:0 2px;position:relative;top:-.12em;}
+  .frac .num,.frac .den{padding:0 3px;}
+  .frac .num{border-bottom:1.2px solid currentColor;padding-bottom:1px;}
+  .frac .den{padding-top:1px;}
+  .pz-opt .frac{font-size:1.1em;top:-.14em;}
   @media(max-width:480px){.pz-stem{font-size:16px;} .pz-opt{font-size:15px;}}`;
   function injectCss() {
     if (document.getElementById('pz-style')) return;
@@ -222,6 +239,31 @@
       this.renderQuestion(ctx);
     },
 
+        /* Scroll to the lesson example card whose title starts with "Example N".
+       Falls back to the top of the step content if the card isn't found.
+       Uses smooth scrolling so the pupil can follow the motion. */
+    jumpToExample(n) {
+      const cards = Array.from(document.querySelectorAll('.step-content-area .card'));
+      const re = new RegExp('^Example\\s+' + Number(n) + '\\b');
+      const target = cards.find(c => {
+        const t = (c.querySelector('.card-title')?.textContent || '').trim();
+        return re.test(t);
+      });
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // subtle flash so the eye lands on it
+        target.style.transition = 'box-shadow .6s';
+        target.style.boxShadow = '0 0 0 3px #FCD34D';
+        setTimeout(() => { target.style.boxShadow = ''; }, 1400);
+      } else {
+        // Fallback: at least scroll up so the pupil sees the lesson
+        const area = document.querySelector('.step-content-area:not(.hidden)');
+        if (area) area.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        console.warn('[pool-ui] Example', n, 'not found in step content');
+      }
+    },
+
+
     renderQuestion(ctx) {
       ctx.state = 'question';
       const S = ctx.session, q = S.qs[S.i], r = ctx.root;
@@ -245,13 +287,48 @@
       tag.className = 'pz-tag ' + q.level;
       tag.textContent = q.level === 'b' ? '🔥 Boss level' : q.level === 't' ? '🧠 Think deeper' : '⭐ Practice';
       card.appendChild(tag);
-      card.appendChild(div('pz-stem', q.stem));
+      const stemDiv = div('pz-stem');
+      stemDiv.innerHTML = renderFractions(q.stem);       // fractions in the stem
+      card.appendChild(stemDiv);
+
+      // ── Hint ── optional per-question "Review Example N" panel.
+      // source: q.exampleRef (set in pool data) OR q._raw.exampleRef
+      // (if pool-engine's prepare() copies the raw question).
+      const exampleRef = q.exampleRef || (q._raw && q._raw.exampleRef);
+      if (exampleRef) {
+        const hintWrap = div('pz-hintref');
+        hintWrap.style.marginBottom = '10px';
+        hintWrap.style.fontSize = '12.5px';
+        const toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.style.cssText = 'background:none;border:none;color:#5B21B6;font-size:12.5px;font-weight:600;cursor:pointer;padding:0;font-family:inherit;';
+        toggle.textContent = '💡 Hint';
+        const body = document.createElement('div');
+        body.style.cssText = 'display:none;margin-top:4px;color:#555;line-height:1.5;';
+        body.innerHTML =
+          'Review <strong>Example ' + exampleRef.n + '</strong>' +
+          (exampleRef.label ? ': ' + renderFractions(exampleRef.label) : '') + '. ' +
+          '<a href="#" class="pz-hint-jump" data-example="' + exampleRef.n + '" style="color:#185FA5;text-decoration:underline;">Go to example ↓</a>';
+        toggle.onclick = () => { body.style.display = body.style.display === 'none' ? 'block' : 'none'; };
+        hintWrap.appendChild(toggle);
+        hintWrap.appendChild(body);
+        card.appendChild(hintWrap);
+
+        // delegate the "Go to example" click once per mount
+        body.querySelector('.pz-hint-jump').addEventListener('click', (e) => {
+          e.preventDefault();
+          this.jumpToExample(exampleRef.n);
+        });
+      }
 
       const opts = div('pz-opts'); const buttons = [];
       q.options.forEach((text, i) => {
         const b = document.createElement('button'); b.type = 'button'; b.className = 'pz-opt';
         const L = document.createElement('span'); L.className = 'pz-letter'; L.textContent = 'ABCD'[i];
-        const T = document.createElement('span'); T.textContent = text;
+        const T = document.createElement('span'); T.innerHTML = renderFractions(text);
+        b.appendChild(L); b.appendChild(T);
+
+
         b.appendChild(L); b.appendChild(T);
         b.onclick = () => this.choose(ctx, i, b);
         opts.appendChild(b); buttons.push(b);

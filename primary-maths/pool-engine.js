@@ -168,7 +168,7 @@
     const idx = shuffle(q.options.map((_, i) => i), rng);
     return {
       id: q.id, v: q.v, concept: q.concept, level: q.level, difficulty: q.difficulty,
-      stem: q.stem, hint: q.hint || null,
+      stem: q.stem, hint: q.hint || null, exampleRef: q.exampleRef || null,
       options: idx.map(i => q.options[i]),
       correctIndex: idx.indexOf(q.correct)
     };
