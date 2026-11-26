@@ -25,32 +25,11 @@ let currentRole = null;
 let roleReady = null;  // promise that resolves once role is known
 
 // ── Email-link sign-in state ──────────────────────────────────
-// We deliberately do NOT call signInWithEmailLink() automatically
-// on page load. The oobCode in the link is single-use, and some
-// email providers (very common on school/university Office 365
-// tenants — "Safe Links"/ATP) pre-visit links to scan them for
-// phishing before the person ever taps them. If sign-in completes
-// the instant the page loads, the scanner's visit burns the code,
-// and the real person gets "auth/invalid-action-code: ...already
-// been used." Requiring an actual button tap avoids that, because
-// scanners fetch pages — they don't press buttons.
 let pendingEmailLinkSignIn = false;
 let pendingEmailLinkEmail = null;
 let signInBusy = false;
 let lastSignInError = null;
 
-// ── Full-page access gate ───────────────────────────────────────
-// Deters casual/unauthorized use of a shared link by blocking view
-// and interaction with the whole page until someone is signed in.
-// This is a UX/access-log deterrent, not a real security boundary:
-// the page's HTML/JS is still delivered to any browser that
-// requests it, so a technically able visitor could still disable
-// JavaScript or read page source to get at it. Genuine content
-// protection would require serving lesson content from Firestore
-// behind an auth-gated read rule instead of embedding it in the
-// page. What this DOES achieve: nobody can see or interact with a
-// lesson without first receiving and clicking a magic-link email
-// tied to a real address — a real, logged access record.
 const GATE_HTML_CLASS = 'xeledif-gate-active';
 
 function showGate() {
@@ -121,15 +100,6 @@ async function handleGateSignInClick() {
   }
 }
 
-// ── Pupil-identity binding ──────────────────────────────────────
-// The dashboard groups scores by a "pupil name" string. Previously
-// that name was just typed into a per-device prompt, completely
-// disconnected from who was actually signed in — so a signed-in
-// pupil could type any name at all, and the same device re-prompted
-// separately for every different visitor. Now the display name is
-// resolved once per ACCOUNT (stored in that pupil's Firestore user
-// document, asked for only the first time), so it follows the pupil
-// to any device they sign into and can't be freely retyped.
 window.__xeledifPupilName = null;
 
 function initFirebaseCompat() {
@@ -148,9 +118,6 @@ function initFirebaseCompat() {
     fbAuth.onAuthStateChanged(async (user) => {
       currentUser = user;
 
-      // Already signed in but a leftover magic link is still in the
-      // URL (stale email re-opened, link clicked twice, etc.) — just
-      // scrub the URL instead of trying to "use" a dead code.
       if (user && cameFromEmailLink) {
         pendingEmailLinkSignIn = false;
         window.history.replaceState({}, document.title, window.location.pathname);
@@ -163,7 +130,6 @@ function initFirebaseCompat() {
         showGate();
         return;
       }
-      // Ensure a user doc exists with a role
       const ref = fbDb.collection('users').doc(user.uid);
       const snap = await ref.get();
       if (snap.exists) {
@@ -178,8 +144,6 @@ function initFirebaseCompat() {
         });
       }
 
-      // Resolve this pupil's stable display name (see the
-      // pupil-identity-binding note above). Teachers don't need one.
       if (currentRole !== 'teacher') {
         const existingData = snap.exists ? snap.data() : null;
         if (existingData && existingData.pupilName) {
@@ -203,20 +167,10 @@ function initFirebaseCompat() {
       hideGate();
       resolve(currentRole);
 
-      // Catch-up sync: push any locally-recorded attempts on THIS
-      // device now that we know for certain we're signed in. This
-      // covers the case where a pupil started answering questions
-      // before tapping "Tap to finish signing in" (or before the
-      // sign-in confirmation had finished processing) — those
-      // per-answer syncs would have silently no-op'd at the time
-      // because getFirebaseUser() was still null. It also re-tries
-      // anything that failed to sync earlier due to a network blip.
       syncAllLocalAttempts();
     });
   });
 
-  // We landed here via a magic link and nobody is signed in yet.
-  // Show a "tap to finish" button instead of calling the SDK now.
   if (cameFromEmailLink && !currentUser) {
     pendingEmailLinkSignIn = true;
     pendingEmailLinkEmail = window.localStorage.getItem('xeledif.emailForSignIn') || null;
@@ -241,9 +195,6 @@ async function sendSignInLink(email) {
   window.localStorage.setItem('xeledif.emailForSignIn', email);
 }
 
-// Runs ONLY when the person taps "Tap to finish signing in" —
-// never automatically. This is the fix for auth/invalid-action-code
-// caused by link-scanning email security systems.
 async function completeEmailLinkSignIn() {
   if (signInBusy) return;
 
@@ -259,7 +210,6 @@ async function completeEmailLinkSignIn() {
 
   try {
     await fbAuth.signInWithEmailLink(email, window.location.href);
-    // onAuthStateChanged fires next and re-renders the bar.
   } catch (err) {
     console.warn('signInWithEmailLink failed:', err);
     pendingEmailLinkSignIn = false;
@@ -274,7 +224,6 @@ async function completeEmailLinkSignIn() {
 }
 
 async function doSignOut() {
-  // Clear caches so the next user doesn't see stale data
   localStorage.removeItem('xeledif.progress.v2');
   localStorage.removeItem('xeledif.activeAttempt');
   localStorage.removeItem('xeledif.migrationDone');
@@ -296,9 +245,6 @@ async function cloudWriteAttempt(rec) {
     }, { merge: true });
   } catch (err) {
     console.warn('cloudWriteAttempt failed:', err.message);
-    // Re-throw so callers (real-time sync, dashboard reconciliation,
-    // catch-up sync) can tell the write did NOT actually make it to
-    // Firestore, instead of silently assuming success.
     throw err;
   }
 }
@@ -308,18 +254,10 @@ async function cloudDeleteAttempt(attemptId) {
   await fbDb.collection('progress').doc(attemptId).delete();
 }
 
-// Push every eligible attempt sitting in this device's localStorage
-// to Firestore. Safe to call repeatedly — writes are idempotent
-// (merge:true), and we skip anything already confirmed synced AND
-// completed, so this doesn't grow into unbounded re-writes over time.
 async function syncAllLocalAttempts() {
   if (!currentUser || !fbDb) return;
-  
-  // TEACHER GUARD: Teachers never upload local cache. 
-  // The teacher's dashboard is read-only; the cloud is the source of truth.
-  // This prevents a loop of permission errors where the teacher tries to
-  // upload pupils' cached records under their own uid.
-  if (currentRole === 'teacher') return; 
+
+  if (currentRole === 'teacher') return;
 
   let all;
   try { all = JSON.parse(localStorage.getItem('xeledif.progress.v2')) || {}; }
@@ -334,10 +272,7 @@ async function syncAllLocalAttempts() {
     !rec.attemptId.startsWith('smoke-test-') &&
     rec.stepId !== 'test-step' &&
     rec.answered > 0 &&
-    // PUPIL OWNERSHIP GUARD: A pupil must only ever upload their OWN attempts.
-    // If a pupil signs in on a shared device, this prevents them from trying
-    // to upload the previous pupil's cached records (which the rules would block).
-    (!rec.pupilUid || rec.pupilUid === currentUser.uid) && 
+    (!rec.pupilUid || rec.pupilUid === currentUser.uid) &&
     !(syncedIds.has(rec.attemptId) && rec.completed)
   );
 
@@ -347,7 +282,6 @@ async function syncAllLocalAttempts() {
       syncedIds.add(rec.attemptId);
     } catch (err) {
       console.warn('[sync] catch-up upload failed for', rec.attemptId, err);
-      // Leave it out of syncedIds — we'll retry next time this runs.
     }
   }
 
@@ -358,56 +292,72 @@ async function syncAllLocalAttempts() {
   }
 }
 
-/* ─── Firestore reads OLD and replaced───
+/* ============================================================
+   Date range helper (M1 — Report Date Range)
 
-function cloudSubscribeAll(callback) {
-  if (!fbDb) return () => {};
-  return fbDb.collection('progress').onSnapshot(snap => {
-    const out = {};
-    snap.forEach(d => { out[d.id] = d.data(); });
-    callback(out);
-  }, err => console.warn('cloudSubscribeAll error:', err));
+   Single source of truth for "which attempts are in scope".
+   Both cloudSubscribeAll (teacher) and cloudSubscribeMy (pupil)
+   call this, so the report page and the index-page score widget
+   (Feature 2, M3) will always agree on the period.
+
+   Storage keys (shared with dashboard-consolidate.js and, later,
+   index.html):
+     xeledif.dash.days          '30' | '90' | 'all' | 'custom'
+     xeledif.dash.customStart   'YYYY-MM-DD' (local date) or ''
+     xeledif.dash.customEnd     'YYYY-MM-DD' (local date) or ''
+
+   Returns { startISO, endISO } or null for 'all time'.
+   The end date is treated as END OF DAY, inclusive.
+   ============================================================ */
+function dashRange() {
+  let v;
+  try { v = localStorage.getItem('xeledif.dash.days'); } catch (e) { v = null; }
+  if (v === 'all') return null;
+
+  if (v === 'custom') {
+    let cs = '', ce = '';
+    try {
+      cs = localStorage.getItem('xeledif.dash.customStart') || '';
+      ce = localStorage.getItem('xeledif.dash.customEnd')   || '';
+    } catch (e) {}
+    if (cs && ce) {
+      const start = new Date(cs + 'T00:00:00.000');
+      const end   = new Date(ce + 'T23:59:59.999');
+      if (!isNaN(start) && !isNaN(end) && start <= end) {
+        return { startISO: start.toISOString(), endISO: end.toISOString() };
+      }
+    }
+    // Fall through to the default if the custom range is incomplete/invalid.
+  }
+
+  const days = parseInt(v, 10) || 30;
+  return {
+    startISO: new Date(Date.now() - days * 86400000).toISOString(),
+    endISO:   new Date().toISOString()
+  };
 }
 
-*/
-
-
-
 /* ============================================================
-   REPLACE the old  function cloudSubscribeAll(callback) { ... }
-   in  primary-maths\firebase-integration.js  with everything below.
-   (Leave cloudSubscribeMy and all other functions exactly as they are.)
-
-   Why: the teacher dashboard used to download EVERY progress record, every time.
-   Now it only listens to the last 30 days (or 90 days / all time, chosen on the
-   dashboard), so Firestore reads stay low however many records pile up.
-   Records are filtered by their "updatedAt" (ISO text) field.
+   Teacher live feed — cloud is source of truth, filtered by range.
    ============================================================ */
-
 let _allUnsub = null;
 let _allCb = null;
 
-function dashDays() {
-  const v = localStorage.getItem('xeledif.dash.days');
-  return v === 'all' ? 'all' : (parseInt(v, 10) || 30);
-}
-
 function cloudSubscribeAll(callback) {
   if (!fbDb) return () => {};
-  if (callback) _allCb = callback;                     // call again with no argument to re-subscribe (period changed)
+  if (callback) _allCb = callback;
   if (_allUnsub) { try { _allUnsub(); } catch (e) {} _allUnsub = null; }
 
   let q = fbDb.collection('progress');
-  const days = dashDays();
-  if (days !== 'all') {
-    q = q.where('updatedAt', '>=', new Date(Date.now() - days * 86400000).toISOString());
+  const range = dashRange();
+  if (range) {
+    q = q.where('updatedAt', '>=', range.startISO)
+         .where('updatedAt', '<=', range.endISO);
   }
+
   _allUnsub = q.onSnapshot(snap => {
     const out = {};
     snap.forEach(d => { out[d.id] = d.data(); });
-    // The teacher dashboard treats the cloud as the source of truth. Refresh the local cache to match
-    // BEFORE the dashboard's own code runs, so records outside the window never look "not yet in the cloud"
-    // (which would make it try to upload them under the wrong owner).
     try { localStorage.setItem('xeledif.progress.v2', JSON.stringify(out)); } catch (e) {}
     window.__dashLoaded = snap.size;
     if (typeof window.__dashInfo === 'function') window.__dashInfo(snap.size);
@@ -416,19 +366,28 @@ function cloudSubscribeAll(callback) {
   return () => { if (_allUnsub) _allUnsub(); };
 }
 
-
+/* ============================================================
+   Pupil live feed — same range bounds. Requires composite index
+   progress: (pupilUid ASC, updatedAt DESC).
+   ============================================================ */
 function cloudSubscribeMy(callback) {
   if (!fbDb || !currentUser) return () => {};
-  return fbDb.collection('progress')
-    .where('pupilUid', '==', currentUser.uid)
-    .onSnapshot(snap => {
-      const out = {};
-      snap.forEach(d => { out[d.id] = d.data(); });
-      callback(out);
-    }, err => console.warn('cloudSubscribeMy error:', err));
+
+  let q = fbDb.collection('progress').where('pupilUid', '==', currentUser.uid);
+  const range = dashRange();
+  if (range) {
+    q = q.where('updatedAt', '>=', range.startISO)
+         .where('updatedAt', '<=', range.endISO);
+  }
+
+  return q.onSnapshot(snap => {
+    const out = {};
+    snap.forEach(d => { out[d.id] = d.data(); });
+    callback(out);
+  }, err => console.warn('cloudSubscribeMy error:', err));
 }
 
-/* ─── Auth UI (injected into <div id="auth-bar"></div>) ─── */
+/* ─── Auth UI ─── */
 
 function renderAuthUI() {
   const bar = document.getElementById('auth-bar');
@@ -444,8 +403,6 @@ function renderAuthUI() {
     return;
   }
 
-  // Arrived via a magic link but sign-in hasn't been completed yet —
-  // wait for a genuine tap before calling the Firebase SDK.
   if (pendingEmailLinkSignIn) {
     bar.innerHTML = `
       <div style="display:flex;align-items:center;gap:10px;font-size:13px;flex-wrap:wrap;">
