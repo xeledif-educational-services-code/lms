@@ -240,6 +240,26 @@
   #back-to-top { bottom: 14px; left: 12px; padding: 8px 12px; font-size: 11px; }
 }
 
+
+/* ─── M4: "Back to question" button (Hint-return) ─── */
+#back-to-practice {
+  position: fixed; top: 16px; right: 16px; z-index: 9998;
+  padding: 10px 18px; border-radius: 999px; border: none;
+  background: #1D9E75; color: #fff; font-size: 13px; font-weight: 700;
+  font-family: inherit; box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  cursor: pointer; opacity: 0; transform: translateY(-8px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+#back-to-practice.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+#back-to-practice:hover { background: #0F6E56; }
+@media print { #back-to-practice { display: none; } }
+@media (prefers-reduced-motion: reduce) { #back-to-practice { transition: none; } }
+
+
+
+
+
 </style>
 
 <!-- Firebase SDK (compat build) -->
@@ -248,10 +268,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <!-- Your Firebase integration -->
-<script src="firebase-integration.js"></script>
-<script src="pool-engine.js"></script>
-<script src="pool-ui.js"></script>
-<script src="pool-sync.js"></script>
+<script src="firebase-integration.js?v=5"></script>
+<script src="pool-engine.js?v=5"></script>
+<script src="pool-ui.js?v=5"></script>
+<script src="pool-sync.js?v=5"></script>
+<script src="hint-return.js?v=5"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -14495,6 +14516,7 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
 
 
 <button id="back-to-top" type="button" aria-label="Back to top">↑ Top</button>
+<button id="back-to-practice" type="button" aria-label="Back to the practice question">↓ Back to question</button>
 
 <script>
 /* ─── Back to Top ─── */
