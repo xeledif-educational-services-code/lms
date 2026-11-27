@@ -189,7 +189,7 @@ function importCore(history, ctx) {
         const data = pool.steps && pool.steps[ctx.stepKey];
         if (!data) throw new Error('Step ' + ctx.stepKey + ' is not in the pool');
         ctx.data = data;
-        return this.store.load(ctx.stepKey).then(h => {
+        return this.store.load(ctx.stepKey, ctx).then(h => {
           if (token !== this._token) return;
           ctx.history = importCore(h || E.emptyHistory(ctx.stepKey, pupilId()), ctx);
           this.showIdle(ctx);

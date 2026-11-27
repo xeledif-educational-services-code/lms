@@ -228,6 +228,9 @@ async function doSignOut() {
   localStorage.removeItem('xeledif.activeAttempt');
   localStorage.removeItem('xeledif.migrationDone');
   localStorage.removeItem('xeledif.syncedAttempts');
+  Object.keys(localStorage)
+  .filter(k => k.startsWith('xeledif.summary.cache.'))
+  .forEach(k => localStorage.removeItem(k));
   window.__xeledifPupilName = null;
   if (fbAuth) await fbAuth.signOut();
   location.reload();

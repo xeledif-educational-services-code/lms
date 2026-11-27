@@ -273,7 +273,7 @@
 <script src="pool-ui.js?v=7"></script>
 <script src="pool-sync.js?v=7"></script>
 <script src="hint-return.js?v=8"></script>
-<script src="summaries-sync.js?v=1"></script>
+<script src="summaries-sync.js?v=4"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -14651,6 +14651,8 @@ function boot() {
   });
 }
 
+// Redraw whenever summaries-sync.js finishes a rebuild (no page reload needed).
+  window.addEventListener('xeledif:summary-updated', e => { if (e.detail) render(e.detail); });
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
   } else {
