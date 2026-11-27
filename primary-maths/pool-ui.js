@@ -111,30 +111,48 @@
     }
   };
 
-  /* ---------------- the core-10 exercises count as "seen" ----------------
-     Lesson exercise k  ==  pool question Q000k (by design).  We read the
-     existing ProgressStore (never prompting) and mark those questions as seen. */
-  function importCore(history, ctx) {
+/* The lesson's core-10 exercises count as "seen".
+   Lesson exercise k == pool question Q000k (by design).
+   Source 1 (truth): lesson attempts loaded from Firestore at mount (ctx.coreRecords).
+   Source 2 (write buffer): attempts finished on this device since mount that may not
+   have reached the cloud yet. Merged by attemptId; the newer copy wins. */
+function importCore(history, ctx) {
+  try {
+    if (!ctx.stepId) return history;
+    const uid = pupilId();
+    const myName = window.__xeledifPupilName || '';
+    const valid = new Set(E.activeQuestions(ctx.data).map(q => q.id));
+    const h = JSON.parse(JSON.stringify(history));
+
+    const byId = new Map();
+    const take = r => {
+      if (!r || r.stepId !== ctx.stepId || !r.attemptId) return;
+      const old = byId.get(r.attemptId);
+      if (!old || String(r.updatedAt || '') > String(old.updatedAt || '')) byId.set(r.attemptId, r);
+    };
+    (ctx.coreRecords || []).forEach(take);
     try {
-      if (typeof ProgressStore === 'undefined' || !ctx.stepId) return history;
-      const pupil = localStorage.getItem('xeledif.pupil');
-      if (!pupil) return history;
-      const valid = new Set(E.activeQuestions(ctx.data).map(q => q.id));
-      const h = JSON.parse(JSON.stringify(history));
-      const all = ProgressStore.readAll();
-      Object.values(all).forEach(rec => {
-        if (!rec || rec.stepId !== ctx.stepId || rec.pupil !== pupil) return;
-        Object.entries(rec.exercises || {}).forEach(([num, e]) => {
-          if (!(e.correct > 0 || e.wrong > 0)) return;
-          const qid = ctx.stepKey + '.Q' + String(num).padStart(4, '0');
-          if (!valid.has(qid) || h.seen[qid]) return;
-          h.seen[qid] = { n: 1, ftc: e.firstTry === true ? 1 : 0, wrong: e.wrong || 0, ms: e.timeOnTaskMs || 0, last: rec.updatedAt || null, core: true };
-          if (!h.inCycle.includes(qid)) h.inCycle.push(qid);
+      if (typeof ProgressStore !== 'undefined') {
+        Object.values(ProgressStore.readAll()).forEach(r => {
+          // WHY: local records may carry only the pupil's name, so accept uid OR name.
+          if (r && (r.pupilUid ? r.pupilUid === uid : (myName && r.pupil === myName))) take(r);
         });
+      }
+    } catch (e) { /* local buffer is optional */ }
+
+    byId.forEach(rec => {
+      Object.entries(rec.exercises || {}).forEach(([num, e]) => {
+        if (!(e.correct > 0 || e.wrong > 0)) return;
+        const qid = ctx.stepKey + '.Q' + String(num).padStart(4, '0');
+        if (!valid.has(qid) || h.seen[qid]) return;
+        h.seen[qid] = { n: 1, ftc: e.firstTry === true ? 1 : 0, wrong: e.wrong || 0,
+                        ms: e.timeOnTaskMs || 0, last: rec.updatedAt || null, core: true };
+        if (!h.inCycle.includes(qid)) h.inCycle.push(qid);
       });
-      return h;
-    } catch (err) { console.warn('importCore skipped:', err); return history; }
-  }
+    });
+    return h;
+  } catch (err) { console.warn('importCore skipped:', err); return history; }
+}
 
   /* ============================================================
      PracticeZone
@@ -329,7 +347,7 @@
         b.appendChild(L); b.appendChild(T);
 
 
-        b.appendChild(L); b.appendChild(T);
+        // b.appendChild(L); b.appendChild(T);
         b.onclick = () => this.choose(ctx, i, b);
         opts.appendChild(b); buttons.push(b);
       });

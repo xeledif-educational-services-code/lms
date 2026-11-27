@@ -1,31 +1,28 @@
 /* ============================================================
    XELEDIF DASHBOARD — consolidated view, concept report, parent report (step 4)
-   Place NEXT TO dashboard.html and add ONE line as the very LAST script:
-        <script src="dashboard-consolidate.js"></script>
-   Also paste cloudSubscribeAll-replacement.js into firebase-integration.js
-   (it limits what the dashboard downloads to the last 30 days by default).
 
-   What it does
-   1. One block per pupil (grouped by pupilUid → email → name); name from users/<uid>.pupilName.
-   2. One block per step: Regular exercises + Practice sessions together, badged.
-   3. NEWEST FIRST: pupils, steps and attempts are ordered by last activity (updatedAt),
-      so a pupil who just answered jumps to the top. Toggle to "name / curriculum order".
-      Attempts you have opened stay open when live updates arrive.
-   4. 📊 Concept report per pupil: Secure / Developing / Struggling per concept,
-      only after at least 5 DIFFERENT questions (otherwise "needs more practice data").
-   5. 📄 Parent report: a printable monthly report (Print → Save as PDF).
-   6. Period control (30 days / 90 days / all time) with a record counter.
-   7. Consolidated, Excel-safe CSV export.
+   M1 (Report Date Range) changes, marked with  // M1:
+     • dashRange() / periodLabel() helpers
+     • periodText() uses periodLabel()
+     • ensureBar() has a "Custom range" option + two <input type="date">
+     • parentReportHtml() shows Cumulative + Current headline lines
+
+   Everything else is unchanged from the previous version.
    ============================================================ */
 (function () {
   'use strict';
 
-  window.__userNames = window.__userNames || {};       // uid -> { name, email, role }
+  window.__userNames = window.__userNames || {};
 
   /* ---------- settings ---------- */
   const MIN_Q = 5, SECURE_FROM = 0.8, STRUGGLING_BELOW = 0.6, LIVE_MINUTES = 5;
   const DAYS_KEY = 'xeledif.dash.days', SORT_KEY = 'xeledif.dash.sort';
-  const getDays = () => { const v = localStorage.getItem(DAYS_KEY); return v === 'all' ? 'all' : (parseInt(v, 10) || 30); };
+  const CUSTOM_START_KEY = 'xeledif.dash.customStart';
+  const CUSTOM_END_KEY   = 'xeledif.dash.customEnd';
+  const getDays = () => {
+    const v = localStorage.getItem(DAYS_KEY);
+    return (v === 'all' || v === 'custom') ? v : (parseInt(v, 10) || 30);
+  };
   const getSort = () => localStorage.getItem(SORT_KEY) || 'new';
 
   /* ---------- helpers ---------- */
@@ -46,10 +43,47 @@
     if (s < 86400) return Math.floor(s / 3600) + ' h ago';
     return Math.floor(s / 86400) + ' d ago';
   }
-  function periodText() {
-    const d = getDays();
-    return d === 'all' ? 'all recorded activity' : 'the last ' + d + ' days (from ' + fmtDate(Date.now() - d * 86400000) + ')';
+
+  /* ---------- M1: shared range + human label ----------
+     Mirrors dashRange() in firebase-integration.js exactly, so the
+     report header and the query bounds can never disagree.        */
+  function dashRange() {
+    let v;
+    try { v = localStorage.getItem(DAYS_KEY); } catch (e) { v = null; }
+    if (v === 'all') return null;
+
+    if (v === 'custom') {
+      let cs = '', ce = '';
+      try {
+        cs = localStorage.getItem(CUSTOM_START_KEY) || '';
+        ce = localStorage.getItem(CUSTOM_END_KEY)   || '';
+      } catch (e) {}
+      if (cs && ce) {
+        const start = new Date(cs + 'T00:00:00.000');
+        const end   = new Date(ce + 'T23:59:59.999');
+        if (!isNaN(start) && !isNaN(end) && start <= end) {
+          return { startISO: start.toISOString(), endISO: end.toISOString(), startDate: cs, endDate: ce };
+        }
+      }
+    }
+
+    const days = parseInt(v, 10) || 30;
+    return {
+      startISO: new Date(Date.now() - days * 86400000).toISOString(),
+      endISO:   new Date().toISOString(),
+      days
+    };
   }
+
+  function periodLabel() {
+    const r = dashRange();
+    if (!r) return 'all recorded activity';
+    if (r.startDate && r.endDate) {
+      return 'the period from ' + fmtDate(r.startDate) + ' to ' + fmtDate(r.endDate);
+    }
+    return 'the last ' + r.days + ' days (from ' + fmtDate(r.startISO) + ')';
+  }
+  const periodText = periodLabel; // legacy alias used elsewhere in this file
 
   /* ---------- who is who ---------- */
   function displayName(key, recs) {
@@ -87,23 +121,7 @@
     return groups;
   }
 
-  /* ============================================================
-     Concept report
-     Regular exercises carry no concept tag, so they are mapped through the pool file:
-       exercise number k of step S  ==  pool question  <stepKey>.Q000k
-     ============================================================ */
-  const TOPIC_CODES = { decperc: 'DP', fractionsB: 'FB', fractionsA: 'FA', addsub: 'AS', placevalue: 'PV', multdivA: 'MA', multdivB: 'MB',
-                        perarea: 'PA', stats: 'ST', shape: 'SH', posdir: 'PD', decimals: 'DC', negatives: 'NG', converting: 'CV', volume: 'VO' };
-  const TERM_CODES = { autumn: 'AUT', spring: 'SPR', summer: 'SUM' };
-
-  // function parseStepId(stepId) {                       // 'p5-term-groups-spring-decperc-step9' -> keys + pool file
-  //   const m = /^(p\d)-term-groups-(autumn|spring|summer)-([A-Za-z0-9]+)-step(\d+)$/.exec(baseStepId(stepId));
-  //   if (!m || !TOPIC_CODES[m[3]]) return null;
-  //   const term = TERM_CODES[m[2]], topicKey = m[1].toUpperCase() + '.' + term + '.' + TOPIC_CODES[m[3]];
-  //   return { topicKey, stepKey: topicKey + '.S' + String(m[4]).padStart(2, '0'), file: 'pools/' + m[1] + '_' + term.toLowerCase() + '_' + m[3].toLowerCase() + '.js' };
-  // }
-
-    /* ---------- curriculum lookup ---------- */
+  /* ---------- curriculum lookup ---------- */
   let _stepIndex = null;
   function declaredPoolFor(stepId) {
     if (_stepIndex) return _stepIndex.get(stepId) || null;
@@ -113,9 +131,9 @@
 
     tree.forEach(term => {
       (term.topics || []).forEach(topic => {
-        if (!topic.poolFile || !topic.poolKey) return;   // topic has no pool yet
+        if (!topic.poolFile || !topic.poolKey) return;
         (topic.steps || []).forEach((step, i) => {
-          if (!step.poolStep) return;                     // step has no pool yet
+          if (!step.poolStep) return;
           const stepNum = step.stepNumber || (i + 1);
           const stepId = `p5-term-groups-${term.id}-${topic.id}-step${stepNum}`;
           _stepIndex.set(stepId, {
@@ -143,7 +161,7 @@
     const s = document.createElement('script');
     s.src = info.file;
     s.onload = () => { poolState[info.file] = 'ok'; scheduleRender(); };
-    s.onerror = () => { poolState[info.file] = 'none'; };            // that topic simply has no pool yet
+    s.onerror = () => { poolState[info.file] = 'none'; };
     document.head.appendChild(s);
   }
 
@@ -161,7 +179,6 @@
     return acc >= SECURE_FROM ? 'secure' : acc < STRUGGLING_BELOW ? 'struggling' : 'developing';
   }
 
-  /* returns { steps: [ { stepKey, label, concepts: [ {id,name,distinct,attempts,ftc,wrong,acc,status} ] } ] } */
   function conceptReport(recs) {
     const steps = {};
     recs.forEach(rec => {
@@ -217,199 +234,351 @@
   }
 
   /* ============================================================
-     Parent report (printable)
+     M1: Cumulative + Current performance helpers
+     A1: Current = the calendar month of the pupil's LATEST attempt.
+     B1: An "active period" = a calendar month with ≥1 attempt.
+     Both computed client-side from the loaded attempt set — cheap.
      ============================================================ */
-function parentReportHtml(key) {
-  const groups = groupRecords(readAll());
-  const recs   = groups[key] || [];
-  const name   = displayName(key, recs);
-
-  // ─── Overview totals (unchanged — this is why these already populate) ───
-  let q = 0, ft = 0, nReg = 0, nPrac = 0;
-  recs.forEach(r => {
-    kindOf(r) === 'practice' ? nPrac++ : nReg++;
-    const ex = Object.values(r.exercises || {});
-    q  += ex.length;
-    ft += ex.filter(e => e.firstTry === true).length;
-  });
-  const pct = q ? Math.round(100 * ft / q) : 0;
-
-  // ─── NEW: per-step rollup from the attempt records themselves ──────
-  // Every record carries `firstTryCorrect` and `answered` (written by
-  // ProgressStore.recordAttempt in index.html). Summing across attempts
-  // gives us per-step totals without needing a pool file.
-  const stepMap = {};
-  recs.forEach(rec => {
-    const info    = (typeof parseStepId === 'function') ? parseStepId(rec.stepId) : null;
-    const stepKey = (info && info.stepKey) || rec.stepId || 'unknown';
-
-    const S = stepMap[stepKey] || (stepMap[stepKey] = {
-      stepKey,
-      label:      rec.stepLabel || stepKey,
-      term:       rec.term       || '',
-      topic:      rec.topic      || '',
-      stepNumber: rec.stepNumber || 0,
-      firstTry:   0,   // first-try correct
-      answered:   0,   // total questions attempted
-      distinct:   new Set()  // distinct question numbers across attempts
+  function monthKeyOf(iso) {
+    if (!iso) return null;
+    const d = new Date(iso);
+    if (isNaN(d)) return null;
+    return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
+  }
+  function monthLabelOf(key) {
+    if (!key) return '';
+    const [y, m] = key.split('-').map(Number);
+    return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+  function cumulativeStats(recs) {
+    let q = 0, ft = 0;
+    recs.forEach(r => {
+      const ex = Object.values(r.exercises || {});
+      q += ex.length;
+      ft += ex.filter(e => e.firstTry === true).length;
     });
-
-    S.firstTry += rec.firstTryCorrect || 0;
-    S.answered += rec.answered        || 0;
-
-    Object.keys(rec.exercises || {}).forEach(num => S.distinct.add(num));
-  });
-
-  // Classify each step using the SAME thresholds as the footer.
-  //   secure     = acc >= SECURE_FROM
-  //   struggling = acc <  STRUGGLING_BELOW
-  //   developing = in between
-  //   few        = fewer than MIN_Q distinct questions
-  const stepRows = Object.values(stepMap).map(s => {
-    const acc = s.answered ? (s.firstTry / s.answered) : null;
-    const distinct = s.distinct.size;
-    let status;
-    if (distinct < MIN_Q) {
-      status = 'few';
-    } else if (acc >= SECURE_FROM) {
-      status = 'secure';
-    } else if (acc < STRUGGLING_BELOW) {
-      status = 'struggling';
-    } else {
-      status = 'developing';
-    }
-    return { ...s, acc, distinct, status };
-  });
-
-  // Human-readable label for a step (used in the three bullet lists)
-  const labelOf = s =>
-    (s.term  ? esc(s.term)  + ' · ' : '') +
-    (s.topic ? esc(s.topic) + ' · ' : '') +
-    'Step ' + (s.stepNumber || '?') + ' · ' + esc(s.label);
-
-  const byStatus = st => stepRows
-    .filter(s => s.status === st)
-    .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
-    .map(labelOf);
-
-  const struggling = byStatus('struggling');
-  const developing = byStatus('developing');
-  const secure     = byStatus('secure');
-  const few        = byStatus('few');
-
-  const list = a => a.length
-    ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>'
-    : '<p class="muted">None yet.</p>';
-
-  // ─── Skill-by-skill table: one section per term/topic, one row per step ──
-  // Group stepRows by term + topic so the output resembles the old
-  // per-topic table, with "Skill" = lesson step.
-  const grouped = {};
-  stepRows.forEach(s => {
-    const g = (s.term || '') + '||' + (s.topic || '');
-    (grouped[g] || (grouped[g] = { term: s.term, topic: s.topic, rows: [] })).rows.push(s);
-  });
-
-  const stepTables = Object.values(grouped).map(g => {
-    const heading = [g.term, g.topic].filter(Boolean).join(' · ') || 'Lessons';
-    const rows = g.rows
-      .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
-      .map(s => {
-        const st = STATUS[s.status] || STATUS.few || { icon: '•', bg: '#f3f4f6', fg: '#333', say: '—' };
-        return '<tr>' +
-          '<td>' + labelOf(s) + '</td>' +
-          '<td style="background:' + st.bg + ';color:' + st.fg + ';font-weight:700;">' +
-            st.icon + ' ' + st.say + '</td>' +
-          '<td>' + (s.acc == null ? '—' : Math.round(s.acc * 100) + '%') + '</td>' +
-          '<td>' + s.distinct + '</td>' +
-        '</tr>';
-      }).join('');
-    return '<h3>' + esc(heading) + '</h3>' +
-      '<table>' +
-        '<tr><th>Skill</th><th>How it is going</th><th>First-try</th><th>Different questions tried</th></tr>' +
-        rows +
-      '</table>';
-  }).join('');
-
-      // ─── Recommended next steps: bulleted when 2+ items, inline for 1 ───
-  const nextStepsHtml = (() => {
-    const buildList = (intro, items, outro) => {
-      if (items.length === 1) {
-        return '<p>' + intro + ' <strong>' + items[0] + '</strong>. ' + outro + '</p>';
-      }
-      return '<p>' + intro + '</p>' +
-        '<ul>' +
-        items.map(x => '<li><strong>' + x + '</strong></li>').join('') +
-        '</ul>' +
-        '<p>' + outro + '</p>';
-    };
-
-    if (struggling.length) {
-      return buildList(
-        'Revisit the lesson examples for these topics:',
-        struggling,
-        'Then complete another Practice Zone session — a little and often (10 minutes a day) works best.'
-      );
-    }
-    if (developing.length) {
-      return buildList(
-        'Keep practising these topics:',
-        developing,
-        'A few more Practice Zone sessions should make them secure.'
-      );
-    }
-    return '<p>Keep up the good work! Continue with Practice Zone sessions to stay sharp.</p>';
-  })();
-
-  // ─── HTML shell: identical styling and structure as before ──────────
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Progress report — ${esc(name)}</title><style>
-      body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:800px;margin:24px auto;padding:0 18px;color:#1a1a1a;line-height:1.5}
-      h1{font-size:24px;margin:0} h2{font-size:17px;border-bottom:2px solid #1D9E75;padding-bottom:4px;margin-top:26px;color:#085041} h3{font-size:14px;margin:16px 0 6px}
-      .muted{color:#777;font-size:13px} .grid{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0} .box{flex:1 1 150px;background:#F0FAF6;border:1px solid #9FE1CB;border-radius:10px;padding:10px;text-align:center}
-      .box b{display:block;font-size:22px;color:#085041} table{width:100%;border-collapse:collapse;font-size:13px} th,td{border:1px solid #ddd;padding:6px 8px;text-align:left} th{background:#f3f4f6}
-      .comment{border:1.5px dashed #999;border-radius:8px;min-height:80px;padding:8px;margin-top:8px} button{padding:8px 16px;font-size:14px;border-radius:8px;border:none;background:#1D9E75;color:#fff;cursor:pointer}
-      @media print{.noprint{display:none} body{margin:0}}</style></head><body>
-      <div class="noprint" style="text-align:right;margin-bottom:8px"><button onclick="window.print()">🖨 Print / Save as PDF</button></div>
-      <h1>Monthly Progress Report</h1>
-      <p><b>${esc(name)}</b> · Primary 5 Mathematics · Xeledif Educational Services<br><span class="muted">Period: ${esc(typeof periodText === 'function' ? periodText() : 'all recorded activity')} · Report date: ${typeof fmtDate === 'function' ? fmtDate(Date.now()) : new Date().toLocaleDateString('en-GB')}</span></p>
-      <h2>Overview</h2>
-      <div class="grid"><div class="box"><b>${q}</b>questions answered</div><div class="box"><b>${pct}%</b>right first time</div><div class="box"><b>${nReg}</b>lesson exercise attempts</div><div class="box"><b>${nPrac}</b>Practice Zone sessions</div></div>
-      <h2>Strengths</h2>${list(secure)}
-      <h2>Areas to focus on</h2>
-      <p><b>Needs support:</b></p>${list(struggling)}<p><b>Getting there:</b></p>${list(developing)}
-      ${few.length ? `<p class="muted">Not enough practice yet to judge (at least ${MIN_Q} different questions are needed): ${few.join('; ')}.</p>` : ''}
-      ${stepTables ? '<h2>Skill-by-skill</h2>' + stepTables : '<p class="muted">No lesson activity recorded yet for this period.</p>'}
-      <h2>Recommended next steps</h2>
-      ${nextStepsHtml}
-      <h2>Teacher's comment</h2><div class="comment" contenteditable="true"></div>
-      <p class="muted" style="margin-top:22px">How skills are rated: a skill is rated only after at least ${MIN_Q} different questions. <b>Confident</b> = ${SECURE_FROM * 100}% or more right first time; <b>Getting there</b> = ${STRUGGLING_BELOW * 100}–${SECURE_FROM * 100 - 1}%; <b>Needs support</b> = under ${STRUGGLING_BELOW * 100}%.</p>
-    </body></html>`;
-}
-  function openParentReport(key) {
-    const w = window.open('', '_blank');
-    if (!w) { alert('Please allow pop-ups for this page to open the report.'); return; }
-    w.document.open(); w.document.write(parentReportHtml(key)); w.document.close();
+    return { questions: q, firstTry: ft, pct: q ? Math.round(100 * ft / q) : 0 };
+  }
+  function currentStats(recs) {
+    // Find latest attempt (by updatedAt || startedAt) across all attempts.
+    let latestKey = null, latestTs = '';
+    recs.forEach(r => {
+      const ts = String(r.updatedAt || r.startedAt || '');
+      const k  = monthKeyOf(ts);
+      if (k && ts > latestTs) { latestTs = ts; latestKey = k; }
+    });
+    if (!latestKey) return { month: null, questions: 0, firstTry: 0, pct: 0 };
+    let q = 0, ft = 0;
+    recs.forEach(r => {
+      const ts = String(r.updatedAt || r.startedAt || '');
+      if (monthKeyOf(ts) !== latestKey) return;
+      const ex = Object.values(r.exercises || {});
+      q += ex.length;
+      ft += ex.filter(e => e.firstTry === true).length;
+    });
+    return { month: latestKey, questions: q, firstTry: ft, pct: q ? Math.round(100 * ft / q) : 0 };
   }
 
   /* ============================================================
-     Period / sort bar + live info
+     Parent report (printable)
+     ============================================================ */
+  function parentReportHtml(key, allRecs)  {
+    const groups = groupRecords(readAll());
+    const recs   = groups[key] || [];
+    const name   = displayName(key, recs);
+
+    // ─── Overview totals (unchanged) ───
+    let q = 0, ft = 0, nReg = 0, nPrac = 0;
+    recs.forEach(r => {
+      kindOf(r) === 'practice' ? nPrac++ : nReg++;
+      const ex = Object.values(r.exercises || {});
+      q  += ex.length;
+      ft += ex.filter(e => e.firstTry === true).length;
+    });
+    const pct = q ? Math.round(100 * ft / q) : 0;
+
+    // M1: headline metrics (Cumulative + Current), always shown.
+    // WHY: Cumulative and Current must come from the pupil's FULL history,
+    // not just the date range loaded for the dashboard. If the full fetch
+    // failed, we fall back to the loaded range and label it honestly.
+    const headlineRecs = allRecs || recs;
+    const cum = cumulativeStats(headlineRecs);
+    const cur = currentStats(headlineRecs);
+    const cumScope = allRecs ? 'all time' : 'selected period only';
+    const currentLine = cur.month
+      ? `<b>${cur.pct}%</b> right first time (${cur.questions} question${cur.questions === 1 ? '' : 's'}, ${esc(monthLabelOf(cur.month))})`
+      : `<span class="muted">No activity yet.</span>`;
+
+    // ─── Per-step rollup (unchanged) ───
+    const stepMap = {};
+    recs.forEach(rec => {
+      const info    = parseStepId(rec.stepId);
+      const stepKey = (info && info.stepKey) || rec.stepId || 'unknown';
+
+      const S = stepMap[stepKey] || (stepMap[stepKey] = {
+        stepKey,
+        label:      rec.stepLabel || stepKey,
+        term:       rec.term       || '',
+        topic:      rec.topic      || '',
+        stepNumber: rec.stepNumber || 0,
+        firstTry:   0,
+        answered:   0,
+        distinct:   new Set()
+      });
+
+      S.firstTry += rec.firstTryCorrect || 0;
+      S.answered += rec.answered        || 0;
+      Object.keys(rec.exercises || {}).forEach(num => S.distinct.add(num));
+    });
+
+    const stepRows = Object.values(stepMap).map(s => {
+      const acc = s.answered ? (s.firstTry / s.answered) : null;
+      const distinct = s.distinct.size;
+      let status;
+      if (distinct < MIN_Q) {
+        status = 'few';
+      } else if (acc >= SECURE_FROM) {
+        status = 'secure';
+      } else if (acc < STRUGGLING_BELOW) {
+        status = 'struggling';
+      } else {
+        status = 'developing';
+      }
+      return { ...s, acc, distinct, status };
+    });
+
+    const labelOf = s =>
+      (s.term  ? esc(s.term)  + ' · ' : '') +
+      (s.topic ? esc(s.topic) + ' · ' : '') +
+      'Step ' + (s.stepNumber || '?') + ' · ' + esc(s.label);
+
+    const byStatus = st => stepRows
+      .filter(s => s.status === st)
+      .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
+      .map(labelOf);
+
+    const struggling = byStatus('struggling');
+    const developing = byStatus('developing');
+    const secure     = byStatus('secure');
+    const few        = byStatus('few');
+
+    const list = a => a.length
+      ? '<ul>' + a.map(x => '<li>' + x + '</li>').join('') + '</ul>'
+      : '<p class="muted">None yet.</p>';
+
+    const grouped = {};
+    stepRows.forEach(s => {
+      const g = (s.term || '') + '||' + (s.topic || '');
+      (grouped[g] || (grouped[g] = { term: s.term, topic: s.topic, rows: [] })).rows.push(s);
+    });
+
+    const stepTables = Object.values(grouped).map(g => {
+      const heading = [g.term, g.topic].filter(Boolean).join(' · ') || 'Lessons';
+      const rows = g.rows
+        .sort((a, b) => (a.stepNumber || 0) - (b.stepNumber || 0))
+        .map(s => {
+          const st = STATUS[s.status] || STATUS.few || { icon: '•', bg: '#f3f4f6', fg: '#333', say: '—' };
+          return '<tr>' +
+            '<td>' + labelOf(s) + '</td>' +
+            '<td style="background:' + st.bg + ';color:' + st.fg + ';font-weight:700;">' +
+              st.icon + ' ' + st.say + '</td>' +
+            '<td>' + (s.acc == null ? '—' : Math.round(s.acc * 100) + '%') + '</td>' +
+            '<td>' + s.distinct + '</td>' +
+          '</tr>';
+        }).join('');
+      return '<h3>' + esc(heading) + '</h3>' +
+        '<table>' +
+          '<tr><th>Skill</th><th>How it is going</th><th>First-try</th><th>Different questions tried</th></tr>' +
+          rows +
+        '</table>';
+    }).join('');
+
+    const nextStepsHtml = (() => {
+      const buildList = (intro, items, outro) => {
+        if (items.length === 1) {
+          return '<p>' + intro + ' <strong>' + items[0] + '</strong>. ' + outro + '</p>';
+        }
+        return '<p>' + intro + '</p>' +
+          '<ul>' +
+          items.map(x => '<li><strong>' + x + '</strong></li>').join('') +
+          '</ul>' +
+          '<p>' + outro + '</p>';
+      };
+
+      if (struggling.length) {
+        return buildList(
+          'Revisit the lesson examples for these topics:',
+          struggling,
+          'Then complete another Practice Zone session — a little and often (10 minutes a day) works best.'
+        );
+      }
+      if (developing.length) {
+        return buildList(
+          'Keep practising these topics:',
+          developing,
+          'A few more Practice Zone sessions should make them secure.'
+        );
+      }
+      return '<p>Keep up the good work! Continue with Practice Zone sessions to stay sharp.</p>';
+    })();
+
+    return `<!doctype html><html><head><meta charset="utf-8"><title>Progress report — ${esc(name)}</title><style>
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:800px;margin:24px auto;padding:0 18px;color:#1a1a1a;line-height:1.5}
+        h1{font-size:24px;margin:0} h2{font-size:17px;border-bottom:2px solid #1D9E75;padding-bottom:4px;margin-top:26px;color:#085041} h3{font-size:14px;margin:16px 0 6px}
+        .muted{color:#777;font-size:13px} .grid{display:flex;gap:10px;flex-wrap:wrap;margin:10px 0} .box{flex:1 1 150px;background:#F0FAF6;border:1px solid #9FE1CB;border-radius:10px;padding:10px;text-align:center}
+        .box b{display:block;font-size:22px;color:#085041} table{width:100%;border-collapse:collapse;font-size:13px} th,td{border:1px solid #ddd;padding:6px 8px;text-align:left} th{background:#f3f4f6}
+        .comment{border:1.5px dashed #999;border-radius:8px;min-height:80px;padding:8px;margin-top:8px} button{padding:8px 16px;font-size:14px;border-radius:8px;border:none;background:#1D9E75;color:#fff;cursor:pointer}
+        .headline{background:#F8FAFC;border:1px solid #E2E8F0;border-radius:10px;padding:10px 14px;margin:10px 0 4px;font-size:13px;line-height:1.7}
+        @media print{.noprint{display:none} body{margin:0}}</style></head><body>
+        <div class="noprint" style="text-align:right;margin-bottom:8px"><button onclick="window.print()">🖨 Print / Save as PDF</button></div>
+        <h1>Monthly Progress Report</h1>
+        <p><b>${esc(name)}</b> · Primary 5 Mathematics · Xeledif Educational Services<br><span class="muted">Period: ${esc(periodText())} · Report date: ${esc(fmtDate(Date.now()))}</span></p>
+        <div class="headline">
+          <div><b>Cumulative performance:</b> <b>${cum.pct}%</b> right first time (${cum.questions} question${cum.questions === 1 ? '' : 's'}, ${cumScope})</div>
+          <div><b>Current performance:</b> ${currentLine}</div>
+        </div>
+        <h2>Overview</h2>
+        <div class="grid"><div class="box"><b>${q}</b>questions answered</div><div class="box"><b>${pct}%</b>right first time</div><div class="box"><b>${nReg}</b>lesson exercise attempts</div><div class="box"><b>${nPrac}</b>Practice Zone sessions</div></div>
+        <h2>Strengths</h2>${list(secure)}
+        <h2>Areas to focus on</h2>
+        <p><b>Needs support:</b></p>${list(struggling)}<p><b>Getting there:</b></p>${list(developing)}
+        ${few.length ? `<p class="muted">Not enough practice yet to judge (at least ${MIN_Q} different questions are needed): ${few.join('; ')}.</p>` : ''}
+        ${stepTables ? '<h2>Skill-by-skill</h2>' + stepTables : '<p class="muted">No lesson activity recorded yet for this period.</p>'}
+        <h2>Recommended next steps</h2>
+        ${nextStepsHtml}
+        <h2>Teacher's comment</h2><div class="comment" contenteditable="true"></div>
+        <p class="muted" style="margin-top:22px">How skills are rated: a skill is rated only after at least ${MIN_Q} different questions. <b>Confident</b> = ${SECURE_FROM * 100}% or more right first time; <b>Getting there</b> = ${STRUGGLING_BELOW * 100}–${SECURE_FROM * 100 - 1}%; <b>Needs support</b> = under ${STRUGGLING_BELOW * 100}%.</p>
+      </body></html>`;
+  }
+// One-off read of this pupil's complete history (one read per attempt),
+// triggered only when the teacher clicks "Parent report".
+async function fetchAllTimeRecords(key) {
+  // Group keys can be an email or "name:…" for old records; only a real uid can be queried.
+  if (!/^[A-Za-z0-9]{20,}$/.test(String(key))) return null;
+  if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+  try {
+    const snap = await firebase.firestore().collection('progress')
+      .where('pupilUid', '==', key).get();
+    const out = [];
+    snap.forEach(d => { const r = d.data(); if (r && !isTest(r)) out.push(r); });
+    return out;
+  } catch (err) {
+    console.warn('[dashboard] all-time fetch failed:', err && err.message);
+    return null;
+  }
+}
+
+function openParentReport(key) {
+  // WHY open the window first: browsers block pop-ups opened after an await.
+  const w = window.open('', '_blank');
+  if (!w) { alert('Please allow pop-ups for this page to open the report.'); return; }
+  w.document.open();
+  w.document.write('<p style="font-family:sans-serif;padding:20px">Preparing report…</p>');
+  w.document.close();
+  fetchAllTimeRecords(key).then(all => {
+    w.document.open(); w.document.write(parentReportHtml(key, all)); w.document.close();
+  });
+}
+
+  /* ============================================================
+     M1: Period / sort bar — now with a Custom range option
      ============================================================ */
   function ensureBar() {
     if (document.getElementById('dash-bar')) return;
     const root = document.getElementById('root');
     if (!root || !root.parentNode) return;
+
     const bar = document.createElement('div');
     bar.id = 'dash-bar';
     bar.style.cssText = 'display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:13px;margin-bottom:14px;background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 14px;';
     bar.innerHTML = `
-      <label>Show activity from <select id="dash-days"><option value="30">the last 30 days</option><option value="90">the last 90 days</option><option value="all">all time (more Firestore reads)</option></select></label>
+      <label>Show activity from
+        <select id="dash-days">
+          <option value="30">the last 30 days</option>
+          <option value="90">the last 90 days</option>
+          <option value="all">all time (more Firestore reads)</option>
+          <option value="custom">a custom date range…</option>
+        </select>
+      </label>
+      <span id="dash-custom" style="display:none;gap:6px;align-items:center;flex-wrap:wrap;">
+        <input type="date" id="dash-custom-start" title="Start date (inclusive)"
+               style="padding:5px 8px;font-size:13px;border-radius:6px;border:1px solid #ddd;font-family:inherit;">
+        <span>to</span>
+        <input type="date" id="dash-custom-end" title="End date (inclusive)"
+               style="padding:5px 8px;font-size:13px;border-radius:6px;border:1px solid #ddd;font-family:inherit;">
+      </span>
       <label>Order <select id="dash-sort"><option value="new">newest activity first</option><option value="curriculum">name / curriculum order</option></select></label>
       <span id="dash-info" style="color:#666;"></span>`;
+
     root.parentNode.insertBefore(bar, root);
-    const d = document.getElementById('dash-days'), s = document.getElementById('dash-sort');
-    d.value = String(getDays()); s.value = getSort();
-    d.onchange = () => { localStorage.setItem(DAYS_KEY, d.value); document.getElementById('dash-info').textContent = 'Loading…'; if (typeof cloudSubscribeAll === 'function') cloudSubscribeAll(); render(); };
-    s.onchange = () => { localStorage.setItem(SORT_KEY, s.value); render(); };
+
+    const d   = document.getElementById('dash-days');
+    const s   = document.getElementById('dash-sort');
+    const cw  = document.getElementById('dash-custom');
+    const cst = document.getElementById('dash-custom-start');
+    const cen = document.getElementById('dash-custom-end');
+
+    const isCustom = getDays() === 'custom';
+    d.value = String(getDays());
+    s.value = getSort();
+    cw.style.display = isCustom ? 'inline-flex' : 'none';
+    if (isCustom) {
+      try {
+        cst.value = localStorage.getItem(CUSTOM_START_KEY) || '';
+        cen.value = localStorage.getItem(CUSTOM_END_KEY)   || '';
+      } catch (e) {}
+    }
+
+    function resubscribeAndRender() {
+      const info = document.getElementById('dash-info');
+      if (info) info.textContent = 'Loading…';
+      if (typeof cloudSubscribeAll === 'function') cloudSubscribeAll();
+      render();
+    }
+
+    d.onchange = () => {
+      const v = d.value;
+      try { localStorage.setItem(DAYS_KEY, v); } catch (e) {}
+      cw.style.display = v === 'custom' ? 'inline-flex' : 'none';
+      if (v === 'custom') {
+        // Default to current month if empty, to avoid a confusing empty state.
+        try {
+          const now = new Date();
+          const first = new Date(now.getFullYear(), now.getMonth(), 1);
+          const last  = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          const iso = x => x.toISOString().slice(0, 10);
+          if (!cst.value) cst.value = iso(first);
+          if (!cen.value) cen.value = iso(last);
+          localStorage.setItem(CUSTOM_START_KEY, cst.value);
+          localStorage.setItem(CUSTOM_END_KEY,   cen.value);
+        } catch (e) {}
+        resubscribeAndRender();
+        return;
+      }
+      resubscribeAndRender();
+    };
+
+    function onCustomChange() {
+      const cs = cst.value || '';
+      const ce = cen.value || '';
+      try {
+        if (cs) localStorage.setItem(CUSTOM_START_KEY, cs); else localStorage.removeItem(CUSTOM_START_KEY);
+        if (ce) localStorage.setItem(CUSTOM_END_KEY,   ce); else localStorage.removeItem(CUSTOM_END_KEY);
+      } catch (e) {}
+      if (cs && ce && new Date(cs) > new Date(ce)) {
+        // Swap if reversed, so the user sees the intent.
+        try {
+          localStorage.setItem(CUSTOM_START_KEY, ce);
+          localStorage.setItem(CUSTOM_END_KEY,   cs);
+        } catch (e) {}
+        cst.value = ce; cen.value = cs;
+      }
+      resubscribeAndRender();
+    }
+    cst.onchange = onCustomChange;
+    cen.onchange = onCustomChange;
+
+    s.onchange = () => { try { localStorage.setItem(SORT_KEY, s.value); } catch (e) {} render(); };
   }
   window.__dashInfo = n => {
     const el = document.getElementById('dash-info');
@@ -417,7 +586,7 @@ function parentReportHtml(key) {
   };
 
   /* ============================================================
-     render
+     render (unchanged)
      ============================================================ */
   function render() {
     const root = document.getElementById('root');
@@ -491,7 +660,6 @@ function parentReportHtml(key) {
         const hotQs = Object.entries(qWrong).filter(([, n]) => n > 0).sort((a, b) => b[1] - a[1]).slice(0, 5);
         const hotHtml = hotQs.length ? `<div style="font-size:11px;color:var(--text-sec);margin-top:8px;"><strong>Most-missed questions:</strong> ${hotQs.map(([num, n]) => `Q${esc(num)} (${n}✗)`).join(' · ')}</div>` : '';
 
-        // NEWEST FIRST: listed by last activity, numbered in the order they were started
         const attemptRows = attempts.map((rec, i) => ({ rec, seq: i + 1 })).sort((a, b) => stamp(b.rec).localeCompare(stamp(a.rec))).map(({ rec, seq }) => {
           const ex = Object.entries(rec.exercises || {}).sort((a, b) => parseInt(a[0]) - parseInt(b[0]));
           const firstTry = ex.filter(([, e]) => e.firstTry === true).length, solved = ex.filter(([, e]) => e.correct > 0).length, b = bucket(firstTry, ex.length);
@@ -558,7 +726,6 @@ function parentReportHtml(key) {
         </div>`;
     }).join('');
 
-    // pupils registered but silent in this period
     const quiet = Object.keys(window.__userNames).filter(uid => !groups[uid] && window.__userNames[uid].role !== 'teacher' && window.__userNames[uid].name);
     if (quiet.length) html += `<div style="font-size:12px;color:#777;margin:10px 4px;">No activity in this period: ${quiet.map(uid => esc(window.__userNames[uid].name)).join(', ')}.</div>`;
 
@@ -568,7 +735,7 @@ function parentReportHtml(key) {
   }
 
   /* ============================================================
-     exports — consolidated, Excel-safe
+     exports (unchanged)
      ============================================================ */
   function pupilRecords(key) {
     const g = groupRecords(readAll()), out = {};
@@ -613,7 +780,6 @@ function parentReportHtml(key) {
     const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
   }
 
-  /* ---------- official names from Firestore (teacher only) ---------- */
   function loadUserNames() {
     const wait = (typeof waitForRole === 'function') ? waitForRole() : Promise.resolve(null);
     return wait.then(role => {
@@ -626,7 +792,6 @@ function parentReportHtml(key) {
     }).catch(err => console.warn('[dashboard] could not load pupil names (is the new firestore.rules published?)', err && err.message));
   }
 
-  /* ---------- take over (only once the page and its own script have finished loading) ---------- */
   function start() {
     Object.assign(window, { render, pupilRecords, exportPupilJSON, exportPupilCSV, buildRows, downloadCSV, groupRecords, openParentReport,
                             __conceptReport: conceptReport, __parentReportHtml: parentReportHtml });

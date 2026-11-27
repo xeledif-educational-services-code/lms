@@ -1,31 +1,27 @@
 /* ============================================================
-   XELEDIF POOL SYNC — Firestore, saved after EVERY answer (step 3 of 4)
-   Place NEXT TO index.html (primary-maths\pool-sync.js).
-   Load AFTER pool-engine.js and pool-ui.js (and after the Firebase scripts).
-
-   Writes (2 small writes per answered question, plus 1 per wrong click):
-     questionHistory/<uid>_<stepKey>   what the pupil has seen + per-concept summary
-     progress/<attemptId>              one record per Practice session, read LIVE by
-                                       your existing dashboard (stepId ends in "-practice")
-   Firestore is the source of truth. localStorage is only a cache, so wiping the
-   browser loses nothing: the history is loaded back from Firestore.
-   If not signed in or Firebase is missing, everything quietly stays local.
+   XELEDIF POOL SYNC — Firestore, saved after EVERY answer
+   Firestore is the source of truth. localStorage is only a cache.
+   Load AFTER pool-engine.js and pool-ui.js (and the Firebase scripts).
    ============================================================ */
 (function () {
   'use strict';
   const PZ = window.PracticeZone, E = window.PoolEngine;
   if (!PZ || !E) { console.warn('pool-sync.js: load pool-engine.js and pool-ui.js first'); return; }
 
-  const local = PZ.store;                       // localStorage store from pool-ui.js
+  // The localStorage store from pool-ui.js, kept as the offline cache.
+  // WHY a named constant: we call local.save()/local.load() as METHODS of this
+  // object, so their internal `this` stays correct.
+  const local = PZ.store;
 
-  /* ---------- Firebase access (works with the compat SDK already on your pages) ---------- */
+  /* ---------- Firebase access ---------- */
   const fb   = () => (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length) ? firebase : null;
   const user = () => { try { const f = fb(); return f ? f.auth().currentUser : null; } catch (e) { return null; } };
   const db   = () => { try { const f = fb(); return f ? f.firestore() : null; } catch (e) { return null; } };
   const stamp = () => fb().firestore.FieldValue.serverTimestamp();
   const withTimeout = (p, ms) => Promise.race([p, new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), ms))]);
   const ready = () => (typeof waitForRole === 'function') ? withTimeout(waitForRole(), 4000).catch(() => null) : Promise.resolve();
-  /* The pupil's name lives in users/<uid>.pupilName (set when he signs in). Read it once. */
+
+  // The pupil's display name lives in users/<uid>.pupilName. Read it once.
   let profileName = null;
   function loadProfileName() {
     const u = user(), d = u ? db() : null;
@@ -36,10 +32,11 @@
     }).catch(() => {});
   }
   function pupilName() {
-    try { return profileName || localStorage.getItem('xeledif.pupil') || (user() && user().email) || 'Unknown'; } catch (e) { return 'Unknown'; }
+    try { return profileName || localStorage.getItem('xeledif.pupil') || (user() && user().email) || 'Unknown'; }
+    catch (e) { return 'Unknown'; }
   }
 
-  /* ---------- question-ID shortening (smaller documents; Firestore-safe keys) ---------- */
+  /* ---------- question-ID shortening (smaller documents) ---------- */
   const short = (stepKey, id) => id.indexOf(stepKey + '.') === 0 ? id.slice(stepKey.length + 1) : id;
   const full  = (stepKey, k)  => k.indexOf('.') >= 0 ? k : stepKey + '.' + k;
 
@@ -69,31 +66,48 @@
     };
   }
 
+  // Lesson attempts for this step, read from Firestore (source of truth).
+  // WHY two equality filters: Firestore serves equality-only queries from its
+  // automatic indexes, so no composite index is needed. Filtering by stepId
+  // leaves out the "-practice" records, which the question history already tracks.
+  function fetchCore(u, d, stepId) {
+    if (!stepId) return Promise.resolve([]);
+    return withTimeout(
+      d.collection('progress').where('pupilUid', '==', u.uid).where('stepId', '==', stepId).get(), 6000)
+      .then(snap => { const out = []; snap.forEach(x => out.push(x.data())); return out; })
+      .catch(() => []);   // never block the Practice Zone on this
+  }
+
   /* ---------- the history store used by the Practice Zone ---------- */
   PZ.store = {
-    load(stepKey) {
+    load(stepKey, ctx) {
       return ready().then(loadProfileName).then(() => {
         const u = user(), d = u ? db() : null;
         if (!u || !d) return local.load(stepKey);
         return Promise.all([
           withTimeout(d.collection('questionHistory').doc(u.uid + '_' + stepKey).get(), 6000)
             .then(snap => snap.exists ? fromDoc(stepKey, snap.data()) : null).catch(() => null),
-          local.load(stepKey)
-        ]).then(([remote, cached]) => {
+          local.load(stepKey),
+          ctx ? fetchCore(u, d, ctx.stepId) : Promise.resolve([])
+        ]).then(([remote, cached, core]) => {
+          if (ctx) ctx.coreRecords = core;   // consumed by importCore() in pool-ui.js
           if (remote && cached) return (cached.updatedAt || '') > (remote.updatedAt || '') ? cached : remote;  // newest wins
           return remote || cached || null;
         });
       });
     },
+
+    // WHY written out in full and never copied from another object: it must not
+    // depend on `this`, so it works however it is called.
     save(stepKey, history, data) {
-      local.save(stepKey, history).catch(() => {});               // always keep the local cache fresh
+      local.save(stepKey, history).catch(() => {});          // keep the local cache fresh
       const u = user(), d = u ? db() : null;
-      if (!u || !d) return Promise.resolve();                     // local only
+      if (!u || !d) return Promise.resolve();                // not signed in: local only
       return d.collection('questionHistory').doc(u.uid + '_' + stepKey).set(toDoc(stepKey, history, data));
     }
   };
 
-  /* ---------- live session record (your dashboard already reads the "progress" collection) ---------- */
+  /* ---------- live session record (the dashboard reads the "progress" collection) ---------- */
   function qNum(id) { return parseInt(id.slice(-4), 10); }
 
   function buildAttempt(ctx, current, completed) {
@@ -104,7 +118,7 @@
       ex[qNum(r.id)] = { correct: 1, wrong: r.wrong, firstTry: r.firstTry, timeOnTaskMs: r.ms, concept: r.concept, qid: r.id };
       correct += 1; wrong += r.wrong; answered += 1; if (r.firstTry) ftc += 1;
     });
-    if (current && !S.results[S.i] && S.wrong > 0) {            // a question with wrong clicks, not solved yet
+    if (current && !S.results[S.i] && S.wrong > 0) {         // wrong clicks on a question not yet solved
       ex[qNum(current.id)] = { correct: 0, wrong: S.wrong, firstTry: false, timeOnTaskMs: 0, concept: current.concept, qid: current.id };
       wrong += S.wrong; answered += 1;
     }
@@ -134,10 +148,10 @@
     S.startedAt = new Date().toISOString();
     S.meta = Object.assign({}, window.__currentStepMeta || {});
   };
-  PZ.hooks.onClick = function (info) {                                                      // every click, right or wrong
+  PZ.hooks.onClick = function (info) {                       // every click, right or wrong
     const S = info.ctx.session;
-    const allDone = info.correct && S.results.filter(Boolean).length === S.qs.length;       // the 10th question solved = session complete
+    const allDone = info.correct && S.results.filter(Boolean).length === S.qs.length;   // 10th solved = session complete
     writeAttempt(info.ctx, info.question, allDone);
   };
-  PZ.hooks.onSessionEnd = function (info) { writeAttempt(info.ctx, null, true); };         // mark the session completed
+  PZ.hooks.onSessionEnd = function (info) { writeAttempt(info.ctx, null, true); };
 })();
