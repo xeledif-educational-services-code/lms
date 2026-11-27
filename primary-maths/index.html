@@ -273,6 +273,7 @@
 <script src="pool-ui.js?v=7"></script>
 <script src="pool-sync.js?v=7"></script>
 <script src="hint-return.js?v=8"></script>
+<script src="summaries-sync.js?v=1"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -312,6 +313,34 @@
     <span class="badge" style="background:#FFF3E0;color:#E65100;border:0.5px solid #FFB74D;">☀️ Summer</span>
   </div>
 </div>
+
+
+
+<!-- ─── M3: Index-page score widget (Cumulative + Current) ─── -->
+<div id="score-widget" aria-live="polite" style="display:none;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 18px;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+    <span style="font-size:18px;">📊</span>
+    <strong style="font-size:14px;color:#1a1a1a;">Your performance</strong>
+    <span id="score-widget-when" style="margin-left:auto;font-size:11px;color:#888;"></span>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+    <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:700;color:#64748B;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Cumulative</div>
+      <div id="score-widget-cum-pct" style="font-size:22px;font-weight:800;color:#1D9E75;line-height:1.1;">—</div>
+      <div id="score-widget-cum-sub" style="font-size:11.5px;color:#555;margin-top:3px;">Not enough data yet</div>
+    </div>
+    <div style="background:#FFF8F0;border:1px solid #FAC775;border-radius:8px;padding:10px 12px;">
+      <div style="font-size:11px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.4px;margin-bottom:4px;">Current</div>
+      <div id="score-widget-cur-pct" style="font-size:22px;font-weight:800;color:#BA7517;line-height:1.1;">—</div>
+      <div id="score-widget-cur-sub" style="font-size:11.5px;color:#555;margin-top:3px;">Not enough data yet</div>
+    </div>
+  </div>
+  <div style="margin-top:10px;font-size:11.5px;color:#888;text-align:right;">
+    <a href="dashboard.html" style="color:#5B21B6;text-decoration:none;font-weight:600;">View full report →</a>
+  </div>
+</div>
+
+
 
 <div class="level-tabs-row">
   <button class="level-tab" data-color="#185FA5" onclick="switchLevel('pane-p4',this)">Primary 4<span class="lt-sub">Year 4</span></button>
@@ -14543,6 +14572,88 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
   });
 })();
 </script>
+
+
+<script>
+/* ─── M3: Render the score widget ─── */
+(function () {
+  const el = (id) => document.getElementById(id);
+
+  function fmtMonth(y, m) {
+    if (!y || !m) return '';
+    return new Date(Date.UTC(y, m - 1, 1))
+      .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
+  }
+
+  function render(summary) {
+    const w = el('score-widget');
+    if (!w) return;
+    if (!summary) { w.style.display = 'none'; return; }
+
+    const cum = summary.cumulative || {};
+    const cur = summary.current || null;
+
+    el('score-widget-cum-pct').textContent = cum.pct != null ? cum.pct + '%' : '—';
+    el('score-widget-cum-sub').textContent = cum.questionsAnswered
+      ? (cum.questionsAnswered + ' question' + (cum.questionsAnswered === 1 ? '' : 's') + ', all time')
+      : 'Not enough data yet';
+
+    if (cur && cur.questionsAnswered) {
+      el('score-widget-cur-pct').textContent = cur.pct + '%';
+      el('score-widget-cur-sub').textContent =
+        cur.questionsAnswered + ' question' + (cur.questionsAnswered === 1 ? '' : 's') +
+        ', ' + fmtMonth(cur.year, cur.month);
+    } else {
+      el('score-widget-cur-pct').textContent = '—';
+      el('score-widget-cur-sub').textContent = 'Not enough data yet';
+    }
+
+    // Footer timestamp
+    if (summary.lastUpdated) {
+      const d = new Date(summary.lastUpdated);
+      if (!isNaN(d)) {
+        el('score-widget-when').textContent = 'Updated ' +
+          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+      }
+    }
+    w.style.display = 'block';
+  }
+
+  function boot() {
+    // Wait for Firebase + summary module to be ready.
+    const wait = (typeof waitForRole === 'function') ? waitForRole() : Promise.resolve(null);
+    wait.then(role => {
+      if (!role) { render(null); return; }   // not signed in
+      if (!window.XeledifSummary) {
+        // summaries-sync.js didn't load or hasn't exposed its API yet.
+        console.warn('[M3 widget] XeledifSummary missing — is summaries-sync.js loaded?');
+        return;
+      }
+
+      // 1. Show the cached value instantly (no wait).
+      const cached = XeledifSummary.cached();
+      if (cached && cached.summary) {
+        render(cached.summary);
+        // If cache is < 5 min old, we're done — no Firestore read needed.
+        if (Date.now() - cached.at < 5 * 60 * 1000) return;
+      }
+
+      // 2. Fetch fresh (1 read) and re-render.
+      XeledifSummary.fetch().then(res => {
+        if (res && res.summary) render(res.summary);
+        else if (!cached) render(null);
+      });
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
 
 </body>
 </html>
