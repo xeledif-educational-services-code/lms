@@ -60,38 +60,37 @@
       updatedAt: stamp()
     };
   }
-  function fromDoc(stepKey, d) {
-    const seen = {};
-    Object.keys(d.seen || {}).forEach(k => { seen[full(stepKey, k)] = d.seen[k]; });
-    return {
-      pupilUid: d.pupilUid, stepKey, cycle: d.cycle || 1, sessions: d.sessions || 0,
-      inCycle: (d.inCycle || []).map(k => full(stepKey, k)), seen, updatedAt: d.updatedAtIso || null
-    };
-  }
+// Lesson attempts for this step, read from Firestore (the source of truth).
+// WHY two equality filters: Firestore serves equality-only queries from its
+// automatic indexes, so no composite index is needed. stepId excludes the
+// "-practice" records, which are already tracked in the question history.
+function fetchCore(u, d, stepId) {
+  if (!stepId) return Promise.resolve([]);
+  return withTimeout(
+    d.collection('progress').where('pupilUid', '==', u.uid).where('stepId', '==', stepId).get(), 6000)
+    .then(snap => { const out = []; snap.forEach(x => out.push(x.data())); return out; })
+    .catch(() => []);                 // never block the Practice Zone on this
+}
 
-  /* ---------- the history store used by the Practice Zone ---------- */
-  PZ.store = {
-    load(stepKey) {
-      return ready().then(loadProfileName).then(() => {
-        const u = user(), d = u ? db() : null;
-        if (!u || !d) return local.load(stepKey);
-        return Promise.all([
-          withTimeout(d.collection('questionHistory').doc(u.uid + '_' + stepKey).get(), 6000)
-            .then(snap => snap.exists ? fromDoc(stepKey, snap.data()) : null).catch(() => null),
-          local.load(stepKey)
-        ]).then(([remote, cached]) => {
-          if (remote && cached) return (cached.updatedAt || '') > (remote.updatedAt || '') ? cached : remote;  // newest wins
-          return remote || cached || null;
-        });
-      });
-    },
-    save(stepKey, history, data) {
-      local.save(stepKey, history).catch(() => {});               // always keep the local cache fresh
+PZ.store = {
+  load(stepKey, ctx) {
+    return ready().then(loadProfileName).then(() => {
       const u = user(), d = u ? db() : null;
-      if (!u || !d) return Promise.resolve();                     // local only
-      return d.collection('questionHistory').doc(u.uid + '_' + stepKey).set(toDoc(stepKey, history, data));
-    }
-  };
+      if (!u || !d) return local.load(stepKey);
+      return Promise.all([
+        withTimeout(d.collection('questionHistory').doc(u.uid + '_' + stepKey).get(), 6000)
+          .then(snap => snap.exists ? fromDoc(stepKey, snap.data()) : null).catch(() => null),
+        local.load(stepKey),
+        ctx ? fetchCore(u, d, ctx.stepId) : Promise.resolve([])
+      ]).then(([remote, cached, core]) => {
+        if (ctx) ctx.coreRecords = core;       // handed to importCore() in pool-ui.js
+        if (remote && cached) return (cached.updatedAt || '') > (remote.updatedAt || '') ? cached : remote;
+        return remote || cached || null;
+      });
+    });
+  },
+  save: PZ.store.save   // keep your existing save() exactly as it is
+};
 
   /* ---------- live session record (your dashboard already reads the "progress" collection) ---------- */
   function qNum(id) { return parseInt(id.slice(-4), 10); }

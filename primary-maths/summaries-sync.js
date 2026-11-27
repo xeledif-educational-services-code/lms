@@ -1,29 +1,7 @@
 /* ============================================================
    XELEDIF SUMMARIES SYNC — index-page score widget backend (M3)
-   -----------------------------------------------------------------
    Maintains ONE Firestore document per pupil at summaries/{uid}
-   holding:
-     - cumulative: { questionsAnswered, firstTryCorrect, pct, firstAttemptAt }
-     - current:    { year, month, questionsAnswered, firstTryCorrect, pct }
-     - lastActiveAt, lastUpdated, schemaVersion
-
-   Write cadence:
-     - Once per Practice Zone session end (hook into pool-sync.js).
-     - Once per exercise finish (hook into MCQTracker's requestFinish).
-     - Debounced: no write within 30 seconds of the previous one.
-     - Skipped if the numbers haven't changed since the last write.
-
-   Read cadence:
-     - Once on index.html load. 1 Firestore read.
-     - Result cached in localStorage so a refresh within 5 minutes
-       shows the cached value instantly while the live fetch runs.
-
-   Cost: ~1 extra write per session, 1 extra read per page load.
-   Net saving vs. the old "pull all attempts" approach: substantial.
-
-   Zero changes to pool-sync.js, pool-engine.js, pool-ui.js, or the
-   answer-by-answer write path. This file only observes completed
-   sessions/exercises and updates the summary document.
+   with cumulative + current aggregates. Debounced writes.
    ============================================================ */
 (function () {
   'use strict';
@@ -33,15 +11,14 @@
 
   const SUMMARY_COLLECTION = 'summaries';
   const CACHE_KEY = 'xeledif.summary.cache';
-  const CACHE_TTL_MS = 5 * 60 * 1000;     // 5 minutes
-  const DEBOUNCE_MS = 30 * 1000;           // 30 seconds between writes
+  const CACHE_TTL_MS = 5 * 60 * 1000;
+  const DEBOUNCE_MS = 30 * 1000;
   const SCHEMA_VERSION = 1;
 
   let lastWriteAt = 0;
   let lastWrittenSignature = null;
   let writeScheduled = null;
 
-  // ── Helpers ────────────────────────────────────────────────
   function fb() {
     try {
       return (typeof firebase !== 'undefined' && firebase.apps && firebase.apps.length)
@@ -58,9 +35,6 @@
     return d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0');
   }
 
-  // ── Compute the two aggregate numbers from LOCAL attempt cache ──
-  // We only read from the local cache (already populated by
-  // cloudSubscribeMy / cloudWriteAttempt). No extra Firestore reads.
   function computeSummary(uid, email) {
     let all = {};
     try { all = JSON.parse(localStorage.getItem('xeledif.progress.v2') || '{}'); }
@@ -87,7 +61,6 @@
       }
     });
 
-    // Current period totals = all attempts whose month matches the latest.
     let curQ = 0, curFT = 0;
     if (currentMonth) {
       Object.values(all).forEach(rec => {
@@ -123,7 +96,6 @@
     };
   }
 
-  // ── Signature for debounce: skip write if nothing meaningful changed ──
   function signature(summary) {
     return [
       summary.cumulative.questionsAnswered,
@@ -133,19 +105,18 @@
     ].join('|');
   }
 
-  // ── Write (debounced) ──────────────────────────────────────
   function scheduleWrite() {
     const u = user();
     const d = db();
     if (!u || !d) return;
-    if (writeScheduled) return;                       // already queued
+    if (writeScheduled) return;
     const now = Date.now();
     const wait = Math.max(0, DEBOUNCE_MS - (now - lastWriteAt));
     writeScheduled = setTimeout(() => {
       writeScheduled = null;
       const summary = computeSummary(u.uid, u.email);
       const sig = signature(summary);
-      if (sig === lastWrittenSignature) return;       // no change
+      if (sig === lastWrittenSignature) return;
       lastWrittenSignature = sig;
       lastWriteAt = Date.now();
       d.collection(SUMMARY_COLLECTION).doc(u.uid).set(summary, { merge: true })
@@ -158,10 +129,6 @@
     }, wait);
   }
 
-  // ── Force a synchronous write (bypasses debounce) ──────────
-  // Used when the pupil finishes an exercise (MCQTracker.requestFinish)
-  // or completes a Practice Zone session. We want the widget to
-  // reflect the new numbers next time the page loads.
   function forceWrite() {
     const u = user();
     const d = db();
@@ -169,7 +136,7 @@
     if (writeScheduled) { clearTimeout(writeScheduled); writeScheduled = null; }
     const summary = computeSummary(u.uid, u.email);
     const sig = signature(summary);
-    if (sig === lastWrittenSignature) return;         // no change
+    if (sig === lastWrittenSignature) return;
     lastWrittenSignature = sig;
     lastWriteAt = Date.now();
     d.collection(SUMMARY_COLLECTION).doc(u.uid).set(summary, { merge: true })
@@ -181,38 +148,28 @@
       .catch(err => console.warn('[summaries-sync] forceWrite failed:', err && err.message));
   }
 
-  // ── Hook into pool-sync.js's onSessionEnd (no edits to that file) ──
-  // pool-sync.js does `PZ.hooks.onSessionEnd = function (info) { … }`
-  // — a direct assignment. We wrap it so our hook runs first, then
-  // theirs. Same for onAnswer (for live feedback during a session,
-  // but debounced — so no extra writes mid-session).
   function wrapHooks() {
     if (!window.PracticeZone || !window.PracticeZone.hooks) return false;
     const H = window.PracticeZone.hooks;
 
-    // Wrap onSessionEnd: run ours first, then the existing one.
     const prevEnd = H.onSessionEnd;
     H.onSessionEnd = function (info) {
       try { forceWrite(); } catch (e) { console.warn('[summaries-sync] onSessionEnd:', e); }
       if (typeof prevEnd === 'function') return prevEnd.apply(this, arguments);
     };
 
-    // Also wrap MCQTracker.requestFinish (exercise finished).
     if (window.MCQTracker && typeof window.MCQTracker.requestFinish === 'function') {
       const prevFinish = window.MCQTracker.requestFinish;
       window.MCQTracker.requestFinish = function () {
-        // Run the original first (so completeAttempt persists), then write.
         let result;
         try { result = prevFinish.apply(this, arguments); }
-        finally { setTimeout(forceWrite, 200); }   // small delay so completeAttempt lands
+        finally { setTimeout(forceWrite, 200); }
         return result;
       };
     }
     return true;
   }
 
-  // Retry wrapHooks until pool-ui.js has exposed PracticeZone.
-  // (Timing varies depending on script load order.)
   let wrapAttempts = 0;
   (function tryWrap() {
     if (wrapHooks()) return;
@@ -220,9 +177,7 @@
     setTimeout(tryWrap, 250);
   })();
 
-  // ── Public API for the widget ──────────────────────────────
   window.XeledifSummary = {
-    // Returns { at, summary } from cache, or null if no cache.
     cached() {
       try {
         const raw = localStorage.getItem(CACHE_KEY);
@@ -233,7 +188,6 @@
       } catch (e) { return null; }
     },
 
-    // Fetch fresh from Firestore (1 read). Resolves with { summary } or null.
     fetch() {
       const u = user();
       const d = db();
@@ -253,10 +207,8 @@
         });
     },
 
-    // Force a recompute + write (used by the widget's refresh button, if any).
     refresh() { forceWrite(); return Promise.resolve(); },
 
-    // Exposed for debugging.
     _compute: () => { const u = user(); return u ? computeSummary(u.uid, u.email) : null; }
   };
 

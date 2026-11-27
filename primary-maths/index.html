@@ -14619,32 +14619,37 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
     w.style.display = 'block';
   }
 
-  function boot() {
-    // Wait for Firebase + summary module to be ready.
-    const wait = (typeof waitForRole === 'function') ? waitForRole() : Promise.resolve(null);
-    wait.then(role => {
-      if (!role) { render(null); return; }   // not signed in
-      if (!window.XeledifSummary) {
-        // summaries-sync.js didn't load or hasn't exposed its API yet.
-        console.warn('[M3 widget] XeledifSummary missing — is summaries-sync.js loaded?');
-        return;
-      }
+function boot() {
+  // WHY onAuthStateChanged: it fires once Firebase knows who is signed in,
+  // which is what "waitForRole" was meant to wait for.
+  firebase.auth().onAuthStateChanged(user => {
+    if (!user) { render(null); return; }
+    if (!window.XeledifSummary) {
+      console.warn('[M3 widget] XeledifSummary missing');
+      return;
+    }
 
-      // 1. Show the cached value instantly (no wait).
-      const cached = XeledifSummary.cached();
-      if (cached && cached.summary) {
-        render(cached.summary);
-        // If cache is < 5 min old, we're done — no Firestore read needed.
-        if (Date.now() - cached.at < 5 * 60 * 1000) return;
-      }
+    // 1. Instant: show the cached copy if we have one.
+    const cached = XeledifSummary.cached();
+    if (cached && cached.summary) {
+      render(cached.summary);
+      if (Date.now() - cached.at < 5 * 60 * 1000) return;   // fresh enough
+    }
 
-      // 2. Fetch fresh (1 read) and re-render.
-      XeledifSummary.fetch().then(res => {
-        if (res && res.summary) render(res.summary);
-        else if (!cached) render(null);
-      });
+    // 2. One Firestore read.
+    XeledifSummary.fetch().then(res => {
+      if (res && res.summary) { render(res.summary); return; }
+
+      // 3. WHY: no document exists yet (new pupil), so build one from local
+      // data, show it, and save it so next load takes the fast path.
+      const local = XeledifSummary._compute();
+      if (local && local.cumulative.questionsAnswered > 0) {
+        render(local);
+        XeledifSummary.refresh();
+      }
     });
-  }
+  });
+}
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
