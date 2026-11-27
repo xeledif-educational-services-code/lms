@@ -268,11 +268,11 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <!-- Your Firebase integration -->
-<script src="firebase-integration.js?v=5"></script>
-<script src="pool-engine.js?v=5"></script>
-<script src="pool-ui.js?v=5"></script>
-<script src="pool-sync.js?v=5"></script>
-<script src="hint-return.js?v=5"></script>
+<script src="firebase-integration.js?v=7"></script>
+<script src="pool-engine.js?v=7"></script>
+<script src="pool-ui.js?v=7"></script>
+<script src="pool-sync.js?v=7"></script>
+<script src="hint-return.js?v=8"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -280,16 +280,17 @@
      delivered to the browser regardless; see project notes. */
   html.xeledif-gate-active body > *:not(#xeledif-auth-gate) { visibility:hidden !important; }
 </style>
+
+
 </head>
 <body>
+
 <div id="xeledif-auth-gate" style="position:fixed;inset:0;z-index:99999;background:rgba(20,16,36,0.94);display:flex;align-items:center;justify-content:center;padding:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
   <div style="background:#fff;border-radius:16px;padding:28px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.4);font-size:13px;color:#555;">
     Loading…
   </div>
 </div>
 
-</head>
-<body>
 <div class="page">
 
 <div id="auth-bar" style="margin-bottom:1rem;"></div>
