@@ -282,7 +282,7 @@
   /* ============================================================
      Parent report (printable)
      ============================================================ */
-  function parentReportHtml(key) {
+  function parentReportHtml(key, allRecs)  {
     const groups = groupRecords(readAll());
     const recs   = groups[key] || [];
     const name   = displayName(key, recs);
@@ -298,8 +298,13 @@
     const pct = q ? Math.round(100 * ft / q) : 0;
 
     // M1: headline metrics (Cumulative + Current), always shown.
-    const cum = cumulativeStats(recs);
-    const cur = currentStats(recs);
+    // WHY: Cumulative and Current must come from the pupil's FULL history,
+    // not just the date range loaded for the dashboard. If the full fetch
+    // failed, we fall back to the loaded range and label it honestly.
+    const headlineRecs = allRecs || recs;
+    const cum = cumulativeStats(headlineRecs);
+    const cur = currentStats(headlineRecs);
+    const cumScope = allRecs ? 'all time' : 'selected period only';
     const currentLine = cur.month
       ? `<b>${cur.pct}%</b> right first time (${cur.questions} question${cur.questions === 1 ? '' : 's'}, ${esc(monthLabelOf(cur.month))})`
       : `<span class="muted">No activity yet.</span>`;
@@ -429,7 +434,7 @@
         <h1>Monthly Progress Report</h1>
         <p><b>${esc(name)}</b> · Primary 5 Mathematics · Xeledif Educational Services<br><span class="muted">Period: ${esc(periodText())} · Report date: ${esc(fmtDate(Date.now()))}</span></p>
         <div class="headline">
-          <div><b>Cumulative performance:</b> <b>${cum.pct}%</b> right first time (${cum.questions} question${cum.questions === 1 ? '' : 's'}, all time)</div>
+          <div><b>Cumulative performance:</b> <b>${cum.pct}%</b> right first time (${cum.questions} question${cum.questions === 1 ? '' : 's'}, ${cumScope})</div>
           <div><b>Current performance:</b> ${currentLine}</div>
         </div>
         <h2>Overview</h2>
@@ -445,11 +450,35 @@
         <p class="muted" style="margin-top:22px">How skills are rated: a skill is rated only after at least ${MIN_Q} different questions. <b>Confident</b> = ${SECURE_FROM * 100}% or more right first time; <b>Getting there</b> = ${STRUGGLING_BELOW * 100}–${SECURE_FROM * 100 - 1}%; <b>Needs support</b> = under ${STRUGGLING_BELOW * 100}%.</p>
       </body></html>`;
   }
-  function openParentReport(key) {
-    const w = window.open('', '_blank');
-    if (!w) { alert('Please allow pop-ups for this page to open the report.'); return; }
-    w.document.open(); w.document.write(parentReportHtml(key)); w.document.close();
+// One-off read of this pupil's complete history (one read per attempt),
+// triggered only when the teacher clicks "Parent report".
+async function fetchAllTimeRecords(key) {
+  // Group keys can be an email or "name:…" for old records; only a real uid can be queried.
+  if (!/^[A-Za-z0-9]{20,}$/.test(String(key))) return null;
+  if (typeof firebase === 'undefined' || !firebase.apps.length) return null;
+  try {
+    const snap = await firebase.firestore().collection('progress')
+      .where('pupilUid', '==', key).get();
+    const out = [];
+    snap.forEach(d => { const r = d.data(); if (r && !isTest(r)) out.push(r); });
+    return out;
+  } catch (err) {
+    console.warn('[dashboard] all-time fetch failed:', err && err.message);
+    return null;
   }
+}
+
+function openParentReport(key) {
+  // WHY open the window first: browsers block pop-ups opened after an await.
+  const w = window.open('', '_blank');
+  if (!w) { alert('Please allow pop-ups for this page to open the report.'); return; }
+  w.document.open();
+  w.document.write('<p style="font-family:sans-serif;padding:20px">Preparing report…</p>');
+  w.document.close();
+  fetchAllTimeRecords(key).then(all => {
+    w.document.open(); w.document.write(parentReportHtml(key, all)); w.document.close();
+  });
+}
 
   /* ============================================================
      M1: Period / sort bar — now with a Custom range option

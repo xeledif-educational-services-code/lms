@@ -255,13 +255,7 @@
 #back-to-practice:hover { background: #0F6E56; }
 @media print { #back-to-practice { display: none; } }
 @media (prefers-reduced-motion: reduce) { #back-to-practice { transition: none; } }
-
-
-
-
-
 </style>
-
 <!-- Firebase SDK (compat build) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -271,9 +265,9 @@
 <script src="firebase-integration.js?v=7"></script>
 <script src="pool-engine.js?v=7"></script>
 <script src="pool-ui.js?v=7"></script>
-<script src="pool-sync.js?v=7"></script>
+<script src="pool-sync.js?v=8"></script>
 <script src="hint-return.js?v=8"></script>
-<script src="summaries-sync.js?v=1"></script>
+<script src="summaries-sync.js?v=4"></script>
 
 <style>
   /* Sign-in gate: hides everything except the gate overlay until
@@ -281,8 +275,6 @@
      delivered to the browser regardless; see project notes. */
   html.xeledif-gate-active body > *:not(#xeledif-auth-gate) { visibility:hidden !important; }
 </style>
-
-
 </head>
 <body>
 
@@ -313,9 +305,6 @@
     <span class="badge" style="background:#FFF3E0;color:#E65100;border:0.5px solid #FFB74D;">☀️ Summer</span>
   </div>
 </div>
-
-
-
 <!-- ─── M3: Index-page score widget (Cumulative + Current) ─── -->
 <div id="score-widget" aria-live="polite" style="display:none;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 18px;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -339,15 +328,11 @@
     <a href="dashboard.html" style="color:#5B21B6;text-decoration:none;font-weight:600;">View full report →</a>
   </div>
 </div>
-
-
-
 <div class="level-tabs-row">
   <button class="level-tab" data-color="#185FA5" onclick="switchLevel('pane-p4',this)">Primary 4<span class="lt-sub">Year 4</span></button>
   <button class="level-tab" data-color="#5B21B6" onclick="switchLevel('pane-p5',this)">Primary 5<span class="lt-sub">Year 5</span></button>
   <button class="level-tab" data-color="#9A3412" onclick="switchLevel('pane-p6',this)">Primary 6<span class="lt-sub">Year 6</span></button>
 </div>
-
 <!-- ================= PRIMARY 4 PANE ================= -->
 <div class="level-pane" id="pane-p4">
   <div id="p4-term-groups"></div>
@@ -369,17 +354,10 @@
 </div>
 
 </div>
-
-
-
-
-
 <script>
 /* ============================================================
    SHARED ENGINE — used by Primary 4, 5 and 6
    ============================================================ */
-
-
 /* ──────── Persistent progress store (multi-attempt, lazy) ──────── */
 const ProgressStore = {
   KEY: 'xeledif.progress.v2',
@@ -14579,12 +14557,14 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
 (function () {
   const el = (id) => document.getElementById(id);
 
+  // Turns (2026, 11) into "November 2026".
   function fmtMonth(y, m) {
     if (!y || !m) return '';
     return new Date(Date.UTC(y, m - 1, 1))
       .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
   }
 
+  // Fills the widget from a summary object, or hides it when there is none.
   function render(summary) {
     const w = el('score-widget');
     if (!w) return;
@@ -14608,48 +14588,43 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
       el('score-widget-cur-sub').textContent = 'Not enough data yet';
     }
 
-    // Footer timestamp
-    if (summary.lastUpdated) {
-      const d = new Date(summary.lastUpdated);
+    // WHY a time and not just a date: a bare date can't tell you whether
+    // the numbers are stale. This shows when the pupil last practised.
+    const stampIso = summary.lastActiveAt || summary.lastUpdated;
+    if (stampIso) {
+      const d = new Date(stampIso);
       if (!isNaN(d)) {
-        el('score-widget-when').textContent = 'Updated ' +
-          d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        el('score-widget-when').textContent = 'Last activity ' +
+          d.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
       }
     }
     w.style.display = 'block';
   }
 
-function boot() {
-  // WHY onAuthStateChanged: it fires once Firebase knows who is signed in,
-  // which is what "waitForRole" was meant to wait for.
-  firebase.auth().onAuthStateChanged(user => {
-    if (!user) { render(null); return; }
-    if (!window.XeledifSummary) {
-      console.warn('[M3 widget] XeledifSummary missing');
-      return;
-    }
+  function boot() {
+    // WHY waitForRole: it resolves only after sign-in AND the role are known,
+    // so the teacher check is reliable.
+    waitForRole().then(role => {
+      if (!role || role === 'teacher') { render(null); return; }
+      if (!window.XeledifSummary) { console.warn('[M3 widget] summaries-sync.js not loaded'); return; }
 
-    // 1. Instant: show the cached copy if we have one.
-    const cached = XeledifSummary.cached();
-    if (cached && cached.summary) {
-      render(cached.summary);
-      if (Date.now() - cached.at < 5 * 60 * 1000) return;   // fresh enough
-    }
-
-    // 2. One Firestore read.
-    XeledifSummary.fetch().then(res => {
-      if (res && res.summary) { render(res.summary); return; }
-
-      // 3. WHY: no document exists yet (new pupil), so build one from local
-      // data, show it, and save it so next load takes the fast path.
-      const local = XeledifSummary._compute();
-      if (local && local.cumulative.questionsAnswered > 0) {
-        render(local);
-        XeledifSummary.refresh();
+      // 1. Instant display from this pupil's own cache.
+      const cached = XeledifSummary.cached();
+      if (cached) {
+        render(cached.summary);
+        if (XeledifSummary.isFresh(cached)) return;   // fresh enough: no Firestore read
       }
+
+      // 2. Otherwise one Firestore read (builds the document if it is missing or old).
+      XeledifSummary.load().then(s => {
+        if (s) render(s);
+        else if (!cached) render(null);
+      });
     });
-  });
-}
+  }
+
+  // Redraw whenever summaries-sync.js finishes a rebuild (no page reload needed).
+  window.addEventListener('xeledif:summary-updated', e => { if (e.detail) render(e.detail); });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', boot);
