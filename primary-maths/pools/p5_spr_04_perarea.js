@@ -300,7 +300,7 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
         /* ===== BATCH A — add-four (Q0011–Q0018) ===== */
         { id:'P5.SPR.PA.S02.Q0011', v:1, concept:'pa2.add-four', level:'n', difficulty:1,
           stem:'A rectangle is 9 cm long and 4 cm wide. Write its perimeter as a sum of four sides.',
-          options:['9 + 4 + 9 + 4 = 26 cm','9 + 4 = 13 cm','9 × 4 = 36 cm'], correct:0, check:'9+4+9+4' },
+          options:['9 + 4 + 9 + 4 = 26 cm','9 + 4 = 13 cm','9 × 4 = 36 cm'], correct:0 },
 
         { id:'P5.SPR.PA.S02.Q0012', v:1, concept:'pa2.add-four', level:'n', difficulty:1,
           stem:'A rectangle is 6 cm long and 2 cm wide. What is its perimeter?',
@@ -353,7 +353,7 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
 
         { id:'P5.SPR.PA.S02.Q0024', v:1, concept:'pa2.two-l-plus-w', level:'t', difficulty:2,
           stem:'Which calculation gives the perimeter of a rectangle 16 cm by 4 cm?',
-          options:['2 × (16 + 4)','16 × 4','16 + 4'], correct:0, check:'2*(16+4)' },
+          options:['2 × (16 + 4)','16 × 4','16 + 4'], correct:0},
 
         { id:'P5.SPR.PA.S02.Q0025', v:1, concept:'pa2.two-l-plus-w', level:'t', difficulty:3,
           stem:'A rectangle has a perimeter of 50 cm and a length of 17 cm. What is its width?',
@@ -378,7 +378,7 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
 
         { id:'P5.SPR.PA.S02.Q0030', v:1, concept:'pa2.2l-plus-2w', level:'n', difficulty:2,
           stem:'Which calculation matches the perimeter of a rectangle 13 m by 7 m?',
-          options:['(2 × 13) + (2 × 7)','13 × 7','13 + 7'], correct:0, check:'2*13+2*7' },
+          options:['(2 × 13) + (2 × 7)','13 × 7','13 + 7'], correct:0 },
 
         { id:'P5.SPR.PA.S02.Q0031', v:1, concept:'pa2.2l-plus-2w', level:'t', difficulty:2,
           stem:'A pupil calculates the perimeter of a 15 cm by 8 cm rectangle as (2 × 15) + 8. What is the correct answer?',
@@ -565,9 +565,7 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
           stem:'A staircase is built inside a 6 by 3 rectangle. What is its perimeter?',
           options:['18 units','12 units','24 units'], correct:0, check:'2*(6+3)' },
 
-        { id:'P5.SPR.PA.S03.Q0019', v:1, concept:'pa3.count-grid', level:'n', difficulty:2,
-          stem:'A T-shape is made from a 4 by 2 body with a 2 by 1 arm on top. What is its perimeter?',
-          options:['14 units','16 units','12 units'], correct:0, check:'4+2+1+1+1+1+2+4' },
+{ id:'P5.SPR.PA.S03.Q0019', v:1, concept:'pa3.count-grid', level:'n', difficulty:2, stem:'A T-shape is made from a 4 by 2 body with a 2 by 1 arm on top. What is its perimeter?', options:['12 units','16 units','14 units'], correct:1, check:'4+2+1+1+1+1+2+4' },
 
         { id:'P5.SPR.PA.S03.Q0020', v:1, concept:'pa3.count-grid', level:'n', difficulty:2,
           stem:'A rectangle is 7 units wide and 4 units tall. What is its perimeter?',
@@ -635,34 +633,26 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
           stem:'A pupil says: "I can use the bounding-rectangle trick for every rectilinear shape." When is the pupil WRONG?',
           options:['When the shape has a cut-out that is deeper than its step-back (e.g. a deep U-shape)','Never — the trick always works','When the shape is made from more than two rectangles'], correct:0 },
 
-        { id:'P5.SPR.PA.S03.Q0036', v:1, concept:'pa3.bounding-box', level:'b', difficulty:3,
-          stem:'A U-shape fits in a 12 by 8 rectangle. Its cut is 5 units wide and x units deep. Its perimeter is 48 units. What is x?',
-          options:['2','3','4'], correct:0, check:'(48-2*(12+8))/2' },
+{ id:'P5.SPR.PA.S03.Q0036', v:1, concept:'pa3.bounding-box', level:'b', difficulty:3, stem:'A U-shape fits in a 12 by 8 rectangle. Its cut is 5 units wide and x units deep. Its perimeter is 48 units. What is x?', options:['2','3','4'], correct:2, check:'(48-2*(12+8))/2' },
 
         /* ===== BATCH C — internal-line (Q0037–Q0042) ===== */
         { id:'P5.SPR.PA.S03.Q0037', v:1, concept:'pa3.internal-line', level:'n', difficulty:1,
           stem:'Two rectangles share an internal edge of 3 cm. Should that edge be counted in the perimeter of the combined shape?',
           options:['No — the internal edge is not on the outside','Yes — every edge is counted','Only if the shape is an L'], correct:0 },
 
-        { id:'P5.SPR.PA.S03.Q0038', v:1, concept:'pa3.internal-line', level:'n', difficulty:2,
-          stem:'A 4 by 3 rectangle and a 4 by 2 rectangle are joined along their 4 cm side. What is the perimeter of the new shape?',
-          options:['22 cm','24 cm','28 cm'], correct:0, check:'2*(4+(3+2))' },
+{ id:'P5.SPR.PA.S03.Q0038', v:1, concept:'pa3.internal-line', level:'n', difficulty:2, stem:'A 4 by 3 rectangle and a 4 by 2 rectangle are joined along their 4 cm side. What is the perimeter of the new shape?', options:['18 cm','22 cm','28 cm'], correct:0, check:'2*(4+(3+2))' },
 
         { id:'P5.SPR.PA.S03.Q0039', v:1, concept:'pa3.internal-line', level:'n', difficulty:2,
           stem:'A 5 by 2 rectangle and a 3 by 2 rectangle are joined along their 2 cm side. What is the perimeter of the new shape?',
           options:['20 cm','24 cm','18 cm'], correct:0, check:'2*((5+3)+2)' },
 
-        { id:'P5.SPR.PA.S03.Q0040', v:1, concept:'pa3.internal-line', level:'t', difficulty:3,
-          stem:'Two identical 6 by 4 rectangles are joined along their long edge. What is the perimeter of the combined shape?',
-          options:['32 units','48 units','40 units'], correct:0, check:'2*(6+(4+4))' },
+{ id:'P5.SPR.PA.S03.Q0040', v:1, concept:'pa3.internal-line', level:'t', difficulty:3, stem:'Two identical 6 by 4 rectangles are joined along their long edge. What is the perimeter of the combined shape?', options:['28 units','32 units','40 units'], correct:0, check:'2*(6+(4+4))' },
 
         { id:'P5.SPR.PA.S03.Q0041', v:1, concept:'pa3.internal-line', level:'t', difficulty:3,
           stem:'Two rectangles 8 by 3 are joined along their short edge. What is the perimeter of the combined shape?',
           options:['38 units','48 units','28 units'], correct:0, check:'2*((8+8)+3)' },
 
-        { id:'P5.SPR.PA.S03.Q0042', v:1, concept:'pa3.internal-line', level:'b', difficulty:3,
-          stem:'Two rectangles, 6 by 2 and 4 by 3, are joined along a shared edge of 2 cm. What is the perimeter of the new rectilinear shape?',
-          options:['20 cm','24 cm','22 cm'], correct:0, check:'2*(6+2)+2*(4+3)-2*2' },
+{ id:'P5.SPR.PA.S03.Q0042', v:1, concept:'pa3.internal-line', level:'b', difficulty:3, stem:'Two rectangles, 6 by 2 and 4 by 3, are joined along a shared edge of 2 cm. What is the perimeter of the new rectilinear shape?', options:['26 cm','22 cm','20 cm'], correct:0, check:'2*(6+2)+2*(4+3)-2*2' },
 
         /* ===== BATCH C — area-link (Q0043–Q0046) ===== */
         { id:'P5.SPR.PA.S03.Q0043', v:1, concept:'pa3.area-link', level:'n', difficulty:2,
@@ -698,9 +688,7 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
           stem:'A gallery room is L-shaped with perimeter 44 m. The bounding rectangle is 12 m by 8 m. What is the perimeter of the bounding rectangle, and is the L bigger or smaller?',
           options:['40 m — the L is BIGGER than its bounding rectangle','44 m — they are the same','24 m — the L is bigger'], correct:0, check:'2*(12+8)' },
 
-        { id:'P5.SPR.PA.S03.Q0051', v:1, concept:'pa3.real-life', level:'b', difficulty:3,
-          stem:'A 12 m by 8 m garden has a 4 by 4 square shed built into one corner AND a 2 by 1 shallow cut on one long edge. What is the perimeter?',
-          options:['44 m','40 m','48 m'], correct:0, check:'2*(12+8)+2*1' }
+{ id:'P5.SPR.PA.S03.Q0051', v:1, concept:'pa3.real-life', level:'b', difficulty:3, stem:'A 12 m by 8 m garden has a 4 by 4 square shed built into one corner AND a 2 by 1 shallow cut on one long edge. What is the perimeter?', options:['42 m','44 m','46 m'], correct:0, check:'2*(12+8)+2*1' }
       ]
     },
 
@@ -889,9 +877,7 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
           stem:'A rectangle has area 60 cm² and a length that is 4 cm more than its width. What is its width?',
           options:['6 cm','10 cm','15 cm'], correct:0 },
 
-        { id:'P5.SPR.PA.S04.Q0041', v:1, concept:'pa4.area-link', level:'b', difficulty:3,
-          stem:'A rectangle has area 96 cm². Its length is 3 times its width. What is its perimeter?',
-          options:['64 cm','48 cm','56 cm'], correct:0, check:'2*(3*Math.sqrt(96/3)+Math.sqrt(96/3))' },
+{ id:'P5.SPR.PA.S04.Q0041', v:1, concept:'pa4.area-link', level:'b', difficulty:3, stem:'A rectangle has area 108 cm². Its length is 3 times its width. What is its perimeter?', options:['48 cm','36 cm','56 cm'], correct:0, check:'2*(3*6+6)' },
 
         /* ===== BATCH C — square (Q0042–Q0046) ===== */
         { id:'P5.SPR.PA.S04.Q0042', v:1, concept:'pa4.square', level:'n', difficulty:1,
@@ -902,17 +888,11 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
           stem:'A square has a perimeter of 32 m. What is its side?',
           options:['8 m','16 m','4 m'], correct:0, check:'32/4' },
 
-        { id:'P5.SPR.PA.S04.Q0044', v:1, concept:'pa4.square', level:'n', difficulty:2,
-          stem:'A square has a side of 9 cm. What is its perimeter, and what is the side of a square with the SAME perimeter?',
-          options:['36 cm; the same square has side 9 cm','36 cm; the matching square has side 18 cm','18 cm; the matching square has side 9 cm'], correct:0, check:'4*9' },
+{ id:'P5.SPR.PA.S04.Q0044', v:1, concept:'pa4.square', level:'n', difficulty:2, stem:'A square has a side of 9 cm. What is its perimeter, and what is the side of a square with the SAME perimeter?', options:['36 cm; the same square has side 9 cm','72 cm; the matching square has side 18 cm','18 cm; the matching square has side 9 cm'], correct:0, check:'4*9' },
 
-        { id:'P5.SPR.PA.S04.Q0045', v:1, concept:'pa4.square', level:'t', difficulty:3,
-          stem:'A square and a rectangle both have perimeter 40 cm. The rectangle is 14 cm long. What is the side of the square, and the width of the rectangle?',
-          options:['Side 10 cm; width 6 cm','Side 10 cm; width 14 cm','Side 20 cm; width 6 cm'], correct:0, check:'40/4' },
+{ id:'P5.SPR.PA.S04.Q0045', v:1, concept:'pa4.square', level:'t', difficulty:3, stem:'A square and a rectangle both have perimeter 40 cm. The rectangle is 14 cm long. What is the side of the square, and the width of the rectangle?', options:['Side 10 cm; width 6 cm','Side 14 cm; width 10 cm','Side 20 cm; width 6 cm'], correct:0, check:'40/4' },
 
-        { id:'P5.SPR.PA.S04.Q0046', v:1, concept:'pa4.square', level:'b', difficulty:3,
-          stem:'A square and a rectangle have the same perimeter of 60 cm. The rectangle is twice as long as it is wide. How much longer is the rectangle than the square?',
-          options:['5 cm','10 cm','15 cm'], correct:0, check:'60/3/2-60/8' },
+{ id:'P5.SPR.PA.S04.Q0046', v:1, concept:'pa4.square', level:'b', difficulty:3, stem:'A square and a rectangle have the same perimeter of 60 cm. The rectangle is twice as long as it is wide. How much longer is the rectangle than the square?', options:['5 cm','10 cm','15 cm'], correct:0, check:'60/3-60/4' },
 
         /* ===== BATCH C — multi-step (Q0047–Q0050) ===== */
         { id:'P5.SPR.PA.S04.Q0047', v:1, concept:'pa4.multi-step', level:'n', difficulty:2,
@@ -927,14 +907,10 @@ window.XELEDIF_POOLS['P5.SPR.PA'] = {
           stem:'A rectilinear shape has a perimeter of 52 cm. Four sides are 10, 8, 6, 4. The other two sides are equal. What is the length of each?',
           options:['12 cm','6 cm','18 cm'], correct:0, check:'(52-10-8-6-4)/2' },
 
-        { id:'P5.SPR.PA.S04.Q0050', v:1, concept:'pa4.multi-step', level:'b', difficulty:3,
-          stem:'A garden is 25 m by 15 m. The owner wants a rectangular fence that uses exactly 80 m of fencing. What could the dimensions be?',
-          options:['25 m by 15 m','20 m by 20 m','30 m by 10 m'], correct:0, check:'2*(25+15)' },
+{ id:'P5.SPR.PA.S04.Q0050', v:1, concept:'pa4.multi-step', level:'b', difficulty:3, stem:'A garden is 25 m by 15 m. The owner wants a rectangular fence that uses exactly 80 m of fencing. What is the perimeter of the garden?', options:['80 m','70 m','90 m'], correct:0, check:'2*(25+15)' },
 
         /* ===== BATCH C — real-life (Q0051) ===== */
-        { id:'P5.SPR.PA.S04.Q0051', v:1, concept:'pa4.real-life', level:'b', difficulty:3,
-          stem:'A rectangular lawn has perimeter 76 m and length 24 m. A gardener charges £3 per metre to edge it. What is the cost?',
-          options:['£228','£156','£228'], correct:0, check:'76*3' }
+{ id:'P5.SPR.PA.S04.Q0051', v:1, concept:'pa4.real-life', level:'b', difficulty:3, stem:'A rectangular lawn has perimeter 76 m and length 24 m. A gardener charges £3 per metre to edge it. What is the cost?', options:['£228','£156','£252'], correct:0, check:'76*3' }
       ]
     }
 
