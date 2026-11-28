@@ -432,11 +432,7 @@ window.XELEDIF_POOLS['P5.AUT.MA'] = {
     { id:'P5.AUT.MA.S04.Q0018', v:1, concept:'ma4.definition', exampleRef:{n:1, label:'What a factor pair is'}, level:'b', difficulty:3, stem:'Which factor pair has a product of 100?', options:['10 and 10','5 and 15','20 and 40'], correct:0 },
 
     /* ===== BATCH B — List all factor pairs (Q0019–Q0030) ===== */
-   { id:'P5.AUT.MA.S04.Q0019', v:2, concept:'ma4.list', exampleRef:{n:2, label:'Listing all factor pairs'},
-  level:'n', difficulty:1,
-  stem:'Which list shows all the factor pairs of 10?',
-  options:['1×10, 2×5','1×10 only','5×2 only'],
-  correct:0, check:'10' },
+    { id:'P5.AUT.MA.S04.Q0019', v:2, concept:'ma4.list', exampleRef:{n:2, label:'Listing all factor pairs'}, level:'n', difficulty:1, stem:'Which list shows all the factor pairs of 10?', options:['1×10, 2×5','1×10 only','5×2 only'], correct:0 },
     { id:'P5.AUT.MA.S04.Q0020', v:1, concept:'ma4.list', exampleRef:{n:2, label:'Listing all factor pairs'}, level:'n', difficulty:1, stem:'Which list shows all the factor pairs of 16?', options:['1×16, 2×8, 4×4','1×16, 2×8','1×16, 4×4, 8×2'], correct:0 },
     { id:'P5.AUT.MA.S04.Q0021', v:1, concept:'ma4.list', exampleRef:{n:2, label:'Listing all factor pairs'}, level:'n', difficulty:2, stem:'What are all the factor pairs of 25?', options:['1×25 and 5×5','1×25 only','1×25, 5×5, 25×1'], correct:0 },
     { id:'P5.AUT.MA.S04.Q0022', v:1, concept:'ma4.list', exampleRef:{n:2, label:'Listing all factor pairs'}, level:'n', difficulty:2, stem:'What are all the factor pairs of 7?', options:['1 and 7 only','1×7 and 7×1','1, 7, 14'], correct:0 },
