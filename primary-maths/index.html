@@ -262,7 +262,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <!-- Your Firebase integration -->
-<script src="firebase-integration.js?v=7"></script>
+<script src="firebase-integration.js?v=9"></script>
 <script src="pool-engine.js?v=7"></script>
 <script src="pool-ui.js?v=7"></script>
 <script src="pool-sync.js?v=8"></script>
@@ -306,11 +306,22 @@
   </div>
 </div>
 <!-- ─── M3: Index-page score widget (Cumulative + Current) ─── -->
+<!-- The "Show" pill replaces the widget when the pupil has chosen to hide their scores. -->
+<button id="score-widget-show" type="button" aria-expanded="false" aria-controls="score-widget"
+        style="display:none;margin-bottom:1.25rem;padding:7px 14px;border-radius:999px;border:1.5px solid #E5E7EB;background:#fff;color:#5B21B6;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;">
+  📊 Show my performance
+</button>
+
 <div id="score-widget" aria-live="polite" style="display:none;background:#fff;border:1.5px solid #E5E7EB;border-radius:12px;padding:14px 18px;margin-bottom:1.25rem;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
   <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
     <span style="font-size:18px;">📊</span>
     <strong style="font-size:14px;color:#1a1a1a;">Your performance</strong>
     <span id="score-widget-when" style="margin-left:auto;font-size:11px;color:#888;"></span>
+    <button id="score-widget-hide" type="button" aria-expanded="true" aria-controls="score-widget"
+            title="Hide my performance"
+            style="margin-left:10px;padding:4px 10px;border-radius:999px;border:1px solid #E5E7EB;background:#F8FAFC;color:#555;font-size:11.5px;font-weight:700;font-family:inherit;cursor:pointer;">
+      🙈 Hide
+    </button>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
     <div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:10px 12px;">
@@ -328,11 +339,13 @@
     <a href="dashboard.html" style="color:#5B21B6;text-decoration:none;font-weight:600;">View full report →</a>
   </div>
 </div>
+
 <div class="level-tabs-row">
   <button class="level-tab" data-color="#185FA5" onclick="switchLevel('pane-p4',this)">Primary 4<span class="lt-sub">Year 4</span></button>
   <button class="level-tab" data-color="#5B21B6" onclick="switchLevel('pane-p5',this)">Primary 5<span class="lt-sub">Year 5</span></button>
   <button class="level-tab" data-color="#9A3412" onclick="switchLevel('pane-p6',this)">Primary 6<span class="lt-sub">Year 6</span></button>
 </div>
+
 <!-- ================= PRIMARY 4 PANE ================= -->
 <div class="level-pane" id="pane-p4">
   <div id="p4-term-groups"></div>
@@ -14553,25 +14566,24 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
 
 
 <script>
-/* ─── M3: Render the score widget ─── */
+/* ─── M3: Render the score widget (with pupil show/hide) ─── */
 (function () {
   const el = (id) => document.getElementById(id);
 
-  // Turns (2026, 11) into "November 2026".
+  let summary = null;    // latest numbers; null = nothing to show yet
+  let hidden = false;    // the pupil's choice, loaded from their account
+  let saving = false;    // blocks double-clicks while a save is in flight
+
   function fmtMonth(y, m) {
     if (!y || !m) return '';
     return new Date(Date.UTC(y, m - 1, 1))
       .toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
   }
 
-  // Fills the widget from a summary object, or hides it when there is none.
-  function render(summary) {
-    const w = el('score-widget');
-    if (!w) return;
-    if (!summary) { w.style.display = 'none'; return; }
-
-    const cum = summary.cumulative || {};
-    const cur = summary.current || null;
+  // Writes the numbers into the widget's elements.
+  function fill(s) {
+    const cum = s.cumulative || {};
+    const cur = s.current || null;
 
     el('score-widget-cum-pct').textContent = cum.pct != null ? cum.pct + '%' : '—';
     el('score-widget-cum-sub').textContent = cum.questionsAnswered
@@ -14588,9 +14600,7 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
       el('score-widget-cur-sub').textContent = 'Not enough data yet';
     }
 
-    // WHY a time and not just a date: a bare date can't tell you whether
-    // the numbers are stale. This shows when the pupil last practised.
-    const stampIso = summary.lastActiveAt || summary.lastUpdated;
+    const stampIso = s.lastActiveAt || s.lastUpdated;
     if (stampIso) {
       const d = new Date(stampIso);
       if (!isNaN(d)) {
@@ -14598,24 +14608,64 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
           d.toLocaleString('en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
       }
     }
-    w.style.display = 'block';
+  }
+
+  // ONE place decides what is visible, so every code path (first load, live
+  // refresh, toggle) behaves the same way.
+  function paint() {
+    const w = el('score-widget'), pill = el('score-widget-show');
+    if (!w || !pill) return;
+    if (!summary) { w.style.display = 'none'; pill.style.display = 'none'; return; }
+    w.style.display    = hidden ? 'none' : 'block';
+    pill.style.display = hidden ? 'inline-block' : 'none';
+  }
+
+  function render(s) {
+    summary = s || null;
+    if (summary) fill(summary);
+    paint();
+  }
+
+  // Applies the choice instantly, then saves it to the pupil's account.
+  // If the save fails, the choice is reverted so the screen never disagrees
+  // with what is stored.
+  function setHidden(next) {
+    if (saving || next === hidden) return;
+    const previous = hidden;
+    hidden = next;
+    paint();
+    // Keep keyboard/screen-reader focus on the control that is now visible.
+    (next ? el('score-widget-show') : el('score-widget-hide')).focus();
+
+    if (typeof cloudSetPreference !== 'function') return;
+    saving = true;
+    cloudSetPreference('hideScores', next)
+      .catch(err => {
+        console.warn('[M3 widget] could not save preference:', err && err.message);
+        hidden = previous;
+        paint();
+        alert('Could not save your choice. Please check your internet connection and try again.');
+      })
+      .finally(() => { saving = false; });
   }
 
   function boot() {
-    // WHY waitForRole: it resolves only after sign-in AND the role are known,
-    // so the teacher check is reliable.
+    // waitForRole resolves after sign-in, the role and the saved preferences are known.
     waitForRole().then(role => {
       if (!role || role === 'teacher') { render(null); return; }
       if (!window.XeledifSummary) { console.warn('[M3 widget] summaries-sync.js not loaded'); return; }
+
+      // Read the choice BEFORE the first paint, so hidden scores never flash on screen.
+      hidden = !!(window.__xeledifPrefs && window.__xeledifPrefs.hideScores);
 
       // 1. Instant display from this pupil's own cache.
       const cached = XeledifSummary.cached();
       if (cached) {
         render(cached.summary);
-        if (XeledifSummary.isFresh(cached)) return;   // fresh enough: no Firestore read
+        if (XeledifSummary.isFresh(cached)) return;
       }
 
-      // 2. Otherwise one Firestore read (builds the document if it is missing or old).
+      // 2. Otherwise one Firestore read (builds the document if missing or old).
       XeledifSummary.load().then(s => {
         if (s) render(s);
         else if (!cached) render(null);
@@ -14623,7 +14673,10 @@ document.querySelector('.level-tab[data-color="#5B21B6"]').style.color = 'white'
     });
   }
 
-  // Redraw whenever summaries-sync.js finishes a rebuild (no page reload needed).
+  el('score-widget-hide').addEventListener('click', () => setHidden(true));
+  el('score-widget-show').addEventListener('click', () => setHidden(false));
+
+  // Redraw whenever summaries-sync.js finishes a rebuild (respects the hidden state).
   window.addEventListener('xeledif:summary-updated', e => { if (e.detail) render(e.detail); });
 
   if (document.readyState === 'loading') {

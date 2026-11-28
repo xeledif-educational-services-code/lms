@@ -23,6 +23,9 @@ let fbDb = null;
 let currentUser = null;
 let currentRole = null;
 let roleReady = null;  // promise that resolves once role is known
+const AUTH_WATCHDOG_MS   = 12000;  // give up waiting for the sign-in result after 12 s
+const PROFILE_TIMEOUT_MS = 10000;  // give up on the profile read after 10 s
+let authSettled = false;           // true once the gate has been shown or hidden
 
 // ── Email-link sign-in state ──────────────────────────────────
 let pendingEmailLinkSignIn = false;
@@ -32,20 +35,103 @@ let lastSignInError = null;
 
 const GATE_HTML_CLASS = 'xeledif-gate-active';
 
-function showGate() {
-  document.documentElement.classList.add(GATE_HTML_CLASS);
+
+/* ---------- Sign-in gate: state is remembered, so it works whatever the load order ---------- */
+// What the gate should currently show: 'loading' | 'signin' | 'open' | 'problem'.
+// WHY a remembered state: this file runs in <head>, often BEFORE the gate <div>
+// exists. A direct DOM update would silently do nothing in that case. Instead we
+// record the intent and apply it now AND again on DOMContentLoaded.
+let gateMode = 'loading';
+let gateProblemInfo = null;
+
+function applyGate() {
   const gate = document.getElementById('xeledif-auth-gate');
-  if (gate) { gate.style.display = 'flex'; renderGate(gate); }
+  if (!gate) return;                          // page not parsed yet; DOMContentLoaded calls us again
+  if (gateMode === 'open') {
+    document.documentElement.classList.remove(GATE_HTML_CLASS);
+    gate.style.display = 'none';
+  } else if (gateMode === 'signin') {
+    document.documentElement.classList.add(GATE_HTML_CLASS);
+    gate.style.display = 'flex';
+    renderGate(gate);
+  } else if (gateMode === 'problem' && gateProblemInfo) {
+    document.documentElement.classList.add(GATE_HTML_CLASS);
+    gate.style.display = 'flex';
+    renderProblem(gate, gateProblemInfo);
+  }
+  // 'loading': leave the page's built-in "Loading…" markup alone.
 }
-function hideGate() {
-  document.documentElement.classList.remove(GATE_HTML_CLASS);
-  const gate = document.getElementById('xeledif-auth-gate');
-  if (gate) gate.style.display = 'none';
+document.addEventListener('DOMContentLoaded', applyGate);
+
+// WHY authSettled is set here: the state is now recorded and WILL be applied,
+// so the watchdog is correctly switched off only when something real was decided.
+function showGate() { authSettled = true; gateMode = 'signin'; applyGate(); }
+
+function hideGate() { authSettled = true; gateMode = 'open';   applyGate(); }
+
+function refreshGate() { if (gateMode === 'signin') applyGate(); }
+
+
+// A visible, recoverable error screen. Titles/details are fixed strings
+// (never user input), so inserting them as HTML is safe.
+function showGateProblem(title, detail) {
+  authSettled = true;
+  gateMode = 'problem';
+  gateProblemInfo = { title, detail };
+  applyGate();
 }
-function refreshGate() {
-  if (!document.documentElement.classList.contains(GATE_HTML_CLASS)) return;
-  const gate = document.getElementById('xeledif-auth-gate');
-  if (gate) renderGate(gate);
+
+// Titles/details are fixed strings (never user input), so HTML here is safe.
+function renderProblem(gate, info) {
+  gate.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,0.4);text-align:left;">
+      <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:6px;">⚠️ ${info.title}</div>
+      <div style="font-size:13px;color:#555;margin-bottom:16px;line-height:1.5;">${info.detail}</div>
+      <button onclick="location.reload()"
+              style="width:100%;padding:10px;border-radius:8px;border:none;background:#5B21B6;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">
+        Try again
+      </button>
+      <button onclick="resetThisDevice()"
+              style="width:100%;padding:10px;border-radius:8px;border:1px solid #5B21B6;background:#fff;color:#5B21B6;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">
+        Reset sign-in on this device
+      </button>
+      <div style="font-size:11.5px;color:#888;margin-top:10px;line-height:1.5;">
+        “Reset” only signs this browser out. Your scores are safe in your account.
+      </div>
+    </div>`;
+}
+
+// Promise.race wrapper: rejects if `promise` takes longer than `ms`.
+// WHY: a Firestore read can hang on a bad connection, and an
+// await that never finishes is what froze the page on "Loading…".
+function fbWithTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error(label + ' timed out')), ms))
+  ]);
+}
+
+// Clears this browser's saved sign-in so the pupil can start fresh.
+// WHY it leaves xeledif.progress.v2 alone: it may hold answers that haven't
+// reached Firestore yet; syncAllLocalAttempts() uploads them after the next sign-in.
+async function resetThisDevice() {
+  try { if (fbAuth) await fbAuth.signOut(); } catch (e) {}
+  try {
+    [localStorage, sessionStorage].forEach(store => {
+      Object.keys(store)
+        .filter(k => k.startsWith('firebase:') || k.startsWith('xeledif.summary.cache.') || k === 'xeledif.emailForSignIn')
+        .forEach(k => store.removeItem(k));
+    });
+  } catch (e) {}
+
+  // Firebase Auth keeps its persistence in this IndexedDB database.
+  let done = false;
+  const finish = () => { if (!done) { done = true; location.reload(); } };
+  try {
+    const req = indexedDB.deleteDatabase('firebaseLocalStorageDb');
+    req.onsuccess = req.onerror = req.onblocked = finish;
+    setTimeout(finish, 2500);   // never wait forever if the delete is blocked
+  } catch (e) { finish(); }
 }
 
 function renderGate(gate) {
@@ -146,6 +232,9 @@ function initFirebaseCompat() {
 
       if (currentRole !== 'teacher') {
         const existingData = snap.exists ? snap.data() : null;
+        // WHY: a name for the teacher stops the "Enter the pupil name for this device"
+        // prompt and stops new records being saved as "Unknown".
+        if (currentRole === 'teacher') window.__xeledifPupilName = 'Teacher';
         if (existingData && existingData.pupilName) {
           window.__xeledifPupilName = existingData.pupilName;
         } else {
@@ -252,6 +341,17 @@ async function cloudWriteAttempt(rec) {
 async function cloudDeleteAttempt(attemptId) {
   if (!currentUser || !fbDb) return;
   await fbDb.collection('progress').doc(attemptId).delete();
+}
+
+// Saves one display preference in the signed-in pupil's own users/{uid} document.
+// WHY a whitelist: only known preference names can ever be written from the UI.
+const ALLOWED_PREFERENCES = ['hideScores'];
+async function cloudSetPreference(field, value) {
+  if (!ALLOWED_PREFERENCES.includes(field)) throw new Error('Unknown preference: ' + field);
+  if (!currentUser || !fbDb) throw new Error('Not signed in');
+  // update() merges the field and leaves "role" untouched, which the Firestore rules require.
+  await fbDb.collection('users').doc(currentUser.uid).update({ [field]: value });
+  if (window.__xeledifPrefs) window.__xeledifPrefs[field] = value;
 }
 
 async function syncAllLocalAttempts() {

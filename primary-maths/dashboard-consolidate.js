@@ -88,6 +88,8 @@
   /* ---------- who is who ---------- */
   function displayName(key, recs) {
     const u = window.__userNames[key];
+   // WHY: the teacher's account has no pupilName, and old records say "Unknown".
+    if (u && u.role === 'teacher') return 'Teacher (test activity)';
     if (u && u.name) return u.name;
     const counts = {};
     recs.forEach(r => { const n = String(r.pupil || '').trim(); if (n && !looksLikeEmail(n)) counts[n] = (counts[n] || 0) + 1; });
